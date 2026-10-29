@@ -1,7 +1,7 @@
 # M5-Plan – X01 vollständig
 
 > Detailplan zu `project.md` M5. Kommt nach M4. Alles hier ist Domäne plus die Projektion auf den Zählscreen; am Netzprotokoll (E11) und an den Rechten (E13) ändert sich nichts. Test-first, jeder grüne Schritt ein Commit.
-> Stand: Fragen in §9 am 29.10.2026 beantwortet und in §2–§7 eingearbeitet. Noch nicht umgesetzt.
+> Stand: Fragen in §9 am 29.10.2026 beantwortet und eingearbeitet; §3–§7 umgesetzt am 29.10.2026 (Domäne x01: 97 % Abdeckung, 86 Regel-Tests, Smoke-Test grün). Offen: Deploy und DoD am Board.
 > Luca: §0.
 
 ---

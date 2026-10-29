@@ -261,6 +261,100 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   log("cancel reached device A live");
 }
 
+// M5: best of 3 legs (leg victory screen, throw alternates, undo across the leg boundary),
+// 4 players down to place 4 with play-out and resign, history in the overview
+{
+  // Taps one key after another; the leg victory screen covers the status line, so only wait for "saved" when it is there.
+  const tap = async (...names) => {
+    for (const n of names) {
+      await key(n).click();
+      await page.waitForTimeout(150);
+    }
+    if (await page.locator("[role=status]").count()) await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
+  };
+  const T180 = ["Triple", "20", "Triple", "20", "Triple", "20"];
+  const OUT121 = ["Triple", "20", "Triple", "20", "1"]; // 121 with single out
+  const MISS = ["0", "0", "0"];
+  const active = async () => (await page.locator(".border-frame-active").first().innerText()).split("\n")[0];
+  const setup = async (names, legs) => {
+    await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
+    for (const n of names) await page.getByRole("button", { name: `${n} auswählen` }).click();
+    await page.getByRole("button", { name: "DoubleOut" }).click();
+    await page.getByRole("button", { name: "SingleOut" }).click();
+    await page.getByRole("button", { name: "501", exact: true }).click();
+    await page.getByRole("button", { name: "301", exact: true }).click();
+    if (legs) {
+      await page.getByRole("button", { name: "Legs: 1" }).click();
+      await page.getByRole("button", { name: String(legs), exact: true }).click();
+    }
+    await page.getByRole("button", { name: "Start Game" }).click();
+    await page.waitForURL(/\/match\//);
+  };
+
+  // Best of 3: A vs B
+  await setup([`A${stamp}`, `B${stamp}`], 3);
+  await tap(...T180);
+  await tap(...MISS);
+  await tap(...OUT121);
+  await page.getByText(`Leg für A${stamp}`).waitFor({ timeout: 5000 });
+  expect((await page.getByText("Legs 1:0").count()) === 1, "leg victory screen shows Legs 1:0");
+  await page.screenshot({ path: `${shots}/match-leg-victory.png` });
+  await page.getByText("Tippen, um weiterzuspielen").click();
+  expect((await active()) === `B${stamp}`, "leg 2: the throw moved to B");
+  // B misses in leg 2; undo it and the checkout of leg 1 → back in leg 1 with 1 left
+  await tap(...MISS);
+  await tap("Undo", "Undo", "Undo");
+  expect((await active()) === `B${stamp}`, "undo in leg 2: B is on turn again");
+  await tap("Undo");
+  expect((await page.locator("[data-rest]").first().innerText()) === "1", "undo across the leg boundary: A has 1 left in leg 1");
+  await tap("1");
+  await page.getByText(`Leg für A${stamp}`).waitFor({ timeout: 5000 });
+  await page.getByText("Tippen, um weiterzuspielen").click();
+  await tap(...MISS); // B
+  await tap(...T180, ...MISS, ...OUT121); // A 180, B miss, A out → 2:0
+  await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
+  expect((await page.getByText("Legs 2:0").count()) >= 1, "victory shows Legs 2:0");
+  await page.reload({ waitUntil: "networkidle" });
+  expect((await page.getByText(`A${stamp} gewinnt!`).count()) === 1, "best of 3 is finished after a reload");
+  log("best of 3 ok");
+
+  // 4 players: admin, A, B and a guest; the guest starts (ToStart), the admin ends last
+  const guest = `H${stamp}`;
+  await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Gast hinzufügen" }).click();
+  await page.getByPlaceholder("Name des Gastes").fill(guest);
+  await page.getByPlaceholder("Name des Gastes").press("Enter");
+  await page.getByRole("button", { name: `${guest} abwählen` }).waitFor({ timeout: 5000 });
+  await page.getByRole("button", { name: `${guest} abwählen` }).click();
+  await setup([ADMIN, `A${stamp}`, `B${stamp}`, guest]);
+  expect(await page.getByRole("button", { name: "Legs: 1" }).count() === 0, "sets/legs pills not on the scoreboard");
+  await page.getByRole("button", { name: `Anwurf: ${guest}` }).click();
+  expect((await active()) === guest, "ToStart: the guest throws first");
+  await tap(...T180, ...MISS, ...MISS, ...MISS); // guest 180, admin, A, B miss
+  await tap(...OUT121); // guest: place 1
+  expect((await page.locator("[data-rest]").first().innerText()) !== "1.", "the leg goes on after place 1");
+  await tap(...MISS, ...T180, ...T180); // admin miss, A 180, B 180
+  await tap(...MISS, ...OUT121); // admin miss, A out: place 2
+  await tap(...OUT121); // B out: place 3, admin last
+  await page.getByText(`${guest} gewinnt!`).waitFor({ timeout: 5000 });
+  expect((await page.getByText(`3. B${stamp}`).count()) === 1 && (await page.getByText(`4. ${ADMIN}`).count()) === 1, "victory lists places 3 and 4");
+  await page.screenshot({ path: `${shots}/match-places.png` });
+  await page.getByRole("button", { name: `${ADMIN} spielt zu Ende` }).click();
+  await key("0").waitFor({ timeout: 5000 });
+  await tap(...MISS);
+  await page.getByRole("button", { name: "Aufgeben" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Aufgeben" }).click();
+  await page.getByText(`${guest} gewinnt!`).waitFor({ timeout: 5000 });
+  expect((await page.getByText(`4. ${ADMIN}`).count()) === 1, "after resigning the admin keeps place 4");
+  log("4 players with play-out and resign ok");
+
+  await page.goto(`${base}/`, { waitUntil: "networkidle" });
+  const history = page.getByRole("list", { name: "Letzte Spiele" });
+  expect((await history.getByText(`A${stamp} Legs 2:0`).count()) === 1, "history shows the best of 3");
+  expect((await history.getByText(`1. ${guest} · 2. A${stamp} · 3. B${stamp} · 4. ${ADMIN}`).count()) === 1, "history shows the places");
+  await page.screenshot({ path: `${shots}/overview-history.png`, fullPage: true });
+}
+
 // Reset for A: A's old session ends, the new password applies
 {
   await page.goto(`${base}/account`, { waitUntil: "networkidle" });

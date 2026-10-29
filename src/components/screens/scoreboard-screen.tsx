@@ -61,8 +61,10 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   const undoOk = isOpen && actor !== null && mayUndo(state, initial.match, actor);
   const playOutOk = isOpen && actor !== null && mayPlayOut(state, initial.match, actor);
   const starterOk = isOpen && actor !== null && view.canChooseStarter && maySetStarter(initial.match, actor);
+  // Undo that reopens a finished leg (from the leg victory screen or right after it) lets the screen
+  // show again on the next checkout; undoing within the next leg keeps it closed.
   const undoAndReopen = () => {
-    setClosedLeg(null);
+    if (view.progress === "leg-finished") setClosedLeg(null);
     undo();
   };
   const turnHint = !isOpen

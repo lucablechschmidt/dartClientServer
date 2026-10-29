@@ -168,11 +168,11 @@ Detailplan: `docs/m5-plan.md`.
 
 **Ziel:** Alle X01-Regeln aus Legacy plus das, was Legacy nur angefangen hat, als getestetes reines TypeScript.
 
-- [ ] Sets und Legs: Leg-Ende, Set-Ende, Match-Ende, wechselnder Anwurf pro Leg (E7: nur bei 2 Spielern)
-- [ ] Platzierungen bei 3+ Spielern: herunterspielen, bis alle Plätze feststehen
-- [ ] Anwurf vor dem ersten Dart wählbar („ToStart“), bei jeder Spielerzahl
-- [ ] Undo über Leg-, Set- und Match-Grenzen
-- [ ] Historie: beendete und abgebrochene Matches (Spielübersicht und Abbrechen: M4)
+- [x] Sets und Legs: Leg-Ende, Set-Ende, Match-Ende, wechselnder Anwurf pro Leg (E7: nur bei 2 Spielern)
+- [x] Platzierungen bei 3+ Spielern: herunterspielen, bis alle Plätze feststehen; der Letzte kann zu Ende spielen oder aufgeben
+- [x] Anwurf vor dem ersten Dart wählbar („ToStart“), bei jeder Spielerzahl
+- [x] Undo über Leg-, Set- und Match-Grenzen
+- [x] Historie: beendete und abgebrochene Matches (Spielübersicht und Abbrechen: M4)
 
 **DoD:** `npm test` ist grün, die Abdeckung von `src/domain` liegt über 90 %, mindestens 30 Regel-Testfälle; ein Best-of-3-Legs-Match und ein 4-Spieler-Spiel mit Platzierungen laufen durch.
 
