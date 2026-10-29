@@ -8,6 +8,7 @@ async function Menu() {
   const { deps } = await requireSession();
   const matches = listOpenMatches(deps).map((m) => ({
     id: m.id,
+    mode: m.mode,
     names: m.players.map((p) => p.name),
     perPlayer: m.inputMode === "per-player",
     startedAt: m.startedAt,

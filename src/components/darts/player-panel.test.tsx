@@ -32,4 +32,13 @@ describe("PlayerPanel", () => {
     render(<PlayerPanel player={{ ...base, placement: 3 }} size="small" texts={texts} />);
     expect(screen.getByText("3.")).toBeInTheDocument();
   });
+  it("cricket: the row of marks with /, X, Ⓧ and gray fields closed by everyone (M7)", () => {
+    const marks = [20, 19, 18, 17, 16, 15, 25].map((field, i) => ({ field, marks: Math.min(3, i), closed: field === 18 }));
+    const { container } = render(<PlayerPanel player={{ ...base, marks }} texts={{ ...texts, marks: "Marks", bull: "Bull" }} />);
+    const row = screen.getByRole("list", { name: "Marks" });
+    expect([...row.querySelectorAll("[data-marks]")].map((e) => e.textContent)).toEqual(["", "/", "X", "Ⓧ", "Ⓧ", "Ⓧ", "Ⓧ"]);
+    expect(screen.getByLabelText("18: 2")).toHaveClass("bg-cricket-closed");
+    expect(screen.getByLabelText("Bull: 3")).toBeInTheDocument();
+    expect(container.querySelector("[data-score]")).toHaveTextContent("121");
+  });
 });

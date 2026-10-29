@@ -12,7 +12,7 @@ import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { TextButton } from "@/components/ui/form-controls";
 import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type PlayerId } from "@/domain/game";
+import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type ModeId, type PlayerId, type Rules } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
 import { VictoryScreen } from "./victory-screen";
@@ -35,6 +35,13 @@ type Props = {
 
 const RULE_SHORT = { single: "Single", double: "Double", triple: "Triple" } as const;
 
+/** Rules in the header: X01 start and in/out, Elimination target and out, the other modes their name (M7). */
+function headerTitle(mode: ModeId, rules: Rules, texts: Texts["game"]): string {
+  if (mode === "x01") return `${rules.startScore} · ${RULE_SHORT[rules.inRule]} In · ${RULE_SHORT[rules.outRule]} Out`;
+  if (mode === "elimination") return `${texts.modes.elimination} · ${rules.startScore} · ${RULE_SHORT[rules.outRule]} Out`;
+  return texts.modes[mode];
+}
+
 /** Identifies one finished-leg state, so closing the leg victory screen survives re-renders but not an undo. */
 const legKey = (m: MatchState) => `${m.legs.length}:${currentLeg(m).visits.length}`;
 
@@ -53,7 +60,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   const view = useMemo(() => projectMatch(state, initial.names, legClosed), [state, initial.names, legClosed]);
   const board = view.board;
   const playerIds = state.players;
-  const rules = scoreLine(view, playerIds, texts) ?? `${initial.rules.startScore} · ${RULE_SHORT[initial.rules.inRule]} In · ${RULE_SHORT[initial.rules.outRule]} Out`;
+  const rules = scoreLine(view, playerIds, texts) ?? headerTitle(state.mode, initial.rules, texts);
   const status = error ?? (sync === "unsaved" ? texts.unsaved : sync === "saving" ? texts.saving : " ");
 
   // E13: keypad and undo only when this device is currently allowed; the server checks anyway.
@@ -143,7 +150,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
           <div className="h-full px-3">
             <PlayerPanels
               players={board.players}
-              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit }}
+              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit, marks: texts.marks, bull: texts.bull }}
               onSelect={starterOk ? chooseStarter : undefined}
               selectLabel={texts.toStart}
             />

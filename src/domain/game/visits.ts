@@ -34,5 +34,12 @@ export function popDart(state: LegState): Result<LegState, UndoError> {
   return { ok: true, value: { ...state, visits } };
 }
 
+/**
+ * The darts of an open visit as they can be thrown again (re-sent to the server, re-applied after
+ * a reload). An open visit holds overthrown darts only in SplitScore (off the target, M7), where
+ * they mean exactly what a miss means; the mode stores them as overthrown again.
+ */
+export const rethrowable = (visit: Visit): Dart[] => visit.darts.map((d) => (d.type === "overthrown" ? { field: 0, type: "single" } : d));
+
 /** Full visit or bust: the visit takes no more darts. */
 export const isClosedByDarts = (visit: Visit): boolean => visit.isBust || visit.darts.length >= MAX_DARTS_PER_VISIT;

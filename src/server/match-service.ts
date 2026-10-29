@@ -43,7 +43,8 @@ import {
 import type { Deps } from "./deps";
 
 export const rulesSchema = z.object({
-  startScore: z.number().int().min(2).max(1001),
+  /** X01 start, Elimination target, SplitScore start (40); Cricket does not use it (0). */
+  startScore: z.number().int().min(0).max(1001),
   inRule: z.enum(["single", "double", "triple"]),
   outRule: z.enum(["single", "double", "triple"]),
 });
@@ -231,19 +232,19 @@ export function listOpenMatches(deps: Deps): OpenMatch[] {
 /** Result of a closed match for the history (M5), without texts; `P` is a player id or, for the view, a name. */
 export type RecentResult<P = PlayerId> =
   | { kind: "abandoned" }
-  /** 3+ players: places in order. */
-  | { kind: "places"; order: P[] }
+  /** 3+ players: places in order (ties share a place). */
+  | { kind: "places"; order: { player: P; place: number }[] }
   /** 2 players with more than one leg or set: winner and the score from his side. */
   | { kind: "score"; winner: P; unit: "legs" | "sets"; score: [number, number] }
   | { kind: "winner"; winner: P };
 
-export type RecentMatchView = { id: string; names: string[]; endedAt: number; result: RecentResult<string> };
+export type RecentMatchView = { id: string; mode: ModeId; names: string[]; endedAt: number; result: RecentResult<string> };
 
 export function recentResult(m: RecentMatch): RecentResult {
   if (m.status !== "finished") return { kind: "abandoned" };
   const ids = m.players.map((p) => p.id);
   const byPlace = ids.filter((id) => m.placements[id] != null).sort((a, b) => m.placements[a]! - m.placements[b]!);
-  if (ids.length > 2) return { kind: "places", order: byPlace };
+  if (ids.length > 2) return { kind: "places", order: byPlace.map((player) => ({ player, place: m.placements[player]! })) };
   const { score } = walkWinners(ids, m.format, m.legWinners);
   const winnerId = byPlace[0] ?? ids.find((id) => score.sets[id] >= m.format.setsToWinMatch) ?? ids[0];
   if (ids.length < 2 || (m.format.legsToWinSet === 1 && m.format.setsToWinMatch === 1)) return { kind: "winner", winner: winnerId };
@@ -253,7 +254,7 @@ export function recentResult(m: RecentMatch): RecentResult {
 }
 
 function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResult<string> {
-  if (r.kind === "places") return { ...r, order: r.order.map(name) };
+  if (r.kind === "places") return { ...r, order: r.order.map((p) => ({ player: name(p.player), place: p.place })) };
   if (r.kind === "score" || r.kind === "winner") return { ...r, winner: name(r.winner) };
   return r;
 }
@@ -262,7 +263,7 @@ function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResul
 export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
   return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit).map((m) => {
     const name = (id: PlayerId) => m.players.find((p) => p.id === id)?.name ?? "";
-    return { id: m.id, names: m.players.map((p) => p.name), endedAt: m.finishedAt ?? m.startedAt, result: withNames(recentResult(m), name) };
+    return { id: m.id, mode: m.mode, names: m.players.map((p) => p.name), endedAt: m.finishedAt ?? m.startedAt, result: withNames(recentResult(m), name) };
   });
 }
 

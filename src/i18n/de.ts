@@ -2,6 +2,14 @@
  * Alle sichtbaren Texte der App. v1 ist nur Deutsch, aber jeder Text
  * steht hier, damit Screens keine Literale enthalten.
  */
+/** Names of the four game modes; used by the game menu, the setups and the scoreboard (M7). */
+const modeNames = {
+  x01: "Classic Game",
+  cricket: "Cricket",
+  elimination: "Elimination",
+  splitscore: "SplitScore",
+} as const;
+
 export const de = {
   app: {
     title: "Darts Scorer",
@@ -103,13 +111,7 @@ export const de = {
   },
   gameMenu: {
     title: "Neues Spiel",
-    modes: {
-      x01: "Classic Game",
-      cricket: "Cricket",
-      elimination: "Elimination",
-      splitscore: "SplitScore",
-    },
-    soon: "kommt später",
+    modes: modeNames,
   },
   overview: {
     title: "Laufende Spiele",
@@ -134,6 +136,8 @@ export const de = {
     sets: "Sets",
     legs: "Legs",
     setsLegsTwoOnly: "Sets und Legs nur bei 2 Spielern",
+    target: "Ziel",
+    modes: modeNames,
     rules: {
       single: "Single",
       double: "Double",
@@ -197,6 +201,8 @@ export const de = {
     resignQuestion: "{name} gibt auf? Der Platz bleibt.",
     chooseStarter: "Anwurf: Spieler antippen",
     points: "Punkte",
+    marks: "Marks",
+    modes: modeNames,
     hints: {
       marks: "Noch {n}× {field}",
       elimination: "Nächste Elimination in {n}",

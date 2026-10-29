@@ -2,6 +2,7 @@
 export * from "./types";
 export { dartScore, visitScore, isDart, dartLabel } from "./scoring";
 export { newLeg } from "./state";
+export { rethrowable } from "./visits";
 export * from "./board";
 export type { GameMode } from "./mode";
 export * from "./modes";

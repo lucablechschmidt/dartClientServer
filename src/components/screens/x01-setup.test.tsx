@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
-import { NewMatchForm } from "./new-match-form";
+import { X01Setup as NewMatchForm } from "./x01-setup";
 
 const players = [
   { id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false },
@@ -11,7 +11,7 @@ const players = [
 ];
 const commonTexts = { back: "Zurück", save: "Speichern", cancel: "Abbrechen" };
 
-describe("NewMatchForm", () => {
+describe("X01Setup", () => {
   it("numbers players in tap order, allows deselecting and only then enables Start Game", async () => {
     const user = userEvent.setup();
     const { container } = render(<NewMatchForm players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: true as const, id: "x" })} />);

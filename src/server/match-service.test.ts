@@ -302,7 +302,7 @@ describe("legs, sets and places (M5)", () => {
     expect(recent.map((m) => [m.id, m.result])).toEqual([
       [gone, { kind: "abandoned" }],
       [single, { kind: "winner", winner: "Casey" }],
-      [three, { kind: "places", order: ["Casey", "Sam", "Kim"] }],
+      [three, { kind: "places", order: [{ player: "Casey", place: 1 }, { player: "Sam", place: 2 }, { player: "Kim", place: 3 }] }],
       [bo3, { kind: "score", winner: "Sam", unit: "legs", score: [2, 1] }],
     ]);
     expect(recent[0].names).toEqual(["Casey", "Sam"]);
@@ -312,5 +312,51 @@ describe("legs, sets and places (M5)", () => {
     const [a, b] = players("Casey", "Sam");
     const id = createMatch(deps, { playerIds: [a, b], rules: short, format: { legsToWinSet: 2, setsToWinMatch: 2 } });
     expect(loadMatchView(deps, restartMatch(deps, id)!)!.format).toEqual({ legsToWinSet: 2, setsToWinMatch: 2 });
+  });
+});
+
+describe("other game modes through the server (M7)", () => {
+  const S = (field: number): Dart => ({ field, type: "single" });
+  const players = (...names: string[]) => names.map((name) => ok(createPlayer(deps, name)).player.id);
+  const commit = (id: string, darts: Dart[]) => {
+    const v = loadMatchView(deps, id)!;
+    return ok(commitVisit(deps, sessionAdmin, id, 0, v.state.legs[0].visits.length, darts)).view;
+  };
+
+  it("elimination: mode and target stored, a bust is replayed on the server, the win finishes the match", () => {
+    const [a, b] = players("Casey", "Sam");
+    const id = createMatch(deps, { mode: "elimination", playerIds: [a, b], rules: { startScore: 40, inRule: "single", outRule: "single" }, format: { legsToWinSet: 3, setsToWinMatch: 3 } });
+    let v = loadMatchView(deps, id)!;
+    expect(v.state.mode).toBe("elimination");
+    expect(v.format).toEqual({ legsToWinSet: 1, setsToWinMatch: 1 });
+    v = commit(id, [S(20), S(19), S(5)]); // 39, then past 40 → overthrown
+    expect(v.board.players[0].score).toBe(39);
+    expect(v.state.legs[0].visits[0].darts[2].type).toBe("overthrown");
+    v = commit(id, [S(20), S(0), S(0)]);
+    v = commit(id, [S(1)]); // 40 exactly: win
+    expect(v.status).toBe("finished");
+    expect(deps.store.matches.get(id)!.placements).toEqual({ [a]: 1, [b]: 2 });
+    expect(ok(undoVisit(deps, sessionAdmin, id)).view.status).toBe("running");
+  });
+
+  it("splitscore: nine rounds, then finished; equal points share the place", () => {
+    const [a, b, c] = players("Casey", "Sam", "Kim");
+    const id = createMatch(deps, { mode: "splitscore", playerIds: [a, b, c], rules: { startScore: 40, inRule: "single", outRule: "single" } });
+    const miss = [S(0), S(0), S(0)];
+    for (let i = 0; i < 24; i++) commit(id, miss);
+    commit(id, [S(25), S(0), S(0)]); // bull round: Casey hits
+    commit(id, miss);
+    const v = commit(id, [S(25), S(0), S(0)]); // Kim hits too
+    expect(v.status).toBe("finished");
+    expect(deps.store.matches.get(id)!.placements).toEqual({ [a]: 1, [b]: 3, [c]: 1 });
+    expect(listRecentMatches(deps)[0].result).toEqual({ kind: "places", order: [{ player: "Casey", place: 1 }, { player: "Kim", place: 1 }, { player: "Sam", place: 3 }] });
+    expect(listRecentMatches(deps)[0].mode).toBe("splitscore");
+  });
+
+  it("cricket: restart keeps the mode", () => {
+    const [a, b] = players("Casey", "Sam");
+    const id = createMatch(deps, { mode: "cricket", playerIds: [a, b], rules: { startScore: 0, inRule: "single", outRule: "single" } });
+    expect(loadMatchView(deps, restartMatch(deps, id)!)!.state.mode).toBe("cricket");
+    expect(loadMatchView(deps, id)!.board.players[0].marks).toHaveLength(7);
   });
 });

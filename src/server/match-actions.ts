@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import type { Dart } from "@/domain/game";
+import { MODE_IDS, type Dart, type ModeId } from "@/domain/game";
 import { cancelMatch, commitVisit, createMatch, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit, type ActionError, type ActionResult } from "./match-service";
 import { log } from "./log";
 import { requireSession } from "./request";
@@ -11,7 +11,9 @@ const toWin = (bestOf: FormDataEntryValue | null) => Math.ceil((Number(bestOf) |
 
 export async function createMatchAction(formData: FormData): Promise<void> {
   const { deps, session } = await requireSession();
+  const mode = String(formData.get("mode") ?? "x01");
   const id = createMatch(deps, {
+    mode: (MODE_IDS as readonly string[]).includes(mode) ? (mode as ModeId) : "x01",
     playerIds: formData.getAll("playerId").map(String),
     rules: {
       startScore: Number(formData.get("startScore")),

@@ -1,4 +1,4 @@
-import { applyMatchDart, currentLeg, nextVisitPosition, openVisit, type Dart, type MatchState } from "@/domain/game";
+import { applyMatchDart, currentLeg, nextVisitPosition, openVisit, rethrowable, type Dart, type MatchState } from "@/domain/game";
 
 /**
  * The open visit lives only on this device (E11). To survive a reload it is kept in localStorage,
@@ -36,7 +36,7 @@ export function reapply(state: MatchState, darts: Dart[]): MatchState | null {
 export function storeOpenVisit(matchId: string, state: MatchState): void {
   try {
     const open = openVisit(currentLeg(state));
-    if (open) localStorage.setItem(storageKey(matchId), JSON.stringify({ ...nextVisitPosition(state), darts: open.darts } satisfies StoredOpen));
+    if (open) localStorage.setItem(storageKey(matchId), JSON.stringify({ ...nextVisitPosition(state), darts: rethrowable(open) } satisfies StoredOpen));
     else localStorage.removeItem(storageKey(matchId));
   } catch {
     /* private mode or similar: then do without */

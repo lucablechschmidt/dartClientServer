@@ -42,4 +42,11 @@ describe("open visit storage", () => {
     const server = newMatch(["a"], rules, format);
     expect(restoreOpenVisit("m", server)).toBe(server);
   });
+  it("splitscore: an open visit with a dart off the target survives a reload (M7)", () => {
+    const server = newMatch(["a", "b"], { startScore: 40, inRule: "single", outRule: "single" }, { legsToWinSet: 1, setsToWinMatch: 1 }, 0, "splitscore");
+    const local = play(server, { field: 15, type: "single" }, { field: 20, type: "single" });
+    expect(local.legs[0].visits[0].darts[1].type).toBe("overthrown");
+    storeOpenVisit("m", local);
+    expect(restoreOpenVisit("m", server)).toEqual(local);
+  });
 });

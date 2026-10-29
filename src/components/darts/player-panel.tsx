@@ -1,8 +1,9 @@
 import type { PlayerPanelData } from "@/domain/game";
 import { CircleSlashIcon } from "@/components/ui/icons";
+import { CricketMarks } from "./cricket-marks";
 import { DartSlots } from "./dart-slots";
 
-export type PlayerPanelTexts = { darts: string; average: string; visit: string };
+export type PlayerPanelTexts = { darts: string; average: string; visit: string; marks?: string; bull?: string };
 
 type Props = { player: PlayerPanelData; size?: "large" | "small"; texts: PlayerPanelTexts };
 
@@ -11,6 +12,7 @@ const fmt = (n: number) => n.toFixed(2);
 /**
  * Port of PlayerDetailView / PlayerSmallDetailView. Display only; the data arrives already projected.
  * M5: a player who has checked out (3+ players) shows his place instead of the rest and is dimmed.
+ * M7: the score is the rest (X01) or the points; Cricket adds the row of marks.
  */
 export function PlayerPanel({ player, size = "large", texts }: Props) {
   const border = player.isActive ? "border-frame-active" : "border-frame-fg";
@@ -42,6 +44,7 @@ export function PlayerPanel({ player, size = "large", texts }: Props) {
         </span>
       </div>
       <DartSlots slots={player.slots} isBust={player.isBust} label={texts.visit} />
+      {player.marks && <CricketMarks marks={player.marks} bull={texts.bull ?? "Bull"} label={texts.marks ?? ""} />}
     </div>
   );
 }

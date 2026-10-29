@@ -9,6 +9,7 @@ import {
   nextVisitPosition,
   openVisit,
   resign,
+  rethrowable,
   setLegStarter,
   startPlayOut,
   undoMatchDart,
@@ -110,7 +111,7 @@ export function useVisitSync<Reason extends string>({ initial, onCommitVisit, on
             setState((local) => {
               const pending = openVisit(currentLeg(local));
               const fits = pending && closedVisits(local) === closedVisits(server) && pending.playerId === matchCurrentPlayer(server);
-              return (fits && reapply(server, pending.darts)) || server;
+              return (fits && reapply(server, rethrowable(pending))) || server;
             });
           }
           setSync("saved");
@@ -153,7 +154,8 @@ export function useVisitSync<Reason extends string>({ initial, onCommitVisit, on
     const r = applyMatchDart(state, dart);
     if (!r.ok) return setError(errorText(r.reason));
     update(r.value);
-    syncServer(state, r.value, [...(openVisit(currentLeg(state))?.darts ?? []), dart]);
+    const open = openVisit(currentLeg(state));
+    syncServer(state, r.value, [...(open ? rethrowable(open) : []), dart]);
   };
 
   const undo = () => {
