@@ -1,0 +1,209 @@
+import { describe, expect, it } from "vitest";
+import {
+  applyMatchDart,
+  currentLeg,
+  legNumbers,
+  matchCurrentPlayer,
+  matchScore,
+  matchStatus,
+  matchWinner,
+  newMatch,
+  setLegStarter,
+  undoMatchDart,
+  type MatchFormat,
+  type MatchState,
+} from "./match";
+import { replayMatch } from "./replay";
+import { applyDart } from "./apply";
+import { newLeg } from "./state";
+import { currentPlayer, isLegFinished } from "./selectors";
+import type { Dart, LegState, Rules } from "./types";
+
+const [A, B, C] = ["a", "b", "c"];
+const rules: Rules = { startScore: 40, inRule: "single", outRule: "single" };
+const S = (field: number): Dart => ({ field, type: "single" });
+const Db = (field: number): Dart => ({ field, type: "double" });
+const MISS = [S(0), S(0), S(0)];
+const OUT = [Db(20)];
+const bestOf3: MatchFormat = { legsToWinSet: 2, setsToWinMatch: 1 };
+
+const play = (m: MatchState, ...darts: Dart[]): MatchState =>
+  darts.reduce((s, d) => {
+    const r = applyMatchDart(s, d);
+    if (!r.ok) throw new Error(`applyMatchDart failed: ${r.reason}`);
+    return r.value;
+  }, m);
+const undo = (m: MatchState, times = 1): MatchState => {
+  for (let i = 0; i < times; i++) {
+    const r = undoMatchDart(m);
+    if (!r.ok) throw new Error(`undoMatchDart failed: ${r.reason}`);
+    m = r.value;
+  }
+  return m;
+};
+/** Whoever is on turn checks out; the other one misses until then. */
+const winLeg = (m: MatchState, winner: string): MatchState => {
+  while (matchCurrentPlayer(m) !== winner) m = play(m, ...MISS);
+  return play(m, ...OUT);
+};
+
+describe("legs and sets (2 players)", () => {
+  it("best of 3 legs: A wins leg 1 and 2 → set and match to A", () => {
+    let m = winLeg(newMatch([A, B], rules, bestOf3), A);
+    expect(matchStatus(m)).toBe("leg-finished");
+    expect(matchScore(m).legs).toEqual({ [A]: 1, [B]: 0 });
+    m = winLeg(m, A);
+    expect(matchStatus(m)).toBe("finished");
+    expect(matchWinner(m)).toBe(A);
+    expect(matchScore(m).sets).toEqual({ [A]: 1, [B]: 0 });
+    expect(m.legs).toHaveLength(2);
+  });
+
+  it("best of 3 legs goes to a third leg at 1:1", () => {
+    let m = winLeg(winLeg(newMatch([A, B], rules, bestOf3), A), B);
+    expect(matchStatus(m)).toBe("leg-finished");
+    m = winLeg(m, B);
+    expect(matchWinner(m)).toBe(B);
+  });
+
+  it("3 sets × 3 legs: set counter, legs reset per set, match only after 2 sets", () => {
+    let m = newMatch([A, B], rules, { legsToWinSet: 2, setsToWinMatch: 2 });
+    m = winLeg(winLeg(m, A), A);
+    expect(matchScore(m)).toEqual({ legs: { [A]: 0, [B]: 0 }, sets: { [A]: 1, [B]: 0 } });
+    expect(matchStatus(m)).toBe("leg-finished");
+    m = winLeg(winLeg(winLeg(m, B), B), A);
+    expect(matchScore(m)).toEqual({ legs: { [A]: 1, [B]: 0 }, sets: { [A]: 1, [B]: 1 } });
+    m = winLeg(m, A);
+    expect(matchWinner(m)).toBe(A);
+    expect(legNumbers(m)).toEqual([
+      { setNo: 1, legNo: 1 },
+      { setNo: 1, legNo: 2 },
+      { setNo: 2, legNo: 1 },
+      { setNo: 2, legNo: 2 },
+      { setNo: 3, legNo: 1 },
+      { setNo: 3, legNo: 2 },
+    ]);
+  });
+
+  it("the throw alternates per leg and keeps cycling across sets (§9.1)", () => {
+    let m = newMatch([A, B], rules, { legsToWinSet: 1, setsToWinMatch: 3 });
+    expect(matchCurrentPlayer(m)).toBe(A);
+    m = winLeg(m, A);
+    expect(matchCurrentPlayer(m)).toBe(B); // set 2 starts with B
+    m = winLeg(m, B);
+    expect(matchCurrentPlayer(m)).toBe(A);
+  });
+
+  it("three players: the match starts with the chosen seat", () => {
+    const m = newMatch([A, B, C], rules, { legsToWinSet: 1, setsToWinMatch: 1 }, 2);
+    expect(matchCurrentPlayer(m)).toBe(C);
+  });
+
+  it("refuses darts after the match is won", () => {
+    const m = winLeg(winLeg(newMatch([A, B], rules, bestOf3), A), A);
+    expect(applyMatchDart(m, S(1))).toEqual({ ok: false, reason: "leg-finished" });
+  });
+});
+
+describe("undo across leg, set and match boundaries", () => {
+  it("first dart of leg 2 undone: leg 2 disappears, leg 1 is finished again", () => {
+    const one = winLeg(newMatch([A, B], rules, bestOf3), A);
+    const m = undo(play(one, S(1)));
+    expect(m).toEqual(one);
+    expect(matchStatus(m)).toBe("leg-finished");
+  });
+
+  it("undo of the winning dart of leg 1 reopens it, winner gone", () => {
+    const m = undo(winLeg(newMatch([A, B], rules, bestOf3), A));
+    expect(matchStatus(m)).toBe("running");
+    expect(matchScore(m).legs).toEqual({ [A]: 0, [B]: 0 });
+    expect(matchCurrentPlayer(m)).toBe(A);
+  });
+
+  it("undo over a set boundary takes the set back", () => {
+    const set1 = winLeg(newMatch([A, B], rules, { legsToWinSet: 1, setsToWinMatch: 2 }), A);
+    expect(matchScore(set1).sets[A]).toBe(1);
+    expect(matchScore(undo(set1)).sets[A]).toBe(0);
+  });
+
+  it("undo from the finished match reopens it", () => {
+    const m = undo(winLeg(winLeg(newMatch([A, B], rules, bestOf3), A), A));
+    expect(matchWinner(m)).toBeNull();
+    expect(matchStatus(m)).toBe("running");
+  });
+
+  it("nothing to undo in a fresh match", () => {
+    expect(undoMatchDart(newMatch([A, B], rules, bestOf3))).toEqual({ ok: false, reason: "nothing-to-undo" });
+  });
+});
+
+describe("choosing the starter (ToStart)", () => {
+  it("before the first dart of a leg: allowed, the next leg continues from there", () => {
+    let m = setOk(newMatch([A, B], rules, bestOf3), B);
+    expect(matchCurrentPlayer(m)).toBe(B);
+    expect(currentLeg(m).starter).toBe(1);
+    m = winLeg(m, B);
+    expect(matchCurrentPlayer(m)).toBe(A);
+  });
+
+  it("between legs it sets the starter of the next leg", () => {
+    const m = setOk(winLeg(newMatch([A, B], rules, bestOf3), A), A);
+    expect(m.legs).toHaveLength(2);
+    expect(matchCurrentPlayer(m)).toBe(A);
+  });
+
+  it("after the first dart: refused", () => {
+    const m = play(newMatch([A, B], rules, bestOf3), S(1));
+    expect(setLegStarter(m, B)).toEqual({ ok: false, reason: "leg-started" });
+  });
+
+  it("unknown player: refused", () => {
+    expect(setLegStarter(newMatch([A, B], rules, bestOf3), "x")).toEqual({ ok: false, reason: "unknown-player" });
+  });
+});
+
+describe("replayMatch", () => {
+  it("rebuilds the same state from stored legs", () => {
+    const m = play(winLeg(newMatch([A, B], rules, bestOf3), A), S(3));
+    const again = replayMatch(m.players, m.rules, m.format, m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })));
+    expect(again).toEqual(m);
+  });
+
+  it("property: replay of 3 legs equals the sequence of applyDart (random darts)", () => {
+    let seed = 7;
+    const rand = (n: number) => {
+      seed = (seed * 1103515245 + 12345) % 2 ** 31;
+      return seed % n;
+    };
+    const types = ["single", "double", "triple"] as const;
+    for (let run = 0; run < 30; run++) {
+      let m = newMatch([A, B, C], { startScore: 101, inRule: "single", outRule: "double" }, { legsToWinSet: 3, setsToWinMatch: 1 });
+      const thrown: Dart[][] = [];
+      for (let i = 0; i < 400 && matchStatus(m) !== "finished"; i++) {
+        const type = types[rand(3)];
+        const field = rand(5) === 0 ? 25 : rand(21);
+        const dart: Dart = field === 25 && type === "triple" ? { field, type: "single" } : field === 0 ? { field, type: "single" } : { field, type };
+        const r = applyMatchDart(m, dart);
+        if (!r.ok) throw new Error(r.reason);
+        m = r.value;
+        (thrown[m.legs.length - 1] ??= []).push(dart);
+      }
+      const again = replayMatch(m.players, m.rules, m.format, m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })));
+      expect(again).toEqual(m);
+      // Each leg on its own equals feeding its darts one by one through applyDart.
+      for (const [i, leg] of m.legs.entries()) {
+        let s: LegState = newLeg(m.players, m.rules, leg.starter);
+        for (const d of thrown[i]) s = (applyDart(s, d) as { ok: true; value: LegState }).value;
+        expect(s.visits).toEqual(leg.visits);
+        expect(isLegFinished(s)).toBe(isLegFinished(leg));
+        expect(currentPlayer(s)).toBe(currentPlayer(leg));
+      }
+    }
+  });
+});
+
+function setOk(m: MatchState, player: string): MatchState {
+  const r = setLegStarter(m, player);
+  if (!r.ok) throw new Error(r.reason);
+  return r.value;
+}

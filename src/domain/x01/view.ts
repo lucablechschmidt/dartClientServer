@@ -4,6 +4,7 @@ import {
   currentPlayer,
   currentVisit,
   dartsThrown,
+  isLegFinished,
   lastVisitOf,
   playersByRest,
   scoreOf,
@@ -41,7 +42,7 @@ export type ScoreboardView = {
 
 export function projectScoreboard(state: LegState, names: Record<PlayerId, string>): ScoreboardView {
   const active = currentPlayer(state);
-  const winner = winnerOf(state);
+  const winner = isLegFinished(state) ? winnerOf(state) : null;
   const open = currentVisit(state);
   const dartsLeft = winner ? 0 : MAX_DARTS_PER_VISIT - open.darts.length;
   const rest = scoreOf(state, active);

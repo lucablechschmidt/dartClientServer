@@ -8,6 +8,7 @@ import {
   canUndo,
   isDart,
   isEditable,
+  isLegFinished,
   isOpen,
   MATCH_OPEN_MS,
   openVisit,
@@ -156,7 +157,7 @@ export function commitVisit(deps: Deps, session: Session, matchId: string, seq: 
   if (!parsed.success) return { ok: false, reason: "invalid-dart" };
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
-  if (winnerOf(m.state)) return { ok: false, reason: "leg-finished" };
+  if (isLegFinished(m.state)) return { ok: false, reason: "leg-finished" };
   const denied = gate(m, session, deps.now(), canEnter);
   if (denied) return { ok: false, reason: denied };
   if (m.state.visits.length !== seq || openVisit(m.state)) return { ok: false, reason: "out-of-sync" };
@@ -171,7 +172,7 @@ export function commitVisit(deps: Deps, session: Session, matchId: string, seq: 
   if (next.visits.length !== seq + 1 || openVisit(next)) return { ok: false, reason: "out-of-sync" };
 
   const now = deps.now();
-  const winner = winnerOf(next);
+  const winner = isLegFinished(next) ? winnerOf(next) : null;
   deps.transaction(() => {
     deps.matches.syncVisits(m.leg.id, next.visits, seq, deps.newId, now);
     if (winner) {
@@ -193,7 +194,7 @@ export function undoVisit(deps: Deps, session: Session, matchId: string): Action
   if (m.state.visits.length === 0) return { ok: false, reason: "nothing-to-undo" };
   if (!canUndo(m.state, match, actorOf(session), now)) return { ok: false, reason: "forbidden" };
 
-  const hadWinner = winnerOf(m.state) !== null;
+  const hadWinner = isLegFinished(m.state);
   const next: LegState = { ...m.state, visits: m.state.visits.slice(0, -1) };
   deps.transaction(() => {
     deps.matches.syncVisits(m.leg.id, next.visits, next.visits.length, deps.newId, now);

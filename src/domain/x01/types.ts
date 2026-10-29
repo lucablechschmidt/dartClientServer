@@ -28,7 +28,7 @@ export type Rules = {
 
 /**
  * The complete state of a leg is the ordered list of visits.
- * Rest, player on turn and winner are derived from it (selectors.ts).
+ * Rest, player on turn, placements and winner are derived from it (selectors.ts).
  */
 export type LegState = {
   players: PlayerId[];
@@ -36,11 +36,18 @@ export type LegState = {
   /** Index in players of who throws first in the leg. */
   starter: number;
   visits: Visit[];
+  /**
+   * 3+ players, places already fixed: the last player still plays to his checkout (M5 plan §9.2).
+   * Never changes a place, only adds visits for the statistics.
+   */
+  playOut: boolean;
 };
 
 export type Result<T, E extends string> = { ok: true; value: T } | { ok: false; reason: E };
 
 export type ApplyError = "leg-finished" | "invalid-dart";
 export type UndoError = "nothing-to-undo";
+export type PlayOutError = "no-play-out";
+export type StarterError = "leg-started" | "unknown-player" | "leg-finished";
 
 export const MAX_DARTS_PER_VISIT = 3;

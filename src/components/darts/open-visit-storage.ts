@@ -1,4 +1,4 @@
-import { applyDart, openVisit, winnerOf, type Dart, type LegState } from "@/domain/x01";
+import { applyDart, isLegFinished, openVisit, type Dart, type LegState } from "@/domain/x01";
 
 /**
  * The open visit lives only on this device (E11). To survive a reload it is kept in localStorage,
@@ -14,7 +14,7 @@ export function restoreOpenVisit(matchId: string, server: LegState): LegState {
     const raw = localStorage.getItem(storageKey(matchId));
     if (!raw) return server;
     const stored = JSON.parse(raw) as StoredOpen;
-    if (stored.seq !== server.visits.length || openVisit(server) || winnerOf(server)) return server;
+    if (stored.seq !== server.visits.length || openVisit(server) || isLegFinished(server)) return server;
     let state = server;
     for (const dart of stored.darts) {
       const r = applyDart(state, dart);
