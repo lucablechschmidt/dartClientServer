@@ -14,18 +14,45 @@ const MODES: readonly { mode: Mode; href: string | null }[] = [
 /** A running match for the overview (E13): ready for display, no DB types. */
 export type OpenMatchItem = { id: string; names: string[]; perPlayer: boolean; startedAt: number };
 
-type Props = { texts: Texts["gameMenu"]; overviewTexts: Texts["overview"]; matches: OpenMatchItem[]; now: number };
+/** A closed match for the history (M5), names already resolved. */
+export type RecentMatchItem = {
+  id: string;
+  names: string[];
+  endedAt: number;
+  result:
+    | { kind: "abandoned" }
+    | { kind: "places"; order: string[] }
+    | { kind: "score"; winner: string; unit: "legs" | "sets"; score: [number, number] }
+    | { kind: "winner"; winner: string };
+};
+
+type Props = { texts: Texts["gameMenu"]; overviewTexts: Texts["overview"]; matches: OpenMatchItem[]; recent?: RecentMatchItem[]; now: number };
 
 /** "vor 12 min", computed from server time so server and client render the same. */
 export function relativeTime(startedAt: number, now: number, t: Texts["overview"]): string {
   const minutes = Math.max(0, Math.round((now - startedAt) / 60_000));
   if (minutes < 1) return t.justNow;
   if (minutes < 60) return t.minutesAgo.replace("{n}", String(minutes));
-  return t.hoursAgo.replace("{n}", String(Math.round(minutes / 60)));
+  if (minutes < 24 * 60) return t.hoursAgo.replace("{n}", String(Math.round(minutes / 60)));
+  return t.daysAgo.replace("{n}", String(Math.round(minutes / (24 * 60))));
 }
 
-/** Port of NewGameView (GameSelection): four titles centered; the running games below (M4). */
-export function GameMenu({ texts, overviewTexts, matches, now }: Props) {
+/** "Casey Legs 2:1", "1. C · 2. A · 3. B", "Casey gewinnt" or "abgebrochen". */
+export function resultText(result: RecentMatchItem["result"], t: Texts["overview"]): string {
+  switch (result.kind) {
+    case "abandoned":
+      return t.abandoned;
+    case "places":
+      return result.order.map((name, i) => `${i + 1}. ${name}`).join(" · ");
+    case "score":
+      return `${result.winner} ${t[result.unit]} ${result.score.join(":")}`;
+    case "winner":
+      return t.winner.replace("{name}", result.winner);
+  }
+}
+
+/** Port of NewGameView (GameSelection): four titles centered; the running games below (M4), then the last ones (M5). */
+export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Props) {
   return (
     <div className="flex flex-1 flex-col">
       <nav aria-label={texts.title} className="flex flex-1 flex-col items-center justify-center gap-6 py-8 fluid-text-xl">
@@ -53,6 +80,24 @@ export function GameMenu({ texts, overviewTexts, matches, now }: Props) {
                     {m.perPlayer ? `${overviewTexts.perPlayer} · ` : ""}
                     {relativeTime(m.startedAt, now, overviewTexts)}
                   </span>
+                </Link>
+              </CardRow>
+            ))}
+          </CardList>
+        </section>
+      )}
+      {recent.length > 0 && (
+        <section className="flex flex-col gap-2 px-4 pb-4">
+          <SectionHeading>{overviewTexts.recent}</SectionHeading>
+          <CardList label={overviewTexts.recent}>
+            {recent.map((m) => (
+              <CardRow key={m.id}>
+                <Link href={`/match/${m.id}`} className="flex min-h-touch w-full flex-col justify-center py-1">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="truncate">{m.names.join(" · ")}</span>
+                    <span className="shrink-0 text-sm text-fg-muted">{relativeTime(m.endedAt, now, overviewTexts)}</span>
+                  </span>
+                  <span className={`truncate text-sm ${m.result.kind === "abandoned" ? "text-fg-muted" : ""}`}>{resultText(m.result, overviewTexts)}</span>
                 </Link>
               </CardRow>
             ))}

@@ -34,29 +34,29 @@ const withCurrentLeg = (m: MatchState, leg: LegState): MatchState => ({ ...m, le
 const zeros = (players: PlayerId[]) => Object.fromEntries(players.map((p) => [p, 0]));
 
 /**
- * One pass over the legs: set/leg number of every leg (plus the next one) and the score after them.
- * The legs of a won set stay visible ("Legs 2:1 · Sets 1:0") until the first leg of the next set exists.
+ * One pass over the leg winners (null = leg not finished): set/leg number of every leg (plus the
+ * next one) and the score after them. The legs of a won set stay visible ("Legs 2:1 · Sets 1:0")
+ * until the first leg of the next set exists. Also used for the history, from the stored winners.
  */
-function walk(m: MatchState): { numbers: LegNumber[]; score: MatchScore } {
-  let legs = zeros(m.players);
-  const sets = zeros(m.players);
+export function walkWinners(players: PlayerId[], format: MatchFormat, winners: (PlayerId | null)[]): { numbers: LegNumber[]; score: MatchScore } {
+  let legs = zeros(players);
+  const sets = zeros(players);
   let setNo = 1;
   let legNo = 1;
   let setWon = false;
   const numbers: LegNumber[] = [];
   const startNextSet = () => {
-    legs = zeros(m.players);
+    legs = zeros(players);
     setNo++;
     legNo = 1;
     setWon = false;
   };
-  for (const leg of m.legs) {
+  for (const winner of winners) {
     if (setWon) startNextSet();
     numbers.push({ setNo, legNo });
-    const winner = isLegFinished(leg) ? winnerOf(leg) : null;
     if (!winner) continue;
     legs[winner]++;
-    if (legs[winner] >= m.format.legsToWinSet) {
+    if (legs[winner] >= format.legsToWinSet) {
       sets[winner]++;
       setWon = true;
     } else {
@@ -68,6 +68,8 @@ function walk(m: MatchState): { numbers: LegNumber[]; score: MatchScore } {
   numbers.push({ setNo, legNo });
   return { numbers, score };
 }
+
+const walk = (m: MatchState) => walkWinners(m.players, m.format, m.legs.map((leg) => (isLegFinished(leg) ? winnerOf(leg) : null)));
 
 /** Set and leg number per leg, in the order of `m.legs`. */
 export const legNumbers = (m: MatchState): LegNumber[] => walk(m).numbers.slice(0, m.legs.length);

@@ -117,6 +117,12 @@ export const de = {
     justNow: "gerade eben",
     minutesAgo: "vor {n} min",
     hoursAgo: "vor {n} h",
+    daysAgo: "vor {n} d",
+    recent: "Letzte Spiele",
+    abandoned: "abgebrochen",
+    winner: "{name} gewinnt",
+    legs: "Legs",
+    sets: "Sets",
   },
   newGame: {
     title: "Neues Spiel",

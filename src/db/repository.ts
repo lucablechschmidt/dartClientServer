@@ -25,6 +25,14 @@ export type MatchSummary = {
 /** For the game overview (M4): open matches, newest first. */
 export type OpenMatch = Pick<MatchSummary, "id" | "players" | "inputMode" | "startedAt">;
 
+/** For the history (M5): a closed match with what its result is derived from. */
+export type RecentMatch = Pick<MatchSummary, "id" | "players" | "status" | "startedAt" | "finishedAt"> & {
+  format: MatchFormat;
+  /** Winner per leg in leg order, null = leg not finished. */
+  legWinners: (PlayerId | null)[];
+  placements: Record<PlayerId, number | null>;
+};
+
 /** A stored leg as the services see it; its visits are in `LoadedMatch.state`. */
 export type StoredLegInfo = { id: string; setNo: number; legNo: number; winnerPlayerId: PlayerId | null };
 
@@ -96,6 +104,8 @@ export interface MatchRepository {
   loadMatch(matchId: string): LoadedMatch | null;
   /** Status running and newer than `openSince` (ms timestamp), newest first. */
   listOpenMatches(openSince: number): OpenMatch[];
+  /** History (M5): finished, abandoned or running but older than `openSince`; most recently ended first. */
+  listRecentMatches(openSince: number, limit: number): RecentMatch[];
 
   /**
    * Writes the visit state of a leg: rows from `fromSeq` on are replaced,

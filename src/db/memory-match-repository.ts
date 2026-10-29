@@ -1,6 +1,6 @@
 import { replayMatch, type PlayerId, type Visit } from "@/domain/x01";
 import { MemoryStore, toPlayer, type StoredLeg, type StoredMatch } from "./memory-store";
-import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch } from "./repository";
+import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, RecentMatch } from "./repository";
 
 /** For service tests: same semantics as SqliteMatchRepository, in memory only. */
 export class MemoryMatchRepository implements MatchRepository {
@@ -39,6 +39,22 @@ export class MemoryMatchRepository implements MatchRepository {
       .filter((m) => m.status === "running" && m.startedAt > openSince)
       .sort((a, b) => b.startedAt - a.startedAt)
       .map((m) => ({ id: m.id, players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)), inputMode: m.inputMode, startedAt: m.startedAt }));
+  }
+  listRecentMatches(openSince: number, limit: number): RecentMatch[] {
+    return [...this.store.matches.values()]
+      .filter((m) => m.status !== "running" || m.startedAt <= openSince)
+      .sort((a, b) => (b.finishedAt ?? b.startedAt) - (a.finishedAt ?? a.startedAt))
+      .slice(0, limit)
+      .map((m) => ({
+        id: m.id,
+        players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
+        status: m.status,
+        startedAt: m.startedAt,
+        finishedAt: m.finishedAt,
+        format: m.format,
+        legWinners: m.legs.map((l) => l.winnerPlayerId),
+        placements: { ...m.placements },
+      }));
   }
   loadMatch(matchId: string): LoadedMatch | null {
     const m = this.store.matches.get(matchId);

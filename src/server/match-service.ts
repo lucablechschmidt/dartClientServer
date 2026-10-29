@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { LoadedMatch, OpenMatch } from "@/db/repository";
+import type { LoadedMatch, OpenMatch, RecentMatch } from "@/db/repository";
 import type { Session } from "@/domain/player";
 import {
   applyMatchDart,
@@ -25,6 +25,7 @@ import {
   setLegStarter,
   startPlayOut,
   undoMatchVisit,
+  walkWinners,
   winnerOf,
   type Actor,
   type Dart,
@@ -220,6 +221,44 @@ export function loadMatchView(deps: Deps, matchId: string, session: Session | nu
 /** Game overview (M4): running matches younger than 24 h. */
 export function listOpenMatches(deps: Deps): OpenMatch[] {
   return deps.matches.listOpenMatches(deps.now() - MATCH_OPEN_MS);
+}
+
+/** Result of a closed match for the history (M5), without texts; `P` is a player id or, for the view, a name. */
+export type RecentResult<P = PlayerId> =
+  | { kind: "abandoned" }
+  /** 3+ players: places in order. */
+  | { kind: "places"; order: P[] }
+  /** 2 players with more than one leg or set: winner and the score from his side. */
+  | { kind: "score"; winner: P; unit: "legs" | "sets"; score: [number, number] }
+  | { kind: "winner"; winner: P };
+
+export type RecentMatchView = { id: string; names: string[]; endedAt: number; result: RecentResult<string> };
+
+export function recentResult(m: RecentMatch): RecentResult {
+  if (m.status !== "finished") return { kind: "abandoned" };
+  const ids = m.players.map((p) => p.id);
+  const byPlace = ids.filter((id) => m.placements[id] != null).sort((a, b) => m.placements[a]! - m.placements[b]!);
+  if (ids.length > 2) return { kind: "places", order: byPlace };
+  const { score } = walkWinners(ids, m.format, m.legWinners);
+  const winnerId = byPlace[0] ?? ids.find((id) => score.sets[id] >= m.format.setsToWinMatch) ?? ids[0];
+  if (ids.length < 2 || (m.format.legsToWinSet === 1 && m.format.setsToWinMatch === 1)) return { kind: "winner", winner: winnerId };
+  const unit = m.format.setsToWinMatch > 1 ? "sets" : "legs";
+  const other = ids.find((id) => id !== winnerId)!;
+  return { kind: "score", winner: winnerId, unit, score: [score[unit][winnerId], score[unit][other]] };
+}
+
+function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResult<string> {
+  if (r.kind === "places") return { ...r, order: r.order.map(name) };
+  if (r.kind === "score" || r.kind === "winner") return { ...r, winner: name(r.winner) };
+  return r;
+}
+
+/** History in the game overview (M5): the last 20 closed matches. */
+export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
+  return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit).map((m) => {
+    const name = (id: PlayerId) => m.players.find((p) => p.id === id)?.name ?? "";
+    return { id: m.id, names: m.players.map((p) => p.name), endedAt: m.finishedAt ?? m.startedAt, result: withNames(recentResult(m), name) };
+  });
 }
 
 /** Cancel by host or admin (E13). The visits stay stored. */

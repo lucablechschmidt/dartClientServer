@@ -236,6 +236,31 @@ describe.each(impls)("Legs (M5): %s", (_name, make) => {
   });
 });
 
+describe.each(impls)("History (M5): %s", (_name, make) => {
+  it("lists closed and expired matches, most recently ended first, with leg winners and places", () => {
+    const repo = make();
+    repo.players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
+    repo.players.createPlayer({ id: "p2", name: "Sam", createdAt: 2, guestUntil: null });
+    const create = (id: string, startedAt: number) =>
+      repo.matches.createMatch({ id, legId: `l-${id}`, rules, playerIds: ["p1", "p2"], starterIndex: 0, format: { legsToWinSet: 2, setsToWinMatch: 1 }, inputMode: "single", hostPlayerId: null, startedAt });
+    create("done", 10);
+    create("gone", 20);
+    create("old", 5);
+    create("live", 500);
+    repo.matches.finishLeg("l-done", "p2", 40);
+    repo.matches.createLeg({ id: "l-done-2", matchId: "done", setNo: 1, legNo: 2, starterPlayerId: "p2" });
+    repo.matches.finishLeg("l-done-2", "p2", 50);
+    repo.matches.setMatchStatus("done", "finished", 50);
+    repo.matches.setPlacements("done", { p1: 2, p2: 1 });
+    repo.matches.setMatchStatus("gone", "abandoned", 30);
+    const recent = repo.matches.listRecentMatches(100, 10);
+    expect(recent.map((m) => [m.id, m.status])).toEqual([["done", "finished"], ["gone", "abandoned"], ["old", "running"]]);
+    expect(recent[0]).toMatchObject({ format: { legsToWinSet: 2, setsToWinMatch: 1 }, legWinners: ["p2", "p2"], placements: { p1: 2, p2: 1 } });
+    expect(recent[0].players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
+    expect(repo.matches.listRecentMatches(100, 1).map((m) => m.id)).toEqual(["done"]);
+  });
+});
+
 describe("visit mapping", () => {
   it("maps slots both ways, empty slots as NULL", () => {
     const v: Visit = { playerId: "p", darts: [{ field: 25, type: "double" }], isBust: false };

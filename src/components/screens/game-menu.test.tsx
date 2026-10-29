@@ -33,4 +33,26 @@ describe("GameMenu overview", () => {
     expect(relativeTime(now - 90_000, now, de.overview)).toBe("vor 2 min");
     expect(relativeTime(now - 2 * 3_600_000, now, de.overview)).toBe("vor 2 h");
   });
+  it("lists the last matches with their result below the running ones (M5)", () => {
+    render(
+      <GameMenu
+        texts={de.gameMenu}
+        overviewTexts={de.overview}
+        now={now}
+        matches={[]}
+        recent={[
+          { id: "r1", names: ["Luca", "Mara"], endedAt: now - 5 * 60_000, result: { kind: "score", winner: "Mara", unit: "legs", score: [2, 1] } },
+          { id: "r2", names: ["Luca", "Mara", "Finn"], endedAt: now - 2 * 86_400_000, result: { kind: "places", order: ["Finn", "Luca", "Mara"] } },
+          { id: "r3", names: ["Luca", "Mara"], endedAt: now, result: { kind: "abandoned" } },
+        ]}
+      />,
+    );
+    expect(screen.getByText("Letzte Spiele")).toBeInTheDocument();
+    const rows = screen.getAllByRole("link", { name: /Luca · Mara/ });
+    expect(rows[0]).toHaveAttribute("href", "/match/r1");
+    expect(rows[0]).toHaveTextContent("Mara Legs 2:1");
+    expect(rows[1]).toHaveTextContent("1. Finn · 2. Luca · 3. Mara");
+    expect(rows[1]).toHaveTextContent("vor 2 d");
+    expect(rows[2]).toHaveTextContent("abgebrochen");
+  });
 });

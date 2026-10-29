@@ -1,7 +1,7 @@
-import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, ne, or, sql } from "drizzle-orm";
 import { replayMatch, type PlayerId, type Visit } from "@/domain/x01";
 import type { Db } from "./client";
-import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, Player } from "./repository";
+import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, Player, RecentMatch } from "./repository";
 import { legs, matchPlayers, matches, players, visits } from "./schema";
 import { toPlayer } from "./sqlite-player-repository";
 import { rowToVisit, visitToSlots } from "./visit-mapping";
@@ -82,6 +82,34 @@ export class SqliteMatchRepository implements MatchRepository {
       .orderBy(desc(matches.startedAt))
       .all()
       .map((m) => ({ id: m.id, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
+  }
+  listRecentMatches(openSince: number, limit: number): RecentMatch[] {
+    return this.db
+      .select()
+      .from(matches)
+      .where(or(ne(matches.status, "running"), lte(matches.startedAt, openSince)))
+      .orderBy(desc(sql`coalesce(${matches.finishedAt}, ${matches.startedAt})`))
+      .limit(limit)
+      .all()
+      .map((m) => {
+        const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, m.id)).all();
+        const winners = this.db
+          .select({ winner: legs.winnerPlayerId })
+          .from(legs)
+          .where(eq(legs.matchId, m.id))
+          .orderBy(asc(legs.setNo), asc(legs.legNo))
+          .all();
+        return {
+          id: m.id,
+          players: this.seatedPlayers(m.id),
+          status: m.status,
+          startedAt: m.startedAt,
+          finishedAt: m.finishedAt,
+          format: { legsToWinSet: m.legsToWinSet, setsToWinMatch: m.setsToWinMatch },
+          legWinners: winners.map((w) => w.winner),
+          placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])),
+        };
+      });
   }
   loadMatch(matchId: string): LoadedMatch | null {
     const match = this.db.select().from(matches).where(eq(matches.id, matchId)).get();

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Session } from "@/domain/player";
 import type { Dart } from "@/domain/x01";
 import { memoryDeps } from "./testing";
-import { cancelMatch, commitVisit, createMatch, listOpenMatches, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit } from "./match-service";
+import { cancelMatch, commitVisit, createMatch, listOpenMatches, listRecentMatches, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit } from "./match-service";
 import { createGuest, createPlayer } from "./player-service";
 
 const ok = <T extends { ok: boolean }>(r: T) => { if (!r.ok) throw new Error("expected ok"); return r as Extract<T, { ok: true }>; };
@@ -281,6 +281,31 @@ describe("legs, sets and places (M5)", () => {
     expect(v.board.activePlayerId).toBe(b);
     expect(ok(commitVisit(deps, host, id, 1, 0, MISS)).view.state.legs[1].visits[0].playerId).toBe(b);
     expect(setStarter(deps, sessionAdmin, id, a)).toEqual({ ok: false, reason: "leg-started" });
+  });
+
+  it("history: score for best-of, places for 3+, winner for single legs, abandoned marked; running ones not listed", () => {
+    const [a, b, c] = players("Casey", "Sam", "Kim");
+    const bo3 = createMatch(deps, { playerIds: [a, b], rules: short, format: { legsToWinSet: 2, setsToWinMatch: 1 } });
+    commit(bo3, OUT); // Casey
+    commit(bo3, OUT); // Sam starts leg 2 and wins
+    commit(bo3, MISS); // leg 3: Casey starts, misses
+    commit(bo3, OUT); // Sam: 2:1
+    const three = createMatch(deps, { playerIds: [a, b, c], rules: short });
+    commit(three, OUT);
+    commit(three, OUT); // Kim last
+    const single = createMatch(deps, { playerIds: [a, b], rules: short });
+    commit(single, OUT);
+    const gone = createMatch(deps, { playerIds: [a, b], rules: short });
+    cancelMatch(deps, sessionAdmin, gone);
+    createMatch(deps, { playerIds: [a, b], rules: short }); // running
+    const recent = listRecentMatches(deps);
+    expect(recent.map((m) => [m.id, m.result])).toEqual([
+      [gone, { kind: "abandoned" }],
+      [single, { kind: "winner", winner: "Casey" }],
+      [three, { kind: "places", order: ["Casey", "Sam", "Kim"] }],
+      [bo3, { kind: "score", winner: "Sam", unit: "legs", score: [2, 1] }],
+    ]);
+    expect(recent[0].names).toEqual(["Casey", "Sam"]);
   });
 
   it("restart keeps the format", () => {
