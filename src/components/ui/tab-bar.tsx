@@ -6,13 +6,16 @@ import type { ReactNode } from "react";
 
 export type TabItem = { href: string; label: string; icon: ReactNode };
 
-/** Port of the TabView from HomeView: floating pill at the bottom, active tab in the accent color. */
+/**
+ * Port of the TabView from HomeView: pill at the bottom, active tab in the accent color. It sits below
+ * the scrolling content instead of floating over it, so it never covers buttons in long lists.
+ */
 export function TabBar({ items, label }: { items: TabItem[]; label: string }) {
   const pathname = usePathname();
   return (
     <nav
       aria-label={label}
-      className="fixed inset-x-0 bottom-0 z-10 flex justify-center px-4 pb-safe-min"
+      className="flex shrink-0 justify-center px-4 pt-2 pb-safe-min"
     >
       <ul className="flex rounded-full bg-tab-bg p-1.5 shadow-lg backdrop-blur">
         {items.map((item) => {

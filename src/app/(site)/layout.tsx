@@ -6,11 +6,14 @@ import { de } from "@/i18n/de";
 /** The two tabs of the legacy HomeView plus "Konto" (account, M3). Setup and scoring screen have no tab bar. */
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col pt-safe pb-tabbar">
-      <div className="flex justify-end px-3 pt-2">
-        <ThemeToggle labels={{ label: de.theme.label, system: de.theme.system, light: de.theme.light, dark: de.theme.dark }} />
+    <div className="flex h-dvh flex-col pt-safe">
+      {/* Only this area scrolls; the tab bar stays below it. */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex justify-end px-3 pt-2">
+          <ThemeToggle labels={{ label: de.theme.label, system: de.theme.system, light: de.theme.light, dark: de.theme.dark }} />
+        </div>
+        {children}
       </div>
-      {children}
       <TabBar
         label={de.nav.main}
         items={[

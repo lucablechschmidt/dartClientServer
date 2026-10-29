@@ -167,10 +167,6 @@
 @utility pb-safe {
   padding-bottom: var(--safe-bottom);
 }
-/* Bottom padding of pages with the floating tab bar: bar height plus safe area */
-@utility pb-tabbar {
-  padding-bottom: calc(6rem + var(--safe-bottom));
-}
 /* Tab bar itself: at least 0.75rem above the home indicator */
 @utility pb-safe-min {
   padding-bottom: max(0.75rem, var(--safe-bottom));
