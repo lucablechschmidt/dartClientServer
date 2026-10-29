@@ -1,14 +1,14 @@
 # M7-Plan – Cricket, Elimination, SplitScore
 
 > Detailplan zu `project.md` M7. Regeln aus `legacy-analysis.md` §4–6 und den Swift-Klassen `CricketGame`, `Field`, `EliminationGame`, `Elimination`, `SplitScoreGame`. Jeder Modus ist ein eigenes Domänenmodul hinter derselben Schnittstelle; Server, Zählscreen, Rechte und Netzprotokoll bleiben, nur Panels, Hinweiszeile und Setup bekommen Varianten. Test-first, jeder grüne Schritt ein Commit.
-> Stand: erste Fassung, 23.10.2026. Noch nicht umgesetzt.
-> Luca: §0 und §9.
+> Stand: Fragen in §9 am 29.10.2026 beantwortet (1, 2, 5) bzw. Default (3, 4). M6 wird zunächst übersprungen; die Playwright-Tests aus §7 kommen deshalb als Erweiterung von `scripts/smoke-match.mjs`. Noch nicht umgesetzt.
+> Luca: §0.
 
 ---
 
 ## 0. Was Luca tut
 
-1. Die Regelfragen in §9 beantworten; ohne Antwort gilt das Legacy-Verhalten.
+1. ~~Die Regelfragen in §9 beantworten~~ (erledigt 29.10.2026).
 2. Für die DoD jeden Modus einmal am Board spielen, mindestens Cricket zu dritt.
 
 ---
@@ -106,10 +106,15 @@ Panel: Punkte, Hinweiszeile „Ziel: Doppel“ bzw. „Ziel: 17“, bei Rundenwe
 
 Sets/Legs für die drei Modi, modusspezifische Statistiken (M8 nimmt nur X01-Kennzahlen plus Feldtreffer aus allen Modi), Sound.
 
-## 9. Offene Fragen (Defaults gelten ohne Antwort)
+## 9. Fragen (beantwortet 29.10.2026)
 
-1. **Cricket Platzierungen bei 3+:** Default: Sieger Platz 1, Rest nach Punkten, bei Gleichstand nach geschlossenen Feldern. Alternative: wie X01 bis zur letzten Platzierung weiterspielen (Legacy beendet beim ersten Sieger). Cricket nicht! bis zur letzten Platzierung weiterspielen
-2. **Elimination, mehrere Spieler auf demselben Stand:** Default: alle werden genullt (Legacy nullt nur den ersten gefundenen). Es sollte nie dazu kommen dass zwei spieler auf dem selben Punktestand sind, da der einer Spiler den anderen schon genullt haben sollte
+1. **Cricket Platzierungen bei 3+:** Default: Sieger Platz 1, Rest nach Punkten, bei Gleichstand nach geschlossenen Feldern. Alternative: wie X01 bis zur letzten Platzierung weiterspielen (Legacy beendet beim ersten Sieger).
+   **Antwort:** Cricket nicht bis zur letzten Platzierung weiterspielen, also Default.
+2. **Elimination, mehrere Spieler auf demselben Stand:** Default: alle werden genullt (Legacy nullt nur den ersten gefundenen).
+   **Antwort:** Kommt nicht vor, weil der erste Spieler den anderen schon genullt hätte. Umgesetzt wird der Default; gleiche Stände gibt es nur bei 0, dort ändert das Nullen nichts.
 3. **Elimination Platzierungen:** Default: Sieger, Rest nach Punkten.
+   **Ohne Antwort:** Default.
 4. **SplitScore Gleichstand am Ende:** Default: geteilter Platz.
-5. **SplitScore Hinweiszeile** „Ziel: 17“ oder zusätzlich auf dem Keypad das Zielfeld hervorheben (Default: nur Hinweiszeile; Hervorhebung ist eine kleine Ergänzung, falls gewünscht). Nur "Ziel: 17"
+   **Ohne Antwort:** Default.
+5. **SplitScore Hinweiszeile** „Ziel: 17“ oder zusätzlich auf dem Keypad das Zielfeld hervorheben (Default: nur Hinweiszeile; Hervorhebung ist eine kleine Ergänzung, falls gewünscht).
+   **Antwort:** Nur „Ziel: 17“.
