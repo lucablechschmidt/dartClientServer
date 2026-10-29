@@ -3,7 +3,7 @@
 import QRCode from "qrcode";
 import { revalidatePath } from "next/cache";
 import type { PlayerResult } from "@/domain/player";
-import { promoteGuest, removeLogin } from "./admin-service";
+import { promoteGuest } from "./admin-service";
 import { readEnv } from "./env";
 import { createPasswordInvite, createRegisterInvite } from "./invite-service";
 import { requireAdmin } from "./request";
@@ -33,13 +33,6 @@ export async function createPasswordInviteAction(playerId: string): Promise<Invi
   if (!player) return null;
   const token = createPasswordInvite(deps, playerId, player.hasLogin);
   return token ? link(token) : null;
-}
-
-export async function removeLoginAction(playerId: string): Promise<PlayerResult> {
-  const { deps, session } = await requireAdmin();
-  const r = removeLogin(deps, session, playerId);
-  touched();
-  return r;
 }
 
 export async function promoteGuestAction(playerId: string): Promise<PlayerResult> {

@@ -122,21 +122,21 @@ Detailplan: `docs/archive/m3-plan.md`.
 
 **Ablauf (E10, Details und Fälle in `docs/archive/m3-plan.md` §1–2):**
 1. Es gibt keine getrennten Nutzer: ein **Spieler mit `password_hash`** kann sich einloggen, `is_admin` ist eine Spalte am Spieler. Der erste Admin wird beim App-Start aus `ADMIN_USER`/`ADMIN_PASSWORD_HASH` in `.env` angelegt, wenn noch keiner existiert. Die Datenbank wird beim M3-Deploy geleert; alle Mitspieler kommen per Einladung neu hinein.
-2. Tab **Konto** (für alle): eigener Name (umbenennen), Passwort ändern, Abmelden. Für den Admin zusätzlich: „Einladungslink erzeugen“ (Token 24 h, einmal nutzbar) als QR-Code und Link; Liste aller Spieler mit Umbenennen, „Login erzeugen“ (Spieler ohne Login), „Passwort zurücksetzen“, „Login löschen“, „Spieler löschen“; Gäste des Tages mit „Dauerhaft übernehmen“.
+2. Tab **Konto** (für alle): eigener Name (umbenennen), Passwort ändern, Abmelden. Für den Admin zusätzlich: „Einladungslink erzeugen“ (Token 24 h, einmal nutzbar) als QR-Code und Link; Liste aller Spieler mit Umbenennen, „Login erzeugen“ (Spieler ohne Login), „Passwort zurücksetzen“, „Spieler löschen“ (das ursprüngliche „Login löschen“ ist seit 29.10.2026 entfernt, ebenso die Login-Kennzeichnung; nur „Admin“ steht noch an der Zeile); Gäste des Tages mit „Dauerhaft übernehmen“.
 3. Der Eingeladene scannt den Code, Seite `/einladung/<token>`: Name und Passwort → Spieler mit Login entsteht, der Token ist verbraucht, er ist eingeloggt. Ein schon vergebener Name wird abgelehnt (für Gäste und Spieler ohne Login erzeugt der Admin stattdessen einen Login).
 4. Login-Seite für alle (Name + Passwort), Logout. Session-Cookie 1 Jahr ab Login (`httpOnly`, `secure`, `sameSite=lax`). Ohne Session ist nur Login und Einladung erreichbar.
-5. Rechte: Eingeloggte benennen sich selbst und Gäste um und entfernen Gäste; Admins benennen alle um und löschen Logins und Spieler, außer sich selbst und andere Admins. „Login löschen“ setzt nur den Hash zurück, der Spieler bleibt samt Historie; „Spieler löschen“ geht nur ohne Matches.
+5. Rechte: Eingeloggte benennen sich selbst und Gäste um und entfernen Gäste; Admins benennen alle um und löschen Spieler, außer sich selbst und andere Admins; „Spieler löschen“ geht nur ohne Matches.
 6. **Neues Spiel:** wie heute, Liste aller Spieler plus Gäste, in Reihenfolge antippen. Gezählt wird weiter auf einem Gerät (E3).
 
 - [x] Schema: `player` + `password_hash NULL`, `is_admin`; `session` (id, player_id, expires_at); `invite` (id, kind register|password, player_id, reset_sessions, expires_at, used_at) (§6)
 - [x] Passwort-Hash mit bcrypt (`bcryptjs`, kompatibel zu `caddy hash-password`, damit der Admin-Hash aus `.env` weiter gilt), Session-Cookie httpOnly/secure/sameSite=lax, 1 Jahr ab Login
 - [x] Admin-Bootstrap beim Start aus `.env`, nur wenn kein Admin existiert
-- [x] Services mit Tests: `login`, `logout`, `createRegisterInvite`, `createPasswordInvite`, `redeem`, `removeLogin`, `promoteGuest`, `renamePlayer` mit Rechteprüfung, `changeOwnPassword`; Autorisierung serverseitig in jeder Action
+- [x] Services mit Tests: `login`, `logout`, `createRegisterInvite`, `createPasswordInvite`, `redeem`, `promoteGuest`, `renamePlayer` mit Rechteprüfung, `changeOwnPassword`; Autorisierung serverseitig in jeder Action
 - [x] Seiten: `/login`, `/einladung/[token]`, Tab `/account` (QR-Code als SVG serverseitig mit `qrcode`), Tab „Spieler“ ohne „Spieler anlegen“ (nur noch Gäste)
 - [x] Rate-Limit für Login und Token-Einlösen (in der App, pro IP)
 - [x] Caddy: `basic_auth` entfernen, `deploy/env.example`, `scripts/hash-password.sh` und README anpassen; `.env` auf dem Pi umstellen, `darts.db` leeren
 
-**DoD (live vorführen):** Admin loggt sich mit den `.env`-Zugangsdaten ein, erzeugt einen QR-Code; ein zweites Handy scannt ihn, legt „Name + Passwort“ an und landet eingeloggt in der App; derselbe QR-Code funktioniert kein zweites Mal; der Name des Admins wird beim Einlösen abgelehnt; der neue Spieler erscheint bei „Neues Spiel“ und kann ausgewählt werden; er kann sich selbst umbenennen, den Admin nicht; ohne Login zeigt jede andere Seite die Login-Seite; nach Logout ist der Zugriff weg; nach Browser-Neustart ist man noch eingeloggt; Passwort-Reset über einen zweiten QR-Code klappt; ein Gast wird vom Admin übernommen und bekommt per „Login erzeugen“ einen Login; Login löschen lässt einen Spieler mit Matches samt Historie stehen.
+**DoD (live vorführen):** Admin loggt sich mit den `.env`-Zugangsdaten ein, erzeugt einen QR-Code; ein zweites Handy scannt ihn, legt „Name + Passwort“ an und landet eingeloggt in der App; derselbe QR-Code funktioniert kein zweites Mal; der Name des Admins wird beim Einlösen abgelehnt; der neue Spieler erscheint bei „Neues Spiel“ und kann ausgewählt werden; er kann sich selbst umbenennen, den Admin nicht; ohne Login zeigt jede andere Seite die Login-Seite; nach Logout ist der Zugriff weg; nach Browser-Neustart ist man noch eingeloggt; Passwort-Reset über einen zweiten QR-Code klappt; ein Gast wird vom Admin übernommen und bekommt per „Login erzeugen“ einen Login.
 
 ---
 

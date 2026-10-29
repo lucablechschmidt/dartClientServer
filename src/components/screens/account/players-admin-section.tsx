@@ -13,15 +13,14 @@ type Props = {
   players: Player[];
   texts: AccountTexts;
   onCreatePasswordInvite: (playerId: string) => Promise<InviteLink | null>;
-  onRemoveLogin: (playerId: string) => Promise<PlayerResult>;
   onDeletePlayer: (formData: FormData) => Promise<PlayerResult>;
 };
 
 /**
- * Admin: every regular player with login state; create login or reset password (QR code),
- * remove login, delete player. Never for the admin themself or other admins (§1 of the M3 plan).
+ * Admin: every regular player in two lines (name with an admin badge, then the actions): create login
+ * or reset password (QR code), delete player. Never for the admin themself or other admins (§1 of the M3 plan).
  */
-export function PlayersAdminSection({ session, players, texts, onCreatePasswordInvite, onRemoveLogin, onDeletePlayer }: Props) {
+export function PlayersAdminSection({ session, players, texts, onCreatePasswordInvite, onDeletePlayer }: Props) {
   const t = texts.admin;
   const confirm = useConfirmTap();
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
@@ -44,7 +43,7 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
             <CardRow key={p.id} className="flex-col items-stretch gap-1">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="truncate fluid-text-lg">{p.name}</span>
-                <span className="shrink-0 text-sm text-fg-muted">{p.isAdmin ? t.badges.admin : p.hasLogin ? t.badges.login : t.badges.noLogin}</span>
+                {p.isAdmin && <span className="shrink-0 text-sm text-fg-muted">{t.adminBadge}</span>}
               </div>
               <div className="flex flex-wrap gap-x-3">
                 <TextButton
@@ -56,11 +55,6 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
                 >
                   {p.hasLogin ? t.resetPassword : t.createLogin}
                 </TextButton>
-                {p.hasLogin && !protectedPlayer && (
-                  <TextButton flush tone="danger" onClick={() => confirm.tap(`login:${p.id}`, async () => report(p.id, await onRemoveLogin(p.id)))}>
-                    {confirm.label(`login:${p.id}`, t.removeLogin, t.confirm)}
-                  </TextButton>
-                )}
                 {!protectedPlayer && (
                   <TextButton flush tone="danger" onClick={() => confirm.tap(`player:${p.id}`, () => void deletePlayer(p.id))}>
                     {confirm.label(`player:${p.id}`, t.deletePlayer, t.confirm)}

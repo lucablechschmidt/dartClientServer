@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { MemoryAuthRepository } from "@/db/memory-auth-repository";
 import { GUEST_LIFETIME_MS } from "@/domain/player";
-import { promoteGuest, removeLogin } from "./admin-service";
+import { promoteGuest } from "./admin-service";
 import { bootstrapAdmin, login, sessionFromToken } from "./auth-service";
 import type { Deps } from "./deps";
 import { memoryDeps } from "./testing";
@@ -108,18 +108,3 @@ describe("invite: password (case F and reset)", () => {
   });
 });
 
-describe("admin: removeLogin", () => {
-  it("removes hash and sessions, keeps the player; never self, admins or players without login", async () => {
-    const reg = createRegisterInvite(deps);
-    const mara = await redeem(deps, reg, { name: "Mara", ...pw });
-    if (!mara.ok) throw new Error();
-    const me = adminSession();
-    expect(removeLogin(deps, { ...me, isAdmin: false }, mara.session.playerId)).toEqual({ ok: false, reason: "forbidden" });
-    expect(removeLogin(deps, me, me.playerId)).toEqual({ ok: false, reason: "forbidden" });
-    expect(removeLogin(deps, me, mara.session.playerId)).toEqual({ ok: true });
-    expect(sessionFromToken(deps, mara.token)).toBeNull();
-    expect(deps.players.findPlayerByName("Mara")).toMatchObject({ hasLogin: false });
-    expect(removeLogin(deps, me, mara.session.playerId)).toEqual({ ok: false, reason: "forbidden" });
-    expect(removeLogin(deps, me, "nope")).toEqual({ ok: false, reason: "not-found" });
-  });
-});

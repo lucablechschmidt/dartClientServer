@@ -284,19 +284,6 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   log("reset: A logs in with the new password");
 }
 
-// Delete B's login (second tap confirms): B is logged out but stays as a player
-{
-  await page.goto(`${base}/account`, { waitUntil: "networkidle" });
-  const rowB = page.getByRole("listitem").filter({ hasText: `B${stamp}` });
-  await rowB.getByRole("button", { name: "Login löschen" }).click();
-  await rowB.getByRole("button", { name: "Wirklich? Nochmal tippen." }).click();
-  await rowB.getByText("ohne Login").waitFor({ timeout: 5000 });
-  await contexts[`B${stamp}`].page.goto(`${base}/players`, { waitUntil: "networkidle" });
-  expect(contexts[`B${stamp}`].page.url().includes("/login"), "B's session ended with the login");
-  await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
-  expect((await page.getByRole("button", { name: `B${stamp} auswählen` }).count()) === 1, "B still selectable as a player");
-  log("login removed, player kept");
-}
 
 // 404: unknown match shows the not-found page with a link home
 await page.goto(`${base}/match/does-not-exist`, { waitUntil: "networkidle" });

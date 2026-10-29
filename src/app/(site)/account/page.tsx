@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { AccountScreen } from "@/components/screens/account-screen";
 import { de } from "@/i18n/de";
 import { changePasswordAction, renameSelfAction } from "@/server/account-actions";
-import { createPasswordInviteAction, createRegisterInviteAction, promoteGuestAction, removeLoginAction } from "@/server/admin-actions";
+import { createPasswordInviteAction, createRegisterInviteAction, promoteGuestAction } from "@/server/admin-actions";
 import { logoutAction } from "@/server/auth-actions";
 import { deletePlayerAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
@@ -21,7 +21,6 @@ async function Account() {
       admin={{
         onCreateInvite: createRegisterInviteAction,
         onCreatePasswordInvite: createPasswordInviteAction,
-        onRemoveLogin: removeLoginAction,
         onDeletePlayer: deletePlayerAction,
         onPromoteGuest: promoteGuestAction,
       }}

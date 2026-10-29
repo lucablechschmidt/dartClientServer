@@ -20,7 +20,6 @@ type Props = {
   admin: {
     onCreateInvite: () => Promise<InviteLink>;
     onCreatePasswordInvite: (playerId: string) => Promise<InviteLink | null>;
-    onRemoveLogin: (playerId: string) => Promise<PlayerResult>;
     onDeletePlayer: (formData: FormData) => Promise<PlayerResult>;
     onPromoteGuest: (playerId: string) => Promise<PlayerResult>;
   };
@@ -39,7 +38,6 @@ export function AccountScreen({ session, players, texts, onRename, onChangePassw
             players={players.filter((p) => !isGuest(p))}
             texts={texts.account}
             onCreatePasswordInvite={admin.onCreatePasswordInvite}
-            onRemoveLogin={admin.onRemoveLogin}
             onDeletePlayer={admin.onDeletePlayer}
           />
           <GuestsAdminSection guests={players.filter(isGuest)} texts={texts.account} onPromoteGuest={admin.onPromoteGuest} />

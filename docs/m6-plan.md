@@ -42,7 +42,7 @@ Fehlt: ein automatischer Nachweis dafür (heute nur `scripts/smoke-match.mjs` al
 
 **Dateien**
 
-- `playwright.config.ts`, `e2e/` mit `fixtures.ts` (Login als Admin, Einladung einlösen in neuem Kontext, Gast anlegen), `e2e/match.spec.ts` (heutiger Smoke-Durchlauf: Setup, 180, Bust, Undo über den Spielerwechsel, Reload, Checkout, Sieg, Undo vom Sieg, Restart), `e2e/auth.spec.ts` (Login, Einladung A/C/D/E, Reset, Login löschen, Logout, Rate-Limit), `e2e/guests.spec.ts`, `e2e/devices.spec.ts` (M4: zwei Kontexte, Sperre, SSE), `e2e/legs.spec.ts` (M5: Best-of-3, Platzierungen), `e2e/offline.spec.ts` (§5).
+- `playwright.config.ts`, `e2e/` mit `fixtures.ts` (Login als Admin, Einladung einlösen in neuem Kontext, Gast anlegen), `e2e/match.spec.ts` (heutiger Smoke-Durchlauf: Setup, 180, Bust, Undo über den Spielerwechsel, Reload, Checkout, Sieg, Undo vom Sieg, Restart), `e2e/auth.spec.ts` (Login, Einladung A/C/D/E, Reset, Logout, Rate-Limit), `e2e/guests.spec.ts`, `e2e/devices.spec.ts` (M4: zwei Kontexte, Sperre, SSE), `e2e/legs.spec.ts` (M5: Best-of-3, Platzierungen), `e2e/offline.spec.ts` (§5).
 - `package.json`: `test:e2e`, `test:e2e:ui`; `README.md` Abschnitt Testen.
 - `scripts/smoke-match.mjs` und `scripts/screenshots.mjs` entfallen; der Layout-Check wird `e2e/layout.spec.ts` (fünf Viewports, hell und dunkel, kein Scrollen auf dem Zählscreen).
 - **Commit:** „M6: Playwright-Tests statt Smoke-Skripte“
