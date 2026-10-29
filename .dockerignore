@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+data
+Legacy
+docs
+coverage
+screenshots
+*.png
+.env
+.env.*
+!.env.example

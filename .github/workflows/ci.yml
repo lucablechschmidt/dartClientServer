@@ -1,0 +1,25 @@
+# For the move to GitHub (architecture.md E15): the same call as in .gitlab-ci.yml.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+      - run: ./scripts/ci.sh
+        env:
+          NPM_CACHE: .npm
+          SMOKE_OUT: ci-screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: ci-screenshots/

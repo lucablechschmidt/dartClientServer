@@ -1,0 +1,25 @@
+# Runs on the Pi under ~/darts. The image arrives via `docker load` from scripts/deploy.sh.
+# Only Caddy on 127.0.0.1:8080 is exposed; Tailscale Funnel forwards there (architecture.md §4).
+services:
+  app:
+    image: darts-app:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_PATH: /data/darts.db
+      ADMIN_USER: ${ADMIN_USER:?set in .env}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?set in .env}
+      APP_URL: ${APP_URL:?set in .env}
+    volumes:
+      - ./data:/data
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro

@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792075575126,
+      "tag": "0000_abnormal_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792673778772,
+      "tag": "0001_high_leo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792674425912,
+      "tag": "0002_far_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792676521911,
+      "tag": "0003_wealthy_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792740278456,
+      "tag": "0004_misty_wallop",
+      "breakpoints": true
+    }
+  ]
+}

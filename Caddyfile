@@ -1,0 +1,19 @@
+# No TLS here: tailscaled (Funnel) on the Pi handles that and passes through to :8080.
+# Since M3 access control is the app's login (session cookie); Caddy is only a proxy.
+{
+	auto_https off
+	admin off
+}
+
+:8080 {
+	encode zstd gzip
+	# Live state (M4): server-sent events must not be buffered
+	@sse path_regexp ^/api/match/[^/]+/events$
+	reverse_proxy @sse app:3000 {
+		header_up X-Forwarded-Proto https
+		flush_interval -1
+	}
+	reverse_proxy app:3000 {
+		header_up X-Forwarded-Proto https
+	}
+}
