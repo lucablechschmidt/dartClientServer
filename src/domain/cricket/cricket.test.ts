@@ -129,6 +129,7 @@ describe("cricket (M7, legacy §4)", () => {
     expect(v.players[0].marks?.find((m) => m.field === 20)).toEqual({ field: 20, marks: 3, closed: false });
     expect(v.hint).toEqual({ kind: "marks", field: 19, missing: 2 });
     expect(v.dartsLeft).toBe(1);
+    expect(v.players[0].average).toBeNull(); // no average in Cricket
   });
 
   it("replay of 3 players equals the sequence of applyDart (random darts)", () => {

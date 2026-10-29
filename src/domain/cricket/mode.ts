@@ -3,7 +3,7 @@ import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId } from "../game/types";
 import { isClosedByDarts, playerOnTurn, popDart, withDart } from "../game/visits";
-import { closedFields, CRICKET_FIELDS, isClosedForAll, tally, type Tally } from "./tally";
+import { closedFields, CRICKET_FIELDS, isClosedForAll, tally } from "./tally";
 
 const finished = (state: LegState) => tally(state).winner !== null;
 const lastOpen = (state: LegState) => {
@@ -24,13 +24,6 @@ function standings(state: LegState): PlayerId[][] {
     else groups.push([p]);
   }
   return groups;
-}
-
-/** Marks per round (marks per closed visit), the usual Cricket average. */
-function marksPerRound(state: LegState, t: Tally, player: PlayerId): number {
-  const visits = state.visits.filter((v, i) => v.playerId === player && (i < state.visits.length - 1 || !lastOpen(state)));
-  const marks = CRICKET_FIELDS.reduce((n, f) => n + t.marks[player][f], 0);
-  return visits.length === 0 ? 0 : marks / visits.length;
 }
 
 /** Cricket (legacy CricketGame, M7): marks on 15–20 and Bull, points from the fourth mark on. */
@@ -59,7 +52,7 @@ export const cricket: GameMode = {
         name: names[id] ?? id,
         score: t.points[id],
         darts: own.reduce((n, v) => n + v.darts.length, 0),
-        average: marksPerRound(state, t, id),
+        average: null,
         isActive: id === active,
         isWinner: id === t.winner,
         slots: slotsOf(visit, id === active, done),

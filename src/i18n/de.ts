@@ -201,6 +201,7 @@ export const de = {
     resignQuestion: "{name} gibt auf? Der Platz bleibt.",
     chooseStarter: "Anwurf: Spieler antippen",
     points: "Punkte",
+    total: "Summe aller Spieler: {n}",
     marks: "Marks",
     modes: modeNames,
     hints: {

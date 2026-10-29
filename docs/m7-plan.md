@@ -44,7 +44,7 @@
 | Undo eines Marks, der Punkte brachte | Punkte zurück, Mark zurück                                             |
 | 3 Spieler, Replay                    | identisch zur Folge von applyDart                                      |
 
-Panel: statt Rest die Punkte, darunter die sieben Felder mit 0–3 Strichen (`/`, `X`, `Ⓧ`), geschlossene Felder in `--cricket-closed`. Hinweiszeile: „20 fehlt noch 1 Mark“ oder leer.
+Panel: statt Rest die Punkte, kein Durchschnitt (29.10.2026), darunter die sieben Felder mit 0–3 Strichen (`/`, `X`, `Ⓧ`), geschlossene Felder in `--cricket-closed`. Hinweiszeile: „20 fehlt noch 1 Mark“ oder leer.
 
 - **Commit:** „M7: Cricket“
 
@@ -68,7 +68,7 @@ Panel: Punkte, darunter „nächste Elimination in N“ (kleinster positiver Abs
 
 ## 5. SplitScore (Test-first)
 
-`src/domain/splitscore/`: alle starten mit 40; Zielfelder 15, 16, Doppel, 17, 18, Triple, 19, 20, Bull; eine Runde pro Ziel; Treffer addieren die Aufnahme, kein Treffer halbiert `(score+1)/2`; nach Bull ist Schluss, Sieger = höchste Punktzahl, Platzierung nach Punkten. Zusätzlich Summe aller Spieler im Spiel zeigen.
+`src/domain/splitscore/`: alle starten mit 40; Zielfelder 15, 16, Doppel, 17, 18, Triple, 19, 20, Bull; eine Runde pro Ziel; Treffer addieren die Aufnahme, kein Treffer halbiert `(score+1)/2`; nach Bull ist Schluss, Sieger = höchste Punktzahl, Platzierung nach Punkten. Zusätzlich die Summe aller Spieler auf dem Sieg-Screen zeigen (29.10.2026; „nur Ziel: 17“ in §9.5 betrifft nur die Hinweiszeile während der Runde).
 
 | Fall                        | Erwartung                                      |
 | --------------------------- | ---------------------------------------------- |

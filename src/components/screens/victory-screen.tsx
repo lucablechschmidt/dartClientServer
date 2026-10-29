@@ -23,6 +23,7 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
   const byId = (id: string) => players.find((p) => p.id === id)!;
   const places = view.ranking.length > 2;
   const scoreLabel = view.board.mode === "x01" ? texts.rest : texts.points;
+  const avg = (a: number | null) => (a === null ? "" : ` · ${texts.average} ${a.toFixed(2)}`);
   const others = view.ranking.filter((id) => id !== winner.id).map(byId);
   const last = view.lastPlayerId ? byId(view.lastPlayerId) : null;
   // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
@@ -31,15 +32,20 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
       <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2">
         <div className="text-center">
           <p className="fluid-text-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
-          <p className="fluid-text-sm text-fg-muted tabular">🎯 {winner.darts} · {texts.average} {winner.average.toFixed(2)}</p>
+          <p className="fluid-text-sm text-fg-muted tabular">
+            🎯 {winner.darts}
+            {avg(winner.average)}
+          </p>
           {view.score && <p className="fluid-text-sm tabular">{scoreLine(view, players.map((p) => p.id), texts)}</p>}
+          {view.board.total !== undefined && <p className="fluid-text-sm tabular">{texts.total.replace("{n}", String(view.board.total))}</p>}
         </div>
         <ul className="flex flex-col gap-1 fluid-text-sm">
           {others.map((p) => (
             <li key={p.id} className="flex justify-between gap-2 tabular">
               <span>{places ? `${view.places[p.id]}. ${p.name}` : p.name}</span>
               <span>
-                {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`} · {texts.average} {p.average.toFixed(2)}
+                {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`}
+                {avg(p.average)}
               </span>
             </li>
           ))}

@@ -14,7 +14,8 @@ export type PlayerPanelData = {
   /** X01: rest; Cricket, Elimination, SplitScore: points. */
   score: number;
   darts: number;
-  average: number;
+  /** X01 3-dart average, points per visit in Elimination and SplitScore; null in Cricket (no average shown). */
+  average: number | null;
   isActive: boolean;
   isWinner: boolean;
   slots: DartSlotView[];
@@ -47,6 +48,8 @@ export type ScoreboardView = {
   canUndo: boolean;
   /** Players best first, for the victory screen. */
   ranking: PlayerId[];
+  /** SplitScore: the points of all players together, shown on the victory screen (legacy getTotalGameScore). */
+  total?: number;
 };
 
 /**

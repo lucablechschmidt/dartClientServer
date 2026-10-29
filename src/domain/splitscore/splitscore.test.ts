@@ -87,6 +87,7 @@ describe("splitscore (M7, legacy §6)", () => {
     s = play(s, S(25), S(0), S(0), ...MISS, S(25), S(0), S(0)); // bull: A and C hit
     expect(splitscore.isLegFinished(s)).toBe(true);
     expect(splitscore.standings(s)).toEqual([[A, C], [B]]);
+    expect(splitscore.board(s, {}).total).toBe(26 + 1 + 26); // all at 1 after eight rounds without a hit; A and C +25 at bull, B stays at 1
     expect(splitscore.applyDart(s, S(1))).toEqual({ ok: false, reason: "leg-finished" });
   });
 

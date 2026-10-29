@@ -38,10 +38,12 @@ export function PlayerPanel({ player, size = "large", texts }: Props) {
           <span aria-hidden="true">🎯</span>
           {player.darts}
         </span>
-        <span aria-label={texts.average} className="flex items-center gap-1.5">
-          <CircleSlashIcon className="size-icon-inline" />
-          {fmt(player.average)}
-        </span>
+        {player.average !== null && (
+          <span aria-label={texts.average} className="flex items-center gap-1.5">
+            <CircleSlashIcon className="size-icon-inline" />
+            {fmt(player.average)}
+          </span>
+        )}
       </div>
       <DartSlots slots={player.slots} isBust={player.isBust} label={texts.visit} />
       {player.marks && <CricketMarks marks={player.marks} bull={texts.bull ?? "Bull"} label={texts.marks ?? ""} />}

@@ -415,6 +415,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   }
   await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
   expect((await page.getByText("Punkte 1 ·").count()) === 1, "splitscore: B halved nine times down to 1");
+  expect((await page.getByText(/^Summe aller Spieler: \d+$/).count()) === 1, "splitscore: victory screen shows the sum of all players");
   log("splitscore ok");
 
   await page.goto(`${base}/`, { waitUntil: "networkidle" });

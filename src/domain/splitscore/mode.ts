@@ -83,6 +83,7 @@ export const splitscore: GameMode = {
       hint: r.target && !done ? { kind: "target", target: r.target } : null,
       canUndo: state.visits.length > 0,
       ranking: ranking.flat(),
+      total: Object.values(r.points).reduce((sum, p) => sum + p, 0),
     };
   },
 };
