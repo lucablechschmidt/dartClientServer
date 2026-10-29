@@ -1,4 +1,5 @@
 import { cricket } from "../cricket/mode";
+import { elimination } from "../elimination/mode";
 import { x01 } from "../x01/mode";
 import type { ScoreboardView } from "./board";
 import type { GameMode } from "./mode";
@@ -8,7 +9,7 @@ import type { ApplyError, Dart, LegState, ModeId, PlayerId, PlayOutError, Result
  * Registry of the game modes (M7) and the functions everything outside a mode calls: they look up
  * the leg's mode and delegate. Adding a mode means adding it here, nothing else changes.
  */
-const MODES: Partial<Record<ModeId, GameMode>> = { x01, cricket };
+const MODES: Partial<Record<ModeId, GameMode>> = { x01, cricket, elimination };
 
 export function modeOf(state: Pick<LegState, "mode">): GameMode {
   const mode = MODES[state.mode];
