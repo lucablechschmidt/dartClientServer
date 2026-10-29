@@ -20,8 +20,8 @@ type Props = {
 
 const RULES: readonly Rule[] = ["single", "double", "triple"];
 const SCORES = [501, 401, 301].map((value) => ({ value, label: String(value) }));
-/** Sets and legs arrive in M5; the pills are already there but disabled at 1. */
-const ONE = [{ value: 1, label: "1" }];
+/** Sets and legs as in legacy: 1/3/5, meaning "best of" (the server stores how many win). */
+const BEST_OF = [1, 3, 5].map((value) => ({ value, label: String(value) }));
 const FORM_ID = "new-match";
 
 /**
@@ -35,6 +35,10 @@ export function NewMatchForm({ players, texts, commonTexts, onStart, onAddGuest 
   const [outRule, setOutRule] = useState<Rule>("double");
   const [startScore, setStartScore] = useState(501);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
+  const [sets, setSets] = useState(1);
+  const [legs, setLegs] = useState(1);
+  // E7: sets and legs only with 2 players; with 3+ one leg is played down to all places.
+  const multi = order.length >= 3;
 
   const toggle = (id: string) => setOrder((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
 
@@ -57,10 +61,11 @@ export function NewMatchForm({ players, texts, commonTexts, onStart, onAddGuest 
             <OptionMenu name="outRule" value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outLabels[r] }))} />
           </div>
           <div className="flex flex-wrap items-start justify-center gap-3">
-            <OptionMenu name="setsToWinMatch" title={texts.sets} value={1} onChange={() => {}} options={ONE} disabled />
+            <OptionMenu name="setsToWinMatch" title={texts.sets} value={multi ? 1 : sets} onChange={setSets} options={BEST_OF} disabled={multi} />
             <OptionMenu name="startScore" value={startScore} onChange={setStartScore} options={SCORES} />
-            <OptionMenu name="legsToWinSet" title={texts.legs} value={1} onChange={() => {}} options={ONE} disabled />
+            <OptionMenu name="legsToWinSet" title={texts.legs} value={multi ? 1 : legs} onChange={setLegs} options={BEST_OF} disabled={multi} />
           </div>
+          {multi && <p className="fluid-text-sm text-fg-muted">{texts.setsLegsTwoOnly}</p>}
           <OptionMenu
             name="inputMode"
             title={texts.inputMode}

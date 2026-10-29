@@ -33,29 +33,40 @@ export const currentLeg = (m: MatchState): LegState => m.legs[m.legs.length - 1]
 const withCurrentLeg = (m: MatchState, leg: LegState): MatchState => ({ ...m, legs: [...m.legs.slice(0, -1), leg] });
 const zeros = (players: PlayerId[]) => Object.fromEntries(players.map((p) => [p, 0]));
 
-/** One pass over the legs: set/leg number of every leg (plus the next one) and the score after them. */
+/**
+ * One pass over the legs: set/leg number of every leg (plus the next one) and the score after them.
+ * The legs of a won set stay visible ("Legs 2:1 · Sets 1:0") until the first leg of the next set exists.
+ */
 function walk(m: MatchState): { numbers: LegNumber[]; score: MatchScore } {
   let legs = zeros(m.players);
   const sets = zeros(m.players);
   let setNo = 1;
   let legNo = 1;
+  let setWon = false;
   const numbers: LegNumber[] = [];
+  const startNextSet = () => {
+    legs = zeros(m.players);
+    setNo++;
+    legNo = 1;
+    setWon = false;
+  };
   for (const leg of m.legs) {
+    if (setWon) startNextSet();
     numbers.push({ setNo, legNo });
     const winner = isLegFinished(leg) ? winnerOf(leg) : null;
     if (!winner) continue;
     legs[winner]++;
     if (legs[winner] >= m.format.legsToWinSet) {
       sets[winner]++;
-      legs = zeros(m.players);
-      setNo++;
-      legNo = 1;
+      setWon = true;
     } else {
       legNo++;
     }
   }
+  const score = { legs, sets };
+  if (setWon) startNextSet();
   numbers.push({ setNo, legNo });
-  return { numbers, score: { legs, sets } };
+  return { numbers, score };
 }
 
 /** Set and leg number per leg, in the order of `m.legs`. */

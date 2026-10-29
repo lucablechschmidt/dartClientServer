@@ -70,8 +70,8 @@ Heute ist ein Match genau ein Leg: Sieg = Match zu Ende. Ab M5 besteht ein Match
 ## 5. Zählscreen und Sieg-Screen
 
 - `scoreboard-screen.tsx`: lokale Zustände über `MatchState` statt `LegState`; Leg-Ende ohne Match-Ende zeigt den Leg-Sieg-Screen (`leg-victory-screen.tsx`, §2): ganze Fläche tippbar zum Weiter, nur der Undo-Button reagiert anders; danach startet das nächste Leg mit neuem Anwurf. Während `playOut` steht statt Abbrechen/Hinweis ein Button „Aufgeben“ (Rückfrage über `ConfirmSheet`). Kopfzeile zeigt bei Sets/Legs den Stand „Legs 1:0 · Sets 0:0“ an Stelle der Regel-Zeile, wenn Platz fehlt.
-- `player-panel.tsx`: Legs/Sets-Zähler klein unter dem Namen (nur wenn > 1 konfiguriert); bei 3+ Spielern Platzierung „1.“ statt Rest, sobald ein Spieler ausgecheckt hat; ausgeschiedene Panels gedimmt. Tipp auf ein Panel vor dem ersten Dart des Legs → `setStarter` (nur wenn `canEnter`).
-- `victory-screen.tsx`: Ergebnis in Legs/Sets, bei 3+ Spielern die Platzierungstabelle; Buttons wie heute, bei 3+ Spielern ohne `playOut` zusätzlich „{Name} spielt zu Ende“.
+- `player-panel.tsx`: bei 3+ Spielern Platzierung „1.“ statt Rest, sobald ein Spieler ausgecheckt hat; ausgeschiedene Panels gedimmt. Der Legs/Sets-Stand steht nur in der Kopfzeile (§9.4), nicht zusätzlich im Panel (umgesetzt 29.10.2026). Tipp auf ein Panel vor dem ersten Dart des Legs → `setStarter` (nur wenn `canEnter`).
+- `victory-screen.tsx` (im neuen `body`-Bereich von `ScoreGrid`, der die ganze Fläche unter der Kopfzeile bekommt): Ergebnis in Legs/Sets (die Legs eines gewonnenen Sets bleiben bis zum ersten Leg des nächsten Sets stehen), bei 3+ Spielern die Platzierungstabelle; Buttons wie heute, bei 3+ Spielern ohne `playOut` zusätzlich „{Name} spielt zu Ende“.
 - `new-match-form.tsx`: Pillen Sets und Legs aktiv (1/3/5), deaktiviert ab 3 gewählten Spielern mit Hinweistext.
 - Tests: `player-panel`-Fixtures für Platzierung und Legs-Zähler; `new-match-form.test.tsx` für die Sperre ab 3 Spielern.
 - **Commit:** „M5: Zählscreen mit Legs, Sets und Platzierungen“

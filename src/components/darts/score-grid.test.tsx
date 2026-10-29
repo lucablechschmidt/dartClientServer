@@ -13,4 +13,9 @@ describe("ScoreGrid", () => {
     expect(slots).toEqual(["header", "panels", "hint", "keypad"]);
     expect(screen.getByText("K")).toBeInTheDocument();
   });
+  it("body variant: one area below the header (victory screen)", () => {
+    const { container } = render(<ScoreGrid header="H" body="B" />);
+    const slots = [...container.querySelectorAll("[data-slot]")].map((el) => el.getAttribute("data-slot"));
+    expect(slots).toEqual(["header", "body"]);
+  });
 });

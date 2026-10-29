@@ -127,6 +127,7 @@ export const de = {
     outRule: "Out",
     sets: "Sets",
     legs: "Legs",
+    setsLegsTwoOnly: "Sets und Legs nur bei 2 Spielern",
     rules: {
       single: "Single",
       double: "Double",
@@ -180,6 +181,15 @@ export const de = {
     cancelBack: "Zurück",
     closed: "Spiel beendet",
     turnOf: "{name} ist dran",
+    legs: "Legs",
+    sets: "Sets",
+    legWon: "Leg für {name}",
+    tapToContinue: "Tippen, um weiterzuspielen",
+    undoLastDart: "Letzten Wurf rückgängig",
+    playOut: "{name} spielt zu Ende",
+    resign: "Aufgeben",
+    resignQuestion: "{name} gibt auf? Der Platz bleibt.",
+    chooseStarter: "Anwurf: Spieler antippen",
     errors: {
       "not-found": "Spiel nicht gefunden.",
       "leg-finished": "Das Leg ist schon beendet.",

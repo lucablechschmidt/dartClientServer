@@ -56,4 +56,19 @@ describe("NewMatchForm", () => {
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Diesen Namen gibt es schon."));
     expect(screen.getByPlaceholderText("Name des Gastes")).toBeInTheDocument();
   });
+
+  it("sets and legs are choosable with 2 players and locked to 1 from 3 players on (E7)", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<NewMatchForm players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: true as const, id: "x" })} />);
+    const legs = () => container.querySelector('input[name="legsToWinSet"]');
+    await user.click(screen.getByRole("button", { name: "Moschusochse auswählen" }));
+    await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
+    await user.click(screen.getByRole("button", { name: "Legs: 1" }));
+    await user.click(screen.getByRole("button", { name: "3" }));
+    expect(legs()).toHaveValue("3");
+    await user.click(screen.getByRole("button", { name: "Gecko auswählen" }));
+    expect(legs()).toHaveValue("1");
+    expect(screen.getByRole("button", { name: "Legs: 1" })).toBeDisabled();
+    expect(screen.getByText(de.newGame.setsLegsTwoOnly)).toBeInTheDocument();
+  });
 });

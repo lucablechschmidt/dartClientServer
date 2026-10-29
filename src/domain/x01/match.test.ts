@@ -8,6 +8,7 @@ import {
   matchStatus,
   matchWinner,
   newMatch,
+  nextLegNumber,
   setLegStarter,
   undoMatchDart,
   undoMatchVisit,
@@ -70,7 +71,9 @@ describe("legs and sets (2 players)", () => {
   it("3 sets × 3 legs: set counter, legs reset per set, match only after 2 sets", () => {
     let m = newMatch([A, B], rules, { legsToWinSet: 2, setsToWinMatch: 2 });
     m = winLeg(winLeg(m, A), A);
-    expect(matchScore(m)).toEqual({ legs: { [A]: 0, [B]: 0 }, sets: { [A]: 1, [B]: 0 } });
+    // the won set's legs stay visible until the next set starts
+    expect(matchScore(m)).toEqual({ legs: { [A]: 2, [B]: 0 }, sets: { [A]: 1, [B]: 0 } });
+    expect(nextLegNumber(m)).toEqual({ setNo: 2, legNo: 1 });
     expect(matchStatus(m)).toBe("leg-finished");
     m = winLeg(winLeg(winLeg(m, B), B), A);
     expect(matchScore(m)).toEqual({ legs: { [A]: 1, [B]: 0 }, sets: { [A]: 1, [B]: 1 } });

@@ -1,44 +1,62 @@
 import Link from "next/link";
-import type { ScoreboardView } from "@/domain/x01";
+import type { MatchBoardView } from "@/domain/x01";
 import type { Texts } from "@/i18n/de";
+import { scoreLine } from "./leg-victory-screen";
 
 type Props = {
-  board: ScoreboardView;
+  view: MatchBoardView;
   texts: Texts["game"];
   onUndoWinningDart: () => void;
   onRestart: () => Promise<void>;
+  /** M5 plan §9.2: set when the last player may still play out (3+ players, this device may enter for him). */
+  onPlayOut: (() => void) | null;
   pending: boolean;
 };
 
 const button = "min-h-touch w-full rounded-xl px-4 font-medium";
 
-/** Port of ClassicGameVictoryView. */
-export function VictoryScreen({ board, texts, onUndoWinningDart, onRestart, pending }: Props) {
-  const winner = board.players.find((p) => p.id === board.winnerId);
+/** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
+export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending }: Props) {
+  const players = view.board.players;
+  const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
-  const others = board.ranking.filter((id) => id !== winner.id).map((id) => board.players.find((p) => p.id === id)!);
+  const byId = (id: string) => players.find((p) => p.id === id)!;
+  const places = view.ranking.length > 2;
+  const others = view.ranking.filter((id) => id !== winner.id).map(byId);
+  const last = view.lastPlayerId ? byId(view.lastPlayerId) : null;
+  // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col justify-center gap-6 px-4">
-      <div className="text-center">
-        <p className="fluid-text-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
-        <p className="fluid-text-sm text-fg-muted tabular">🎯 {winner.darts} · {texts.average} {winner.average.toFixed(2)}</p>
-      </div>
-      <ul className="flex flex-col gap-1 fluid-text-sm">
-        {others.map((p) => (
-          <li key={p.id} className="flex justify-between tabular">
-            <span>{p.name}</span>
-            <span>{texts.rest} {p.rest} · {texts.average} {p.average.toFixed(2)}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="flex flex-col gap-2">
-        <button type="button" onClick={onUndoWinningDart} disabled={pending} className={`${button} border border-frame-fg`}>
-          {texts.undoWinningDart}
-        </button>
-        <form action={onRestart}>
-          <button type="submit" disabled={pending} className={`${button} bg-accent text-white`}>{texts.restart}</button>
-        </form>
-        <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>{texts.home}</Link>
+    <div className="flex h-full flex-col overflow-y-auto">
+      <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2">
+        <div className="text-center">
+          <p className="fluid-text-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
+          <p className="fluid-text-sm text-fg-muted tabular">🎯 {winner.darts} · {texts.average} {winner.average.toFixed(2)}</p>
+          {view.score && <p className="fluid-text-sm tabular">{scoreLine(view, players.map((p) => p.id), texts)}</p>}
+        </div>
+        <ul className="flex flex-col gap-1 fluid-text-sm">
+          {others.map((p) => (
+            <li key={p.id} className="flex justify-between gap-2 tabular">
+              <span>{places ? `${view.ranking.indexOf(p.id) + 1}. ${p.name}` : p.name}</span>
+              <span>
+                {p.isOut ? `🎯 ${p.darts}` : `${texts.rest} ${p.rest}`} · {texts.average} {p.average.toFixed(2)}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-col gap-2">
+          <button type="button" onClick={onUndoWinningDart} disabled={pending} className={`${button} border border-frame-fg`}>
+            {texts.undoWinningDart}
+          </button>
+          {onPlayOut && last && !view.playOut && (
+            <button type="button" onClick={onPlayOut} disabled={pending} className={`${button} border border-frame-fg`}>
+              {texts.playOut.replace("{name}", last.name)}
+            </button>
+          )}
+          <form action={onRestart}>
+            <button type="submit" disabled={pending} className={`${button} bg-accent text-white`}>{texts.restart}</button>
+          </form>
+          <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>{texts.home}</Link>
+        </div>
       </div>
     </div>
   );

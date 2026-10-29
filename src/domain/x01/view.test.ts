@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyDart, newLeg } from ".";
-import { projectScoreboard } from "./view";
+import { applyDart, applyMatchDart, newLeg, newMatch, type Dart, type MatchState } from ".";
+import { projectMatch, projectScoreboard } from "./view";
 
 const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;
 const names = { a: "Casey", b: "Sam" };
@@ -56,5 +56,44 @@ describe("projectScoreboard", () => {
     expect(v.dartsLeft).toBe(0);
     expect(v.checkoutHint).toBeNull();
     expect(v.players[0].slots[1].isCurrent).toBe(false);
+  });
+});
+
+describe("projectMatch (M5)", () => {
+  const short = { startScore: 40, inRule: "single", outRule: "single" } as const;
+  const OUT = { field: 20, type: "double" } as const;
+  const MISS = { field: 0, type: "single" } as const;
+  const throwAll = (m: MatchState, ...darts: Dart[]) =>
+    darts.reduce((s, d) => {
+      const r = applyMatchDart(s, d);
+      if (!r.ok) throw new Error(r.reason);
+      return r.value;
+    }, m);
+
+  it("score only when more than one leg or set is played; between legs the coming leg with its starter", () => {
+    expect(projectMatch(newMatch(["a", "b"], short, { legsToWinSet: 1, setsToWinMatch: 1 }), names).score).toBeNull();
+    const m = throwAll(newMatch(["a", "b"], short, { legsToWinSet: 2, setsToWinMatch: 1 }), OUT);
+    const finished = projectMatch(m, names);
+    expect(finished.progress).toBe("leg-finished");
+    expect(finished.legWinnerId).toBe("a");
+    expect(finished.score).toEqual({ legs: { a: 1, b: 0 }, sets: null });
+    const coming = projectMatch(m, names, true);
+    expect(coming.board.activePlayerId).toBe("b");
+    expect(coming.board.players[0].rest).toBe(40);
+    expect(coming.canChooseStarter).toBe(true);
+  });
+
+  it("3 players: places on the panels, out players marked, last player can play out", () => {
+    let m = throwAll(newMatch(["a", "b", "c"], short, { legsToWinSet: 1, setsToWinMatch: 1 }), OUT);
+    let v = projectMatch(m, names);
+    expect(v.board.players.map((p) => [p.placement, p.isOut])).toEqual([[1, true], [null, false], [null, false]]);
+    expect(v.lastPlayerId).toBeNull();
+    m = throwAll(m, MISS, MISS, MISS, OUT); // b misses, c out
+    v = projectMatch(m, names);
+    expect(v.progress).toBe("finished");
+    expect(v.ranking).toEqual(["a", "c", "b"]);
+    expect(v.lastPlayerId).toBe("b");
+    expect(v.board.players[1].placement).toBeNull(); // the last one shows his rest
+    expect(v.canChooseStarter).toBe(false);
   });
 });

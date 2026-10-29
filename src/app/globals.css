@@ -147,6 +147,7 @@
   .score-grid > [data-slot="panels"] { grid-area: panels; min-height: 0; }
   .score-grid > [data-slot="hint"]   { grid-area: hint; }
   .score-grid > [data-slot="keypad"] { grid-area: keypad; min-height: 0; }
+  .score-grid > [data-slot="body"]   { grid-row: 2 / -1; grid-column: 1 / -1; min-height: 0; }
 
   /* Header row: back button, centred title, equally wide right slot (ScreenHeader) */
   .header-grid {
