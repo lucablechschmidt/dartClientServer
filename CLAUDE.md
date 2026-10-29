@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-GitLab project `dart`: a web port ("Darts Scorer Web", Next.js + SQLite on a
+GitHub repo `lucablechschmidt/dartClientServer` (moved from GitLab, E15): a web port ("Darts Scorer Web", Next.js + SQLite on a
 Raspberry Pi) of an earlier iOS dart-scoring app whose Swift source lives in
 `Legacy/Dart/` (read-only reference, never edit). The owner wrote the Swift app
 and is the end user. Read the docs before touching anything:
 
-- `docs/architecture.md`: stack, network path, data model (§6), decisions (§10)
-- `docs/project.md`: milestones M0–M11 in execution order, with checklists and DoD (old numbers mapped at the top); tick items off
+- `docs/architecture.md`: stack, network path, data model (§6), security (§10), decisions (§11)
+- `docs/project.md`: milestones M0–M12 in execution order, with checklists and DoD (old numbers mapped at the top); tick items off
 - `docs/legacy-analysis.md`: the Swift rules, screens and stats the port must match
 - `docs/m*-plan.md`: step-by-step plan per milestone (every milestone gets one before code), finished plans move to `docs/archive/`; numbered in execution order: M4 devices → M5 X01 complete → M6 robustness → M7 other modes → M8 statistics → M9 tournaments → M10 achievements → M11 sound, comfort → M12 operations incl. ingress/Caddy check (deliberately last)
 - `docs/theme.md`: color tokens (light/dark) from the legacy assets and the layout rules
@@ -42,7 +42,7 @@ npm run db:generate              # drizzle-kit migration after editing src/db/sc
 node scripts/screenshots.mjs DIR # layout check, needs `npx next dev --port 3100`
 node scripts/smoke-match.mjs DIR # browser flow against port 3100 (BASE_URL/BASIC_AUTH env for the container)
 ./scripts/smoke.sh               # production build + standalone on :3100 + browser flow, screenshots → docs/screenshots
-./scripts/ci.sh                  # everything the CI runs (install, lint, typecheck, test, smoke); .gitlab-ci.yml only calls this
+./scripts/ci.sh                  # everything the CI runs (install, lint, typecheck, test, smoke); .github/workflows/ci.yml only calls this
 ./scripts/deploy.sh              # buildx arm64 → ssh pi docker load → compose up (see README), only when asked
 ```
 

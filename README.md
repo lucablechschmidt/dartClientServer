@@ -96,7 +96,7 @@ npm run typecheck         # TypeScript without build
 
 **Layout check** of the scoring screen in five viewports, light and dark: `npx next dev --port 3100 &` then `node scripts/screenshots.mjs ./screenshots`. It reports whether a page scrolls (it must not).
 
-**CI:** `.gitlab-ci.yml` (and `.github/workflows/ci.yml` for the planned move to GitHub) only call `scripts/ci.sh`. The pipeline fails below the coverage thresholds, and the screenshots are attached as an artifact.
+**CI:** `.github/workflows/ci.yml` only calls `scripts/ci.sh`. The pipeline fails below the coverage thresholds, and the screenshots are attached as an artifact.
 
 ## Deploying to the Pi
 
@@ -277,7 +277,7 @@ flowchart LR
 | Develop | Mac | `npm run dev` with `.env` (Configuration) |
 | Unit and UI tests | Mac and CI | `npm test`, `npm run test:coverage` |
 | Browser run | Mac and CI | `./scripts/smoke.sh` |
-| CI | GitLab now, GitHub after the move | the pipeline file only calls `scripts/ci.sh` (E15) |
+| CI | GitHub Actions | the pipeline file only calls `scripts/ci.sh` (E15) |
 | Build the image | Mac, never on the Pi | `Dockerfile`: dependencies → build → slim runtime image |
 | Ship | Mac → Pi over SSH | `./scripts/deploy.sh`, only when asked; rollback via `IMAGE_TAG` |
 | Database schema | generated on the Mac, applied on the Pi | edit `src/db/schema.ts`, `npm run db:generate`; the migration runs on the next start |

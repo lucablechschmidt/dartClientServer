@@ -1,4 +1,4 @@
-# For the move to GitHub (architecture.md E15): the same call as in .gitlab-ci.yml.
+# Just a call to scripts/ci.sh (architecture.md E15).
 name: ci
 on:
   push:

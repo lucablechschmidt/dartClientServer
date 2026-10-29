@@ -1,7 +1,7 @@
 # M4-Plan – Eingabe auf mehreren Geräten
 
 > Detailplan zu `project.md` M4 und Entscheidung E13 (`architecture.md` §11). Braucht die Sessions aus M3. Reihenfolge: Schema und Rechte mit Tests zuerst, dann Spielübersicht, dann Live-Stand, zuletzt Setup-Pille und Smoke-Test. Jeder grüne Schritt ist ein Commit.
-> Stand: umgesetzt am 23.10.2026 (Schritte 3–7 bis auf Deploy und DoD). Offene Fragen in §9 mit Defaults umgesetzt.
+> Stand: umgesetzt am 23.10.2026, deployt und DoD (mit Rate-Limit-Probe) am Handy abgenommen. Offene Fragen in §9 mit Defaults umgesetzt.
 > Luca: Deine Aufgaben stehen in §0, die offenen Fragen in §9.
 
 ---

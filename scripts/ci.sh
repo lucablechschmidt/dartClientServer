@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# All check steps in one script (architecture.md E15): .gitlab-ci.yml and .github/workflows/ci.yml
-# only call this script, so the content moves along when switching platforms.
+# All check steps in one script (architecture.md E15): .github/workflows/ci.yml
+# only calls this script, so the content moves along when switching platforms.
 # Locally: ./scripts/ci.sh   (matches what has to run before every deploy)
 set -euo pipefail
 cd "$(dirname "$0")/.."

@@ -26,9 +26,9 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 |---|---|---|---|
 | M0 | Vorbereitung und Analyse | fertig | M0 |
 | M1 | Vertikaler Durchstich | fertig, DoD am Handy geprüft | M1 |
-| M2 | Gastspieler | fertig, DoD am Handy offen | M1b |
-| M3 | Accounts per Einladung | fertig, deployt, DoD mit zwei Handys offen | M4 |
-| M4 | Eingabe auf mehreren Geräten | umgesetzt, Deploy und DoD offen (mit Rate-Limit-Probe) | M4b |
+| M2 | Gastspieler | fertig, DoD am Handy geprüft | M1b |
+| M3 | Accounts per Einladung | fertig, deployt, DoD mit zwei Handys geprüft | M4 |
+| M4 | Eingabe auf mehreren Geräten | fertig, deployt, DoD mit Rate-Limit-Probe geprüft | M4b |
 | M5 | X01 vollständig | geplant | M2 |
 | M6 | Robustheit am Board | geplant (lokales Zählen schon da) | M3 |
 | M7 | Cricket, Elimination, SplitScore | geplant | M3b |
@@ -144,7 +144,7 @@ Detailplan: `docs/archive/m3-plan.md`.
 
 **Ziel:** Beim Start entscheidet man, ob ein Handy alle Darts eingibt (Default) oder jeder Spieler auf seinem eigenen Gerät (E13).
 
-Detailplan: `docs/m4-plan.md`.
+Detailplan: `docs/archive/m4-plan.md`.
 
 - [x] Schema: `match.input_mode` ('single' | 'per-player'), Default 'single'; `match.host_player_id` (Spieler, dessen Gerät das Match gestartet hat)
 - [x] Setup: Pille „Eingabe: ein Handy / jeder selbst“ neben den anderen Optionen, Wert geht mit dem Formular
