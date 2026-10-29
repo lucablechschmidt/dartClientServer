@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
-import { applyMatchDart, newMatch, type Dart, type MatchState } from "@/domain/x01";
+import { applyMatchDart, newMatch, type Dart, type MatchState } from "@/domain/game";
 import { restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
 
 const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;

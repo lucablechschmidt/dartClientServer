@@ -1,6 +1,6 @@
 import { and, asc, eq, gt, isNotNull, isNull, lte, notInArray, or, sql } from "drizzle-orm";
 import type { FieldHits } from "@/domain/stats/field-hits";
-import type { PlayerId } from "@/domain/x01";
+import type { PlayerId } from "@/domain/game";
 import type { Db } from "./client";
 import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
 import { matchPlayers, playerFieldHits, players, type PlayerRow } from "./schema";

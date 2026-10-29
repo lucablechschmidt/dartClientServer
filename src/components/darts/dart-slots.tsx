@@ -1,4 +1,4 @@
-import type { DartSlotView } from "@/domain/x01";
+import type { DartSlotView } from "@/domain/game";
 
 /**
  * The three slots of a visit (port of DartScoreView): boxes with a black frame,

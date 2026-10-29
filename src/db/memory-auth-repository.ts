@@ -1,4 +1,4 @@
-import type { PlayerId } from "@/domain/x01";
+import type { PlayerId } from "@/domain/game";
 import type { AuthRepository, InviteRecord, SessionRecord } from "./auth-repository";
 
 /** For tests: same semantics as SQLite, in memory only. There is no cascade on player deletion here. */

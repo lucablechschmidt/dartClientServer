@@ -1,10 +1,4 @@
-export * from "./types";
-export { dartScore, visitScore, isDart, dartLabel } from "./scoring";
+/** X01 rules (legacy ClassicGame); used from outside through the game modes (`@/domain/game`). */
+export { x01 } from "./mode";
 export { isValidDart } from "./rules";
-export { applyDart, undoDart, playOutUndo, startPlayOut, resign } from "./apply";
-export { newLeg } from "./state";
-export { replay, replayMatch, type StoredLeg } from "./replay";
-export * from "./match";
-export * from "./selectors";
-export * from "./view";
-export * from "./permissions";
+export { checkoutOrder, placements, scoreOf } from "./selectors";

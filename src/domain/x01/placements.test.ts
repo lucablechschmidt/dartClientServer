@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { applyDart, resign, startPlayOut, undoDart } from "./apply";
-import { newLeg } from "./state";
+import { newLeg } from "../game/state";
 import { checkoutOrder, currentPlayer, isLegFinished, placements, placementsFixed, scoreOf, winnerOf } from "./selectors";
-import type { Dart, LegState, Rules } from "./types";
+import type { Dart, LegState, Rules } from "../game/types";
 
 const [A, B, C, D] = ["a", "b", "c", "d"];
 /** Short legs: 40 single-out, so D20 or S20 S20 checks out. */

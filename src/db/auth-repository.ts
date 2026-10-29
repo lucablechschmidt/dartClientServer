@@ -1,4 +1,4 @@
-import type { PlayerId } from "@/domain/x01";
+import type { PlayerId } from "@/domain/game";
 
 /**
  * Sessions and invites (M3, E10). Separate from MatchRepository because only the auth service

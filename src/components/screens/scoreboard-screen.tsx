@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { CheckoutHint } from "@/components/darts/checkout-hint";
+import { hintText } from "@/components/darts/hint-text";
 import { Keypad } from "@/components/darts/keypad";
 import { PlayerPanels } from "@/components/darts/player-panels";
 import { ScoreGrid } from "@/components/darts/score-grid";
@@ -11,7 +12,7 @@ import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { TextButton } from "@/components/ui/form-controls";
 import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type PlayerId } from "@/domain/x01";
+import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type PlayerId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
 import { VictoryScreen } from "./victory-screen";
@@ -151,7 +152,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
         hint={
           <div className="flex items-center gap-2 px-3">
             <div className="flex-1">
-              <CheckoutHint hint={turnHint ?? board.checkoutHint} />
+              <CheckoutHint hint={turnHint ?? hintText(board.hint, texts)} />
             </div>
             {view.playOut && playOutOk && (
               <TextButton tone="danger" onClick={() => setAsking("resign")}>

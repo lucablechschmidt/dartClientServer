@@ -1,7 +1,6 @@
-import { applyDart, playOutUndo, undoDart } from "./apply";
-import { currentPlayer, isLegFinished, openVisit, winnerOf } from "./selectors";
+import { applyDart, currentPlayer, isLegFinished, openVisit, playOutUndo, undoDart, winnerOf } from "./modes";
 import { newLeg } from "./state";
-import type { ApplyError, Dart, LegState, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
+import type { ApplyError, Dart, LegState, ModeId, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
 
 /**
  * A match is a list of legs (M5). `LegState` stays the unit that applyDart/undoDart know; legs,
@@ -14,6 +13,7 @@ import type { ApplyError, Dart, LegState, PlayerId, Result, Rules, StarterError,
 export type MatchFormat = { legsToWinSet: number; setsToWinMatch: number };
 
 export type MatchState = {
+  mode: ModeId;
   players: PlayerId[];
   rules: Rules;
   format: MatchFormat;
@@ -25,8 +25,8 @@ export type LegNumber = { setNo: number; legNo: number };
 export type MatchScore = { legs: Record<PlayerId, number>; sets: Record<PlayerId, number> };
 export type MatchProgress = "running" | "leg-finished" | "finished";
 
-export function newMatch(players: PlayerId[], rules: Rules, format: MatchFormat, starter = 0): MatchState {
-  return { players: [...players], rules, format, legs: [newLeg(players, rules, starter)] };
+export function newMatch(players: PlayerId[], rules: Rules, format: MatchFormat, starter = 0, mode: ModeId = "x01"): MatchState {
+  return { mode, players: [...players], rules, format, legs: [newLeg(players, rules, starter, mode)] };
 }
 
 export const currentLeg = (m: MatchState): LegState => m.legs[m.legs.length - 1];
@@ -98,7 +98,7 @@ export function matchCurrentPlayer(m: MatchState): PlayerId {
 
 const startNextLeg = (m: MatchState, starter = nextStarter(m)): MatchState => ({
   ...m,
-  legs: [...m.legs, newLeg(m.players, m.rules, starter)],
+  legs: [...m.legs, newLeg(m.players, m.rules, starter, m.mode)],
 });
 
 /** Where the next closed visit goes (E11 commit position): after a finished leg, seq 0 of the next one. */

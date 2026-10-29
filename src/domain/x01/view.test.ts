@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { applyDart, applyMatchDart, newLeg, newMatch, type Dart, type MatchState } from ".";
-import { projectMatch, projectScoreboard } from "./view";
+import { applyMatchDart, newLeg, newMatch, projectMatch, type Dart, type MatchState } from "../game";
+import { applyDart } from "./apply";
+import { projectScoreboard } from "./view";
 
 const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;
 const names = { a: "Casey", b: "Sam" };
@@ -12,7 +13,7 @@ describe("projectScoreboard", () => {
     expect(v.players[1].isActive).toBe(true);
     expect(v.players[1].slots.map((s) => s.isCurrent)).toEqual([true, false, false]);
     expect(v.players[0].slots.map((s) => s.isCurrent)).toEqual([false, false, false]);
-    expect(v.checkoutHint).toBeNull();
+    expect(v.hint).toBeNull();
     expect(v.canUndo).toBe(false);
     expect(v.dartsLeft).toBe(3);
   });
@@ -38,11 +39,11 @@ describe("projectScoreboard", () => {
     }
     // a: 2 visits of 180 → 141, b: 2 visits → 141; a is up with 3 darts
     const v = projectScoreboard(s, names);
-    expect(v.players[0].rest).toBe(141);
+    expect(v.players[0].score).toBe(141);
     expect(v.activePlayerId).toBe("a");
     expect(v.players[0].slots.map((x) => x.label)).toEqual(["T20", "T20", "T20"].map(() => null));
     expect(v.players[1].slots.map((x) => x.label)).toEqual(["T20", "T20", "T20"]);
-    expect(v.checkoutHint).toBe("T20, T19, D12");
+    expect(v.hint).toEqual({ kind: "checkout", text: "T20, T19, D12" });
     expect(v.players[0].average).toBe(180);
   });
 
@@ -54,7 +55,7 @@ describe("projectScoreboard", () => {
     expect(v.winnerId).toBe("a");
     expect(v.players[0].isWinner).toBe(true);
     expect(v.dartsLeft).toBe(0);
-    expect(v.checkoutHint).toBeNull();
+    expect(v.hint).toBeNull();
     expect(v.players[0].slots[1].isCurrent).toBe(false);
   });
 });
@@ -79,7 +80,7 @@ describe("projectMatch (M5)", () => {
     expect(finished.score).toEqual({ legs: { a: 1, b: 0 }, sets: null });
     const coming = projectMatch(m, names, true);
     expect(coming.board.activePlayerId).toBe("b");
-    expect(coming.board.players[0].rest).toBe(40);
+    expect(coming.board.players[0].score).toBe(40);
     expect(coming.canChooseStarter).toBe(true);
   });
 

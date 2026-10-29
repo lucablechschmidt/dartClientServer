@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { MatchBoardView } from "@/domain/x01";
+import type { MatchBoardView } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { scoreLine } from "./leg-victory-screen";
 
@@ -22,6 +22,7 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
   if (!winner) return null;
   const byId = (id: string) => players.find((p) => p.id === id)!;
   const places = view.ranking.length > 2;
+  const scoreLabel = view.board.mode === "x01" ? texts.rest : texts.points;
   const others = view.ranking.filter((id) => id !== winner.id).map(byId);
   const last = view.lastPlayerId ? byId(view.lastPlayerId) : null;
   // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
@@ -36,9 +37,9 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
         <ul className="flex flex-col gap-1 fluid-text-sm">
           {others.map((p) => (
             <li key={p.id} className="flex justify-between gap-2 tabular">
-              <span>{places ? `${view.ranking.indexOf(p.id) + 1}. ${p.name}` : p.name}</span>
+              <span>{places ? `${view.places[p.id]}. ${p.name}` : p.name}</span>
               <span>
-                {p.isOut ? `🎯 ${p.darts}` : `${texts.rest} ${p.rest}`} · {texts.average} {p.average.toFixed(2)}
+                {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`} · {texts.average} {p.average.toFixed(2)}
               </span>
             </li>
           ))}

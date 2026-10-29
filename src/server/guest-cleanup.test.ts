@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { GUEST_LIFETIME_MS } from "@/domain/player";
-import type { Dart } from "@/domain/x01";
+import type { Dart } from "@/domain/game";
 import { memoryDeps } from "./testing";
 import { cleanupGuests } from "./guest-cleanup";
 import { commitVisit, createMatch, loadMatchView } from "./match-service";

@@ -1,4 +1,8 @@
-/** Port of SingleDartsScore / DartThrow / ClassicGame (docs/legacy-analysis.md §1–3). */
+/** Port of SingleDartsScore / DartThrow (docs/legacy-analysis.md §1–3): types shared by all game modes (M7). */
+
+/** The four legacy game modes; the value of `match.mode`. */
+export type ModeId = "x01" | "cricket" | "elimination" | "splitscore";
+export const MODE_IDS: readonly ModeId[] = ["x01", "cricket", "elimination", "splitscore"];
 
 export type PlayerId = string;
 
@@ -20,6 +24,10 @@ export type Visit = {
 export type InRule = "single" | "double" | "triple";
 export type OutRule = "single" | "double" | "triple";
 
+/**
+ * Options of a match. X01: start score and in/out rule. Elimination (M7): `startScore` is the
+ * target to reach, `outRule` as in X01. SplitScore: `startScore` is the start (40). Cricket: unused.
+ */
 export type Rules = {
   startScore: number;
   inRule: InRule;
@@ -27,10 +35,11 @@ export type Rules = {
 };
 
 /**
- * The complete state of a leg is the ordered list of visits.
- * Rest, player on turn, placements and winner are derived from it (selectors.ts).
+ * The complete state of a leg is the ordered list of visits; everything else (score, player on
+ * turn, places, winner) is derived from it by the leg's game mode (game/modes.ts).
  */
 export type LegState = {
+  mode: ModeId;
   players: PlayerId[];
   rules: Rules;
   /** Index in players of who throws first in the leg. */

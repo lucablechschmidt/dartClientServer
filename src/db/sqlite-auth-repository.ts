@@ -1,5 +1,5 @@
 import { and, eq, gt, isNull, lte, ne } from "drizzle-orm";
-import type { PlayerId } from "@/domain/x01";
+import type { PlayerId } from "@/domain/game";
 import type { AuthRepository, InviteRecord, SessionRecord } from "./auth-repository";
 import type { Db } from "./client";
 import { invites, sessions } from "./schema";

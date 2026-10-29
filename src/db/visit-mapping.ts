@@ -1,4 +1,4 @@
-import type { Dart, DartType, Visit } from "@/domain/x01";
+import type { Dart, DartType, Visit } from "@/domain/game";
 import type { VisitRow } from "./schema";
 
 /** DartThrow (3 slots) ↔ row with d1..d3. Empty slot = both columns NULL. */

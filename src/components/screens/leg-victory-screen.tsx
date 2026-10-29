@@ -1,4 +1,4 @@
-import type { MatchBoardView, PlayerId } from "@/domain/x01";
+import type { MatchBoardView, PlayerId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 
 type Props = {

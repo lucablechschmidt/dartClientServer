@@ -1,5 +1,5 @@
-import { dartScore, isDart } from "./scoring";
-import type { Dart, OutRule, Rules } from "./types";
+import { dartScore, isDart } from "../game/scoring";
+import type { Dart, OutRule, Rules } from "../game/types";
 
 const MIN_REST_AFTER: Record<OutRule, number> = { single: 1, double: 2, triple: 3 };
 

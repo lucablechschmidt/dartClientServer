@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { PlayerPanelData } from "@/domain/x01";
+import type { PlayerPanelData } from "@/domain/game";
 import { PlayerPanel, type PlayerPanelTexts } from "./player-panel";
 
 type Props = {

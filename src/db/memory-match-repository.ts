@@ -1,4 +1,4 @@
-import { replayMatch, type PlayerId, type Visit } from "@/domain/x01";
+import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredLeg, type StoredMatch } from "./memory-store";
 import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, RecentMatch } from "./repository";
 
@@ -22,6 +22,7 @@ export class MemoryMatchRepository implements MatchRepository {
   createMatch(input: NewMatch): void {
     this.store.matches.set(input.id, {
       id: input.id,
+      mode: input.mode,
       rules: input.rules,
       status: "running",
       playerIds: [...input.playerIds],
@@ -38,7 +39,7 @@ export class MemoryMatchRepository implements MatchRepository {
     return [...this.store.matches.values()]
       .filter((m) => m.status === "running" && m.startedAt > openSince)
       .sort((a, b) => b.startedAt - a.startedAt)
-      .map((m) => ({ id: m.id, players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)), inputMode: m.inputMode, startedAt: m.startedAt }));
+      .map((m) => ({ id: m.id, mode: m.mode, players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)), inputMode: m.inputMode, startedAt: m.startedAt }));
   }
   listRecentMatches(openSince: number, limit: number): RecentMatch[] {
     return [...this.store.matches.values()]
@@ -47,6 +48,7 @@ export class MemoryMatchRepository implements MatchRepository {
       .slice(0, limit)
       .map((m) => ({
         id: m.id,
+        mode: m.mode,
         players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
         status: m.status,
         startedAt: m.startedAt,
@@ -61,6 +63,7 @@ export class MemoryMatchRepository implements MatchRepository {
     if (!m || m.legs.length === 0) return null;
     return {
       id: m.id,
+      mode: m.mode,
       rules: m.rules,
       status: m.status,
       players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
@@ -70,7 +73,7 @@ export class MemoryMatchRepository implements MatchRepository {
       finishedAt: m.finishedAt,
       format: m.format,
       legs: m.legs.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
-      state: replayMatch(m.playerIds, m.rules, m.format, m.legs.map((l) => ({ starter: l.starterIndex, visits: l.visits, playOut: l.playOut }))),
+      state: replayMatch(m.playerIds, m.rules, m.format, m.legs.map((l) => ({ starter: l.starterIndex, visits: l.visits, playOut: l.playOut })), 0, m.mode),
     };
   }
   private matchOfLeg(legId: string): StoredMatch {

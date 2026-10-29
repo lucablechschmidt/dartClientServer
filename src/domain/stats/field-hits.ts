@@ -1,4 +1,4 @@
-import type { Dart, Visit } from "@/domain/x01";
+import type { Dart, Visit } from "@/domain/game";
 
 /**
  * Field hits (E12, M8): how often a field was hit. Single 1, double 2, triple 3.

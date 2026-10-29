@@ -1,4 +1,4 @@
-import { applyMatchDart, currentLeg, nextVisitPosition, openVisit, type Dart, type MatchState } from "@/domain/x01";
+import { applyMatchDart, currentLeg, nextVisitPosition, openVisit, type Dart, type MatchState } from "@/domain/game";
 
 /**
  * The open visit lives only on this device (E11). To survive a reload it is kept in localStorage,

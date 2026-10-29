@@ -19,7 +19,7 @@ import {
   type MatchState,
   type PlayerId,
   type Rules,
-} from "@/domain/x01";
+} from "@/domain/game";
 import { reapply, restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
 import { useMatchEvents } from "./use-match-events";
 

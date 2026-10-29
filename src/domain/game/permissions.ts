@@ -1,6 +1,5 @@
-import { playOutUndo } from "./apply";
 import { currentLeg, lastVisitOfMatch, matchCurrentPlayer, type MatchState } from "./match";
-import { remainingPlayer } from "./selectors";
+import { playOutUndo, remainingPlayer } from "./modes";
 import type { PlayerId } from "./types";
 
 /**

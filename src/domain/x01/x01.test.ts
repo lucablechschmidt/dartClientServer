@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { checkoutHint } from "../checkouts";
 import { applyDart, undoDart } from "./apply";
-import { newLeg } from "./state";
+import { newLeg } from "../game/state";
 import { currentPlayer, dartsThrown, openVisit, scoreOf, threeDartAverage, winnerOf } from "./selectors";
-import { dartScore, visitScore } from "./scoring";
+import { dartScore, visitScore } from "../game/scoring";
 import { isValidDart } from "./rules";
-import { replay } from "./replay";
-import type { Dart, LegState, Rules } from "./types";
+import { replay } from "../game/replay";
+import type { Dart, LegState, Rules } from "../game/types";
 
 const A = "a";
 const B = "b";

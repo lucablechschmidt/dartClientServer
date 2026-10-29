@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Dart } from "@/domain/x01";
+import type { Dart } from "@/domain/game";
 import { createRegisterInvite, redeem } from "./invite-service";
 import { commitVisit, createMatch, loadMatchView } from "./match-service";
 import { cleanupGuests } from "./guest-cleanup";

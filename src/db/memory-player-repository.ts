@@ -1,6 +1,6 @@
 import { isListed } from "@/domain/player";
 import { addFieldHits, type FieldHits } from "@/domain/stats/field-hits";
-import type { PlayerId } from "@/domain/x01";
+import type { PlayerId } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredPlayer } from "./memory-store";
 import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
 

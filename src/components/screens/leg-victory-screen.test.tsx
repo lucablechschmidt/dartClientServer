@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { applyMatchDart, newMatch, projectMatch } from "@/domain/x01";
+import { applyMatchDart, newMatch, projectMatch } from "@/domain/game";
 import { de } from "@/i18n/de";
 import { LegVictoryScreen } from "./leg-victory-screen";
 

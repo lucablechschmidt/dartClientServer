@@ -1,5 +1,5 @@
 import type { FieldHits } from "@/domain/stats/field-hits";
-import type { InputMode, MatchFormat, PlayerId, Rules, Visit } from "@/domain/x01";
+import type { InputMode, MatchFormat, ModeId, PlayerId, Rules, Visit } from "@/domain/game";
 import type { MatchStatus, Player } from "./repository";
 
 export type StoredPlayer = Player & { passwordHash: string | null };
@@ -7,6 +7,7 @@ export const toPlayer = (p: StoredPlayer): Player => ({ id: p.id, name: p.name, 
 
 export type StoredMatch = {
   id: string;
+  mode: ModeId;
   rules: Rules;
   status: MatchStatus;
   playerIds: PlayerId[];

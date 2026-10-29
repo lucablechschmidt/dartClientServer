@@ -1,5 +1,5 @@
 import { isValidDart } from "./rules";
-import { dartScore, isDart } from "./scoring";
+import { dartScore, isDart } from "../game/scoring";
 import { currentPlayer, isLegFinished, openVisit, remainingPlayer, scoreOf } from "./selectors";
 import {
   MAX_DARTS_PER_VISIT,
@@ -10,7 +10,7 @@ import {
   type Result,
   type UndoError,
   type Visit,
-} from "./types";
+} from "../game/types";
 
 const OVERTHROWN: Dart = { field: 0, type: "overthrown" };
 

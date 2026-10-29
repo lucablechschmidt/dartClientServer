@@ -19,8 +19,10 @@ import {
   matchWinner,
   nextVisitPosition,
   openVisit,
-  placements,
-  projectScoreboard,
+  matchStandings,
+  MODE_IDS,
+  placeNumbers,
+  projectBoard,
   resign,
   setLegStarter,
   startPlayOut,
@@ -33,10 +35,11 @@ import {
   type MatchAccess,
   type MatchFormat,
   type MatchState,
+  type ModeId,
   type PlayerId,
   type Rules,
   type ScoreboardView,
-} from "@/domain/x01";
+} from "@/domain/game";
 import type { Deps } from "./deps";
 
 export const rulesSchema = z.object({
@@ -51,6 +54,8 @@ export const formatSchema = z.object({
 });
 
 export const newMatchSchema = z.object({
+  /** M7: X01, Cricket, Elimination or SplitScore. */
+  mode: z.enum(MODE_IDS).default("x01"),
   playerIds: z.array(z.string().min(1)).min(1).max(8),
   rules: rulesSchema,
   /** Sets and legs; E7: forced to 1/1 with 3+ players. */
@@ -118,7 +123,7 @@ function toView(m: LoadedMatch, session: Session | null, now: number): MatchView
     format: m.format,
     state: m.state,
     names,
-    board: projectScoreboard(currentLeg(m.state), names),
+    board: projectBoard(currentLeg(m.state), names),
     inputMode: m.inputMode,
     hostPlayerId: m.hostPlayerId,
     match,
@@ -132,15 +137,14 @@ function toView(m: LoadedMatch, session: Session | null, now: number): MatchView
   };
 }
 
-/** E7: sets and legs only with 2 players. */
-const formatFor = (players: number, format: MatchFormat): MatchFormat => (players > 2 ? { legsToWinSet: 1, setsToWinMatch: 1 } : format);
+/** E7: sets and legs only for X01 with 2 players; the other modes are one leg (M7). */
+const formatFor = (mode: ModeId, players: number, format: MatchFormat): MatchFormat =>
+  mode !== "x01" || players > 2 ? { legsToWinSet: 1, setsToWinMatch: 1 } : format;
 
-/** Final places once the match is over: by the places of the last leg (3+ players) or by the match winner. */
+/** Final places once the match is over (ties share a place); null while it runs. */
 function finalPlacements(state: MatchState): Record<PlayerId, number | null> {
-  const winner = matchWinner(state);
-  if (!winner) return Object.fromEntries(state.players.map((p) => [p, null]));
-  const order = state.players.length > 2 ? placements(currentLeg(state)) : [winner, ...state.players.filter((p) => p !== winner)];
-  return Object.fromEntries(state.players.map((p) => [p, order.indexOf(p) + 1]));
+  if (!matchWinner(state)) return Object.fromEntries(state.players.map((p) => [p, null]));
+  return placeNumbers(matchStandings(state));
 }
 
 /** Index of the first visit that differs, so only the changed tail of a leg is rewritten. */
@@ -201,11 +205,12 @@ export function createMatch(deps: Deps, raw: NewMatchInput): string {
   const id = deps.newId();
   deps.matches.createMatch({
     id,
+    mode: input.mode,
     legId: deps.newId(),
     rules: input.rules,
     playerIds: input.playerIds,
     starterIndex: input.starterIndex % input.playerIds.length,
-    format: formatFor(input.playerIds.length, input.format),
+    format: formatFor(input.mode, input.playerIds.length, input.format),
     inputMode: input.inputMode,
     hostPlayerId: input.hostPlayerId,
     startedAt: deps.now(),
@@ -357,6 +362,7 @@ export function restartMatch(deps: Deps, matchId: string): string | null {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return null;
   return createMatch(deps, {
+    mode: m.mode,
     playerIds: m.players.map((p) => p.id),
     rules: m.rules,
     format: m.format,

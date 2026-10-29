@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Session } from "@/domain/player";
-import type { Dart } from "@/domain/x01";
+import type { Dart } from "@/domain/game";
 import { memoryDeps } from "./testing";
 import { cancelMatch, commitVisit, createMatch, listOpenMatches, listRecentMatches, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit } from "./match-service";
 import { createGuest, createPlayer } from "./player-service";
@@ -27,7 +27,7 @@ describe("match service", () => {
     const { id } = setup();
     const v = loadMatchView(deps, id)!;
     expect(v.board.players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
-    expect(v.board.players[0].rest).toBe(501);
+    expect(v.board.players[0].score).toBe(501);
     expect(v.status).toBe("running");
     expect(loadMatchView(deps, "nope")).toBeNull();
   });
@@ -40,7 +40,7 @@ describe("match service", () => {
     const { id, b } = setup();
     let r = commitVisit(deps, sessionAdmin, id, 0, 0, [T20, T20, T20]);
     if (!r.ok) throw new Error(r.reason);
-    expect(r.view.board.players[0].rest).toBe(321);
+    expect(r.view.board.players[0].score).toBe(321);
     expect(r.view.board.activePlayerId).toBe(b.id);
     expect(loadMatchView(deps, id)!.board).toEqual(r.view.board);
     // same or later position → the client is stale
@@ -59,7 +59,7 @@ describe("match service", () => {
     // Casey: T20 (61), T20 → 1 left under double-out = bust; the second T20 is not stored
     const r = commitVisit(deps, sessionAdmin, id, 0, 2, [T20, T20]);
     if (!r.ok) throw new Error(r.reason);
-    expect(r.view.board.players[0].rest).toBe(121);
+    expect(r.view.board.players[0].score).toBe(121);
     expect(r.view.board.players[0].isBust).toBe(true);
     const stored = loadMatchView(deps, id)!.state.legs[0].visits[2];
     expect(stored.isBust).toBe(true);
@@ -91,7 +91,7 @@ describe("match service", () => {
     if (!u.ok) throw new Error(u.reason);
     expect(u.view.board.winnerId).toBeNull();
     expect(u.view.status).toBe("running");
-    expect(u.view.board.players[0].rest).toBe(121);
+    expect(u.view.board.players[0].score).toBe(121);
     expect(u.view.board.activePlayerId).toBe(a.id);
     expect(loadMatchView(deps, id)!.status).toBe("running");
   });
@@ -104,8 +104,8 @@ describe("match service", () => {
     const u = undoVisit(deps, sessionAdmin, id);
     if (!u.ok) throw new Error(u.reason);
     expect(u.view.board.activePlayerId).toBe(b.id);
-    expect(u.view.board.players[1].rest).toBe(501);
-    expect(u.view.board.players[0].rest).toBe(441);
+    expect(u.view.board.players[1].score).toBe(501);
+    expect(u.view.board.players[0].score).toBe(441);
     expect(loadMatchView(deps, id)!.board).toEqual(u.view.board);
   });
 

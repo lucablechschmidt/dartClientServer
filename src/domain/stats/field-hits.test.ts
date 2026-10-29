@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Dart, Visit } from "@/domain/x01";
+import type { Dart, Visit } from "@/domain/game";
 import { addFieldHits, fieldHits, hitsOfDart } from "./field-hits";
 
 const d = (field: number, type: Dart["type"] = "single"): Dart => ({ field, type });

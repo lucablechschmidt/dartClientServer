@@ -97,7 +97,7 @@ await page.waitForURL(/\/match\//);
 const url = page.url();
 
 const key = (name) => page.getByRole("button", { name, exact: true });
-const rests = async () => page.locator("[data-rest]").allInnerTexts();
+const scores = async () => page.locator("[data-score]").allInnerTexts();
 const throwKeys = async (...names) => {
   for (const n of names) {
     await key(n).click();
@@ -109,14 +109,14 @@ const throwKeys = async (...names) => {
 
 // A: T20 T20 T20 → 121
 await throwKeys("Triple", "20", "Triple", "20", "Triple", "20");
-expect((await rests())[0] === "121", `A has 121 after 180 (got ${await rests()})`);
+expect((await scores())[0] === "121", `A has 121 after 180 (got ${await scores()})`);
 await page.screenshot({ path: `${shots}/match-after-180.png` });
 
 // B: 0 0 0
 await throwKeys("0", "0", "0");
 // A: Rest 121, T20 (61), T20 (1 → bust under Double Out)
 await throwKeys("Triple", "20", "Triple", "20");
-const afterBust = await rests();
+const afterBust = await scores();
 expect(afterBust[0] === "121", `A back to 121 after bust (got ${afterBust})`);
 const bustSlots = await page.locator("ol[aria-label=Aufnahme]").first().allInnerTexts();
 log("A slots after bust:", bustSlots[0]);
@@ -124,16 +124,16 @@ await page.screenshot({ path: `${shots}/match-after-bust.png` });
 
 // Undo: bust removed, A on turn again with 61 left and one dart
 await throwKeys("Undo");
-expect((await rests())[0] === "61", `undo bust → 61 (got ${await rests()})`);
+expect((await scores())[0] === "61", `undo bust → 61 (got ${await scores()})`);
 await throwKeys("Undo");
-expect((await rests())[0] === "121", `undo first dart → 121 (got ${await rests()})`);
+expect((await scores())[0] === "121", `undo first dart → 121 (got ${await scores()})`);
 await throwKeys("Undo"); // B's third 0
 await throwKeys("Undo"); // B's second 0
-log("after undo across switch: rests", await rests());
+log("after undo across switch: rests", await scores());
 
 // Reload: same state
 await page.reload({ waitUntil: "networkidle" });
-expect((await rests())[0] === "121", `after reload A still 121 (got ${await rests()})`);
+expect((await scores())[0] === "121", `after reload A still 121 (got ${await scores()})`);
 
 // B: 0 0 (B's visit had one dart left after the undos)
 await throwKeys("0", "0");
@@ -148,7 +148,7 @@ await page.screenshot({ path: `${shots}/match-victory.png` });
 // Undo winning dart → back to the board with 28
 await page.getByRole("button", { name: "Letzten Wurf rückgängig machen" }).click();
 await key("Undo").waitFor();
-expect((await rests())[0] === "28", `undo win → 28 (got ${await rests()})`);
+expect((await scores())[0] === "28", `undo win → 28 (got ${await scores()})`);
 await throwKeys("Double", "14");
 await page.getByText(`A${stamp} gewinnt!`).waitFor();
 
@@ -240,7 +240,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   expect((await pageA.getByText(`${ADMIN} ist dran`).count()) === 1, "A sees who is on turn");
   // Admin throws 180 → A sees the new remaining score without a reload and may now throw
   await throwKeys("Triple", "20", "Triple", "20", "Triple", "20");
-  await pageA.locator("[data-rest]").first().filter({ hasText: "321" }).waitFor({ timeout: 10000 });
+  await pageA.locator("[data-score]").first().filter({ hasText: "321" }).waitFor({ timeout: 10000 });
   log("device A received the visit live (SSE)");
   await pageA.getByRole("button", { name: "20", exact: true }).isEnabled();
   expect(await page.getByRole("button", { name: "20", exact: true }).isDisabled(), "admin's keypad locks while A is on turn");
@@ -251,7 +251,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
     await pageA.waitForTimeout(150);
   }
   await pageA.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
-  await page.locator("[data-rest]").nth(1).filter({ hasText: "441" }).waitFor({ timeout: 10000 });
+  await page.locator("[data-score]").nth(1).filter({ hasText: "441" }).waitFor({ timeout: 10000 });
   log("admin received A's visit live");
   // Cancel by the host reaches A live
   await page.getByRole("button", { name: "Spiel abbrechen" }).click();
@@ -306,7 +306,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await tap("Undo", "Undo", "Undo");
   expect((await active()) === `B${stamp}`, "undo in leg 2: B is on turn again");
   await tap("Undo");
-  expect((await page.locator("[data-rest]").first().innerText()) === "1", "undo across the leg boundary: A has 1 left in leg 1");
+  expect((await page.locator("[data-score]").first().innerText()) === "1", "undo across the leg boundary: A has 1 left in leg 1");
   await tap("1");
   await page.getByText(`Leg für A${stamp}`).waitFor({ timeout: 5000 });
   await page.getByText("Tippen, um weiterzuspielen").click();
@@ -332,7 +332,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   expect((await active()) === guest, "ToStart: the guest throws first");
   await tap(...T180, ...MISS, ...MISS, ...MISS); // guest 180, admin, A, B miss
   await tap(...OUT121); // guest: place 1
-  expect((await page.locator("[data-rest]").first().innerText()) !== "1.", "the leg goes on after place 1");
+  expect((await page.locator("[data-score]").first().innerText()) !== "1.", "the leg goes on after place 1");
   await tap(...MISS, ...T180, ...T180); // admin miss, A 180, B 180
   await tap(...MISS, ...OUT121); // admin miss, A out: place 2
   await tap(...OUT121); // B out: place 3, admin last

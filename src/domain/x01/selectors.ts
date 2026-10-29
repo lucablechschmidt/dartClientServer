@@ -1,5 +1,5 @@
-import { visitScore } from "./scoring";
-import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId, type Visit } from "./types";
+import { visitScore } from "../game/scoring";
+import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId, type Visit } from "../game/types";
 
 export function scoreOf(state: LegState, playerId: PlayerId): number {
   return state.visits

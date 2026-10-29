@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, ne, or, sql } from "drizzle-orm";
-import { replayMatch, type PlayerId, type Visit } from "@/domain/x01";
+import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import type { Db } from "./client";
 import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, Player, RecentMatch } from "./repository";
 import { legs, matchPlayers, matches, players, visits } from "./schema";
@@ -41,7 +41,7 @@ export class SqliteMatchRepository implements MatchRepository {
       tx.insert(matches)
         .values({
           id: input.id,
-          mode: "x01",
+          mode: input.mode,
           startScore: input.rules.startScore,
           inRule: input.rules.inRule,
           outRule: input.rules.outRule,
@@ -81,7 +81,7 @@ export class SqliteMatchRepository implements MatchRepository {
       .where(and(eq(matches.status, "running"), gt(matches.startedAt, openSince)))
       .orderBy(desc(matches.startedAt))
       .all()
-      .map((m) => ({ id: m.id, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
+      .map((m) => ({ id: m.id, mode: m.mode, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
   }
   listRecentMatches(openSince: number, limit: number): RecentMatch[] {
     return this.db
@@ -101,6 +101,7 @@ export class SqliteMatchRepository implements MatchRepository {
           .all();
         return {
           id: m.id,
+          mode: m.mode,
           players: this.seatedPlayers(m.id),
           status: m.status,
           startedAt: m.startedAt,
@@ -133,6 +134,7 @@ export class SqliteMatchRepository implements MatchRepository {
     }));
     return {
       id: match.id,
+      mode: match.mode,
       rules,
       status: match.status,
       players: seated,
@@ -142,7 +144,7 @@ export class SqliteMatchRepository implements MatchRepository {
       finishedAt: match.finishedAt,
       format,
       legs: legRows.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
-      state: replayMatch(playerIds, rules, format, stored),
+      state: replayMatch(playerIds, rules, format, stored, 0, match.mode),
     };
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number, ids: () => string, now: number): void {

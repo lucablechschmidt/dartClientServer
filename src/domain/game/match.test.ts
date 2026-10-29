@@ -16,9 +16,8 @@ import {
   type MatchState,
 } from "./match";
 import { replayMatch } from "./replay";
-import { applyDart, startPlayOut } from "./apply";
+import { applyDart, currentPlayer, isLegFinished, startPlayOut } from "./modes";
 import { newLeg } from "./state";
-import { currentPlayer, isLegFinished } from "./selectors";
 import type { Dart, LegState, Rules } from "./types";
 
 const [A, B, C] = ["a", "b", "c"];

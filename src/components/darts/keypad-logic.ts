@@ -1,4 +1,4 @@
-import type { Dart } from "@/domain/x01";
+import type { Dart } from "@/domain/game";
 
 /** Port of InputButtons + ButtonsView: Double/Triple are modifiers for the next number tap. */
 

@@ -1,6 +1,6 @@
 import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials } from "@/domain/player";
 import type { FieldHits } from "@/domain/stats/field-hits";
-import type { InputMode, MatchFormat, MatchState, PlayerId, Rules, Visit } from "@/domain/x01";
+import type { InputMode, MatchFormat, MatchState, ModeId, PlayerId, Rules, Visit } from "@/domain/game";
 
 /**
  * Interfaces between services and persistence (architecture.md §9, dependency inversion).
@@ -13,6 +13,7 @@ export type MatchStatus = "running" | "finished" | "abandoned";
 
 export type MatchSummary = {
   id: string;
+  mode: ModeId;
   rules: Rules;
   status: MatchStatus;
   players: Player[]; // in seat order
@@ -23,10 +24,10 @@ export type MatchSummary = {
 };
 
 /** For the game overview (M4): open matches, newest first. */
-export type OpenMatch = Pick<MatchSummary, "id" | "players" | "inputMode" | "startedAt">;
+export type OpenMatch = Pick<MatchSummary, "id" | "mode" | "players" | "inputMode" | "startedAt">;
 
 /** For the history (M5): a closed match with what its result is derived from. */
-export type RecentMatch = Pick<MatchSummary, "id" | "players" | "status" | "startedAt" | "finishedAt"> & {
+export type RecentMatch = Pick<MatchSummary, "id" | "mode" | "players" | "status" | "startedAt" | "finishedAt"> & {
   format: MatchFormat;
   /** Winner per leg in leg order, null = leg not finished. */
   legWinners: (PlayerId | null)[];
@@ -48,6 +49,7 @@ export type NewLeg = { id: string; matchId: string; setNo: number; legNo: number
 
 export type NewMatch = {
   id: string;
+  mode: ModeId;
   legId: string;
   rules: Rules;
   playerIds: PlayerId[]; // seat order

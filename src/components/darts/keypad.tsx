@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Dart } from "@/domain/x01";
+import type { Dart } from "@/domain/game";
 import { initialKeypadState, isKeyHidden, KEYPAD_ROWS, keyId, pressKey, type KeypadKey, type KeypadState } from "./keypad-logic";
 
 export type KeypadTexts = { bull: string; undo: string; double: string; triple: string };

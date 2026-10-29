@@ -196,6 +196,13 @@ export const de = {
     resign: "Aufgeben",
     resignQuestion: "{name} gibt auf? Der Platz bleibt.",
     chooseStarter: "Anwurf: Spieler antippen",
+    points: "Punkte",
+    hints: {
+      marks: "Noch {n}× {field}",
+      elimination: "Nächste Elimination in {n}",
+      target: "Ziel: {target}",
+      targets: { double: "Doppel", triple: "Triple", bull: "Bull" },
+    },
     errors: {
       "not-found": "Spiel nicht gefunden.",
       "leg-finished": "Das Leg ist schon beendet.",

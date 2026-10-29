@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { startPlayOut } from "./apply";
+import { startPlayOut } from "./modes";
 import { applyMatchDart, currentLeg, newMatch, type MatchState } from "./match";
 import { canCancel, canEnter, canPlayOut, canUndo, isOpen, maySetStarter, MATCH_OPEN_MS, type MatchAccess } from "./permissions";
 import type { Dart } from "./types";
