@@ -10,7 +10,7 @@ import { BackButton } from "@/components/ui/back-button";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { currentPlayer, mayEnter, mayUndo, projectScoreboard, type Dart } from "@/domain/x01";
+import { currentLeg, matchCurrentPlayer, mayEnter, mayUndo, projectScoreboard, type Dart, type PlayerId } from "@/domain/x01";
 import type { Texts } from "@/i18n/de";
 import { VictoryScreen } from "./victory-screen";
 
@@ -21,8 +21,10 @@ export type ActionReply = Reply<Reason>;
 type Props = {
   initial: MatchViewLike;
   texts: Texts["game"];
-  onCommitVisit: (matchId: string, seq: number, darts: Dart[]) => Promise<ActionReply>;
+  onCommitVisit: (matchId: string, legIndex: number, seq: number, darts: Dart[]) => Promise<ActionReply>;
   onUndoVisit: (matchId: string) => Promise<ActionReply>;
+  onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply>;
+  onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
   onCancel: (matchId: string) => Promise<unknown>;
@@ -34,12 +36,12 @@ const RULE_SHORT = { single: "Single", double: "Double", triple: "Triple" } as c
  * The scoring screen: header with status, player panels, checkout or turn hint, keypad; the
  * victory screen once a player has checked out. Scoring and server sync live in `useVisitSync`.
  */
-export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, onLoad, onRestart, onCancel }: Props) {
+export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, onRestart, onCancel }: Props) {
   const [asking, setAsking] = useState(false);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
-  const { state, sync, error, isOpen, throwDart: throwLocal, undo: undoLocal } = useVisitSync<Reason>({ initial, onCommitVisit, onUndoVisit, onLoad, errorText });
+  const { state, sync, error, isOpen, throwDart: throwLocal, undo: undoLocal } = useVisitSync<Reason>({ initial, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, errorText });
 
-  const board = useMemo(() => projectScoreboard(state, initial.names), [state, initial.names]);
+  const board = useMemo(() => projectScoreboard(currentLeg(state), initial.names), [state, initial.names]);
   const rules = `${initial.rules.startScore} · ${RULE_SHORT[initial.rules.inRule]} In · ${RULE_SHORT[initial.rules.outRule]} Out`;
   const status = error ?? (sync === "unsaved" ? texts.unsaved : sync === "saving" ? texts.saving : " ");
 
@@ -47,7 +49,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   const actor = initial.actor;
   const enterOk = isOpen && actor !== null && mayEnter(state, initial.match, actor);
   const undoOk = isOpen && actor !== null && mayUndo(state, initial.match, actor);
-  const turnHint = !isOpen ? texts.closed : enterOk ? null : texts.turnOf.replace("{name}", initial.names[currentPlayer(state)] ?? "");
+  const turnHint = !isOpen ? texts.closed : enterOk ? null : texts.turnOf.replace("{name}", initial.names[matchCurrentPlayer(state)] ?? "");
 
   const header = (
     <ScreenHeader

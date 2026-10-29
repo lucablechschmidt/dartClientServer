@@ -22,9 +22,9 @@ describe("transactions (SQLite)", () => {
     deps.matches.finishLeg = () => {
       throw new Error("disk full");
     };
-    expect(() => commitVisit(deps, { ...admin, playerId: a.id }, id, 0, [D20])).toThrow("disk full");
+    expect(() => commitVisit(deps, { ...admin, playerId: a.id }, id, 0, 0, [D20])).toThrow("disk full");
     const view = loadMatchView(deps, id)!;
-    expect(view.state.visits).toEqual([]);
+    expect(view.state.legs[0].visits).toEqual([]);
     expect(view.status).toBe("running");
   });
 
@@ -32,7 +32,7 @@ describe("transactions (SQLite)", () => {
     const deps = sqliteDeps();
     const a = ok(createPlayer(deps, "Casey")).player;
     const id = createMatch(deps, { playerIds: [a.id], rules: { startScore: 40, inRule: "single", outRule: "double" }, starterIndex: 0, hostPlayerId: a.id });
-    expect(commitVisit(deps, { ...admin, playerId: a.id }, id, 0, [D20]).ok).toBe(true);
+    expect(commitVisit(deps, { ...admin, playerId: a.id }, id, 0, 0, [D20]).ok).toBe(true);
     expect(loadMatchView(deps, id)!.status).toBe("finished");
   });
 
@@ -42,7 +42,7 @@ describe("transactions (SQLite)", () => {
     const a = ok(createPlayer(deps, "Casey")).player;
     const g = ok(createGuest(deps, "Guest")).player;
     const id = createMatch(deps, { playerIds: [a.id, g.id], rules: { startScore: 501, inRule: "single", outRule: "double" }, starterIndex: 0, hostPlayerId: a.id });
-    commitVisit(deps, { ...admin, playerId: a.id }, id, 0, [{ field: 20, type: "triple" }, { field: 20, type: "single" }, { field: 5, type: "triple" }]);
+    commitVisit(deps, { ...admin, playerId: a.id }, id, 0, 0, [{ field: 20, type: "triple" }, { field: 20, type: "single" }, { field: 5, type: "triple" }]);
     clock += 24 * 60 * 60 * 1000;
     deps.matches.deleteMatch = () => {
       throw new Error("locked");

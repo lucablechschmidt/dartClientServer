@@ -1,0 +1,1 @@
+ALTER TABLE `leg` ADD `play_out` integer DEFAULT false NOT NULL;

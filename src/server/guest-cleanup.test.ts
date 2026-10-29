@@ -31,9 +31,9 @@ describe("cleanupGuests (E12)", () => {
 
     const guestMatch = createMatch(deps, { playerIds: [casey.id, guest.id], rules, starterIndex: 0 });
     // Casey: T20 S20 T5, Gast: 1 1 1, Casey: S20 S20 T20
-    expect(commitVisit(deps, sessionAdmin, guestMatch, 0, [T(20), S(20), T(5)]).ok).toBe(true);
-    expect(commitVisit(deps, sessionAdmin, guestMatch, 1, [S(1), S(1), S(1)]).ok).toBe(true);
-    expect(commitVisit(deps, sessionAdmin, guestMatch, 2, [S(20), S(20), T(20)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, guestMatch, 0, 0, [T(20), S(20), T(5)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, guestMatch, 0, 1, [S(1), S(1), S(1)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, guestMatch, 0, 2, [S(20), S(20), T(20)]).ok).toBe(true);
     const regularMatch = createMatch(deps, { playerIds: [casey.id, sam.id], rules, starterIndex: 0 });
 
     // nothing happens before expiry
@@ -56,9 +56,9 @@ describe("cleanupGuests (E12)", () => {
     const casey = ok(createPlayer(deps, "Casey")).player;
     const guest = ok(createGuest(deps, "Gast")).player;
     const id = createMatch(deps, { playerIds: [casey.id, guest.id], rules: { startScore: 301, inRule: "single", outRule: "double" }, starterIndex: 0 });
-    expect(commitVisit(deps, sessionAdmin, id, 0, [T(20), T(20), T(20)]).ok).toBe(true); // 121
-    expect(commitVisit(deps, sessionAdmin, id, 1, [S(0), S(0), S(0)]).ok).toBe(true);
-    expect(commitVisit(deps, sessionAdmin, id, 2, [T(20), T(20)]).ok).toBe(true); // 61 → 1 = Bust
+    expect(commitVisit(deps, sessionAdmin, id, 0, 0, [T(20), T(20), T(20)]).ok).toBe(true); // 121
+    expect(commitVisit(deps, sessionAdmin, id, 0, 1, [S(0), S(0), S(0)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, id, 0, 2, [T(20), T(20)]).ok).toBe(true); // 61 → 1 = Bust
     clock += GUEST_LIFETIME_MS;
     cleanupGuests(deps);
     expect(deps.players.fieldHitsOf(casey.id)).toEqual(new Map([[20, 9]]));

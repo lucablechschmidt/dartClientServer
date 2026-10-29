@@ -1,5 +1,5 @@
 import type { FieldHits } from "@/domain/stats/field-hits";
-import type { InputMode, PlayerId, Rules, Visit } from "@/domain/x01";
+import type { InputMode, MatchFormat, PlayerId, Rules, Visit } from "@/domain/x01";
 import type { MatchStatus, Player } from "./repository";
 
 export type StoredPlayer = Player & { passwordHash: string | null };
@@ -14,7 +14,19 @@ export type StoredMatch = {
   hostPlayerId: PlayerId | null;
   startedAt: number;
   finishedAt: number | null;
-  leg: { id: string; starterIndex: number; winnerPlayerId: PlayerId | null; visits: Visit[] };
+  format: MatchFormat;
+  placements: Record<PlayerId, number | null>;
+  legs: StoredLeg[];
+};
+
+export type StoredLeg = {
+  id: string;
+  setNo: number;
+  legNo: number;
+  starterIndex: number;
+  winnerPlayerId: PlayerId | null;
+  playOut: boolean;
+  visits: Visit[];
 };
 
 /**

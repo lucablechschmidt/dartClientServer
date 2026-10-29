@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ScoreboardScreen } from "@/components/screens/scoreboard-screen";
 import { de } from "@/i18n/de";
-import { cancelMatchAction, commitVisitAction, loadMatchAction, restartMatchAction, undoVisitAction } from "@/server/match-actions";
+import { cancelMatchAction, commitVisitAction, loadMatchAction, restartMatchAction, setPlayOutAction, setStarterAction, undoVisitAction } from "@/server/match-actions";
 import { loadMatchView } from "@/server/match-service";
 import { requireSession } from "@/server/request";
 
@@ -17,6 +17,8 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
       texts={de.game}
       onCommitVisit={commitVisitAction}
       onUndoVisit={undoVisitAction}
+      onPlayOut={setPlayOutAction}
+      onSetStarter={setStarterAction}
       onLoad={loadMatchAction}
       onRestart={restartMatchAction}
       onCancel={cancelMatchAction}

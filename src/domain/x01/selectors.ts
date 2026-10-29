@@ -62,6 +62,13 @@ export function placements(state: LegState): PlayerId[] {
   return [...out, ...state.players.filter((p) => !out.includes(p))];
 }
 
+/** The one player who has not checked out once the places are fixed (3+ players); otherwise null. */
+export function remainingPlayer(state: LegState): PlayerId | null {
+  if (state.players.length < 3 || !placementsFixed(state)) return null;
+  const out = checkoutOrder(state);
+  return state.players.find((p) => !out.includes(p)) ?? null;
+}
+
 /** Winner of the leg = first checkout (with 2 players identical to the end of the leg). */
 export function winnerOf(state: LegState): PlayerId | null {
   return checkoutOrder(state)[0] ?? null;

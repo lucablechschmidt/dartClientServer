@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max } from "drizzle-orm";
-import { replay, type PlayerId, type Visit } from "@/domain/x01";
+import { replayMatch, type PlayerId, type Visit } from "@/domain/x01";
 import type { Db } from "./client";
-import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewMatch, OpenMatch, Player } from "./repository";
+import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, Player } from "./repository";
 import { legs, matchPlayers, matches, players, visits } from "./schema";
 import { toPlayer } from "./sqlite-player-repository";
 import { rowToVisit, visitToSlots } from "./visit-mapping";
@@ -47,6 +47,8 @@ export class SqliteMatchRepository implements MatchRepository {
           outRule: input.rules.outRule,
           inputMode: input.inputMode,
           hostPlayerId: input.hostPlayerId,
+          legsToWinSet: input.format.legsToWinSet,
+          setsToWinMatch: input.format.setsToWinMatch,
           startedAt: input.startedAt,
         })
         .run();
@@ -85,18 +87,22 @@ export class SqliteMatchRepository implements MatchRepository {
     const match = this.db.select().from(matches).where(eq(matches.id, matchId)).get();
     if (!match) return null;
     const seated = this.seatedPlayers(matchId);
-    const leg = this.db
+    const legRows = this.db.select().from(legs).where(eq(legs.matchId, matchId)).orderBy(asc(legs.setNo), asc(legs.legNo)).all();
+    if (legRows.length === 0) return null;
+    const visitRows = this.db
       .select()
-      .from(legs)
-      .where(eq(legs.matchId, matchId))
-      .orderBy(asc(legs.setNo), asc(legs.legNo))
-      .all()
-      .at(-1);
-    if (!leg) return null;
-    const rows = this.db.select().from(visits).where(eq(visits.legId, leg.id)).orderBy(asc(visits.seq)).all();
+      .from(visits)
+      .where(inArray(visits.legId, legRows.map((l) => l.id)))
+      .orderBy(asc(visits.seq))
+      .all();
     const rules = { startScore: match.startScore, inRule: match.inRule, outRule: match.outRule };
+    const format = { legsToWinSet: match.legsToWinSet, setsToWinMatch: match.setsToWinMatch };
     const playerIds = seated.map((p) => p.id);
-    const starter = Math.max(0, playerIds.indexOf(leg.starterPlayerId));
+    const stored = legRows.map((l) => ({
+      starter: Math.max(0, playerIds.indexOf(l.starterPlayerId)),
+      visits: visitRows.filter((v) => v.legId === l.id).map(rowToVisit),
+      playOut: l.playOut,
+    }));
     return {
       id: match.id,
       rules,
@@ -106,8 +112,9 @@ export class SqliteMatchRepository implements MatchRepository {
       hostPlayerId: match.hostPlayerId,
       startedAt: match.startedAt,
       finishedAt: match.finishedAt,
-      leg: { id: leg.id, setNo: leg.setNo, legNo: leg.legNo, winnerPlayerId: leg.winnerPlayerId },
-      state: replay(playerIds, rules, rows.map(rowToVisit), starter),
+      format,
+      legs: legRows.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
+      state: replayMatch(playerIds, rules, format, stored),
     };
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number, ids: () => string, now: number): void {
@@ -136,5 +143,24 @@ export class SqliteMatchRepository implements MatchRepository {
       .set({ status, finishedAt: status === "running" ? null : now })
       .where(eq(matches.id, matchId))
       .run();
+  }
+  createLeg(leg: NewLeg): void {
+    this.db.insert(legs).values(leg).run();
+  }
+  deleteLeg(legId: string): void {
+    this.db.delete(legs).where(eq(legs.id, legId)).run(); // visits: ON DELETE CASCADE
+  }
+  setLegStarter(legId: string, starterPlayerId: PlayerId): void {
+    this.db.update(legs).set({ starterPlayerId }).where(eq(legs.id, legId)).run();
+  }
+  setPlayOut(legId: string, playOut: boolean): void {
+    this.db.update(legs).set({ playOut }).where(eq(legs.id, legId)).run();
+  }
+  setPlacements(matchId: string, placements: Record<PlayerId, number | null>): void {
+    this.db.transaction((tx) => {
+      for (const [playerId, placement] of Object.entries(placements)) {
+        tx.update(matchPlayers).set({ placement }).where(and(eq(matchPlayers.matchId, matchId), eq(matchPlayers.playerId, playerId))).run();
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
-import { applyDart, undoDart } from "./apply";
-import { currentPlayer, isLegFinished, winnerOf } from "./selectors";
+import { applyDart, playOutUndo, undoDart } from "./apply";
+import { currentPlayer, isLegFinished, openVisit, winnerOf } from "./selectors";
 import { newLeg } from "./state";
-import type { ApplyError, Dart, LegState, PlayerId, Result, Rules, StarterError, UndoError } from "./types";
+import type { ApplyError, Dart, LegState, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
 
 /**
  * A match is a list of legs (M5). `LegState` stays the unit that applyDart/undoDart know; legs,
@@ -88,6 +88,17 @@ const startNextLeg = (m: MatchState, starter = nextStarter(m)): MatchState => ({
   legs: [...m.legs, newLeg(m.players, m.rules, starter)],
 });
 
+/** Where the next closed visit goes (E11 commit position): after a finished leg, seq 0 of the next one. */
+export function nextVisitPosition(m: MatchState): { legIndex: number; seq: number } {
+  if (matchStatus(m) === "leg-finished") return { legIndex: m.legs.length, seq: 0 };
+  const leg = currentLeg(m);
+  return { legIndex: m.legs.length - 1, seq: leg.visits.length - (openVisit(leg) ? 1 : 0) };
+}
+
+/** Number of closed visits in the whole match; only those are known to the server. */
+export const closedVisits = (m: MatchState): number =>
+  m.legs.reduce((n, leg) => n + leg.visits.length, 0) - (openVisit(currentLeg(m)) ? 1 : 0);
+
 /** A dart in the match: after a finished leg it opens the next one. */
 export function applyMatchDart(m: MatchState, dart: Dart): Result<MatchState, ApplyError> {
   const base = matchStatus(m) === "leg-finished" ? startNextLeg(m) : m;
@@ -95,16 +106,35 @@ export function applyMatchDart(m: MatchState, dart: Dart): Result<MatchState, Ap
   return r.ok ? { ok: true, value: withCurrentLeg(base, r.value) } : r;
 }
 
-/** Undo one step; a leg left empty disappears, so the previous leg is finished again. */
-export function undoMatchDart(m: MatchState): Result<MatchState, UndoError> {
+const withoutEmptyLegs = (m: MatchState): MatchState => {
   let base = m;
   while (base.legs.length > 1 && currentLeg(base).visits.length === 0) base = { ...base, legs: base.legs.slice(0, -1) };
-  const r = undoDart(currentLeg(base));
+  return base;
+};
+
+/** Applies a leg-level undo to the current leg; a leg left empty disappears, so the previous leg is finished again. */
+function undoInLeg(m: MatchState, undo: (leg: LegState) => Result<LegState, UndoError>): Result<MatchState, UndoError> {
+  const base = withoutEmptyLegs(m);
+  const r = undo(currentLeg(base));
   if (!r.ok) return r;
   const next = withCurrentLeg(base, r.value);
   const dropEmpty = next.legs.length > 1 && r.value.visits.length === 0;
   return { ok: true, value: dropEmpty ? { ...next, legs: next.legs.slice(0, -1) } : next };
 }
+
+/** Undo one dart (client, local scoring). */
+export const undoMatchDart = (m: MatchState): Result<MatchState, UndoError> => undoInLeg(m, undoDart);
+
+/** Undo one stored step on the server: a whole visit, or a play-out decision (E11 `undoVisit`). */
+export const undoMatchVisit = (m: MatchState): Result<MatchState, UndoError> =>
+  undoInLeg(m, (leg) => {
+    const toggled = playOutUndo(leg);
+    if (toggled) return { ok: true, value: toggled };
+    return leg.visits.length > 0 ? { ok: true, value: { ...leg, visits: leg.visits.slice(0, -1) } } : { ok: false, reason: "nothing-to-undo" };
+  });
+
+/** The most recent visit of the whole match (empty legs skipped), or null. */
+export const lastVisitOfMatch = (m: MatchState): Visit | null => currentLeg(withoutEmptyLegs(m)).visits.at(-1) ?? null;
 
 /** ToStart: choose who throws first, only before the first dart of a leg (between legs: the next one). */
 export function setLegStarter(m: MatchState, playerId: PlayerId): Result<MatchState, StarterError> {

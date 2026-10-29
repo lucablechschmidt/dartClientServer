@@ -188,6 +188,9 @@ export const de = {
       "out-of-sync": "Stand vom Server übernommen.",
       forbidden: "Dieses Gerät ist gerade nicht dran.",
       "match-closed": "Spiel beendet.",
+      "leg-started": "Das Leg läuft schon.",
+      "no-play-out": "Zu Ende spielen geht gerade nicht.",
+      "unknown-player": "Spieler gehört nicht zum Spiel.",
     },
   },
 } as const;

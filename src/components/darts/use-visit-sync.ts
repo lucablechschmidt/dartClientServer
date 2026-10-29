@@ -1,15 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { applyDart, currentPlayer, openVisit, undoDart, type Actor, type Dart, type LegState, type MatchAccess, type PlayerId, type Rules } from "@/domain/x01";
-import { restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
+import {
+  applyMatchDart,
+  closedVisits,
+  currentLeg,
+  matchCurrentPlayer,
+  nextVisitPosition,
+  openVisit,
+  resign,
+  setLegStarter,
+  startPlayOut,
+  undoMatchDart,
+  type Actor,
+  type Dart,
+  type MatchAccess,
+  type MatchFormat,
+  type MatchState,
+  type PlayerId,
+  type Rules,
+} from "@/domain/x01";
+import { reapply, restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
 import { useMatchEvents } from "./use-match-events";
 
 /** What the scoreboard needs from the server's MatchView (structural, no server import). */
 export type MatchViewLike = {
   id: string;
   rules: Rules;
-  state: LegState;
+  format: MatchFormat;
+  state: MatchState;
   names: Record<PlayerId, string>;
   match: MatchAccess;
   actor: Actor | null;
@@ -20,18 +39,17 @@ export type SyncStatus = "saved" | "saving" | "unsaved";
 
 type Options<Reason extends string> = {
   initial: MatchViewLike;
-  onCommitVisit: (matchId: string, seq: number, darts: Dart[]) => Promise<ActionReply<Reason>>;
+  onCommitVisit: (matchId: string, legIndex: number, seq: number, darts: Dart[]) => Promise<ActionReply<Reason>>;
   onUndoVisit: (matchId: string) => Promise<ActionReply<Reason>>;
+  onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply<Reason>>;
+  onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
   onLoad: (matchId: string) => Promise<ActionReply<Reason>>;
   /** Text for a domain or server error; shown in the status line. */
-  errorText: (reason: Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo") => string;
+  errorText: (reason: Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "no-play-out" | "leg-started" | "unknown-player") => string;
 };
 
 const RETRY_MS = [500, 1000, 2000, 4000, 8000];
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** Number of closed visits; only those are known to the server. */
-const closedCount = (state: LegState) => state.visits.length - (openVisit(state) ? 1 : 0);
 
 /**
  * Local scoring plus server sync for the scoreboard (E11, E13). Darts are applied through the
@@ -39,8 +57,9 @@ const closedCount = (state: LegState) => state.visits.length - (openVisit(state)
  * as does undoing an already saved visit. Calls run in a sequential queue and are retried with
  * backoff indefinitely on network errors (status "unsaved"). A domain error from the server means
  * client and server diverged: the server state is adopted. Changes from other devices arrive via SSE.
+ * M5: the state is the whole match; play-out and the starter go through the same queue.
  */
-export function useVisitSync<Reason extends string>({ initial, onCommitVisit, onUndoVisit, onLoad, errorText }: Options<Reason>) {
+export function useVisitSync<Reason extends string>({ initial, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, errorText }: Options<Reason>) {
   const [state, setState] = useState(initial.state);
   const [sync, setSync] = useState<SyncStatus>("saved");
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +68,7 @@ export function useVisitSync<Reason extends string>({ initial, onCommitVisit, on
   const queue = useRef(Promise.resolve());
   const inFlight = useRef(0);
   /** How many visits the server has after the calls already queued. */
-  const committed = useRef(closedCount(initial.state));
+  const committed = useRef(closedVisits(initial.state));
 
   // After mount (not during server rendering): restore this device's open visit.
   // localStorage exists only in the browser, hence a deliberate setState in the effect (once per match).
@@ -85,13 +104,13 @@ export function useVisitSync<Reason extends string>({ initial, onCommitVisit, on
         if (inFlight.current === 0) {
           if (reply.ok) {
             const server = reply.view.state;
-            committed.current = server.visits.length;
+            committed.current = closedVisits(server);
             setIsOpen(reply.view.access.isOpen);
-            // A locally open visit is kept; the rest is the server state.
+            // A locally open visit is kept on top of the server state if it still fits; the rest is the server state.
             setState((local) => {
-              const pending = openVisit(local);
-              const keepOpen = pending && local.visits.length === server.visits.length + 1 && pending.playerId === currentPlayer(server);
-              return { ...server, visits: keepOpen ? [...server.visits, pending] : server.visits };
+              const pending = openVisit(currentLeg(local));
+              const fits = pending && closedVisits(local) === closedVisits(server) && pending.playerId === matchCurrentPlayer(server);
+              return (fits && reapply(server, pending.darts)) || server;
             });
           }
           setSync("saved");
@@ -112,33 +131,54 @@ export function useVisitSync<Reason extends string>({ initial, onCommitVisit, on
    * `thrown` are the darts actually thrown in the visit; on a bust the triggering dart is not in
    * the state (only overthrown slots there), but the server needs it to recompute.
    */
-  const syncServer = (next: LegState, thrown: Dart[]) => {
-    const closed = closedCount(next);
+  const syncServer = (prev: MatchState, next: MatchState, thrown: Dart[]) => {
+    const closed = closedVisits(next);
     if (closed > committed.current) {
-      const seq = committed.current;
+      const { legIndex, seq } = nextVisitPosition(prev);
       committed.current = closed;
-      enqueue(() => onCommitVisit(initial.id, seq, thrown));
-    } else if (closed < committed.current) {
+      enqueue(() => onCommitVisit(initial.id, legIndex, seq, thrown));
+    } else if (closed < committed.current || currentLeg(next).playOut !== currentLeg(prev).playOut) {
+      // undo of a stored visit, or of a play-out decision (a step of its own on the server too)
       committed.current = closed;
       enqueue(() => onUndoVisit(initial.id));
     }
   };
 
-  const throwDart = (dart: Dart) => {
-    const r = applyDart(state, dart);
-    if (!r.ok) return setError(errorText(r.reason));
-    setState(r.value);
+  const update = (next: MatchState) => {
+    setState(next);
     setError(null);
-    syncServer(r.value, [...(openVisit(state)?.darts ?? []), dart]);
+  };
+
+  const throwDart = (dart: Dart) => {
+    const r = applyMatchDart(state, dart);
+    if (!r.ok) return setError(errorText(r.reason));
+    update(r.value);
+    syncServer(state, r.value, [...(openVisit(currentLeg(state))?.darts ?? []), dart]);
   };
 
   const undo = () => {
-    const r = undoDart(state);
+    const r = undoMatchDart(state);
     if (!r.ok) return setError(errorText(r.reason));
-    setState(r.value);
-    setError(null);
-    syncServer(r.value, []);
+    update(r.value);
+    syncServer(state, r.value, []);
   };
 
-  return { state, sync, error, isOpen, throwDart, undo };
+  /** M5 plan §9.2: the last player plays out (true) or gives up (false). */
+  const playOut = (value: boolean) => {
+    const leg = currentLeg(state);
+    const r = value ? startPlayOut(leg) : resign(leg);
+    if (!r.ok) return setError(errorText(r.reason));
+    update({ ...state, legs: [...state.legs.slice(0, -1), r.value] });
+    enqueue(() => onPlayOut(initial.id, value));
+  };
+
+  /** ToStart before the first dart of a leg. */
+  const chooseStarter = (playerId: PlayerId) => {
+    const r = setLegStarter(state, playerId);
+    if (!r.ok) return setError(errorText(r.reason));
+    update(r.value);
+    enqueue(() => onSetStarter(initial.id, playerId));
+  };
+
+  return { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter };
 }

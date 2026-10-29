@@ -96,6 +96,8 @@ export const legs = sqliteTable(
     starterPlayerId: text("starter_player_id").notNull().references(() => players.id),
     winnerPlayerId: text("winner_player_id").references(() => players.id),
     finishedAt: integer("finished_at"),
+    /** M5: 3+ players, places fixed, the last player still plays to his checkout. */
+    playOut: integer("play_out", { mode: "boolean" }).notNull().default(false),
   },
   (t) => [index("leg_match_idx").on(t.matchId)],
 );

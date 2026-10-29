@@ -1,6 +1,6 @@
 import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials } from "@/domain/player";
 import type { FieldHits } from "@/domain/stats/field-hits";
-import type { InputMode, LegState, PlayerId, Rules, Visit } from "@/domain/x01";
+import type { InputMode, MatchFormat, MatchState, PlayerId, Rules, Visit } from "@/domain/x01";
 
 /**
  * Interfaces between services and persistence (architecture.md §9, dependency inversion).
@@ -25,11 +25,18 @@ export type MatchSummary = {
 /** For the game overview (M4): open matches, newest first. */
 export type OpenMatch = Pick<MatchSummary, "id" | "players" | "inputMode" | "startedAt">;
 
-/** Everything the scoring screen needs: match, players and the current leg as domain state. */
+/** A stored leg as the services see it; its visits are in `LoadedMatch.state`. */
+export type StoredLegInfo = { id: string; setNo: number; legNo: number; winnerPlayerId: PlayerId | null };
+
+/** Everything the scoring screen needs: match, players and all legs (M5) as domain state. */
 export type LoadedMatch = MatchSummary & {
-  leg: { id: string; setNo: number; legNo: number; winnerPlayerId: PlayerId | null };
-  state: LegState;
+  format: MatchFormat;
+  /** Same order as `state.legs`. */
+  legs: StoredLegInfo[];
+  state: MatchState;
 };
+
+export type NewLeg = { id: string; matchId: string; setNo: number; legNo: number; starterPlayerId: PlayerId };
 
 export type NewMatch = {
   id: string;
@@ -37,6 +44,7 @@ export type NewMatch = {
   rules: Rules;
   playerIds: PlayerId[]; // seat order
   starterIndex: number;
+  format: MatchFormat;
   inputMode: InputMode;
   hostPlayerId: PlayerId | null;
   startedAt: number;
@@ -98,6 +106,14 @@ export interface MatchRepository {
   finishLeg(legId: string, winnerPlayerId: PlayerId, now: number): void;
   reopenLeg(legId: string): void;
   setMatchStatus(matchId: string, status: MatchStatus, now: number): void;
+
+  // Legs (M5): the next leg is created with its first visit, an emptied one is deleted again.
+  createLeg(leg: NewLeg): void;
+  deleteLeg(legId: string): void;
+  setLegStarter(legId: string, starterPlayerId: PlayerId): void;
+  setPlayOut(legId: string, playOut: boolean): void;
+  /** Final places of the match; null = not decided (match running again). */
+  setPlacements(matchId: string, placements: Record<PlayerId, number | null>): void;
 
   // Guest matches (E12)
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[];

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { applyDart } from "./apply";
-import { canCancel, canEnter, canUndo, isOpen, MATCH_OPEN_MS, type MatchAccess } from "./permissions";
-import { newLeg } from "./state";
+import { startPlayOut } from "./apply";
+import { applyMatchDart, currentLeg, newMatch, type MatchState } from "./match";
+import { canCancel, canEnter, canPlayOut, canUndo, isOpen, maySetStarter, MATCH_OPEN_MS, type MatchAccess } from "./permissions";
 import type { Dart } from "./types";
 
 const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;
@@ -17,16 +17,16 @@ const admin = { id: "admin", isAdmin: true };
 const now = 2000;
 const S20: Dart = { field: 20, type: "single" };
 
-/** Leg with three players, after `visits` complete visits. */
-const legAfter = (visits: number) => {
-  let s = newLeg(players.map((p) => p.id), rules, 0);
-  for (let i = 0; i < visits * 3; i++) {
-    const r = applyDart(s, S20);
+const throwAll = (s: MatchState, darts: Dart[]) =>
+  darts.reduce((m, d) => {
+    const r = applyMatchDart(m, d);
     if (!r.ok) throw new Error(r.reason);
-    s = r.value;
-  }
-  return s;
-};
+    return r.value;
+  }, s);
+
+/** Match with three players, after `visits` complete visits. */
+const legAfter = (visits: number) =>
+  throwAll(newMatch(players.map((p) => p.id), rules, { legsToWinSet: 1, setsToWinMatch: 1 }), Array.from({ length: visits * 3 }, () => S20));
 
 describe("isOpen", () => {
   it("running and younger than 24 h", () => {
@@ -93,5 +93,40 @@ describe("closed matches and cancel", () => {
     expect(canCancel(base, b, now)).toBe(false);
     expect(canCancel({ ...base, status: "abandoned" }, host, now)).toBe(false);
     expect(canCancel(base, host, 1000 + MATCH_OPEN_MS)).toBe(false);
+  });
+});
+
+describe("legs and play-out (M5)", () => {
+  const short = { startScore: 40, inRule: "single", outRule: "single" } as const;
+  const D20: Dart = { field: 20, type: "double" };
+  const MISS: Dart[] = [{ field: 0, type: "single" }, { field: 0, type: "single" }, { field: 0, type: "single" }];
+  const m: MatchAccess = { ...base, inputMode: "per-player" };
+
+  it("between two legs the starter of the next leg enters", () => {
+    const two = newMatch(["host", "b"], short, { legsToWinSet: 2, setsToWinMatch: 1 });
+    const s = throwAll(two, [D20]); // host wins leg 1, b starts leg 2
+    expect(canEnter(s, m, b, now)).toBe(true);
+    expect(canEnter(s, m, host, now)).toBe(false);
+    expect(canUndo(s, m, host, now)).toBe(true); // host's winning dart
+  });
+
+  it("play-out and its undo belong to whoever enters for the last player", () => {
+    const fixed = throwAll(newMatch(["host", "b", "guest"], short, { legsToWinSet: 1, setsToWinMatch: 1 }), [D20, D20]);
+    const finished = { ...m, status: "finished" as const };
+    expect(canPlayOut(fixed, finished, host, now)).toBe(true); // guest → host
+    expect(canPlayOut(fixed, finished, b, now)).toBe(false);
+    const r = startPlayOut(currentLeg(fixed));
+    if (!r.ok) throw new Error(r.reason);
+    const playing = { ...fixed, legs: [r.value] };
+    expect(canUndo(playing, m, host, now)).toBe(true); // undo of the choice
+    expect(canUndo(playing, m, b, now)).toBe(false);
+    expect(canPlayOut(throwAll(playing, MISS), m, host, now)).toBe(true);
+    expect(canPlayOut(legAfter(1), m, host, now)).toBe(false); // places not fixed
+  });
+
+  it("choosing the starter: host or admin", () => {
+    expect(maySetStarter(base, host)).toBe(true);
+    expect(maySetStarter(base, admin)).toBe(true);
+    expect(maySetStarter(base, b)).toBe(false);
   });
 });

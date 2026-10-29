@@ -2,23 +2,36 @@ import { z } from "zod";
 import type { LoadedMatch, OpenMatch } from "@/db/repository";
 import type { Session } from "@/domain/player";
 import {
-  applyDart,
+  applyMatchDart,
   canCancel,
   canEnter,
+  canPlayOut,
   canUndo,
+  currentLeg,
   isDart,
   isEditable,
   isLegFinished,
   isOpen,
+  legNumbers,
   MATCH_OPEN_MS,
+  matchStatus,
+  maySetStarter,
+  matchWinner,
+  nextVisitPosition,
   openVisit,
+  placements,
   projectScoreboard,
+  resign,
+  setLegStarter,
+  startPlayOut,
+  undoMatchVisit,
   winnerOf,
   type Actor,
   type Dart,
   type InputMode,
-  type LegState,
   type MatchAccess,
+  type MatchFormat,
+  type MatchState,
   type PlayerId,
   type Rules,
   type ScoreboardView,
@@ -31,9 +44,16 @@ export const rulesSchema = z.object({
   outRule: z.enum(["single", "double", "triple"]),
 });
 
+export const formatSchema = z.object({
+  legsToWinSet: z.number().int().min(1).max(9).default(1),
+  setsToWinMatch: z.number().int().min(1).max(9).default(1),
+});
+
 export const newMatchSchema = z.object({
   playerIds: z.array(z.string().min(1)).min(1).max(8),
   rules: rulesSchema,
+  /** Sets and legs; E7: forced to 1/1 with 3+ players. */
+  format: formatSchema.default({ legsToWinSet: 1, setsToWinMatch: 1 }),
   starterIndex: z.number().int().min(0).default(0),
   inputMode: z.enum(["single", "per-player"]).default("single"),
   /** Player of the session that starts the match (E13). */
@@ -45,10 +65,11 @@ export type MatchView = {
   id: string;
   status: LoadedMatch["status"];
   rules: Rules;
-  legId: string;
+  format: MatchFormat;
   /** Raw state and names so the client can apply darts locally (optimistic UI). */
-  state: LegState;
+  state: MatchState;
   names: Record<PlayerId, string>;
+  /** The current leg, projected. */
   board: ScoreboardView;
   inputMode: InputMode;
   hostPlayerId: PlayerId | null;
@@ -59,7 +80,16 @@ export type MatchView = {
   access: { isOpen: boolean; canEnter: boolean; canUndo: boolean; canCancel: boolean };
 };
 
-export type ActionError = "not-found" | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "out-of-sync" | "forbidden" | "match-closed";
+export type ActionError =
+  | "not-found"
+  | "leg-finished"
+  | "invalid-dart"
+  | "nothing-to-undo"
+  | "out-of-sync"
+  | "forbidden"
+  | "match-closed"
+  | "leg-started"
+  | "no-play-out";
 export type ActionResult = { ok: true; view: MatchView } | { ok: false; reason: ActionError };
 
 export const dartSchema = z
@@ -67,7 +97,7 @@ export const dartSchema = z
   .refine((d) => isDart(d), { message: "not a valid dart" });
 export const thrownDartsSchema = z.array(dartSchema).min(1).max(3);
 
-const accessOf = (m: LoadedMatch): MatchAccess => ({
+const accessOf = (m: Pick<LoadedMatch, "status" | "startedAt" | "inputMode" | "hostPlayerId" | "players">): MatchAccess => ({
   status: m.status,
   startedAt: m.startedAt,
   inputMode: m.inputMode,
@@ -84,10 +114,10 @@ function toView(m: LoadedMatch, session: Session | null, now: number): MatchView
     id: m.id,
     status: m.status,
     rules: m.rules,
-    legId: m.leg.id,
+    format: m.format,
     state: m.state,
     names,
-    board: projectScoreboard(m.state, names),
+    board: projectScoreboard(currentLeg(m.state), names),
     inputMode: m.inputMode,
     hostPlayerId: m.hostPlayerId,
     match,
@@ -99,6 +129,63 @@ function toView(m: LoadedMatch, session: Session | null, now: number): MatchView
       canCancel: actor ? canCancel(match, actor, now) : false,
     },
   };
+}
+
+/** E7: sets and legs only with 2 players. */
+const formatFor = (players: number, format: MatchFormat): MatchFormat => (players > 2 ? { legsToWinSet: 1, setsToWinMatch: 1 } : format);
+
+/** Final places once the match is over: by the places of the last leg (3+ players) or by the match winner. */
+function finalPlacements(state: MatchState): Record<PlayerId, number | null> {
+  const winner = matchWinner(state);
+  if (!winner) return Object.fromEntries(state.players.map((p) => [p, null]));
+  const order = state.players.length > 2 ? placements(currentLeg(state)) : [winner, ...state.players.filter((p) => p !== winner)];
+  return Object.fromEntries(state.players.map((p) => [p, order.indexOf(p) + 1]));
+}
+
+/** Index of the first visit that differs, so only the changed tail of a leg is rewritten. */
+function firstDiff(a: MatchState["legs"][number]["visits"], b: MatchState["legs"][number]["visits"]): number {
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) if (JSON.stringify(a[i]) !== JSON.stringify(b[i])) return i;
+  return n;
+}
+
+/**
+ * Writes the difference between the stored match and `next` (one transaction): legs created or
+ * deleted, changed visits, starter and play-out of a leg, leg winners, match status and places.
+ * Returns the match as now stored. All derived columns are projections of the domain state.
+ */
+function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
+  const now = deps.now();
+  const numbers = legNumbers(next);
+  const legs = [...m.legs];
+  const status = matchStatus(next) === "finished" ? "finished" : "running";
+  deps.transaction(() => {
+    while (legs.length > next.legs.length) deps.matches.deleteLeg(legs.pop()!.id);
+    next.legs.forEach((leg, i) => {
+      if (i >= legs.length) {
+        const created = { id: deps.newId(), ...numbers[i], winnerPlayerId: null };
+        deps.matches.createLeg({ id: created.id, matchId: m.id, setNo: created.setNo, legNo: created.legNo, starterPlayerId: next.players[leg.starter] });
+        legs.push(created);
+      }
+      const old = m.state.legs[i];
+      if (old && old.starter !== leg.starter) deps.matches.setLegStarter(legs[i].id, next.players[leg.starter]);
+      if ((old?.playOut ?? false) !== leg.playOut) deps.matches.setPlayOut(legs[i].id, leg.playOut);
+      const oldVisits = old?.visits ?? [];
+      const from = firstDiff(oldVisits, leg.visits);
+      if (from < oldVisits.length || from < leg.visits.length) deps.matches.syncVisits(legs[i].id, leg.visits, from, deps.newId, now);
+      const winner = isLegFinished(leg) ? winnerOf(leg) : null;
+      if (winner !== legs[i].winnerPlayerId) {
+        if (winner) deps.matches.finishLeg(legs[i].id, winner, now);
+        else deps.matches.reopenLeg(legs[i].id);
+        legs[i] = { ...legs[i], winnerPlayerId: winner };
+      }
+    });
+    if (status !== m.status) {
+      deps.matches.setMatchStatus(m.id, status, now);
+      deps.matches.setPlacements(m.id, finalPlacements(next));
+    }
+  });
+  return { ...m, legs, state: next, status, finishedAt: status === "finished" ? now : null };
 }
 
 /** Checks openness and permission for an input; null = allowed. */
@@ -117,6 +204,7 @@ export function createMatch(deps: Deps, raw: NewMatchInput): string {
     rules: input.rules,
     playerIds: input.playerIds,
     starterIndex: input.starterIndex % input.playerIds.length,
+    format: formatFor(input.playerIds.length, input.format),
     inputMode: input.inputMode,
     hostPlayerId: input.hostPlayerId,
     startedAt: deps.now(),
@@ -149,72 +237,91 @@ export function cancelMatch(deps: Deps, session: Session, matchId: string): { ok
  * Accepts a completed visit from the client: the darts actually thrown
  * (so for a bust also the dart that caused the bust, which is not stored).
  * Darts are counted locally on the phone; only the finished visit goes over the network.
- * `seq` is the expected position; the server replays the darts through the rules itself and
+ * `legIndex` and `seq` are the expected position (M5: the first visit of the next leg has
+ * legIndex = number of legs, seq 0); the server replays the darts through the rules itself and
  * accepts only if exactly one completed visit results.
  */
-export function commitVisit(deps: Deps, session: Session, matchId: string, seq: number, rawDarts: Dart[]): ActionResult {
+export function commitVisit(deps: Deps, session: Session, matchId: string, legIndex: number, seq: number, rawDarts: Dart[]): ActionResult {
   const parsed = thrownDartsSchema.safeParse(rawDarts);
   if (!parsed.success) return { ok: false, reason: "invalid-dart" };
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
-  if (isLegFinished(m.state)) return { ok: false, reason: "leg-finished" };
+  const progress = matchStatus(m.state);
+  if (progress === "finished") return { ok: false, reason: "leg-finished" };
   const denied = gate(m, session, deps.now(), canEnter);
   if (denied) return { ok: false, reason: denied };
-  if (m.state.visits.length !== seq || openVisit(m.state)) return { ok: false, reason: "out-of-sync" };
+  const expected = nextVisitPosition(m.state);
+  if (legIndex !== expected.legIndex || seq !== expected.seq || openVisit(currentLeg(m.state))) return { ok: false, reason: "out-of-sync" };
 
   let next = m.state;
-  for (const dart of parsed.data) {
-    if (openVisit(next) === null && next !== m.state) return { ok: false, reason: "out-of-sync" }; // visit was already closed
-    const r = applyDart(next, dart);
+  for (const [i, dart] of parsed.data.entries()) {
+    if (i > 0 && openVisit(currentLeg(next)) === null) return { ok: false, reason: "out-of-sync" }; // visit was already closed
+    const r = applyMatchDart(next, dart);
     if (!r.ok) return { ok: false, reason: r.reason };
     next = r.value;
   }
-  if (next.visits.length !== seq + 1 || openVisit(next)) return { ok: false, reason: "out-of-sync" };
+  if (next.legs.length !== legIndex + 1 || currentLeg(next).visits.length !== seq + 1 || openVisit(currentLeg(next))) return { ok: false, reason: "out-of-sync" };
 
-  const now = deps.now();
-  const winner = isLegFinished(next) ? winnerOf(next) : null;
-  deps.transaction(() => {
-    deps.matches.syncVisits(m.leg.id, next.visits, seq, deps.newId, now);
-    if (winner) {
-      deps.matches.finishLeg(m.leg.id, winner, now);
-      deps.matches.setMatchStatus(matchId, "finished", now);
-    }
-  });
+  const stored = persist(deps, m, next);
   deps.events.publish(matchId);
-  return { ok: true, view: toView({ ...m, state: next, status: winner ? "finished" : m.status, leg: { ...m.leg, winnerPlayerId: winner } }, session, now) };
+  return { ok: true, view: toView(stored, session, deps.now()) };
 }
 
-/** Removes the last stored visit completely (the client reopens it locally). */
+/** Removes the last stored step (a visit, or a play-out decision); the client reopens it locally. */
 export function undoVisit(deps: Deps, session: Session, matchId: string): ActionResult {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
   const match = accessOf(m);
   const now = deps.now();
   if (!isEditable(match, now)) return { ok: false, reason: "match-closed" };
-  if (m.state.visits.length === 0) return { ok: false, reason: "nothing-to-undo" };
+  const r = undoMatchVisit(m.state);
+  if (!r.ok) return { ok: false, reason: r.reason };
   if (!canUndo(m.state, match, actorOf(session), now)) return { ok: false, reason: "forbidden" };
-
-  const hadWinner = isLegFinished(m.state);
-  const next: LegState = { ...m.state, visits: m.state.visits.slice(0, -1) };
-  deps.transaction(() => {
-    deps.matches.syncVisits(m.leg.id, next.visits, next.visits.length, deps.newId, now);
-    if (hadWinner) {
-      deps.matches.reopenLeg(m.leg.id);
-      deps.matches.setMatchStatus(matchId, "running", now);
-    }
-  });
+  const stored = persist(deps, m, r.value);
   deps.events.publish(matchId);
-  return { ok: true, view: toView({ ...m, state: next, status: "running", leg: { ...m.leg, winnerPlayerId: null } }, session, now) };
+  return { ok: true, view: toView(stored, session, now) };
 }
 
-/** "Restart Game" from legacy: same players, same rules, the starter moves on by one seat. */
+/** M5 plan §9.2: the last player plays to his checkout (true) or gives up (false). */
+export function setPlayOut(deps: Deps, session: Session, matchId: string, playOut: boolean): ActionResult {
+  const m = deps.matches.loadMatch(matchId);
+  if (!m) return { ok: false, reason: "not-found" };
+  const match = accessOf(m);
+  const now = deps.now();
+  if (!isEditable(match, now)) return { ok: false, reason: "match-closed" };
+  if (!canPlayOut(m.state, match, actorOf(session), now)) return { ok: false, reason: "forbidden" };
+  const leg = currentLeg(m.state);
+  const r = playOut ? startPlayOut(leg) : resign(leg);
+  if (!r.ok) return { ok: false, reason: r.reason };
+  const stored = persist(deps, m, { ...m.state, legs: [...m.state.legs.slice(0, -1), r.value] });
+  deps.events.publish(matchId);
+  return { ok: true, view: toView(stored, session, now) };
+}
+
+/** ToStart: host or admin choose who throws first, before the first dart of a leg. */
+export function setStarter(deps: Deps, session: Session, matchId: string, playerId: PlayerId): ActionResult {
+  const m = deps.matches.loadMatch(matchId);
+  if (!m) return { ok: false, reason: "not-found" };
+  const match = accessOf(m);
+  const now = deps.now();
+  if (!isOpen(match, now)) return { ok: false, reason: "match-closed" };
+  if (!maySetStarter(match, actorOf(session))) return { ok: false, reason: "forbidden" };
+  const r = setLegStarter(m.state, playerId);
+  if (!r.ok) return { ok: false, reason: r.reason === "unknown-player" ? "not-found" : r.reason };
+  const stored = persist(deps, m, r.value);
+  deps.events.publish(matchId);
+  return { ok: true, view: toView(stored, session, now) };
+}
+
+/** "Restart Game" from legacy: same players, rules and format, the starter moves on by one seat. */
 export function restartMatch(deps: Deps, matchId: string): string | null {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return null;
   return createMatch(deps, {
     playerIds: m.players.map((p) => p.id),
     rules: m.rules,
-    starterIndex: (m.state.starter + 1) % m.players.length,
+    format: m.format,
+    starterIndex: (m.state.legs[0].starter + 1) % m.players.length,
     inputMode: m.inputMode,
     hostPlayerId: m.hostPlayerId,
   });

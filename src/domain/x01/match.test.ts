@@ -10,11 +10,12 @@ import {
   newMatch,
   setLegStarter,
   undoMatchDart,
+  undoMatchVisit,
   type MatchFormat,
   type MatchState,
 } from "./match";
 import { replayMatch } from "./replay";
-import { applyDart } from "./apply";
+import { applyDart, startPlayOut } from "./apply";
 import { newLeg } from "./state";
 import { currentPlayer, isLegFinished } from "./selectors";
 import type { Dart, LegState, Rules } from "./types";
@@ -137,6 +138,25 @@ describe("undo across leg, set and match boundaries", () => {
   });
 });
 
+describe("undoMatchVisit (server side)", () => {
+  it("removes a whole visit, across the leg boundary too", () => {
+    const one = winLeg(newMatch([A, B], rules, bestOf3), A);
+    const two = play(one, ...MISS);
+    expect(ok(undoMatchVisit(two))).toEqual(one);
+    expect(matchStatus(ok(undoMatchVisit(one)))).toBe("running");
+  });
+
+  it("takes back a play-out decision as a step of its own", () => {
+    const fixed = play(newMatch([A, B, C], rules, { legsToWinSet: 1, setsToWinMatch: 1 }), ...OUT, ...OUT);
+    const playing = { ...fixed, legs: [ok(startPlayOut(currentLeg(fixed)))] };
+    expect(ok(undoMatchVisit(playing))).toEqual(fixed);
+  });
+
+  it("nothing to undo in a fresh match", () => {
+    expect(undoMatchVisit(newMatch([A, B], rules, bestOf3))).toEqual({ ok: false, reason: "nothing-to-undo" });
+  });
+});
+
 describe("choosing the starter (ToStart)", () => {
   it("before the first dart of a leg: allowed, the next leg continues from there", () => {
     let m = setOk(newMatch([A, B], rules, bestOf3), B);
@@ -204,6 +224,11 @@ describe("replayMatch", () => {
 
 function setOk(m: MatchState, player: string): MatchState {
   const r = setLegStarter(m, player);
+  if (!r.ok) throw new Error(r.reason);
+  return r.value;
+}
+
+function ok<T>(r: { ok: true; value: T } | { ok: false; reason: string }): T {
   if (!r.ok) throw new Error(r.reason);
   return r.value;
 }

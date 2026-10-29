@@ -1,6 +1,6 @@
 import { isValidDart } from "./rules";
 import { dartScore, isDart } from "./scoring";
-import { checkoutOrder, currentPlayer, isLegFinished, openVisit, placementsFixed, scoreOf } from "./selectors";
+import { currentPlayer, isLegFinished, openVisit, remainingPlayer, scoreOf } from "./selectors";
 import {
   MAX_DARTS_PER_VISIT,
   type ApplyError,
@@ -61,13 +61,6 @@ export function undoDart(state: LegState): Result<LegState, UndoError> {
     return { ok: true, value: { ...state, visits: state.visits.slice(0, -1) } };
   }
   return { ok: true, value: withLastVisit(state, { ...last, darts, isBust: false }) };
-}
-
-/** The one player who has not checked out once the places are fixed (3+ players); otherwise null. */
-function remainingPlayer(state: LegState): string | null {
-  if (state.players.length < 3 || !placementsFixed(state)) return null;
-  const out = checkoutOrder(state);
-  return state.players.find((p) => !out.includes(p)) ?? null;
 }
 
 /**

@@ -1,5 +1,7 @@
-import { currentPlayer } from "./selectors";
-import type { LegState, PlayerId } from "./types";
+import { playOutUndo } from "./apply";
+import { currentLeg, lastVisitOfMatch, matchCurrentPlayer, type MatchState } from "./match";
+import { remainingPlayer } from "./selectors";
+import type { PlayerId } from "./types";
 
 /**
  * Input permissions (E13, M4): pure functions over values, no DB.
@@ -41,23 +43,40 @@ function mayActFor(match: MatchAccess, actor: Actor, playerId: PlayerId): boolea
   return player.hasLogin ? actor.id === playerId : isHost(match, actor);
 }
 
-/** Enter the next visit, without checking the clock (for the client, which gets `isOpen` from the server). */
-export function mayEnter(state: LegState, match: MatchAccess, actor: Actor): boolean {
-  return mayActFor(match, actor, currentPlayer(state));
+/** Enter the next visit, without checking the clock (for the client, which gets `isOpen` from the server). Between legs: the next starter. */
+export function mayEnter(state: MatchState, match: MatchAccess, actor: Actor): boolean {
+  return mayActFor(match, actor, matchCurrentPlayer(state));
 }
 
-/** Undo the last saved visit: whoever could have entered it. */
-export function mayUndo(state: LegState, match: MatchAccess, actor: Actor): boolean {
-  const last = state.visits.at(-1);
+/** M5 plan §9.2: choose play-out or resign, whoever enters for the last player. */
+export function mayPlayOut(state: MatchState, match: MatchAccess, actor: Actor): boolean {
+  const last = remainingPlayer(currentLeg(state));
+  return last ? mayActFor(match, actor, last) : false;
+}
+
+/** Undo the last saved step: whoever could have entered the visit, or made the play-out decision. */
+export function mayUndo(state: MatchState, match: MatchAccess, actor: Actor): boolean {
+  if (playOutUndo(currentLeg(state))) return mayPlayOut(state, match, actor);
+  const last = lastVisitOfMatch(state);
   return last ? mayActFor(match, actor, last.playerId) : false;
 }
 
-export function canEnter(state: LegState, match: MatchAccess, actor: Actor, now: number): boolean {
+/** ToStart: host or admin, like cancelling. */
+export function maySetStarter(match: MatchAccess, actor: Actor): boolean {
+  return actor.isAdmin || isHost(match, actor);
+}
+
+export function canEnter(state: MatchState, match: MatchAccess, actor: Actor, now: number): boolean {
   return isOpen(match, now) && mayEnter(state, match, actor);
 }
 
-export function canUndo(state: LegState, match: MatchAccess, actor: Actor, now: number): boolean {
+export function canUndo(state: MatchState, match: MatchAccess, actor: Actor, now: number): boolean {
   return isEditable(match, now) && mayUndo(state, match, actor);
+}
+
+/** Play-out and resign change a finished match too (it reopens), like undo. */
+export function canPlayOut(state: MatchState, match: MatchAccess, actor: Actor, now: number): boolean {
+  return isEditable(match, now) && mayPlayOut(state, match, actor);
 }
 
 /** Cancel: host or admin, only while the match is open. */
