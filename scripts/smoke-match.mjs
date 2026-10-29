@@ -355,6 +355,75 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.screenshot({ path: `${shots}/overview-history.png`, fullPage: true });
 }
 
+// M7: Cricket, Elimination and SplitScore, each once to the end with an undo (A vs B, host = admin)
+{
+  const tap = async (...names) => {
+    for (const n of names) {
+      await key(n).click();
+      await page.waitForTimeout(120);
+    }
+    if (await page.locator("[role=status]").count()) await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
+  };
+  const MISS = ["0", "0", "0"];
+  const start = async (mode, before) => {
+    await page.goto(`${base}/new/${mode}`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: `A${stamp} auswählen` }).click();
+    await page.getByRole("button", { name: `B${stamp} auswählen` }).click();
+    if (before) await before();
+    await page.getByRole("button", { name: "Start Game" }).click();
+    await page.waitForURL(/\/match\//);
+  };
+
+  // Cricket: A closes everything, B misses; undo of a scoring dart takes the points back
+  await start("cricket");
+  await tap("Triple", "20", "Triple", "20");
+  expect((await scores())[0] === "60", `cricket: fourth to sixth mark score 60 (got ${await scores()})`);
+  await tap("Undo");
+  expect((await scores())[0] === "0", "cricket: undo takes the points back");
+  await tap("Triple", "19", "Triple", "18", ...MISS, "Triple", "17", "Triple", "16", "Triple", "15", ...MISS);
+  expect((await page.locator("[aria-live=polite]").innerText()) === "Noch 3× Bull", "cricket: hint names the field still open");
+  await page.screenshot({ path: `${shots}/match-cricket.png` });
+  await tap("Double", "Bull", "Bull", "20");
+  await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
+  log("cricket ok");
+
+  // Elimination 301 single out: landing on A's score sends A back to 0, undo brings A back
+  await start("elimination");
+  await tap("20", "0", "0");
+  await tap("15", "5");
+  expect(JSON.stringify(await scores()) === JSON.stringify(["0", "20"]), `elimination: A back to 0 (got ${await scores()})`);
+  await tap("Undo");
+  expect(JSON.stringify(await scores()) === JSON.stringify(["20", "15"]), `elimination: undo brings A back (got ${await scores()})`);
+  await tap("0", "0");
+  await tap("Triple", "20", "Triple", "20", "Triple", "20"); // A 200
+  await tap(...MISS);
+  await tap("Triple", "20", "Triple", "13", "Double", "1"); // 260, 299, 301
+  await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
+  log("elimination ok");
+
+  // SplitScore: A hits every target, B never; an undo in round 1, the target moves on per round
+  await start("splitscore");
+  const targets = [["15"], ["16"], ["Double", "1"], ["17"], ["18"], ["Triple", "1"], ["19"], ["20"], ["Bull"]];
+  for (const [i, hit] of targets.entries()) {
+    await tap(...hit, "0", "0");
+    if (i === 0) {
+      await tap("0", "Undo");
+      expect((await page.locator("[aria-live=polite]").innerText()) === "Ziel: 15", "splitscore: still target 15 after the undo");
+    }
+    await tap(...MISS);
+    if (i === 2) await page.screenshot({ path: `${shots}/match-splitscore.png` });
+  }
+  await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
+  expect((await page.getByText("Punkte 1 ·").count()) === 1, "splitscore: B halved nine times down to 1");
+  log("splitscore ok");
+
+  await page.goto(`${base}/`, { waitUntil: "networkidle" });
+  const recent = page.getByRole("list", { name: "Letzte Spiele" });
+  for (const mode of ["Cricket", "Elimination", "SplitScore"]) {
+    expect((await recent.getByText(new RegExp(`${mode} ·`)).count()) >= 1, `history lists the ${mode} match`);
+  }
+}
+
 // Reset for A: A's old session ends, the new password applies
 {
   await page.goto(`${base}/account`, { waitUntil: "networkidle" });

@@ -1,7 +1,7 @@
 # M7-Plan – Cricket, Elimination, SplitScore
 
 > Detailplan zu `project.md` M7. Regeln aus `legacy-analysis.md` §4–6 und den Swift-Klassen `CricketGame`, `Field`, `EliminationGame`, `Elimination`, `SplitScoreGame`. Jeder Modus ist ein eigenes Domänenmodul hinter derselben Schnittstelle; Server, Zählscreen, Rechte und Netzprotokoll bleiben, nur Panels, Hinweiszeile und Setup bekommen Varianten. Test-first, jeder grüne Schritt ein Commit.
-> Stand: Fragen in §9 am 29.10.2026 beantwortet (1, 2, 5) bzw. Default (3, 4). M6 wird zunächst übersprungen; die Playwright-Tests aus §7 kommen deshalb als Erweiterung von `scripts/smoke-match.mjs`. Noch nicht umgesetzt.
+> Stand: Fragen in §9 am 29.10.2026 beantwortet (1, 2, 5) bzw. Default (3, 4). M6 wird zunächst übersprungen; die Playwright-Tests aus §7 kommen deshalb als Erweiterung von `scripts/smoke-match.mjs`. §2–§7 umgesetzt am 29.10.2026 (Schnittstelle in `src/domain/game/`, je Modus über 97 % Abdeckung, Smoke-Test mit jedem Modus bis zum Sieg inklusive Undo). Offen: Deploy und DoD am Board.
 > Luca: §0.
 
 ---
@@ -87,7 +87,7 @@ Panel: Punkte, Hinweiszeile „Ziel: Doppel“ bzw. „Ziel: 17“, bei Rundenwe
 
 ## 6. Setup-Screens und Zählscreen-Varianten
 
-- `src/app/new/cricket`, `/new/elimination` (Pillen Ziel 301/501, Out-Regel), `/new/splitscore`; `new-match-form.tsx` wird `x01-setup.tsx`, die gemeinsame Hülle (Kopfzeile, Picker, Eingabemodus aus M4) wird `setup-shell.tsx`.
+- eine Route `/new/[mode]` für alle vier Modi; Elimination mit Out-Regel und Ziel 501/401/301 (wie Legacy, Default SingleOut und 301); `new-match-form.tsx` wird `x01-setup.tsx`, die gemeinsame Hülle (Kopfzeile, Picker, Eingabemodus aus M4) wird `setup-shell.tsx`.
 - `game-menu.tsx`: alle vier Modi als Links; Spielübersicht zeigt den Modus.
 - `player-panel.tsx`: Varianten `x01` (wie heute), `cricket` (Marks-Raster), `points` (Elimination, SplitScore); Kleinpanel zeigt Punkte bzw. geschlossene Felder als Zahl.
 - `checkout-hint.tsx` bleibt; der Text kommt aus `mode.hint`.

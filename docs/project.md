@@ -199,10 +199,10 @@ Detailplan: `docs/m7-plan.md`.
 
 **Ziel:** Die drei übrigen Legacy-Modi, je ein Domänenmodul und ein Screen (Regeln: `legacy-analysis.md` §4–6).
 
-- [ ] `src/domain/cricket/` mit Tests: Marks, Punkte ab dem 4. Mark, geschlossene Felder, Sieg
-- [ ] `src/domain/elimination/` mit Tests: hochzählen, Out-Regel, Elimination und ihr Undo
-- [ ] `src/domain/splitscore/` mit Tests: Zielfeld-Reihenfolge, Halbieren, Replay
-- [ ] Setup-Screens und Panel-Varianten (Cricket-Marks, „nächste Elimination“, aktuelles Zielfeld)
+- [x] `src/domain/cricket/` mit Tests: Marks, Punkte ab dem 4. Mark, geschlossene Felder, Sieg
+- [x] `src/domain/elimination/` mit Tests: hochzählen, Out-Regel, Elimination und ihr Undo
+- [x] `src/domain/splitscore/` mit Tests: Zielfeld-Reihenfolge, Halbieren, Replay
+- [x] Setup-Screens und Panel-Varianten (Cricket-Marks, „nächste Elimination“, aktuelles Zielfeld)
 
 **DoD:** Jeder Modus wird einmal am Board durchgespielt; Undo stimmt in allen dreien.
 
