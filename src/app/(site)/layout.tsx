@@ -3,7 +3,7 @@ import { TabBar } from "@/components/ui/tab-bar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { de } from "@/i18n/de";
 
-/** The two tabs of the legacy HomeView plus "Konto" (account, M3). Setup and scoring screen have no tab bar. */
+/** The two tabs of the legacy HomeView plus the account tab (M3). Setup and scoring screen have no tab bar. */
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-dvh flex-col pt-safe">

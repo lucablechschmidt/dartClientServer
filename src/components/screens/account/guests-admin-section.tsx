@@ -6,7 +6,7 @@ import { FormError, SectionHeading, TextButton } from "@/components/ui/form-cont
 import type { Player, PlayerError, PlayerResult } from "@/domain/player";
 import type { AccountTexts } from "./types";
 
-/** Admin: today's guests with "Dauerhaft übernehmen" (E12); hidden when there are none. */
+/** Admin: today's guests with "make permanent" (E12); hidden when there are none. */
 export function GuestsAdminSection({ guests, texts, onPromoteGuest }: { guests: Player[]; texts: AccountTexts; onPromoteGuest: (playerId: string) => Promise<PlayerResult> }) {
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
   if (guests.length === 0) return null;

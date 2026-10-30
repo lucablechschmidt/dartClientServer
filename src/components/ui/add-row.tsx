@@ -25,7 +25,7 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, v
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Controlled on purpose: React 19 resets a form after its action, which would wipe the name
-  // right when the user needs to correct it ("Diesen Namen gibt es schon").
+  // right when the user needs to correct it (name already taken).
   const [name, setName] = useState("");
   const submit = async (fd: FormData) => {
     const message = await onSubmit(fd);

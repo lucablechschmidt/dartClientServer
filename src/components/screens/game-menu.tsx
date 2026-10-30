@@ -24,7 +24,7 @@ export type RecentMatchItem = {
 
 type Props = { texts: Texts["gameMenu"]; overviewTexts: Texts["overview"]; matches: OpenMatchItem[]; recent?: RecentMatchItem[]; now: number };
 
-/** "Cricket · " before the time; Classic Game (X01) stays unmarked as the usual case. */
+/** Mode name before the time; Classic Game (X01) stays unmarked as the usual case. */
 const modePrefix = (mode: Mode, t: Texts["gameMenu"]) => (mode === "x01" ? "" : `${t.modes[mode]} · `);
 
 /** "vor 12 min", computed from server time so server and client render the same. */
@@ -36,7 +36,7 @@ export function relativeTime(startedAt: number, now: number, t: Texts["overview"
   return t.daysAgo.replace("{n}", String(Math.round(minutes / (24 * 60))));
 }
 
-/** "Casey Legs 2:1", "1. C · 2. A · 3. B", "Casey gewinnt" or "abgebrochen". */
+/** Result line: score ("Casey Legs 2:1"), places ("1. C · 2. A · 3. B"), the winner, or cancelled. */
 export function resultText(result: RecentMatchItem["result"], t: Texts["overview"]): string {
   switch (result.kind) {
     case "abandoned":

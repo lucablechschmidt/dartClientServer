@@ -11,7 +11,7 @@ type Props = {
   header: ReactNode;
   keypad: ReactNode;
   isOpen: boolean;
-  /** "… ist dran" on a device that may not enter, or "Spiel beendet"; replaces the next player line. */
+  /** Whose turn it is on a device that may not enter, or "match closed"; replaces the next player line. */
   turnHint: string | null;
   onSelectStarter?: (playerId: PlayerId) => void;
 };

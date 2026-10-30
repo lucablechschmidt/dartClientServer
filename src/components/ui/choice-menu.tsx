@@ -10,7 +10,7 @@ type Props<V extends string | number> = {
   options: readonly Choice<V>[];
   value: V;
   onChange: (value: V) => void;
-  /** What is chosen ("Einstieg"); the trigger's accessible name is "label: current". */
+  /** What is chosen (e.g. the in rule); the trigger's accessible name is "label: current". */
   label: string;
   /** Content of the trigger; gets the current option's label and whether the list is open. */
   children: (current: string, open: boolean) => ReactNode;
@@ -100,7 +100,7 @@ export function DisclosureChevron({ open }: { open: boolean }) {
   return <ChevronDownIcon className={`size-icon-sm shrink-0 ${open ? "rotate-180" : ""}`} />;
 }
 
-/** Small label above the chosen value, the content of most choice triggers ("Einstieg / Single In"). */
+/** Small label above the chosen value, the content of most choice triggers (in rule / Single In). */
 export function LabeledValue({ label, value }: { label: string; value: string }) {
   return (
     <span className="flex flex-1 flex-col">

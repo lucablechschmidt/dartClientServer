@@ -19,8 +19,8 @@ type Props = {
 
 /**
  * Port of PlayersListView. Regular players are only created by invitation (M3), so this screen
- * only offers "Gast hinzufügen". The wrench appears where the role may rename: own
- * player, guests, admin everyone. Guests (E12) are in a second card "Gäste heute".
+ * only offers adding a guest. The wrench appears where the role may rename: own
+ * player, guests, admin everyone. Guests (E12) are in a second card (today's guests).
  */
 export function PlayerList({ players, session, texts, onAddGuest, onRename, onDelete }: Props) {
   const [editing, setEditing] = useState<string | null>(null);

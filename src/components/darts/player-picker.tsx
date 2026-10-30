@@ -37,7 +37,7 @@ export function initials(players: Player[]): Record<string, string> {
 
 /**
  * Port of PlayerSelectionView in the Figma layout: avatar, name, guest badge and a box that shows
- * the throwing position once tapped (players are tapped in order). "Gast hinzufügen" is a button
+ * the throwing position once tapped (players are tapped in order). Adding a guest is a button
  * below the list (tap → input field → Enter). Sits outside the match form because the guest row
  * is a form of its own.
  */

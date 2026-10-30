@@ -36,7 +36,7 @@ export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((val
 
 /**
  * What every setup shares, in the Figma layout (Design/GameSetUpGameOptions*.png, own colors):
- * title with the mode, the mode's options, the input mode (E13), "Spieler auswählen" with the
+ * title with the mode, the mode's options, the input mode (E13), the player heading with the
  * PlayerPicker, and the start button at the bottom with a summary. The picker sits outside the
  * form (its own guest form); the start button belongs to the form via `form=`.
  */
@@ -136,7 +136,7 @@ export function ScoreChoice({ title, subtitle, value, options, onChange }: { tit
   );
 }
 
-/** A tile with a small label above the chosen rule ("Einstieg / Single In"); opened it is outlined in the accent. */
+/** A tile with a small label above the chosen rule (in rule / Single In); opened it is outlined in the accent. */
 export function RuleTile<V extends string>({ name, label, value, options, onChange }: { name: string; label: string; value: V; options: readonly Choice<V>[]; onChange: (v: V) => void }) {
   return (
     <ChoiceMenu name={name} label={label} value={value} onChange={onChange} options={options} className="rounded-tile border border-transparent bg-fill px-3 py-2" openClassName="border-accent bg-accent-wash">

@@ -160,7 +160,7 @@ const activeName = await page.locator(".border-frame-active").first().innerText(
 expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${activeName.split("\n")[0]})`);
 
 
-// --- Guests (E12): created in the setup, selected right away, survive a reload, listed under "Gäste heute"
+// --- Guests (E12): created in the setup, selected right away, survive a reload, listed under today's guests
 {
   const guest = `G${stamp}`;
   await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
@@ -222,7 +222,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   log("overview and cancel ok");
 }
 
-// Two devices (M4, E13): admin starts "jeder selbst" against A; A sees the match live and may only throw when it is A's turn
+// Two devices (M4, E13): admin starts "each on their own phone" against A; A sees the match live and may only throw when it is A's turn
 {
   const pageA = contexts[`A${stamp}`].page;
   await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });

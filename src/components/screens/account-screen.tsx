@@ -25,7 +25,7 @@ type Props = {
   };
 };
 
-/** "Konto" tab: own account for everyone; invite, players and guests sections for the admin. */
+/** Account tab: own account for everyone; invite, players and guests sections for the admin. */
 export function AccountScreen({ session, players, texts, onRename, onChangePassword, onLogout, admin }: Props) {
   return (
     <GroupedSection className="flex flex-col gap-5">

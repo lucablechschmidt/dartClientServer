@@ -78,7 +78,7 @@ export function playOutUndo(state: LegState): LegState | null {
   return null;
 }
 
-/** "{Name} spielt zu Ende" (M5 plan §9.2): only with 3+ players, places fixed, last player not out yet. */
+/** "{name} plays out" (M5 plan §9.2): only with 3+ players, places fixed, last player not out yet. */
 export function startPlayOut(state: LegState): Result<LegState, PlayOutError> {
   if (!remainingPlayer(state) || state.playOut) return { ok: false, reason: "no-play-out" };
   return { ok: true, value: { ...state, playOut: true } };

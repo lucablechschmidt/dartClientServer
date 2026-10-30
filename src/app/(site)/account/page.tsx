@@ -28,7 +28,7 @@ async function Account() {
   );
 }
 
-/** "Konto" (account) tab (M3): own name, password, logout; for the admin also invites and management. */
+/** Account tab (M3): own name, password, logout; for the admin also invites and management. */
 export default function AccountPage() {
   return (
     <main className="flex flex-1 flex-col">
