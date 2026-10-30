@@ -45,7 +45,7 @@ npm run dev                      # http://localhost:3000; /dev/theme and /dev/to
 npm test                         # Vitest once; projects: domain (node, *.test.ts) and ui (jsdom, *.test.tsx)
 npx vitest run src/domain/x01    # one folder or file
 npm run format                   # Prettier (printWidth 140, Tailwind class order); format:check in CI
-npm run lint                     # ESLint incl. the layering rule (no-restricted-imports)
+npm run lint                     # ESLint: next presets, typescript-eslint strict + stylistic (type-checked), layering rule
 npm run typecheck                # tsc; run `npm run build` first if .next/types is stale
 npm run build                    # production build, output: standalone
 npm run db:generate              # drizzle-kit migration after editing src/db/schema.ts
