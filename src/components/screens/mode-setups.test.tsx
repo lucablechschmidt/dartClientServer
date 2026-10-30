@@ -9,10 +9,10 @@ const props = {
   players,
   texts: de.newGame,
   commonTexts: { back: "Zurück", save: "Speichern", cancel: "Abbrechen" },
-  onStart: async () => {},
-  onAddGuest: async () => ({ ok: true as const, id: "x" }),
+  onStart: () => Promise.resolve(),
+  onAddGuest: () => Promise.resolve({ ok: true as const, id: "x" }),
 };
-const value = (c: HTMLElement, name: string) => (c.querySelector(`input[name="${name}"]`) as HTMLInputElement | null)?.value;
+const value = (c: HTMLElement, name: string) => c.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
 
 describe("setups per mode (M7)", () => {
   it("cricket and splitscore: no pills, fixed rules, the mode as hidden field", () => {

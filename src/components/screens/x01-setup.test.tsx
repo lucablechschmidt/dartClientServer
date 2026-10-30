@@ -19,8 +19,8 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={async () => {}}
-        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+        onStart={() => Promise.resolve()}
+        onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
     const start = screen.getByRole("button", { name: "Spiel starten" });
@@ -43,9 +43,9 @@ describe("X01Setup", () => {
 
   it("marks guests and selects a newly added guest right away", async () => {
     const user = userEvent.setup();
-    const onAddGuest = vi.fn(async (fd: FormData) => ({ ok: true as const, id: `guest-${fd.get("name")}` }));
+    const onAddGuest = vi.fn((fd: FormData) => Promise.resolve({ ok: true as const, id: `guest-${fd.get("name") as string}` }));
     const { container } = render(
-      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={onAddGuest} />,
+      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={() => Promise.resolve()} onAddGuest={onAddGuest} />,
     );
     expect(screen.getByRole("button", { name: "Gecko auswählen" })).toHaveTextContent("Gast");
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
@@ -65,8 +65,8 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={async () => {}}
-        onAddGuest={async () => ({ ok: false as const, reason: "name-taken" as const })}
+        onStart={() => Promise.resolve()}
+        onAddGuest={() => Promise.resolve({ ok: false as const, reason: "name-taken" as const })}
       />,
     );
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
@@ -82,8 +82,8 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={async () => {}}
-        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+        onStart={() => Promise.resolve()}
+        onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
     const legs = () => container.querySelector('input[name="legsToWinSet"]');
@@ -105,8 +105,8 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={async () => {}}
-        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+        onStart={() => Promise.resolve()}
+        onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
     const trigger = screen.getByRole("button", { name: "Einstieg: Single In" });

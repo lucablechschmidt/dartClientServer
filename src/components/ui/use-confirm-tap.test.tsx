@@ -21,7 +21,9 @@ describe("useConfirmTap", () => {
     const run = vi.fn();
     const { result } = renderHook(() => useConfirmTap(5000));
     act(() => result.current.tap("a", run));
-    act(() => vi.advanceTimersByTime(5001));
+    act(() => {
+      vi.advanceTimersByTime(5001);
+    });
     act(() => result.current.tap("a", run));
     expect(run).not.toHaveBeenCalled();
     act(() => result.current.tap("b", run));

@@ -67,6 +67,8 @@ describe("themeInitScript", () => {
   it("is self-contained and references the storage key", () => {
     expect(themeInitScript).toContain('"theme"');
     expect(themeInitScript).toContain("data-theme");
+    // Parsing the inline script is the point of this test; it is our own constant, not user input.
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     expect(() => new Function(themeInitScript)).not.toThrow();
   });
 });
