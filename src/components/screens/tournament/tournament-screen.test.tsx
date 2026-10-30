@@ -36,22 +36,23 @@ const view: TournamentScreenView = {
   canRedraw: false,
   canDelete: true,
 };
-const props = { texts: de.tournaments, back: "Zurück", onRedraw: vi.fn(), onDelete: vi.fn() };
+const t = de.tournaments;
+const props = { texts: t, back: de.ui.back, onRedraw: vi.fn(), onDelete: vi.fn() };
 
 describe("TournamentScreen (M9)", () => {
-  it("rounds by name, a bye names the bye, a result shows legs and the winner in bold, ready games offer Spielen", async () => {
+  it("rounds by name, a bye names the bye, a result shows legs and the winner in bold, ready games can be played", async () => {
     const user = userEvent.setup();
     const onStart = vi.fn(() => Promise.resolve({ ok: false as const, reason: "not-ready" as const }));
     render(<TournamentScreen view={view} onStart={onStart} {...props} />);
-    const semis = screen.getByRole("list", { name: "Halbfinale" });
-    expect(within(semis).getByText("Freilos")).toBeInTheDocument();
+    const semis = screen.getByRole("list", { name: t.semifinal });
+    expect(within(semis).getByText(t.bye)).toBeInTheDocument();
     expect(within(semis).getByText("1:2")).toBeInTheDocument();
     expect(within(semis).getByText("Kim")).toHaveClass("font-semibold");
-    const final = screen.getByRole("list", { name: "Finale" });
-    await user.click(within(final).getByRole("button", { name: "Spielen" }));
+    const final = screen.getByRole("list", { name: t.final });
+    await user.click(within(final).getByRole("button", { name: t.play }));
     expect(onStart).toHaveBeenCalledWith("k-r2-s1");
-    expect(await screen.findByText(de.tournaments.errors["not-ready"])).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Neu auslosen" })).toBeNull();
+    expect(await screen.findByText(t.errors["not-ready"])).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: t.redraw })).toBeNull();
   });
 
   it("winner banner, a running game links back into its match, redraw before the first game", () => {
@@ -62,9 +63,9 @@ describe("TournamentScreen (M9)", () => {
       fixtures: [{ ...view.fixtures[2], matchId: "m2", matchStatus: "running" }],
     };
     render(<TournamentScreen view={running} onStart={vi.fn()} {...props} />);
-    expect(screen.getByText("Sieger: Kim")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Weiter" })).toHaveAttribute("href", "/match/m2");
-    expect(screen.getByRole("button", { name: "Neu auslosen" })).toBeInTheDocument();
+    expect(screen.getByText(t.winner.replace("{name}", "Kim"))).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: t.open })).toHaveAttribute("href", "/match/m2");
+    expect(screen.getByRole("button", { name: t.redraw })).toBeInTheDocument();
   });
 
   it("the group table: place, player, games, wins, legs, average", () => {

@@ -9,7 +9,11 @@ const players = [
   { id: "b", name: "Haflinger", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false },
   { id: "g", name: "Gecko", createdAt: 0, guestUntil: 999, hasLogin: false, isAdmin: false },
 ];
-const commonTexts = { back: "Zurück", save: "Speichern", cancel: "Abbrechen" };
+const t = de.newGame;
+const commonTexts = { back: de.ui.back, save: de.players.save, cancel: de.players.cancel };
+const select = (name: string) => t.select.replace("{name}", name);
+const choice = (label: string, value: string) => `${label}: ${value}`;
+const legsMore = `${t.bestOfLegs} ${t.more}`;
 
 describe("X01Setup", () => {
   it("numbers players in tap order, allows deselecting and only then enables Start Game", async () => {
@@ -23,21 +27,21 @@ describe("X01Setup", () => {
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
-    const start = screen.getByRole("button", { name: "Spiel starten" });
+    const start = screen.getByRole("button", { name: t.start });
     expect(start).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
-    await user.click(screen.getByRole("button", { name: "Moschusochse auswählen" }));
-    expect(screen.getByLabelText("Position 1")).toHaveTextContent("1");
+    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(screen.getByRole("button", { name: select("Moschusochse") }));
+    expect(screen.getByLabelText(t.selected.replace("{n}", "1"))).toHaveTextContent("1");
     expect(start).toBeEnabled();
     const ids = () => [...container.querySelectorAll('input[name="playerId"]')].map((i) => (i as HTMLInputElement).value);
     expect(ids()).toEqual(["b", "a"]);
-    await user.click(screen.getByRole("button", { name: "Haflinger abwählen" }));
+    await user.click(screen.getByRole("button", { name: t.deselect.replace("{name}", "Haflinger") }));
     expect(ids()).toEqual(["a"]);
     expect(container.querySelector('input[name="outRule"]')).toHaveValue("double");
     // E13: default is one phone, switchable to each player on their own
     expect(container.querySelector('input[name="inputMode"]')).toHaveValue("single");
-    await user.click(screen.getByRole("button", { name: "Eingabe: Ein Handy für alle" }));
-    await user.click(screen.getByRole("button", { name: "Jeder auf seinem Handy" }));
+    await user.click(screen.getByRole("button", { name: choice(t.inputMode, t.inputModes.single) }));
+    await user.click(screen.getByRole("button", { name: t.inputModes["per-player"] }));
     expect(container.querySelector('input[name="inputMode"]')).toHaveValue("per-player");
   });
 
@@ -47,15 +51,15 @@ describe("X01Setup", () => {
     const { container } = render(
       <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={() => Promise.resolve()} onAddGuest={onAddGuest} />,
     );
-    expect(screen.getByRole("button", { name: "Gecko auswählen" })).toHaveTextContent("Gast");
-    await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
-    await user.type(screen.getByPlaceholderText("Name des Gastes"), "Neu{Enter}");
+    expect(screen.getByRole("button", { name: select("Gecko") })).toHaveTextContent(t.guestBadge);
+    await user.click(screen.getByRole("button", { name: t.addGuest }));
+    await user.type(screen.getByPlaceholderText(t.guestNamePlaceholder), "Neu{Enter}");
     await waitFor(() => expect(onAddGuest).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       const ids = [...container.querySelectorAll('input[name="playerId"]')].map((i) => (i as HTMLInputElement).value);
       expect(ids).toEqual(["guest-Neu"]);
     });
-    expect(screen.queryByPlaceholderText("Name des Gastes")).toBeNull();
+    expect(screen.queryByPlaceholderText(t.guestNamePlaceholder)).toBeNull();
   });
 
   it("shows an error and keeps the field when the guest name is taken", async () => {
@@ -69,10 +73,10 @@ describe("X01Setup", () => {
         onAddGuest={() => Promise.resolve({ ok: false as const, reason: "name-taken" as const })}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
-    await user.type(screen.getByPlaceholderText("Name des Gastes"), "Haflinger{Enter}");
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Diesen Namen gibt es schon."));
-    expect(screen.getByPlaceholderText("Name des Gastes")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: t.addGuest }));
+    await user.type(screen.getByPlaceholderText(t.guestNamePlaceholder), "Haflinger{Enter}");
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(t.nameTaken));
+    expect(screen.getByPlaceholderText(t.guestNamePlaceholder)).toBeInTheDocument();
   });
 
   it("sets and legs are choosable with 2 players and locked to 1 from 3 players on (E7)", async () => {
@@ -87,15 +91,15 @@ describe("X01Setup", () => {
       />,
     );
     const legs = () => container.querySelector('input[name="legsToWinSet"]');
-    await user.click(screen.getByRole("button", { name: "Moschusochse auswählen" }));
-    await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
-    await user.click(screen.getByRole("button", { name: "Best of Legs mehr" }));
+    await user.click(screen.getByRole("button", { name: select("Moschusochse") }));
+    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(screen.getByRole("button", { name: legsMore }));
     expect(legs()).toHaveValue("3"); // best of: 1, 3, 5 …
-    expect(screen.getByRole("button", { name: "Best of Legs weniger" })).toBeEnabled();
-    await user.click(screen.getByRole("button", { name: "Gecko auswählen" }));
+    expect(screen.getByRole("button", { name: `${t.bestOfLegs} ${t.fewer}` })).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: select("Gecko") }));
     expect(legs()).toHaveValue("1");
-    expect(screen.getByRole("button", { name: "Best of Legs mehr" })).toBeDisabled();
-    expect(screen.getByText(de.newGame.setsLegsTwoOnly)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: legsMore })).toBeDisabled();
+    expect(screen.getByText(t.setsLegsTwoOnly)).toBeInTheDocument();
   });
 
   it("in and out rule open a list, the choice goes into the form and the summary below the start button", async () => {
@@ -109,17 +113,19 @@ describe("X01Setup", () => {
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
-    const trigger = screen.getByRole("button", { name: "Einstieg: Single In" });
+    const trigger = screen.getByRole("button", { name: choice(t.inRule, t.inNames.single) });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("option", { name: "Single In" })).toHaveAttribute("aria-selected", "true");
-    await user.click(screen.getByRole("button", { name: "Double In" }));
+    expect(screen.getByRole("option", { name: t.inNames.single })).toHaveAttribute("aria-selected", "true");
+    await user.click(screen.getByRole("button", { name: t.inNames.double }));
     expect(screen.queryByRole("listbox")).toBeNull();
     expect(container.querySelector('input[name="inRule"]')).toHaveValue("double");
-    await user.click(screen.getByRole("button", { name: "Startpunktzahl: 501" }));
+    await user.click(screen.getByRole("button", { name: choice(t.startScore, "501") }));
     await user.click(screen.getByRole("button", { name: "301" }));
-    await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
-    expect(screen.getByText("1 Spieler · 301 · Double In / Double Out")).toBeInTheDocument();
-    expect(screen.getByText("1 ausgewählt")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    expect(
+      screen.getByText(`${t.summaryPlayers.replace("{n}", "1")} · 301 · ${t.inNames.double} / ${t.outNames.double}`),
+    ).toBeInTheDocument();
+    expect(screen.getByText(t.selectedCount.replace("{n}", "1"))).toBeInTheDocument();
   });
 });

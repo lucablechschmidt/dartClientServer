@@ -4,6 +4,8 @@ import { de } from "@/i18n/de";
 import { GameMenu, relativeTime } from "./game-menu";
 
 const now = 10_000_000;
+const o = de.overview;
+const modes = de.gameMenu.modes;
 
 describe("GameMenu overview", () => {
   it("lists open matches with players, mode and age; hides the block when empty", () => {
@@ -21,19 +23,19 @@ describe("GameMenu overview", () => {
     const rows = screen.getAllByRole("link", { name: /Luca · Mara|Finn · Gast/ });
     expect(rows).toHaveLength(2);
     expect(rows[0]).toHaveAttribute("href", "/match/m1");
-    expect(rows[0]).toHaveTextContent("jeder selbst · vor 12 min");
-    expect(rows[1]).toHaveTextContent("Cricket · vor 3 h");
-    expect(rows[1]).not.toHaveTextContent("jeder selbst");
+    expect(rows[0]).toHaveTextContent(`${o.perPlayer} · ${o.minutesAgo.replace("{n}", "12")}`);
+    expect(rows[1]).toHaveTextContent(`${modes.cricket} · ${o.hoursAgo.replace("{n}", "3")}`);
+    expect(rows[1]).not.toHaveTextContent(o.perPlayer);
     rerender(<GameMenu texts={de.gameMenu} overviewTexts={de.overview} now={now} matches={[]} />);
-    expect(screen.queryByText("Laufende Spiele")).toBeNull();
-    expect(screen.getByRole("link", { name: "Classic Game" })).toHaveAttribute("href", "/new/x01");
-    expect(screen.getByRole("link", { name: "Cricket" })).toHaveAttribute("href", "/new/cricket");
-    expect(screen.getByRole("link", { name: "SplitScore" })).toHaveAttribute("href", "/new/splitscore");
+    expect(screen.queryByText(o.title)).toBeNull();
+    expect(screen.getByRole("link", { name: modes.x01 })).toHaveAttribute("href", "/new/x01");
+    expect(screen.getByRole("link", { name: modes.cricket })).toHaveAttribute("href", "/new/cricket");
+    expect(screen.getByRole("link", { name: modes.splitscore })).toHaveAttribute("href", "/new/splitscore");
   });
   it("relativeTime rounds to minutes and hours", () => {
-    expect(relativeTime(now - 20_000, now, de.overview)).toBe("gerade eben");
-    expect(relativeTime(now - 90_000, now, de.overview)).toBe("vor 2 min");
-    expect(relativeTime(now - 2 * 3_600_000, now, de.overview)).toBe("vor 2 h");
+    expect(relativeTime(now - 20_000, now, de.overview)).toBe(o.justNow);
+    expect(relativeTime(now - 90_000, now, de.overview)).toBe(o.minutesAgo.replace("{n}", "2"));
+    expect(relativeTime(now - 2 * 3_600_000, now, de.overview)).toBe(o.hoursAgo.replace("{n}", "2"));
   });
   it("lists the last matches with their result below the running ones (M5)", () => {
     render(
@@ -68,13 +70,12 @@ describe("GameMenu overview", () => {
         ]}
       />,
     );
-    expect(screen.getByText("Letzte Spiele")).toBeInTheDocument();
+    expect(screen.getByText(o.recent)).toBeInTheDocument();
     const rows = screen.getAllByRole("link", { name: /Luca · Mara/ });
     expect(rows[0]).toHaveAttribute("href", "/match/r1");
-    expect(rows[0]).toHaveTextContent("Mara Legs 2:1");
+    expect(rows[0]).toHaveTextContent(`Mara ${o.legs} 2:1`);
     expect(rows[1]).toHaveTextContent("1. Finn · 1. Luca · 3. Mara");
-    expect(rows[1]).toHaveTextContent("SplitScore · vor 2 d");
-    expect(rows[1]).toHaveTextContent("vor 2 d");
-    expect(rows[2]).toHaveTextContent("abgebrochen");
+    expect(rows[1]).toHaveTextContent(`${modes.splitscore} · ${o.daysAgo.replace("{n}", "2")}`);
+    expect(rows[2]).toHaveTextContent(o.abandoned);
   });
 });

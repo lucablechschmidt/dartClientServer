@@ -21,9 +21,9 @@ describe("LegVictoryScreen (M5 plan §9.3)", () => {
     const onContinue = vi.fn();
     const onUndo = vi.fn();
     render(<LegVictoryScreen view={won} names={names} texts={de.game} canUndo onContinue={onContinue} onUndo={onUndo} />);
-    expect(screen.getByText("Leg für Casey")).toBeInTheDocument();
-    expect(screen.getByText("Legs 1:0")).toBeInTheDocument();
-    await user.click(screen.getByText("Legs 1:0"));
+    expect(screen.getByText(de.game.legWon.replace("{name}", "Casey"))).toBeInTheDocument();
+    expect(screen.getByText(`${de.game.legs} 1:0`)).toBeInTheDocument();
+    await user.click(screen.getByText(`${de.game.legs} 1:0`));
     expect(onContinue).toHaveBeenCalledTimes(1);
     expect(onUndo).not.toHaveBeenCalled();
   });

@@ -26,11 +26,11 @@ const players = [player("m", "Mosch", [0, 0, 0, 3, 3, 0, 0]), player("l", "Lena"
 describe("CricketTable (Figma)", () => {
   it("one row per field from 15 to Bull, marks as —, /, X and the circled cross", () => {
     render(<CricketTable players={players} activePlayerId="m" texts={de.game} />);
-    expect(screen.getAllByRole("rowheader").map((r) => r.textContent)).toEqual(["15", "16", "17", "18", "19", "20", "Bull"]);
-    expect(screen.getByLabelText("Lena, 15: 1")).toHaveTextContent("/");
-    expect(screen.getByLabelText("Lena, 20: 2")).toHaveTextContent("X");
+    expect(screen.getAllByRole("rowheader").map((r) => r.textContent)).toEqual(["15", "16", "17", "18", "19", "20", de.game.bull]);
+    expect(screen.getByLabelText("Lena, 15: 1")).toHaveTextContent(de.game.markSymbols[1]);
+    expect(screen.getByLabelText("Lena, 20: 2")).toHaveTextContent(de.game.markSymbols[2]);
     expect(screen.getByLabelText("Mosch, 19: 3").querySelector("svg")).not.toBeNull();
-    expect(screen.getByLabelText("Mosch, 15: 0")).toHaveTextContent("—");
+    expect(screen.getByLabelText("Mosch, 15: 0")).toHaveTextContent(de.game.markSymbols[0]);
   });
 
   it("closed by everyone gray and struck through; closed by one green; the row label green where the player on turn can score", () => {
@@ -46,8 +46,8 @@ describe("CricketTable (Figma)", () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
     render(<CricketTable players={players} activePlayerId="m" texts={de.game} onSelect={onSelect} />);
-    expect(screen.getByRole("columnheader", { current: true })).toHaveTextContent("Am Wurf");
-    await user.click(screen.getByRole("button", { name: "Anwurf: Lena" }));
+    expect(screen.getByRole("columnheader", { current: true })).toHaveTextContent(de.game.onTurn);
+    await user.click(screen.getByRole("button", { name: `${de.game.toStart}: Lena` }));
     expect(onSelect).toHaveBeenCalledWith("l");
   });
 });
