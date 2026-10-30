@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { OptionMenu } from "@/components/ui/option-menu";
-import { SetupShell, type SetupProps } from "./setup-shell";
+import { Stepper } from "@/components/ui/stepper";
+import { RuleTile, ScoreChoice, SetupCard, SetupShell, type SetupProps } from "./setup-shell";
 
 type Rule = "single" | "double" | "triple";
 
 const RULES: readonly Rule[] = ["single", "double", "triple"];
 const SCORES = [501, 401, 301].map((value) => ({ value, label: String(value) }));
-/** Sets and legs as in legacy: 1/3/5, meaning "best of" (the server stores how many win). */
-const BEST_OF = [1, 3, 5].map((value) => ({ value, label: String(value) }));
 
-/** Port of ClassicGameSetUpView: in/out rule, start score, sets and legs. */
+/** Port of ClassicGameSetUpView in the Figma layout: start score, in/out rule, best of sets and legs (1, 3, 5 …). */
 export function X01Setup(props: SetupProps) {
   const { texts } = props;
   const [inRule, setInRule] = useState<Rule>("single");
@@ -19,27 +17,30 @@ export function X01Setup(props: SetupProps) {
   const [startScore, setStartScore] = useState(501);
   const [sets, setSets] = useState(1);
   const [legs, setLegs] = useState(1);
+  const stepper = { min: 1, max: 9, step: 2, decreaseLabel: texts.fewer, increaseLabel: texts.more };
 
   return (
     <SetupShell
       {...props}
       mode="x01"
+      summary={[String(startScore), `${texts.inNames[inRule]} / ${texts.outNames[outRule]}`]}
       options={(playerCount) => {
         // E7: sets and legs only with 2 players; with 3+ one leg is played down to all places.
         const multi = playerCount >= 3;
         return (
-          <>
-            <div className="flex flex-wrap items-start justify-center gap-3">
-              <OptionMenu name="inRule" value={inRule} onChange={setInRule} options={RULES.map((r) => ({ value: r, label: texts.inLabels[r] }))} />
-              <OptionMenu name="outRule" value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outLabels[r] }))} />
+          <SetupCard>
+            <ScoreChoice title={texts.startScore} subtitle={texts.cardSubtitles.x01} value={startScore} options={SCORES} onChange={setStartScore} />
+            <div className="grid grid-cols-2 gap-3">
+              <RuleTile name="inRule" label={texts.inRule} value={inRule} onChange={setInRule} options={RULES.map((r) => ({ value: r, label: texts.inNames[r] }))} />
+              <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outNames[r] }))} />
             </div>
-            <div className="flex flex-wrap items-start justify-center gap-3">
-              <OptionMenu name="setsToWinMatch" title={texts.sets} value={multi ? 1 : sets} onChange={setSets} options={BEST_OF} disabled={multi} />
-              <OptionMenu name="startScore" value={startScore} onChange={setStartScore} options={SCORES} />
-              <OptionMenu name="legsToWinSet" title={texts.legs} value={multi ? 1 : legs} onChange={setLegs} options={BEST_OF} disabled={multi} />
+            {/* One row each: "Best of Legs" next to − 1 + does not fit half a phone width. */}
+            <div className="flex flex-col divide-y divide-separator">
+              <Stepper name="setsToWinMatch" label={texts.bestOfSets} value={multi ? 1 : sets} onChange={setSets} disabled={multi} {...stepper} />
+              <Stepper name="legsToWinSet" label={texts.bestOfLegs} value={multi ? 1 : legs} onChange={setLegs} disabled={multi} {...stepper} />
             </div>
-            {multi && <p className="fluid-text-sm text-fg-muted">{texts.setsLegsTwoOnly}</p>}
-          </>
+            {multi && <p className="text-xs text-fg-muted">{texts.setsLegsTwoOnly}</p>}
+          </SetupCard>
         );
       }}
     />

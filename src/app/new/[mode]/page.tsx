@@ -17,23 +17,20 @@ async function Setup({ params }: { params: Promise<{ mode: string }> }) {
   const { deps } = await requireSession();
   const ModeSetup = SETUPS[mode as ModeId];
   return (
-    <>
-      <h1 className="sr-only">{`${de.newGame.title}: ${de.gameMenu.modes[mode as ModeId]}`}</h1>
-      <ModeSetup
-        players={listPlayers(deps)}
-        texts={de.newGame}
-        commonTexts={{ back: de.ui.back, save: de.players.save, cancel: de.players.cancel }}
-        onStart={createMatchAction}
-        onAddGuest={createGuestAction}
-      />
-    </>
+    <ModeSetup
+      players={listPlayers(deps)}
+      texts={de.newGame}
+      commonTexts={{ back: de.ui.back, save: de.players.save, cancel: de.players.cancel }}
+      onStart={createMatchAction}
+      onAddGuest={createGuestAction}
+    />
   );
 }
 
-/** Setup per game mode (ClassicGameSetUpView and its siblings, M7). No tab bar, as in legacy. */
+/** Setup per game mode (ClassicGameSetUpView and its siblings, M7). No tab bar, as in legacy; the title is in the shell. */
 export default function NewMatchPage({ params }: { params: Promise<{ mode: string }> }) {
   return (
-    <main className="flex min-h-dvh flex-col pt-safe pb-safe">
+    <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe">
       <Suspense fallback={null}>
         <Setup params={params} />
       </Suspense>

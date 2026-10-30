@@ -1,24 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { OptionMenu } from "@/components/ui/option-menu";
-import { FixedRules, SetupShell, type SetupProps } from "./setup-shell";
+import { FixedRules, RuleTile, ScoreChoice, SetupCard, SetupShell, type SetupProps } from "./setup-shell";
 
 type Rule = "single" | "double" | "triple";
 const RULES: readonly Rule[] = ["single", "double", "triple"];
 const TARGETS = [501, 401, 301].map((value) => ({ value, label: String(value) }));
 
-/** Port of CricketGameSetUpView: only the players. */
+/** Port of CricketGameSetUpView: no game options, only input mode and players. */
 export function CricketSetup(props: SetupProps) {
-  return <SetupShell {...props} mode="cricket" options={() => <FixedRules startScore={0} />} />;
+  return <SetupShell {...props} mode="cricket" summary={[]} options={() => <FixedRules startScore={0} />} />;
 }
 
-/** Port of SplitScoreGameSetUpView: only the players; everybody starts with 40. */
+/** Port of SplitScoreGameSetUpView: no game options (everybody starts with 40), only input mode and players. */
 export function SplitScoreSetup(props: SetupProps) {
-  return <SetupShell {...props} mode="splitscore" options={() => <FixedRules startScore={40} />} />;
+  return <SetupShell {...props} mode="splitscore" summary={[]} options={() => <FixedRules startScore={40} />} />;
 }
 
-/** Port of EliminationGameSetUpView: out rule and target 501/401/301 (defaults as in legacy: SingleOut, 301). */
+/** Port of EliminationGameSetUpView: target 501/401/301 and the out rule (defaults as in legacy: 301, SingleOut). */
 export function EliminationSetup(props: SetupProps) {
   const { texts } = props;
   const [target, setTarget] = useState(301);
@@ -27,12 +26,13 @@ export function EliminationSetup(props: SetupProps) {
     <SetupShell
       {...props}
       mode="elimination"
+      summary={[String(target), texts.outNames[outRule]]}
       options={() => (
-        <div className="flex flex-wrap items-start justify-center gap-3">
+        <SetupCard>
           <input type="hidden" name="inRule" value="single" />
-          <OptionMenu name="outRule" value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outLabels[r] }))} />
-          <OptionMenu name="startScore" title={texts.target} value={target} onChange={setTarget} options={TARGETS} />
-        </div>
+          <ScoreChoice title={texts.targetScore} subtitle={texts.cardSubtitles.elimination} value={target} options={TARGETS} onChange={setTarget} />
+          <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outNames[r] }))} />
+        </SetupCard>
       )}
     />
   );

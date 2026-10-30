@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CardRow } from "./card-list";
 import { FormError, TextButton, TextInput } from "./form-controls";
 
@@ -12,13 +12,16 @@ type Props = {
   cancelLabel: string;
   /** Submits the form; resolves to an error text to show, or null to close the row. */
   onSubmit: (formData: FormData) => Promise<string | null>;
+  /** "row": last row of a CardList (players tab); "button": a bordered button of its own below a list (setup). */
+  variant?: "row" | "button";
+  icon?: ReactNode;
 };
 
 /**
  * Last row of a CardList that expands into "name input + save + cancel" (legacy AddPlayer row).
  * The row closes only after the action has finished; unmounting in onSubmit would abort it.
  */
-export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit }: Props) {
+export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, variant = "row", icon }: Props) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Controlled on purpose: React 19 resets a form after its action, which would wipe the name
@@ -32,8 +35,8 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit }:
       setName("");
     }
   };
-  return (
-    <CardRow className="flex-col items-stretch">
+  const content = (
+    <>
       {open ? (
         <form action={submit} className="flex w-full gap-2">
           <TextInput inline name="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={40} autoFocus placeholder={placeholder} autoComplete="off" />
@@ -47,12 +50,15 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit }:
             setOpen(true);
             setError(null);
           }}
-          className="min-h-touch w-full text-center text-base text-accent"
+          className={`flex min-h-touch w-full items-center justify-center gap-2 text-base ${variant === "button" ? "font-semibold text-fg" : "text-accent"}`}
         >
+          {icon}
           {label}
         </button>
       )}
       {open && error && <FormError>{error}</FormError>}
-    </CardRow>
+    </>
   );
+  if (variant === "button") return <div className="flex flex-col rounded-panel border border-separator bg-card-bg px-4 py-1">{content}</div>;
+  return <CardRow className="flex-col items-stretch">{content}</CardRow>;
 }

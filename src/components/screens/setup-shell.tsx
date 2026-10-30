@@ -3,9 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
 import { BackButton } from "@/components/ui/back-button";
-import { GroupedSection } from "@/components/ui/card-list";
-import { OptionMenu } from "@/components/ui/option-menu";
-import { ScreenHeader } from "@/components/ui/screen-header";
+import { ChoiceMenu, type Choice } from "@/components/ui/choice-menu";
+import { ArrowRightIcon, ChevronDownIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
 import type { Player } from "@/domain/player";
 import type { ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
@@ -20,53 +19,133 @@ export type SetupProps = {
 
 type Props = SetupProps & {
   mode: ModeId;
-  /** The mode's option pills; they get the number of chosen players (E7: sets/legs only with 2). */
+  /** The mode's option card(s); they get the number of chosen players (E7: sets/legs only with 2). */
   options: (playerCount: number) => ReactNode;
+  /** Rules for the line below the start button ("501 · Single In / Double Out"). */
+  summary: string[];
 };
 
+const FORM_ID = "new-match";
+
 /**
- * What every setup shares (ClassicGameSetUpView and its siblings, M7): header with "Start Game",
- * the mode's options, the input mode (E13) and the PlayerPicker. The picker sits outside the form
- * (its own guest row); the chosen players are submitted as hidden inputs.
+ * What every setup shares, in the Figma layout (Design/GameSetUpGameOptions*.png, own colors):
+ * title with the mode, the mode's options, the input mode (E13), "Spieler auswählen" with the
+ * PlayerPicker, and the start button at the bottom with a summary. The picker sits outside the
+ * form (its own guest form); the start button belongs to the form via `form=`.
  */
-export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGuest, options }: Props) {
+export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGuest, options, summary }: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
   const toggle = (id: string) => setOrder((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
+  const inputModes: Choice<"single" | "per-player">[] = [
+    { value: "single", label: texts.inputModes.single },
+    { value: "per-player", label: texts.inputModes["per-player"] },
+  ];
 
   return (
-    <div className="flex flex-1 flex-col">
-      <form action={onStart}>
-        <ScreenHeader
-          left={<BackButton href="/" label={commonTexts.back} />}
-          title={
-            <button type="submit" disabled={order.length === 0} className="min-h-touch px-3 text-fg disabled:opacity-0">
-              {texts.start}
-            </button>
-          }
-        />
-        <input type="hidden" name="mode" value={mode} />
-        {order.map((id) => <input key={id} type="hidden" name="playerId" value={id} />)}
+    <div className="flex flex-1 flex-col bg-bg-grouped text-fg">
+      <div className="flex px-3">
+        <BackButton href="/" label={commonTexts.back} />
+      </div>
+      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{texts.title}</h1>
+          <p className="text-sm text-fg-muted">{texts.modes[mode]}</p>
+        </div>
 
-        <div className="flex flex-col items-center gap-3 px-3 pb-4">
+        <form id={FORM_ID} action={onStart} className="flex flex-col gap-3">
+          <input type="hidden" name="mode" value={mode} />
+          {order.map((id) => <input key={id} type="hidden" name="playerId" value={id} />)}
           {options(order.length)}
-          <OptionMenu
+          <ChoiceMenu
             name="inputMode"
-            title={texts.inputMode}
+            label={texts.inputMode}
             value={inputMode}
             onChange={setInputMode}
-            options={[
-              { value: "single", label: texts.inputModes.single },
-              { value: "per-player", label: texts.inputModes["per-player"] },
-            ]}
-          />
-        </div>
-      </form>
+            options={inputModes}
+            className="rounded-panel border border-transparent bg-card-bg px-4 py-3"
+            openClassName="border-accent"
+          >
+            {(current, open) => (
+              <span className="flex items-center gap-3">
+                <PhoneIcon className="h-6 w-6 shrink-0 text-fg-muted" />
+                <span className="flex flex-1 flex-col">
+                  <span className="text-xs text-fg-muted">{texts.inputMode}</span>
+                  <span className="font-semibold">{current}</span>
+                </span>
+                <ChevronDownIcon className={`h-5 w-5 shrink-0 ${open ? "rotate-180" : ""}`} />
+              </span>
+            )}
+          </ChoiceMenu>
+        </form>
 
-      <GroupedSection>
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-bold">{texts.choosePlayersTitle}</h2>
+          <span className="text-sm text-fg-muted">{texts.selectedCount.replace("{n}", String(order.length))}</span>
+        </div>
         <PlayerPicker players={players} order={order} onToggle={toggle} onAddGuest={onAddGuest} texts={{ ...texts, save: commonTexts.save, cancel: commonTexts.cancel }} />
-      </GroupedSection>
+      </div>
+
+      <div className="sticky bottom-0 bg-bg-grouped px-4 pt-3 pb-safe-min">
+        <div className="mx-auto max-w-xl">
+          <button
+            type="submit"
+            form={FORM_ID}
+            disabled={order.length === 0}
+            className="flex min-h-14 w-full items-center justify-between rounded-2xl bg-accent px-5 text-lg font-bold text-white disabled:opacity-40"
+          >
+            {texts.start}
+            <ArrowRightIcon className="h-6 w-6" />
+          </button>
+          <p className="mt-2 text-center text-xs text-fg-muted">{[texts.summaryPlayers.replace("{n}", String(order.length)), ...summary].join(" · ")}</p>
+        </div>
+      </div>
     </div>
+  );
+}
+
+/** White card holding a mode's options. */
+export function SetupCard({ children }: { children: ReactNode }) {
+  return <section className="flex flex-col gap-3 rounded-panel bg-card-bg p-4">{children}</section>;
+}
+
+/** Top row of the options card: target icon, title and subtitle, the score big with its choice list. */
+export function ScoreChoice({ title, subtitle, value, options, onChange }: { title: string; subtitle: string; value: number; options: readonly Choice<number>[]; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+        <TargetIcon className="h-6 w-6" />
+      </span>
+      <span className="flex flex-1 flex-col">
+        <span className="font-semibold">{title}</span>
+        <span className="text-xs text-fg-muted">{subtitle}</span>
+      </span>
+      <ChoiceMenu name="startScore" label={title} value={value} onChange={onChange} options={options} align="end">
+        {(current, open) => (
+          <span className="flex items-center gap-1">
+            <span className="text-4xl font-bold tabular">{current}</span>
+            <ChevronDownIcon className={`h-5 w-5 ${open ? "rotate-180" : ""}`} />
+          </span>
+        )}
+      </ChoiceMenu>
+    </div>
+  );
+}
+
+/** A tile with a small label above the chosen rule ("Einstieg / Single In"); opened it is outlined in the accent. */
+export function RuleTile<V extends string>({ name, label, value, options, onChange }: { name: string; label: string; value: V; options: readonly Choice<V>[]; onChange: (v: V) => void }) {
+  return (
+    <ChoiceMenu name={name} label={label} value={value} onChange={onChange} options={options} className="rounded-xl border border-transparent bg-fg/5 px-3 py-2" openClassName="border-accent bg-accent/10">
+      {(current, open) => (
+        <span className="flex items-center gap-2">
+          <span className="flex flex-1 flex-col">
+            <span className="text-xs text-fg-muted">{label}</span>
+            <span className="font-semibold">{current}</span>
+          </span>
+          <ChevronDownIcon className={`h-5 w-5 shrink-0 ${open ? "rotate-180" : ""}`} />
+        </span>
+      )}
+    </ChoiceMenu>
   );
 }
 

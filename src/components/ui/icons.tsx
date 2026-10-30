@@ -109,3 +109,83 @@ export function CircleSlashIcon(props: IconProps) {
     </svg>
   );
 }
+
+// Setup screens (Figma design, M7 follow-up)
+
+/** chevron.down (choice menus) */
+export function ChevronDownIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <polyline points="6 9.5 12 15.5 18 9.5" />
+    </svg>
+  );
+}
+
+/** checkmark */
+export function CheckIcon(props: IconProps) {
+  return (
+    <svg {...base({ strokeWidth: 2.2, ...props })}>
+      <polyline points="5.5 12.5 10 17 18.5 7.5" />
+    </svg>
+  );
+}
+
+/** target (start score card) */
+export function TargetIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5.5" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
+
+/** iphone (input mode) */
+export function PhoneIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect x="6.5" y="2.5" width="11" height="19" rx="2.5" />
+      <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" />
+    </svg>
+  );
+}
+
+/** person.badge.plus (add guest) */
+export function PersonPlusIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="10" cy="8" r="3.5" />
+      <path d="M3.5 19.5a6.5 6.5 0 0 1 11.5-4" />
+      <line x1="18.5" y1="14" x2="18.5" y2="20" />
+      <line x1="15.5" y1="17" x2="21.5" y2="17" />
+    </svg>
+  );
+}
+
+/** arrow.right (start game) */
+export function ArrowRightIcon(props: IconProps) {
+  return (
+    <svg {...base({ strokeWidth: 2, ...props })}>
+      <line x1="4.5" y1="12" x2="19" y2="12" />
+      <polyline points="13 6 19 12 13 18" />
+    </svg>
+  );
+}
+
+/** minus / plus (stepper) */
+export function MinusIcon(props: IconProps) {
+  return (
+    <svg {...base({ strokeWidth: 2, ...props })}>
+      <line x1="6" y1="12" x2="18" y2="12" />
+    </svg>
+  );
+}
+export function PlusIcon(props: IconProps) {
+  return (
+    <svg {...base({ strokeWidth: 2, ...props })}>
+      <line x1="6" y1="12" x2="18" y2="12" />
+      <line x1="12" y1="6" x2="12" y2="18" />
+    </svg>
+  );
+}

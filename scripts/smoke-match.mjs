@@ -90,9 +90,10 @@ await page.getByRole("link", { name: "Classic Game" }).click();
 await page.waitForURL(/\/new\/x01/);
 await page.getByRole("button", { name: `A${stamp} auswählen` }).click();
 await page.getByRole("button", { name: `B${stamp} auswählen` }).click();
-await page.getByRole("button", { name: "501", exact: true }).click();
+await page.getByRole("button", { name: "Startpunktzahl: 501" }).click();
 await page.getByRole("button", { name: "301", exact: true }).click();
-await page.getByRole("button", { name: "Start Game" }).click();
+await page.screenshot({ path: `${shots}/setup-x01.png` });
+await page.getByRole("button", { name: "Spiel starten" }).click();
 await page.waitForURL(/\/match\//);
 const url = page.url();
 
@@ -168,9 +169,9 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.getByPlaceholder("Name des Gastes").press("Enter");
   const guestRow = page.getByRole("button", { name: `${guest} abwählen` });
   await guestRow.waitFor({ timeout: 5000 });
-  expect((await guestRow.innerText()).includes("Gast"), "guest row carries the Gast badge and is selected");
+  expect(/\bgast\b/i.test(await guestRow.innerText()), "guest row carries the Gast badge and is selected");
   await page.getByRole("button", { name: `A${stamp} auswählen` }).click();
-  await page.getByRole("button", { name: "Start Game" }).click();
+  await page.getByRole("button", { name: "Spiel starten" }).click();
   await page.waitForURL(/\/match\//);
   // Guest throws first (position 1): T20 S20 T5
   await throwKeys("Triple", "20", "20", "Triple", "5");
@@ -227,9 +228,9 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: `${ADMIN} auswählen` }).click();
   await page.getByRole("button", { name: `A${stamp} auswählen` }).click();
-  await page.getByRole("button", { name: "Eingabe: ein Handy" }).click();
-  await page.getByRole("button", { name: "jeder selbst" }).click();
-  await page.getByRole("button", { name: "Start Game" }).click();
+  await page.getByRole("button", { name: "Eingabe: Ein Handy für alle" }).click();
+  await page.getByRole("button", { name: "Jeder auf seinem Handy" }).click();
+  await page.getByRole("button", { name: "Spiel starten" }).click();
   await page.waitForURL(/\/match\//);
   const matchUrl = page.url();
   // A finds the match via the overview
@@ -279,15 +280,12 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   const setup = async (names, legs) => {
     await page.goto(`${base}/new/x01`, { waitUntil: "networkidle" });
     for (const n of names) await page.getByRole("button", { name: `${n} auswählen` }).click();
-    await page.getByRole("button", { name: "DoubleOut" }).click();
-    await page.getByRole("button", { name: "SingleOut" }).click();
-    await page.getByRole("button", { name: "501", exact: true }).click();
+    await page.getByRole("button", { name: "Abschluss: Double Out" }).click();
+    await page.getByRole("button", { name: "Single Out", exact: true }).click();
+    await page.getByRole("button", { name: "Startpunktzahl: 501" }).click();
     await page.getByRole("button", { name: "301", exact: true }).click();
-    if (legs) {
-      await page.getByRole("button", { name: "Legs: 1" }).click();
-      await page.getByRole("button", { name: String(legs), exact: true }).click();
-    }
-    await page.getByRole("button", { name: "Start Game" }).click();
+    for (let n = 1; n < (legs ?? 1); n += 2) await page.getByRole("button", { name: "Best of Legs mehr" }).click();
+    await page.getByRole("button", { name: "Spiel starten" }).click();
     await page.waitForURL(/\/match\//);
   };
 
@@ -327,7 +325,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.getByRole("button", { name: `${guest} abwählen` }).waitFor({ timeout: 5000 });
   await page.getByRole("button", { name: `${guest} abwählen` }).click();
   await setup([ADMIN, `A${stamp}`, `B${stamp}`, guest]);
-  expect(await page.getByRole("button", { name: "Legs: 1" }).count() === 0, "sets/legs pills not on the scoreboard");
+  expect(await page.getByRole("button", { name: "Best of Legs mehr" }).count() === 0, "sets/legs steppers not on the scoreboard");
   await page.getByRole("button", { name: `Anwurf: ${guest}` }).click();
   expect((await active()) === guest, "ToStart: the guest throws first");
   await tap(...T180, ...MISS, ...MISS, ...MISS); // guest 180, admin, A, B miss
@@ -370,7 +368,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
     await page.getByRole("button", { name: `A${stamp} auswählen` }).click();
     await page.getByRole("button", { name: `B${stamp} auswählen` }).click();
     if (before) await before();
-    await page.getByRole("button", { name: "Start Game" }).click();
+    await page.getByRole("button", { name: "Spiel starten" }).click();
     await page.waitForURL(/\/match\//);
   };
 

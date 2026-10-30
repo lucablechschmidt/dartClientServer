@@ -19,7 +19,8 @@ describe("setups per mode (M7)", () => {
     const cricket = render(<CricketSetup {...props} />).container;
     expect(value(cricket, "mode")).toBe("cricket");
     expect(value(cricket, "startScore")).toBe("0");
-    expect(screen.queryByRole("button", { name: /Sets|Legs|Out/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Best of|Einstieg|Abschluss|punktzahl/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "Eingabe: Ein Handy für alle" })).toBeInTheDocument();
     const split = render(<SplitScoreSetup {...props} />).container;
     expect(value(split, "mode")).toBe("splitscore");
     expect(value(split, "startScore")).toBe("40");
@@ -31,15 +32,15 @@ describe("setups per mode (M7)", () => {
     expect(value(container, "mode")).toBe("elimination");
     expect(value(container, "outRule")).toBe("single");
     expect(value(container, "startScore")).toBe("301");
-    await user.click(screen.getByRole("button", { name: "Ziel: 301" }));
+    await user.click(screen.getByRole("button", { name: "Zielpunktzahl: 301" }));
     await user.click(screen.getByRole("button", { name: "501" }));
     expect(value(container, "startScore")).toBe("501");
-    await user.click(screen.getByRole("button", { name: "SingleOut" }));
-    await user.click(screen.getByRole("button", { name: "DoubleOut" }));
+    await user.click(screen.getByRole("button", { name: "Abschluss: Single Out" }));
+    await user.click(screen.getByRole("button", { name: "Double Out" }));
     expect(value(container, "outRule")).toBe("double");
     // Start only with a player
-    expect(screen.getByRole("button", { name: "Start Game" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Spiel starten" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Moschusochse auswählen" }));
-    expect(screen.getByRole("button", { name: "Start Game" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Spiel starten" })).toBeEnabled();
   });
 });
