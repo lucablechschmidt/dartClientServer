@@ -17,13 +17,15 @@ type Props = {
   status: string;
   sync: "saved" | "saving" | "unsaved";
   hasError: boolean;
+  /** M6: while not saved, a tap on the status retries at once. */
+  onRetry?: () => void;
   /** Host or admin of an open match get the cancel button instead of the way back (M4). */
   onCancel: (() => void) | null;
   texts: Texts["game"];
 };
 
 /** Header row of the scoring screen: cancel or back, the rules or the legs/sets score, the sync status. */
-export function ScoreboardHeader({ title, status, sync, hasError, onCancel, texts }: Props) {
+export function ScoreboardHeader({ title, status, sync, hasError, onRetry, onCancel, texts }: Props) {
   return (
     <ScreenHeader
       left={
@@ -47,7 +49,13 @@ export function ScoreboardHeader({ title, status, sync, hasError, onCancel, text
           role="status"
           data-sync={sync}
         >
-          {status}
+          {onRetry && sync === "unsaved" ? (
+            <button type="button" onClick={onRetry} title={texts.retryNow} className="min-h-touch underline">
+              {status}
+            </button>
+          ) : (
+            status
+          )}
         </span>
       }
     />

@@ -14,6 +14,7 @@ import {
   setLegStarter,
   startPlayOut,
   undoMatchDart,
+  undoStep,
   type Actor,
   type Dart,
   type MatchAccess,
@@ -23,6 +24,7 @@ import {
   type Rules,
 } from "@/domain/game";
 import { reapply, restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
+import { dequeue, emptyQueue, enqueue, isStale, pendingVisits, restoreQueue, storeQueue, type Queue, type QueueItem } from "./sync-queue";
 import { useMatchEvents } from "./use-match-events";
 
 /** What the scoreboard needs from the server's MatchView (structural, no server import). */
@@ -44,7 +46,7 @@ export type SyncStatus = "saved" | "saving" | "unsaved";
 type Options<Reason extends string> = {
   initial: MatchViewLike;
   onCommitVisit: (matchId: string, legIndex: number, seq: number, darts: Dart[]) => Promise<ActionReply<Reason>>;
-  onUndoVisit: (matchId: string) => Promise<ActionReply<Reason>>;
+  onUndoVisit: (matchId: string, step?: string) => Promise<ActionReply<Reason>>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply<Reason>>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
@@ -57,15 +59,31 @@ type Options<Reason extends string> = {
 };
 
 const RETRY_MS = [500, 1000, 2000, 4000, 8000];
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Backoff with ±20 % jitter, so several devices do not retry in step (M6). */
+const backoff = (attempt: number) => (RETRY_MS.at(Math.min(attempt, RETRY_MS.length - 1)) ?? 8000) * (0.8 + Math.random() * 0.4);
+const STALE_CHECK_MS = 15_000;
+
+/** A backoff pause that `wake` can cut short (retry now). */
+const pause = (ms: number, wake: { current: (() => void) | null }) =>
+  new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, ms);
+    wake.current = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+  });
 
 /**
- * Local scoring plus server sync for the scoreboard (E11, E13). Darts are applied through the
- * domain immediately; only a closed visit (three darts, bust or checkout) goes out as an action,
- * as does undoing an already saved visit. Calls run in a sequential queue and are retried with
- * backoff indefinitely on network errors (status "unsaved"). A domain error from the server means
- * client and server diverged: the server state is adopted. Changes from other devices arrive via SSE.
- * M5: the state is the whole match; play-out and the starter go through the same queue.
+ * Local scoring plus server sync for the scoreboard (E11, E13, M6). Darts are applied through the
+ * domain immediately; only a closed visit (three darts, bust or checkout) goes out as a call, as do
+ * undoing a stored step, play-out, the starter and a declared winner. The calls wait in a queue
+ * that is kept in localStorage together with the shown state, so a reload during an outage loses
+ * nothing: the queue is played first, then the server state is taken. Network errors are retried
+ * with backoff without end ("unsaved"); `online`, a visible tab, `pageshow` and a tap on the status
+ * line retry at once. A domain error from the server means client and server diverged: the message
+ * is shown, the rest of the queue still goes out and the server state is taken at the end. After
+ * ten minutes without progress the screen offers to resend or to drop the queue and re-enter.
+ * Changes from other devices arrive via SSE while the queue is empty.
  */
 export function useVisitSync<Reason extends string>({
   initial,
@@ -77,74 +95,196 @@ export function useVisitSync<Reason extends string>({
   onLoad,
   errorText,
 }: Options<Reason>) {
+  const matchId = initial.id;
   const [state, setState] = useState(initial.state);
   const [sync, setSync] = useState<SyncStatus>("saved");
   const [error, setError] = useState<string | null>(null);
   /** Open/closed comes from the server (clock); who may enter right now the caller recomputes after every dart. */
   const [isOpen, setIsOpen] = useState(initial.access.isOpen);
-  const queue = useRef(Promise.resolve());
-  const inFlight = useRef(0);
+  const [pending, setPending] = useState(0);
+  const [stale, setStale] = useState(false);
+  const stateRef = useRef(initial.state);
+  const queue = useRef<Queue>(emptyQueue);
+  const running = useRef(false);
+  /** Raised by "re-enter": a loop of an older generation stops after its current await. */
+  const generation = useRef(0);
+  /** Cuts the current backoff pause short (retry now). */
+  const wake = useRef<(() => void) | null>(null);
   /** How many visits the server has after the calls already queued. */
   const committed = useRef(closedVisits(initial.state));
 
-  // After mount (not during server rendering): restore this device's open visit.
-  // localStorage exists only in the browser, hence a deliberate setState in the effect (once per match).
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setState((s) => restoreOpenVisit(initial.id, s));
-  }, [initial.id]);
-  useEffect(() => storeOpenVisit(initial.id, state), [initial.id, state]);
+  const show = useCallback((next: MatchState) => {
+    stateRef.current = next;
+    setState(next);
+  }, []);
 
-  const retrying = useCallback(async (fn: () => Promise<ActionReply<Reason>>): Promise<ActionReply<Reason>> => {
+  const setQueue = useCallback(
+    (next: Queue) => {
+      queue.current = next;
+      storeQueue(matchId, next, stateRef.current);
+      setPending(pendingVisits(next));
+      setStale(isStale(next, Date.now()));
+    },
+    [matchId],
+  );
+
+  const send = useCallback(
+    (item: QueueItem): Promise<ActionReply<Reason>> => {
+      switch (item.kind) {
+        case "commit":
+          return onCommitVisit(matchId, item.legIndex, item.seq, item.darts);
+        case "undo":
+          return onUndoVisit(matchId, item.step ?? undefined);
+        case "play-out":
+          return onPlayOut(matchId, item.value);
+        case "starter":
+          return onSetStarter(matchId, item.playerId);
+        case "decide":
+          return onDecideWinner(matchId, item.playerId);
+      }
+    },
+    [matchId, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onDecideWinner],
+  );
+
+  /** One call until it gets an answer; null if the queue was dropped meanwhile. */
+  const untilAnswered = useCallback(async (call: () => Promise<ActionReply<Reason>>, gen: number): Promise<ActionReply<Reason> | null> => {
     for (let attempt = 0; ; attempt++) {
       try {
-        return await fn();
+        const reply = await call();
+        return gen === generation.current ? reply : null;
       } catch {
+        if (gen !== generation.current) return null;
         setSync("unsaved");
-        await sleep(RETRY_MS[Math.min(attempt, RETRY_MS.length - 1)]);
+        await pause(backoff(attempt), wake);
+        if (gen !== generation.current) return null;
       }
     }
   }, []);
 
-  const enqueue = useCallback(
-    (fn: () => Promise<ActionReply<Reason>>) => {
-      inFlight.current++;
-      setSync("saving");
-      queue.current = queue.current.then(async () => {
-        let reply = await retrying(fn);
-        if (!reply.ok) {
-          setError(errorText(reply.reason));
-          reply = await retrying(() => onLoad(initial.id));
-        }
-        inFlight.current--;
-        // The server state applies only when nothing else is in flight; otherwise it would already be stale.
-        if (inFlight.current === 0) {
-          if (reply.ok) {
-            const server = reply.view.state;
-            committed.current = closedVisits(server);
-            setIsOpen(reply.view.access.isOpen);
-            // A locally open visit is kept on top of the server state if it still fits; the rest is the server state.
-            setState((local) => {
-              const pending = openVisit(currentLeg(local));
-              const fits = pending && closedVisits(local) === closedVisits(server) && pending.playerId === matchCurrentPlayer(server);
-              return fits ? (reapply(server, rethrowable(pending)) ?? server) : server;
-            });
-          }
-          setSync("saved");
-        }
-      });
+  /** Takes the server state; a locally open visit is kept on top if it still fits. */
+  const adopt = useCallback(
+    (view: MatchViewLike) => {
+      const server = view.state;
+      committed.current = closedVisits(server);
+      setIsOpen(view.access.isOpen);
+      const local = stateRef.current;
+      const open = openVisit(currentLeg(local));
+      const fits = open && closedVisits(local) === closedVisits(server) && open.playerId === matchCurrentPlayer(server);
+      show(fits ? (reapply(server, rethrowable(open)) ?? server) : server);
     },
-    [initial.id, onLoad, retrying, errorText],
+    [show],
   );
 
-  // M4: reload changes made elsewhere (other device, cancel); while own calls are in flight,
-  // the server state arrives with their reply anyway.
-  useMatchEvents(initial.id, () => {
-    if (inFlight.current === 0) enqueue(() => onLoad(initial.id));
+  /** Plays the queue to the end, then takes the server state (after a rejected call: freshly loaded). */
+  const run = useCallback(async () => {
+    if (running.current) return;
+    running.current = true;
+    const gen = generation.current;
+    setSync("saving");
+    let last: ActionReply<Reason> | null = null;
+    let diverged = false;
+    for (let item = queue.current.items.at(0); item; item = queue.current.items.at(0)) {
+      const reply = await untilAnswered(() => send(item), gen);
+      if (!reply) break;
+      setQueue(dequeue(queue.current, Date.now()));
+      if (reply.ok) last = reply;
+      else {
+        setError(errorText(reply.reason));
+        diverged = true;
+      }
+      setSync(queue.current.items.length > 0 ? "saving" : "saved");
+    }
+    if (gen === generation.current && (diverged || !last)) last = await untilAnswered(() => onLoad(matchId), gen);
+    // dropped meanwhile ("re-enter"): a newer loop owns the queue now
+    if (gen !== generation.current) return;
+    if (last?.ok && queue.current.items.length === 0) adopt(last.view);
+    setSync("saved");
+    running.current = false;
+    // a call queued while the last answer was being taken over
+    if (queue.current.items.length > 0) void run();
+  }, [adopt, errorText, matchId, onLoad, send, setQueue, untilAnswered]);
+
+  const push = useCallback(
+    (item: QueueItem) => {
+      setQueue(enqueue(queue.current, item, Date.now(), running.current));
+      void run();
+    },
+    [run, setQueue],
+  );
+
+  const retryNow = useCallback(() => {
+    wake.current?.();
+    setStale(false);
+  }, []);
+
+  /** "Re-enter": drop what is still waiting and take the server state. */
+  const discard = useCallback(() => {
+    generation.current++;
+    wake.current?.();
+    setQueue(emptyQueue);
+    setError(null);
+    running.current = false;
+    void (async () => {
+      const gen = generation.current;
+      setSync("saving");
+      const reply = await untilAnswered(() => onLoad(matchId), gen);
+      if (reply?.ok) {
+        show(reply.view.state);
+        adopt(reply.view);
+      }
+      if (gen === generation.current) setSync("saved");
+    })();
+  }, [adopt, matchId, onLoad, setQueue, show, untilAnswered]);
+
+  const runRef = useRef(run);
+  useEffect(() => {
+    runRef.current = run;
+  }, [run]);
+
+  // After mount (not during server rendering): a stored queue brings back the state the device
+  // showed and is played; otherwise this device's open visit is restored on top of the server state.
+  // localStorage exists only in the browser, hence a deliberate setState in the effect (once per match).
+  useEffect(() => {
+    const stored = restoreQueue(matchId);
+    if (stored) {
+      stateRef.current = stored.state;
+      committed.current = closedVisits(stored.state);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setState(stored.state);
+      queue.current = stored.queue;
+      setPending(pendingVisits(stored.queue));
+      setStale(isStale(stored.queue, Date.now()));
+      void runRef.current();
+    } else show(restoreOpenVisit(matchId, stateRef.current));
+  }, [matchId, show]);
+  useEffect(() => {
+    storeOpenVisit(matchId, state);
+    if (queue.current.items.length > 0) storeQueue(matchId, queue.current, state);
+  }, [matchId, state]);
+
+  // M6: retry at once when the network or the tab comes back; check for a stale queue now and then.
+  useEffect(() => {
+    const onVisible = () => document.visibilityState === "visible" && retryNow();
+    window.addEventListener("online", retryNow);
+    window.addEventListener("pageshow", retryNow);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = setInterval(() => setStale(isStale(queue.current, Date.now())), STALE_CHECK_MS);
+    return () => {
+      window.removeEventListener("online", retryNow);
+      window.removeEventListener("pageshow", retryNow);
+      document.removeEventListener("visibilitychange", onVisible);
+      clearInterval(timer);
+    };
+  }, [retryNow]);
+
+  // M4: reload changes made elsewhere (other device, cancel); while own calls wait, the server
+  // state comes with their answers anyway.
+  useMatchEvents(matchId, () => {
+    if (!running.current && queue.current.items.length === 0) void runRef.current();
   });
 
   /**
-   * After a local change, decide whether a visit has to be saved or deleted.
+   * After a local change, decide whether a visit has to be saved or a stored step taken back.
    * `thrown` are the darts actually thrown in the visit; on a bust the triggering dart is not in
    * the state (only overthrown slots there), but the server needs it to recompute.
    */
@@ -153,20 +293,20 @@ export function useVisitSync<Reason extends string>({
     if (closed > committed.current) {
       const { legIndex, seq } = nextVisitPosition(prev);
       committed.current = closed;
-      enqueue(() => onCommitVisit(initial.id, legIndex, seq, thrown));
+      push({ kind: "commit", legIndex, seq, darts: thrown });
     } else if (
       closed < committed.current ||
       currentLeg(next).playOut !== currentLeg(prev).playOut ||
       next.decidedWinner !== prev.decidedWinner
     ) {
-      // undo of a stored visit, or of a play-out decision (a step of its own on the server too)
+      // undo of a stored visit, a play-out decision or a declared winner (a step of its own on the server too)
       committed.current = closed;
-      enqueue(() => onUndoVisit(initial.id));
+      push({ kind: "undo", step: undoStep(prev) });
     }
   };
 
   const update = (next: MatchState) => {
-    setState(next);
+    show(next);
     setError(null);
   };
 
@@ -200,7 +340,7 @@ export function useVisitSync<Reason extends string>({
       return;
     }
     update({ ...state, legs: [...state.legs.slice(0, -1), r.value] });
-    enqueue(() => onPlayOut(initial.id, value));
+    push({ kind: "play-out", value });
   };
 
   /** ToStart before the first dart of a leg. */
@@ -211,7 +351,7 @@ export function useVisitSync<Reason extends string>({
       return;
     }
     update(r.value);
-    enqueue(() => onSetStarter(initial.id, playerId));
+    push({ kind: "starter", playerId });
   };
 
   /** M9: declare the winner of a tournament fixture after a leg. */
@@ -222,8 +362,8 @@ export function useVisitSync<Reason extends string>({
       return;
     }
     update(r.value);
-    enqueue(() => onDecideWinner(initial.id, playerId));
+    push({ kind: "decide", playerId });
   };
 
-  return { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter, decide };
+  return { state, sync, error, isOpen, pending, stale, throwDart, undo, playOut, chooseStarter, decide, retryNow, discard };
 }

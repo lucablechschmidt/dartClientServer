@@ -67,23 +67,25 @@ export function ScoreboardScreen({
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
-  const { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter, decide } = useVisitSync<Reason>({
-    initial,
-    onCommitVisit,
-    onUndoVisit,
-    onPlayOut,
-    onSetStarter,
-    onDecideWinner,
-    onLoad,
-    errorText,
-  });
+  const { state, sync, error, isOpen, pending, stale, throwDart, undo, playOut, chooseStarter, decide, retryNow, discard } =
+    useVisitSync<Reason>({
+      initial,
+      onCommitVisit,
+      onUndoVisit,
+      onPlayOut,
+      onSetStarter,
+      onDecideWinner,
+      onLoad,
+      errorText,
+    });
 
   const legClosed = closedLeg === legKey(state);
   const view = useMemo(() => projectMatch(state, initial.names, legClosed), [state, initial.names, legClosed]);
   const board = view.board;
   const playerIds = state.players;
   const rules = scoreLine(view, playerIds, texts) ?? headerTitle(state.mode, initial.rules, texts);
-  const status = error ?? (sync === "unsaved" ? texts.unsaved : sync === "saving" ? texts.saving : " ");
+  const unsaved = pending > 1 ? texts.unsavedVisits.replace("{n}", String(pending)) : pending === 1 ? texts.unsavedVisit : texts.unsaved;
+  const status = error ?? (sync === "unsaved" ? unsaved : sync === "saving" ? texts.saving : " ");
 
   // E13: keypad and undo only when this device is currently allowed; the server checks anyway.
   const actor = initial.actor;
@@ -112,6 +114,7 @@ export function ScoreboardScreen({
       status={status}
       sync={sync}
       hasError={error !== null}
+      onRetry={retryNow}
       onCancel={initial.access.canCancel && isOpen ? () => setAsking("cancel") : null}
       texts={texts}
     />
@@ -129,6 +132,17 @@ export function ScoreboardScreen({
         setAsking(null);
       }}
       onCancel={() => setAsking(null)}
+    />
+  );
+  // M6: ten minutes without progress; the red button drops the queue, a tap outside only retries.
+  const staleSheet = (
+    <ConfirmSheet
+      open={stale && asking === null}
+      text={texts.staleQuestion}
+      confirmLabel={texts.reenter}
+      cancelLabel={texts.resend}
+      onConfirm={discard}
+      onCancel={retryNow}
     />
   );
 
@@ -150,21 +164,25 @@ export function ScoreboardScreen({
           }
         />
         {confirm}
+        {staleSheet}
       </>
     );
   }
 
   if (view.progress === "leg-finished" && !legClosed) {
     return (
-      <LegVictoryScreen
-        view={view}
-        names={initial.names}
-        texts={texts}
-        canUndo={undoOk && sync === "saved"}
-        onContinue={() => setClosedLeg(legKey(state))}
-        onUndo={undoAndReopen}
-        onDecide={initial.isTournament && actor !== null && isOpen && maySetStarter(initial.match, actor) ? decide : undefined}
-      />
+      <>
+        <LegVictoryScreen
+          view={view}
+          names={initial.names}
+          texts={texts}
+          canUndo={undoOk && sync === "saved"}
+          onContinue={() => setClosedLeg(legKey(state))}
+          onUndo={undoAndReopen}
+          onDecide={initial.isTournament && actor !== null && isOpen && maySetStarter(initial.match, actor) ? decide : undefined}
+        />
+        {staleSheet}
+      </>
     );
   }
 
@@ -193,6 +211,7 @@ export function ScoreboardScreen({
           onSelectStarter={starterOk ? chooseStarter : undefined}
         />
         {confirm}
+        {staleSheet}
       </>
     );
   }
@@ -209,6 +228,7 @@ export function ScoreboardScreen({
         onResign={view.playOut && playOutOk ? () => setAsking("resign") : null}
       />
       {confirm}
+      {staleSheet}
     </>
   );
 }
