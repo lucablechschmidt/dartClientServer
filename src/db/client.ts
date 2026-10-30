@@ -25,8 +25,6 @@ const globalForDb = globalThis as unknown as { __dartsDb?: Db };
 
 /** One connection per process; survives hot reload in development. */
 export function getDb(): Db {
-  if (!globalForDb.__dartsDb) {
-    globalForDb.__dartsDb = openDatabase(process.env.DATABASE_PATH ?? "./data/darts.db");
-  }
+  globalForDb.__dartsDb ??= openDatabase(process.env.DATABASE_PATH ?? "./data/darts.db");
   return globalForDb.__dartsDb;
 }

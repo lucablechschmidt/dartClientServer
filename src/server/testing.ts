@@ -37,7 +37,7 @@ export function memoryDeps(overrides: Partial<Deps> = {}): MemoryDeps {
     newId: counterIds(),
     now: () => 1_000_000,
     random: seededRandom(),
-    events: { publish() {} },
+    events: { publish: () => undefined },
     transaction: (fn) => fn(),
     ...overrides,
   } as MemoryDeps;
@@ -53,7 +53,7 @@ export function sqliteDeps(overrides: Partial<Deps> = {}): Deps {
     newId: counterIds(),
     now: () => 1_000_000,
     random: seededRandom(),
-    events: { publish() {} },
+    events: { publish: () => undefined },
     transaction: (fn) => db.transaction(() => fn()),
     ...overrides,
   };

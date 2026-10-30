@@ -166,7 +166,7 @@ function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
   const legs = [...m.legs];
   const status = matchStatus(next) === "finished" ? "finished" : "running";
   deps.transaction(() => {
-    while (legs.length > next.legs.length) deps.matches.deleteLeg(legs.pop()!.id);
+    for (const gone of legs.splice(next.legs.length)) deps.matches.deleteLeg(gone.id);
     next.legs.forEach((leg, i) => {
       if (i >= legs.length) {
         const created = { id: deps.newId(), ...numbers[i], winnerPlayerId: null };
@@ -179,7 +179,7 @@ function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
         });
         legs.push(created);
       }
-      const old = m.state.legs[i];
+      const old = m.state.legs.at(i); // a leg that is new in `next` has no stored counterpart
       if (old && old.starter !== leg.starter) deps.matches.setLegStarter(legs[i].id, next.players[leg.starter]);
       if ((old?.playOut ?? false) !== leg.playOut) deps.matches.setPlayOut(legs[i].id, leg.playOut);
       const oldVisits = old?.visits ?? [];
@@ -244,22 +244,28 @@ export type RecentResult<P = PlayerId> =
   | { kind: "score"; winner: P; unit: "legs" | "sets"; score: [number, number] }
   | { kind: "winner"; winner: P };
 
-export type RecentMatchView = { id: string; mode: ModeId; names: string[]; endedAt: number; result: RecentResult<string> };
+export type RecentMatchView = { id: string; mode: ModeId; names: string[]; endedAt: number; result: RecentResult };
 
 export function recentResult(m: RecentMatch): RecentResult {
   if (m.status !== "finished") return { kind: "abandoned" };
   const ids = m.players.map((p) => p.id);
-  const byPlace = ids.filter((id) => m.placements[id] != null).sort((a, b) => m.placements[a]! - m.placements[b]!);
-  if (ids.length > 2) return { kind: "places", order: byPlace.map((player) => ({ player, place: m.placements[player]! })) };
+  const placed = ids
+    .flatMap((player) => {
+      const place = m.placements[player];
+      return place == null ? [] : [{ player, place }];
+    })
+    .sort((a, b) => a.place - b.place);
+  if (ids.length > 2) return { kind: "places", order: placed };
   const { score } = walkWinners(ids, m.format, m.legWinners);
-  const winnerId = byPlace[0] ?? ids.find((id) => score.sets[id] >= m.format.setsToWinMatch) ?? ids[0];
+  const winnerId = placed.at(0)?.player ?? ids.find((id) => score.sets[id] >= m.format.setsToWinMatch) ?? ids[0];
   if (ids.length < 2 || (m.format.legsToWinSet === 1 && m.format.setsToWinMatch === 1)) return { kind: "winner", winner: winnerId };
   const unit = m.format.setsToWinMatch > 1 ? "sets" : "legs";
-  const other = ids.find((id) => id !== winnerId)!;
+  const other = ids.find((id) => id !== winnerId);
+  if (!other) return { kind: "winner", winner: winnerId };
   return { kind: "score", winner: winnerId, unit, score: [score[unit][winnerId], score[unit][other]] };
 }
 
-function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResult<string> {
+function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResult {
   if (r.kind === "places") return { ...r, order: r.order.map((p) => ({ player: name(p.player), place: p.place })) };
   if (r.kind === "score" || r.kind === "winner") return { ...r, winner: name(r.winner) };
   return r;

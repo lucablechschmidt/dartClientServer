@@ -3,7 +3,8 @@
  * Key: rest, value: suggestions for 3, 2 or 1 remaining darts. Assumes double-out.
  */
 
-export type CheckoutTable = Readonly<Record<number, readonly string[]>>;
+/** Partial: most rests have no route. */
+export type CheckoutTable = Readonly<Partial<Record<number, readonly string[]>>>;
 
 export const CHECKOUTS_THREE_DARTS: CheckoutTable = {
   170: ["T20, T20, Bullseye"],
@@ -299,7 +300,7 @@ export const CHECKOUTS_ONE_DART: CheckoutTable = {
   2: ["D1"],
 };
 
-const TABLES: Record<number, CheckoutTable> = {
+const TABLES: Partial<Record<number, CheckoutTable>> = {
   3: CHECKOUTS_THREE_DARTS,
   2: CHECKOUTS_TWO_DARTS,
   1: CHECKOUTS_ONE_DART,

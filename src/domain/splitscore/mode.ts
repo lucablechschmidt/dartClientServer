@@ -26,7 +26,8 @@ export const splitscore: GameMode = {
     if (!isDart(dart)) return { ok: false, reason: "invalid-dart" };
     if (finished(state)) return { ok: false, reason: "leg-finished" };
     const open = openVisit(state);
-    const target = targetOfVisit(state, open ? state.visits.length - 1 : state.visits.length)!;
+    const target = targetOfVisit(state, open ? state.visits.length - 1 : state.visits.length);
+    if (!target) return { ok: false, reason: "leg-finished" };
     // A dart off the target is as good as missing the board: stored overthrown (legacy addSingleFaultyDartScore).
     return { ok: true, value: withDart(state, open, currentPlayer(state), hitsTarget(dart, target) ? dart : OVERTHROWN) };
   },

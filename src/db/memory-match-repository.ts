@@ -9,9 +9,9 @@ export class MemoryMatchRepository implements MatchRepository {
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[] {
     const out: ExpiredGuestMatch[] = [];
     for (const m of this.store.matches.values()) {
-      const seated = m.playerIds.map((id) => this.store.players.get(id)!);
+      const seated = m.playerIds.map((id) => this.store.player(id));
       const guests = seated.filter((p) => p.guestUntil !== null);
-      if (guests.length === 0 || Math.max(...guests.map((p) => p.guestUntil!)) > now) continue;
+      if (guests.length === 0 || Math.max(...guests.map((p) => p.guestUntil ?? 0)) > now) continue;
       out.push({
         id: m.id,
         regularPlayerIds: seated.filter((p) => p.guestUntil === null).map((p) => p.id),
@@ -46,7 +46,7 @@ export class MemoryMatchRepository implements MatchRepository {
       .map((m) => ({
         id: m.id,
         mode: m.mode,
-        players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
+        players: m.playerIds.map((id) => toPlayer(this.store.player(id))),
         inputMode: m.inputMode,
         startedAt: m.startedAt,
       }));
@@ -59,7 +59,7 @@ export class MemoryMatchRepository implements MatchRepository {
       .map((m) => ({
         id: m.id,
         mode: m.mode,
-        players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
+        players: m.playerIds.map((id) => toPlayer(this.store.player(id))),
         status: m.status,
         startedAt: m.startedAt,
         finishedAt: m.finishedAt,
@@ -76,7 +76,7 @@ export class MemoryMatchRepository implements MatchRepository {
       mode: m.mode,
       rules: m.rules,
       status: m.status,
-      players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
+      players: m.playerIds.map((id) => toPlayer(this.store.player(id))),
       inputMode: m.inputMode,
       hostPlayerId: m.hostPlayerId,
       startedAt: m.startedAt,
@@ -99,7 +99,9 @@ export class MemoryMatchRepository implements MatchRepository {
     return m;
   }
   private legById(legId: string): StoredLeg {
-    return this.matchOfLeg(legId).legs.find((l) => l.id === legId)!;
+    const leg = this.matchOfLeg(legId).legs.find((l) => l.id === legId);
+    if (!leg) throw new Error(`unknown leg ${legId}`);
+    return leg;
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number): void {
     const leg = this.legById(legId);

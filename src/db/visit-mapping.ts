@@ -25,7 +25,8 @@ export function rowToVisit(row: VisitRow): Visit {
 export type VisitSlots = Pick<VisitRow, "d1Field" | "d1Type" | "d2Field" | "d2Type" | "d3Field" | "d3Type" | "isBust">;
 
 export function visitToSlots(visit: Visit): VisitSlots {
-  const [a, b, c] = visit.darts;
+  // .at() is honest about empty slots (a visit can hold fewer than three darts).
+  const [a, b, c] = [visit.darts.at(0), visit.darts.at(1), visit.darts.at(2)];
   return {
     d1Field: a?.field ?? null,
     d1Type: a?.type ?? null,

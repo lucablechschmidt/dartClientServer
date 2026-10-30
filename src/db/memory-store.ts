@@ -46,6 +46,13 @@ export class MemoryStore {
   matches = new Map<string, StoredMatch>();
   fieldHits = new Map<PlayerId, FieldHits>();
 
+  /** A stored player; a missing one is a bug in the test setup. */
+  player(id: PlayerId): StoredPlayer {
+    const player = this.players.get(id);
+    if (!player) throw new Error(`unknown player ${id}`);
+    return player;
+  }
+
   isSeated(playerId: PlayerId): boolean {
     return [...this.matches.values()].some((m) => m.playerIds.includes(playerId));
   }

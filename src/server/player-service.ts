@@ -17,13 +17,20 @@ function nameTaken(deps: Deps, name: string, exceptId?: string): boolean {
   return other !== null && other.id !== exceptId;
 }
 
+/** The player just inserted in this transaction; missing would be a bug in the repository. */
+function created(deps: Deps, id: string): Player {
+  const player = deps.players.findPlayerById(id);
+  if (!player) throw new Error(`player ${id} missing right after insert`);
+  return player;
+}
+
 export function createPlayer(deps: Deps, rawName: string): CreateResult {
   const name = playerNameSchema.parse(rawName);
   return deps.transaction((): CreateResult => {
     if (nameTaken(deps, name)) return { ok: false, reason: "name-taken" };
     const player: NewPlayer = { id: deps.newId(), name, createdAt: deps.now(), guestUntil: null };
     deps.players.createPlayer(player);
-    return { ok: true, player: deps.players.findPlayerById(player.id)! };
+    return { ok: true, player: created(deps, player.id) };
   });
 }
 
@@ -35,7 +42,7 @@ export function createGuest(deps: Deps, rawName: string): CreateResult {
     const now = deps.now();
     const player: NewPlayer = { id: deps.newId(), name, createdAt: now, guestUntil: now + GUEST_LIFETIME_MS };
     deps.players.createPlayer(player);
-    return { ok: true, player: deps.players.findPlayerById(player.id)! };
+    return { ok: true, player: created(deps, player.id) };
   });
 }
 

@@ -63,7 +63,7 @@ export function slotsOf(
   missed: (index: number) => boolean = () => false,
 ): DartSlotView[] {
   return Array.from({ length: MAX_DARTS_PER_VISIT }, (_, i) => {
-    const d = visit.darts[i];
+    const d = visit.darts.at(i);
     return {
       label: d ? dartLabel(d) : null,
       isCurrent: isActive && !finished && i === visit.darts.length,
@@ -93,10 +93,15 @@ export function groupStandings(
   winner: PlayerId | null = null,
 ): PlayerId[][] {
   const groups: PlayerId[][] = winner ? [[winner]] : [];
-  const rest = players.filter((p) => p !== winner).sort(compare);
-  rest.forEach((p, i) => {
-    if (i > 0 && compare(rest[i - 1], p) === 0) groups.at(-1)!.push(p);
-    else groups.push([p]);
-  });
+  let previous: { player: PlayerId; group: PlayerId[] } | null = null;
+  for (const p of players.filter((q) => q !== winner).sort(compare)) {
+    if (previous && compare(previous.player, p) === 0) {
+      previous.group.push(p);
+      previous.player = p;
+    } else {
+      previous = { player: p, group: [p] };
+      groups.push(previous.group);
+    }
+  }
   return groups;
 }

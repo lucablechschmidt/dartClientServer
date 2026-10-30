@@ -72,7 +72,7 @@ export type ExpiredGuestMatch = {
  * Players, their login (E10), guests (E12) and stored field hits. Split from MatchRepository by
  * responsibility (architecture.md §9, interface segregation).
  */
-export interface PlayerRepository {
+export type PlayerRepository = {
   /** Regular players, then the guests visible at `now`, each in creation order. */
   listPlayers(now: number): Player[];
   createPlayer(player: NewPlayer): void;
@@ -98,10 +98,10 @@ export interface PlayerRepository {
   deleteOrphanGuests(now: number): void;
   addFieldHits(playerId: PlayerId, hits: FieldHits): void;
   fieldHitsOf(playerId: PlayerId): FieldHits;
-}
+};
 
 /** Matches, legs and visits. */
-export interface MatchRepository {
+export type MatchRepository = {
   createMatch(input: NewMatch): void;
   loadMatch(matchId: string): LoadedMatch | null;
   /** Status running and newer than `openSince` (ms timestamp), newest first. */
@@ -130,4 +130,4 @@ export interface MatchRepository {
   // Guest matches (E12)
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[];
   deleteMatch(matchId: string): void;
-}
+};

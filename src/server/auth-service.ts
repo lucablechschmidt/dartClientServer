@@ -51,7 +51,7 @@ function startSession(deps: Deps, playerId: string, name: string, isAdmin: boole
 export async function login(deps: Deps, name: string, password: string): Promise<LoginResult> {
   const creds = deps.players.credentialsByName(name.trim());
   const ok = await verifyPassword(password, creds?.passwordHash ?? DUMMY_HASH);
-  if (!creds || creds.passwordHash === null || !ok) return { ok: false, reason: "invalid-credentials" };
+  if (!creds?.passwordHash || !ok) return { ok: false, reason: "invalid-credentials" };
   return { ok: true, ...startSession(deps, creds.id, creds.name, creds.isAdmin) };
 }
 
@@ -64,7 +64,7 @@ export function sessionFromToken(deps: Deps, token: string): Session | null {
   const s = deps.auth.findSession(tokenId(token), deps.now());
   if (!s) return null;
   const creds = deps.players.credentialsById(s.playerId);
-  if (!creds || creds.passwordHash === null) return null;
+  if (!creds?.passwordHash) return null;
   return { playerId: creds.id, name: creds.name, isAdmin: creds.isAdmin };
 }
 
@@ -79,7 +79,7 @@ export async function changeOwnPassword(
   if (newPassword.length < MIN_PASSWORD_LENGTH) return { ok: false, reason: "password-too-short" };
   const creds = deps.players.credentialsById(session.playerId);
   const ok = await verifyPassword(oldPassword, creds?.passwordHash ?? DUMMY_HASH);
-  if (!creds || creds.passwordHash === null || !ok) return { ok: false, reason: "invalid-credentials" };
+  if (!creds?.passwordHash || !ok) return { ok: false, reason: "invalid-credentials" };
   const hash = await hashPassword(newPassword);
   deps.transaction(() => {
     deps.players.setPasswordHash(creds.id, hash);

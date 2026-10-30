@@ -6,7 +6,7 @@ import type { ApplyError, Dart, LegState, PlayerId, PlayOutError, Result, UndoEr
  * network protocol only use this interface; X01, Cricket, Elimination and SplitScore implement it.
  * The state of a leg is always its list of visits (storage format, architecture.md §6).
  */
-export interface GameMode {
+export type GameMode = {
   /** A dart for the player on turn; an invalid dart may close the visit (bust) instead of an error. */
   applyDart(state: LegState, dart: Dart): Result<LegState, ApplyError>;
   /** Takes back one dart (or one step, see X01 play-out). */
@@ -25,4 +25,4 @@ export interface GameMode {
     startPlayOut(state: LegState): Result<LegState, PlayOutError>;
     resign(state: LegState): Result<LegState, PlayOutError>;
   };
-}
+};

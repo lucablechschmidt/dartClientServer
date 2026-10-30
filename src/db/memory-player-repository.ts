@@ -77,7 +77,7 @@ export class MemoryPlayerRepository implements PlayerRepository {
   }
   addFieldHits(playerId: PlayerId, hits: FieldHits): void {
     const positive = new Map([...hits].filter(([, n]) => n > 0));
-    this.store.fieldHits.set(playerId, addFieldHits(this.store.fieldHits.get(playerId) ?? new Map(), positive));
+    this.store.fieldHits.set(playerId, addFieldHits(this.store.fieldHits.get(playerId) ?? new Map<number, number>(), positive));
   }
   fieldHitsOf(playerId: PlayerId): FieldHits {
     return new Map(this.store.fieldHits.get(playerId) ?? []);

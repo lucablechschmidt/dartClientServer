@@ -19,7 +19,7 @@ export type InviteRecord = {
   usedAt: number | null;
 };
 
-export interface AuthRepository {
+export type AuthRepository = {
   createSession(session: SessionRecord): void;
   /** Only valid (unexpired) sessions. */
   findSession(id: string, now: number): SessionRecord | null;
@@ -31,4 +31,4 @@ export interface AuthRepository {
   /** Only valid ones: not expired, not used. */
   findInvite(id: string, now: number): InviteRecord | null;
   markInviteUsed(id: string, now: number): void;
-}
+};

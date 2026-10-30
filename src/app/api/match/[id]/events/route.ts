@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (!(await currentSession())) return new Response(null, { status: 401 });
   const { id } = await params;
   const encoder = new TextEncoder();
-  let cleanup = () => {};
+  let cleanup = (): void => undefined;
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       const send = (chunk: string) => {

@@ -11,7 +11,7 @@ const schema = z.object({
     .trim()
     .regex(/^\$2[aby]\$\d\d\$/, "bcrypt hash expected")
     .optional(),
-  APP_URL: z.string().url().default("http://127.0.0.1:3100"),
+  APP_URL: z.url().default("http://127.0.0.1:3100"),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
 });
 
