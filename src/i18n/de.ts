@@ -236,6 +236,7 @@ export const de = {
       "no-play-out": "Zu Ende spielen geht gerade nicht.",
       "unknown-player": "Spieler gehört nicht zum Spiel.",
       "not-between-legs": "Der Sieger lässt sich nur nach einem Leg festlegen.",
+      "tournament-moved-on": "Das nächste Turnierspiel läuft schon; dieses Ergebnis bleibt.",
     },
   },
 } as const;

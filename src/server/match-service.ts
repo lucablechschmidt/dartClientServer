@@ -42,6 +42,7 @@ import {
   type ScoreboardView,
 } from "@/domain/game";
 import type { Deps } from "./deps";
+import { isTournamentMatchLocked } from "./tournament-plan";
 
 export const rulesSchema = z.object({
   /** X01 start, Elimination target, SplitScore start (40); Cricket does not use it (0). */
@@ -102,7 +103,8 @@ export type ActionError =
   | "match-closed"
   | "leg-started"
   | "no-play-out"
-  | "not-between-legs";
+  | "not-between-legs"
+  | "tournament-moved-on";
 export type ActionResult = { ok: true; view: MatchView } | { ok: false; reason: ActionError };
 
 export const dartSchema = z
@@ -350,6 +352,9 @@ export function undoVisit(deps: Deps, session: Session, matchId: string): Action
   const r = undoMatchVisit(m.state);
   if (!r.ok) return { ok: false, reason: r.reason };
   if (!canUndo(m.state, match, actorOf(session), now)) return { ok: false, reason: "forbidden" };
+  // M9: a finished tournament match stays decided once the game that depends on it has started.
+  if (m.isTournament && m.status === "finished" && isTournamentMatchLocked(deps, matchId))
+    return { ok: false, reason: "tournament-moved-on" };
   const stored = persist(deps, m, r.value);
   deps.events.publish(matchId);
   return { ok: true, view: toView(stored, session, now) };

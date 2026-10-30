@@ -120,6 +120,71 @@ export const legs = sqliteTable(
   (t) => [index("leg_match_idx").on(t.matchId)],
 );
 
+/**
+ * M9: a tournament is its seed list, its rules and which match was played for which fixture. The
+ * schedule itself is rebuilt by the domain (src/domain/tournament) from format and seeds; results come
+ * from the linked matches. Players are removed with the tournament row (cascade) so the daily guest
+ * cleanup never trips over a guest who only sat in a tournament.
+ */
+export const tournaments = sqliteTable("tournament", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  format: text("format", { enum: ["round-robin", "knockout", "groups-knockout"] }).notNull(),
+  groupCount: integer("group_count").notNull().default(1),
+  advancePerGroup: integer("advance_per_group").notNull().default(2),
+  startScore: integer("start_score").notNull(),
+  inRule: text("in_rule", { enum: ["single", "double", "triple"] }).notNull(),
+  outRule: text("out_rule", { enum: ["single", "double", "triple"] }).notNull(),
+  inputMode: text("input_mode", { enum: ["single", "per-player"] })
+    .notNull()
+    .default("single"),
+  createdBy: text("created_by").references(() => players.id, { onDelete: "set null" }),
+  createdAt: integer("created_at").notNull(),
+});
+
+export const tournamentPlayers = sqliteTable(
+  "tournament_player",
+  {
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    seed: integer("seed").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tournamentId, t.playerId] })],
+);
+
+/** Best of legs/sets per phase and knockout round (m9-plan §9.4); round 0 = the whole group phase. */
+export const tournamentRoundFormats = sqliteTable(
+  "tournament_round_format",
+  {
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    phase: text("phase", { enum: ["group", "knockout"] }).notNull(),
+    round: integer("round").notNull(),
+    legsToWinSet: integer("legs_to_win_set").notNull(),
+    setsToWinMatch: integer("sets_to_win_match").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.tournamentId, t.phase, t.round] })],
+);
+
+export const tournamentMatches = sqliteTable(
+  "tournament_match",
+  {
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    fixtureId: text("fixture_id").notNull(),
+    matchId: text("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.tournamentId, t.fixtureId] }), index("tournament_match_match_idx").on(t.matchId)],
+);
+
 const dartType = { enum: ["single", "double", "triple", "overthrown"] } as const;
 
 export const visits = sqliteTable(

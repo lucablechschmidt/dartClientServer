@@ -1,5 +1,6 @@
 import type { AuthRepository } from "@/db/auth-repository";
 import type { MatchRepository, PlayerRepository } from "@/db/repository";
+import type { TournamentRepository } from "@/db/tournament-repository";
 import type { MatchEvents } from "./match-events";
 
 /** Service dependencies, replaceable in tests (architecture.md §9). */
@@ -7,6 +8,8 @@ export type Deps = {
   players: PlayerRepository;
   matches: MatchRepository;
   auth: AuthRepository;
+  /** M9 */
+  tournaments: TournamentRepository;
   newId: () => string;
   now: () => number;
   /** Random bytes for tokens (M3); deterministic in tests. */

@@ -3,9 +3,11 @@ import { MemoryAuthRepository } from "@/db/memory-auth-repository";
 import { MemoryMatchRepository } from "@/db/memory-match-repository";
 import { MemoryPlayerRepository } from "@/db/memory-player-repository";
 import { MemoryStore } from "@/db/memory-store";
+import { MemoryTournamentRepository } from "@/db/memory-tournament-repository";
 import { SqliteAuthRepository } from "@/db/sqlite-auth-repository";
 import { SqliteMatchRepository } from "@/db/sqlite-match-repository";
 import { SqlitePlayerRepository } from "@/db/sqlite-player-repository";
+import { SqliteTournamentRepository } from "@/db/sqlite-tournament-repository";
 import type { Deps } from "./deps";
 
 /** Counter-based ids (`id1`, `id2`, …) so tests can predict them. */
@@ -33,6 +35,7 @@ export function memoryDeps(overrides: Partial<Deps> = {}): MemoryDeps {
     store,
     players: new MemoryPlayerRepository(store),
     matches: new MemoryMatchRepository(store),
+    tournaments: new MemoryTournamentRepository(store),
     auth: new MemoryAuthRepository(),
     newId: counterIds(),
     now: () => 1_000_000,
@@ -49,6 +52,7 @@ export function sqliteDeps(overrides: Partial<Deps> = {}): Deps {
   return {
     players: new SqlitePlayerRepository(db),
     matches: new SqliteMatchRepository(db),
+    tournaments: new SqliteTournamentRepository(db),
     auth: new SqliteAuthRepository(db),
     newId: counterIds(),
     now: () => 1_000_000,

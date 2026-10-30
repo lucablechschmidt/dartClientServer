@@ -1,6 +1,7 @@
 import type { FieldHits } from "@/domain/stats/field-hits";
 import type { InputMode, MatchFormat, ModeId, PlayerId, Rules, Visit } from "@/domain/game";
 import type { MatchStatus, Player } from "./repository";
+import type { NewTournament } from "./tournament-repository";
 
 export type StoredPlayer = Player & { passwordHash: string | null };
 export const toPlayer = (p: StoredPlayer): Player => ({
@@ -47,6 +48,7 @@ export class MemoryStore {
   players = new Map<PlayerId, StoredPlayer>();
   matches = new Map<string, StoredMatch>();
   fieldHits = new Map<PlayerId, FieldHits>();
+  tournaments = new Map<string, Omit<NewTournament, "seeds"> & { seeds: PlayerId[]; links: { fixtureId: string; matchId: string }[] }>();
 
   /** A stored player; a missing one is a bug in the test setup. */
   player(id: PlayerId): StoredPlayer {
