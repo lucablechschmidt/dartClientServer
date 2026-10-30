@@ -2,7 +2,7 @@ import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, lastOpenVisit, playerOnTurn, popDart, shownVisit, withDart } from "../game/visits";
+import { dartsOf, lastOpenVisit, nextSeat, playerOnTurn, popDart, shownVisit, withDart } from "../game/visits";
 import { closedFields, CRICKET_FIELDS, isClosedForAll, tally } from "./tally";
 
 const finished = (state: LegState) => tally(state).winner !== null;
@@ -46,16 +46,16 @@ export const cricket: GameMode = {
       isOut: false,
       marks: CRICKET_FIELDS.map((field) => ({ field, marks: Math.min(3, t.marks[id][field]), closed: isClosedForAll(t, state.players, field) })),
     }));
-    const missing = CRICKET_FIELDS.find((f) => t.marks[active][f] < 3);
     return {
       mode: "cricket",
       players,
       activePlayerId: active,
       winnerId: t.winner,
       dartsLeft: done ? 0 : MAX_DARTS_PER_VISIT - (open?.darts.length ?? 0),
-      hint: done || missing === undefined ? null : { kind: "marks", field: missing, missing: 3 - t.marks[active][missing] },
+      hint: null,
       canUndo: state.visits.length > 0,
       ranking: standings(state).flat(),
+      nextPlayerId: done ? undefined : nextSeat(state.players, active),
     };
   },
 };

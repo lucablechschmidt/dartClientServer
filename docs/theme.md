@@ -27,7 +27,8 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--key-undo` | `undo` (systemRed) | Taste Undo | `#FF3B30` | `#FF453A` |
 | `--slot-bg` | `FrameBackground` (DartScoreView, über dem Panel) | Füllung der drei Dart-Kästen | `rgb(0 0 0 / .10)` | `rgb(0 0 0 / .10)` |
 | `--hint-bg` | `Color.gray.opacity(0.5)` | Checkout-Hinweis-Leiste | `rgb(142 142 147 / .5)` | `rgb(142 142 147 / .5)` |
-| `--cricket-closed` | `CricketFieldClosed` (M7) | geschlossenes Cricket-Feld | `#8E8E93` | `rgb(200 200 200 / .5)` |
+| `--cricket-closed` | `CricketFieldClosed` (M7) | Cricket-Feld, das alle geschlossen haben (Zeile und Felder, Symbol in `--on-accent`) | `#8E8E93` | `rgb(200 200 200 / .5)` |
+| `--cricket-scoring` | – (Figma-Cricket) | Feld, das der Spieler geschlossen hat, aber nicht alle; Symbol in `--key-triple` | `--key-triple` 20 % | `--key-triple` 20 % |
 | `--accent` | `AccentColor` (leer) | Links, aktiver Tab | `= --frame-active` | `= --frame-active` |
 | `--bg-grouped` | systemGroupedBackground (`List`) | Hintergrund der Listen-Screens (Setup, Spieler) | `#F2F2F7` | `#000000` |
 | `--card-bg` | secondarySystemGroupedBackground | Karte mit den Listenzeilen | `#FFFFFF` | `#1C1C1E` |
@@ -66,6 +67,6 @@ Regeln für die Web-App:
 5. **Container Queries** für die Panels (`container-type: inline-size`), damit ein Panel in der Kleinvariante ohne JavaScript Average und Darts ausblendet.
 6. Keine festen Pixelhöhen außer der Touch-Mindesthöhe; keine `window.innerHeight`-Berechnungen in JavaScript.
 7. **Safe Areas**: `padding: env(safe-area-inset-*)` auf dem Grid, `viewport-fit=cover` im Meta-Tag, damit die PWA (M12) randlos sein kann.
-8. **Nur Tokens, kein Inline-Style, keine Ad-hoc-Werte.** Farben, Radien, feste Größen und fluide `clamp()`-Größen stehen als Tokens in `globals.css` (`@theme`: `--color-*`, `--radius-panel|slot|pill|tile|box`, `--shadow-floating`, `--text-title|display`, `--spacing-row|tab|panel-x|keypad-gap|icon-inline|icon|icon-sm|icon-xs|avatar|check|icon-box|cta|qr|panel-sm|slot-w|slot-h|slot-gap`); Komponenten nutzen nur die daraus erzeugten Klassen (`rounded-panel`, `w-slot-w`, `gap-keypad-gap` …). Safe-Area-Abstände über `pt-safe`, `pb-safe`, `pb-safe-min`; wiederkehrende Layouts als Klasse in `@layer components` (`score-grid`, `header-grid`). `style={…}` ist per ESLint verboten (`react/forbid-dom-props`), Tailwind-Ad-hoc-Werte wie `rounded-[18px]` sind es per Konvention: ein neuer Wert wird ein Token.
+8. **Nur Tokens, kein Inline-Style, keine Ad-hoc-Werte.** Farben, Radien, feste Größen und fluide `clamp()`-Größen stehen als Tokens in `globals.css` (`@theme`: `--color-*`, `--radius-panel|slot|pill|tile|box`, `--shadow-floating`, `--text-title|display`, `--spacing-row|tab|panel-x|keypad-gap|icon-inline|icon|icon-sm|icon-xs|avatar|check|icon-box|cta|qr|cricket-label|cricket-col|panel-sm|slot-w|slot-h|slot-gap`); Komponenten nutzen nur die daraus erzeugten Klassen (`rounded-panel`, `w-slot-w`, `gap-keypad-gap` …). Safe-Area-Abstände über `pt-safe`, `pb-safe`, `pb-safe-min`; wiederkehrende Layouts als Klasse in `@layer components` (`score-grid`, `header-grid`). `style={…}` ist per ESLint verboten (`react/forbid-dom-props`), Tailwind-Ad-hoc-Werte wie `rounded-[18px]` sind es per Konvention: ein neuer Wert wird ein Token.
 
 Testgeräte für die DoD: iPhone-Breite 375 px hoch und quer, Tablet 768 px hoch und quer, Desktop-Fenster 1280 px. Der Zählscreen darf in keinem davon scrollen oder abschneiden.

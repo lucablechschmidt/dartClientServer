@@ -14,6 +14,7 @@ import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type ModeId, type PlayerId, type Rules } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
+import { CricketBoard } from "./cricket-board";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
 import { VictoryScreen } from "./victory-screen";
 
@@ -140,6 +141,26 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
     return <LegVictoryScreen view={view} names={initial.names} texts={texts} canUndo={undoOk && sync === "saved"} onContinue={() => setClosedLeg(legKey(state))} onUndo={undoAndReopen} />;
   }
 
+  const keypad = (
+    <Keypad
+      texts={{ bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple }}
+      canThrow={enterOk}
+      canUndo={undoOk}
+      onDart={throwDart}
+      onUndo={undoAndReopen}
+      layout={board.mode === "cricket" ? "cricket" : "full"}
+    />
+  );
+
+  if (board.mode === "cricket") {
+    return (
+      <>
+        <CricketBoard board={board} names={initial.names} texts={texts} header={header} keypad={keypad} isOpen={isOpen} turnHint={turnHint} onSelectStarter={starterOk ? chooseStarter : undefined} />
+        {confirm}
+      </>
+    );
+  }
+
   return (
     <>
       <ScoreGrid
@@ -148,7 +169,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
           <div className="h-full px-3">
             <PlayerPanels
               players={board.players}
-              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit, marks: texts.marks, bull: texts.bull, bullShort: texts.bullShort, markSymbols: texts.markSymbols }}
+              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit }}
               onSelect={starterOk ? chooseStarter : undefined}
               selectLabel={texts.toStart}
             />
@@ -166,17 +187,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
             )}
           </div>
         }
-        keypad={
-          <div className="h-full px-3 pb-3">
-            <Keypad
-              texts={{ bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple }}
-              canThrow={enterOk}
-              canUndo={undoOk}
-              onDart={throwDart}
-              onUndo={undoAndReopen}
-            />
-          </div>
-        }
+        keypad={<div className="h-full px-3 pb-3">{keypad}</div>}
       />
       {confirm}
     </>

@@ -3,7 +3,8 @@ import type { Dart, LegState, PlayerId } from "../game/types";
 
 /** Port of CricketGame / Field (legacy-analysis.md §4). */
 
-export const CRICKET_FIELDS = [20, 19, 18, 17, 16, 15, 25] as const;
+/** In the order of the board table (Figma: 15 on top, Bull at the bottom). */
+export const CRICKET_FIELDS = [15, 16, 17, 18, 19, 20, 25] as const;
 export type CricketField = (typeof CRICKET_FIELDS)[number];
 const MARKS_TO_CLOSE = 3;
 

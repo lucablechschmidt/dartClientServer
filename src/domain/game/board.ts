@@ -31,8 +31,6 @@ export type PlayerPanelData = {
 /** The line between panels and keypad; texts come from i18n, the domain only says what. */
 export type BoardHint =
   | { kind: "checkout"; text: string }
-  /** Cricket: the highest field the player still has to close, and how many marks are missing. */
-  | { kind: "marks"; field: number; missing: number }
   /** Elimination: points to the next player above, who would be sent back to 0. */
   | { kind: "elimination"; points: number }
   /** SplitScore: the current target. */
@@ -50,6 +48,8 @@ export type ScoreboardView = {
   ranking: PlayerId[];
   /** SplitScore: the points of all players together, shown on the victory screen (legacy getTotalGameScore). */
   total?: number;
+  /** Cricket (Figma): who throws after the current visit, shown below the keypad. */
+  nextPlayerId?: PlayerId;
 };
 
 /**

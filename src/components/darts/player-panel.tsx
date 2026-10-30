@@ -1,10 +1,8 @@
 import type { PlayerPanelData } from "@/domain/game";
 import { CircleSlashIcon } from "@/components/ui/icons";
-import { CricketMarks, type CricketMarksTexts } from "./cricket-marks";
 import { DartSlots } from "./dart-slots";
 
-/** Cricket texts are only needed where a mode shows marks. */
-export type PlayerPanelTexts = { darts: string; average: string; visit: string } & Partial<CricketMarksTexts>;
+export type PlayerPanelTexts = { darts: string; average: string; visit: string };
 
 type Props = { player: PlayerPanelData; size?: "large" | "small"; texts: PlayerPanelTexts };
 
@@ -13,7 +11,7 @@ const fmt = (n: number) => n.toFixed(2);
 /**
  * Port of PlayerDetailView / PlayerSmallDetailView. Display only; the data arrives already projected.
  * M5: a player who has checked out (3+ players) shows his place instead of the rest and is dimmed.
- * M7: the score is the rest (X01) or the points; Cricket adds the row of marks.
+ * M7: the score is the rest (X01) or the points. Cricket has its own board (CricketTable, Figma).
  */
 export function PlayerPanel({ player, size = "large", texts }: Props) {
   const border = player.isActive ? "border-frame-active" : "border-frame-fg";
@@ -34,21 +32,25 @@ export function PlayerPanel({ player, size = "large", texts }: Props) {
         <span className="truncate font-normal tracking-tight">{player.name}</span>
         <span className="tabular font-bold" data-score>{score}</span>
       </div>
-      <div className="flex items-center gap-2 fluid-text-sm tabular">
-        <span aria-label={texts.darts} className="flex items-center gap-1.5">
-          <span aria-hidden="true">🎯</span>
-          {player.darts}
-        </span>
-        {player.average !== null && (
-          <span aria-label={texts.average} className="flex items-center gap-1.5">
-            <CircleSlashIcon className="size-icon-inline" />
-            {fmt(player.average)}
-          </span>
-        )}
-      </div>
+      <PanelStats player={player} texts={texts} />
       <DartSlots slots={player.slots} isBust={player.isBust} label={texts.visit} />
-      {player.marks && texts.marks && texts.bull && texts.bullShort && texts.markSymbols && (
-        <CricketMarks marks={player.marks} texts={{ marks: texts.marks, bull: texts.bull, bullShort: texts.bullShort, markSymbols: texts.markSymbols }} />
+    </div>
+  );
+}
+
+/** Darts thrown and, where the mode has one, the average. */
+function PanelStats({ player, texts }: { player: PlayerPanelData; texts: PlayerPanelTexts }) {
+  return (
+    <div className="flex items-center gap-2 fluid-text-sm tabular">
+      <span aria-label={texts.darts} className="flex items-center gap-1.5">
+        <span aria-hidden="true">🎯</span>
+        {player.darts}
+      </span>
+      {player.average !== null && (
+        <span aria-label={texts.average} className="flex items-center gap-1.5">
+          <CircleSlashIcon className="size-icon-inline" />
+          {fmt(player.average)}
+        </span>
       )}
     </div>
   );

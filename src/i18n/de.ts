@@ -208,14 +208,15 @@ export const de = {
     points: "Punkte",
     total: "Summe aller Spieler: {n}",
     marks: "Marks",
-    /** Cricket marks 0–3 as on a chalk board: nothing, a stroke, a cross, a circled cross. */
-    markSymbols: ["", "/", "X", "Ⓧ"],
-    bullShort: "B",
+    /** Cricket marks 0–2 as on a chalk board: a dash for none, a stroke, a cross; 3 is the circled-cross icon. */
+    markSymbols: ["—", "/", "X"],
+    target: "Ziel",
+    onTurn: "Am Wurf",
+    nextPlayer: "Nächster Spieler: {name}",
     inNames,
     outNames,
     modes: modeNames,
     hints: {
-      marks: "Noch {n}× {field}",
       elimination: "Nächste Elimination in {n}",
       target: "Ziel: {target}",
       targets: { double: "Doppel", triple: "Triple", bull: "Bull" },

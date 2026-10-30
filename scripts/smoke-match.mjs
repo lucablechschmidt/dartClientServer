@@ -379,7 +379,8 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await tap("Undo");
   expect((await scores())[0] === "0", "cricket: undo takes the points back");
   await tap("Triple", "19", "Triple", "18", ...MISS, "Triple", "17", "Triple", "16", "Triple", "15", ...MISS);
-  expect((await page.locator("[aria-live=polite]").innerText()) === "Noch 3× Bull", "cricket: hint names the field still open");
+  expect((await page.getByText(`Nächster Spieler: B${stamp}`).count()) === 1, "cricket: the next player below the keypad");
+  expect((await page.getByRole("button", { name: "1", exact: true }).count()) === 0, "cricket: reduced keypad without 1–14");
   await page.screenshot({ path: `${shots}/match-cricket.png` });
   await tap("Double", "Bull", "Bull", "20");
   await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });

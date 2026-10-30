@@ -33,6 +33,8 @@
   --separator: light-dark(rgb(60 60 67 / 0.29), rgb(84 84 88 / 0.6));
   --tab-bg: light-dark(rgb(242 242 247 / 0.92), rgb(28 28 30 / 0.92));
   --cricket-closed: light-dark(#8e8e93, rgb(200 200 200 / 0.5));
+  /* Cricket table (Figma): a field the player has closed but not everyone, so it still scores */
+  --cricket-scoring: color-mix(in srgb, var(--key-triple) 20%, transparent);
   --accent: var(--frame-active);
   /* Tints for the setup screens (Figma layout, own colors): derived, so they follow light/dark and the accent */
   --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
@@ -79,6 +81,7 @@
   --color-separator: var(--separator);
   --color-tab-bg: var(--tab-bg);
   --color-cricket-closed: var(--cricket-closed);
+  --color-cricket-scoring: var(--cricket-scoring);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-wash: var(--accent-wash);
@@ -125,6 +128,8 @@
   --spacing-icon-box: 2.75rem;                     /* tinted square with the target icon */
   --spacing-cta: 3.5rem;                           /* height of "Spiel starten" */
   --spacing-qr: 14rem;                             /* invite QR code */
+  --spacing-cricket-label: 3.5rem;                 /* field column of the Cricket table */
+  --spacing-cricket-col: 4.5rem;                   /* narrowest player column; more players scroll sideways */
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

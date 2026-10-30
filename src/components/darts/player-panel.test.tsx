@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { PlayerPanelData } from "@/domain/game";
-import { de } from "@/i18n/de";
 import { PlayerPanel } from "./player-panel";
 
 const texts = { darts: "Darts", average: "Ø", visit: "Aufnahme" };
@@ -32,14 +31,5 @@ describe("PlayerPanel", () => {
   it("small panel: place too", () => {
     render(<PlayerPanel player={{ ...base, placement: 3 }} size="small" texts={texts} />);
     expect(screen.getByText("3.")).toBeInTheDocument();
-  });
-  it("cricket: the row of marks with /, X, Ⓧ and gray fields closed by everyone (M7)", () => {
-    const marks = [20, 19, 18, 17, 16, 15, 25].map((field, i) => ({ field, marks: Math.min(3, i), closed: field === 18 }));
-    const { container } = render(<PlayerPanel player={{ ...base, marks }} texts={{ ...texts, marks: de.game.marks, bull: de.game.bull, bullShort: de.game.bullShort, markSymbols: de.game.markSymbols }} />);
-    const row = screen.getByRole("list", { name: "Marks" });
-    expect([...row.querySelectorAll("[data-marks]")].map((e) => e.textContent)).toEqual(["", "/", "X", "Ⓧ", "Ⓧ", "Ⓧ", "Ⓧ"]);
-    expect(screen.getByLabelText("18: 2")).toHaveClass("bg-cricket-closed");
-    expect(screen.getByLabelText("Bull: 3")).toBeInTheDocument();
-    expect(container.querySelector("[data-score]")).toHaveTextContent("121");
   });
 });

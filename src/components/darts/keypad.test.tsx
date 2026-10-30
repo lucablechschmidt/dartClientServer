@@ -38,4 +38,13 @@ describe("Keypad", () => {
     render(<Keypad onDart={() => {}} onUndo={() => {}} texts={texts} disabled />);
     expect(screen.getAllByRole("button").every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
   });
+  it("cricket layout: only 0, 15–20, Bull, Double, Triple, Undo (Figma)", async () => {
+    const user = userEvent.setup();
+    const onDart = vi.fn();
+    render(<Keypad onDart={onDart} onUndo={() => {}} texts={texts} layout="cricket" />);
+    expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual(["0", "15", "16", "17", "18", "19", "20", "Bull", "Double", "Triple", "Undo"]);
+    await user.click(screen.getByRole("button", { name: "Triple" }));
+    await user.click(screen.getByRole("button", { name: "20" }));
+    expect(onDart).toHaveBeenCalledWith({ field: 20, type: "triple" });
+  });
 });

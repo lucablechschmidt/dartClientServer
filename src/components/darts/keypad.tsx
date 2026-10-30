@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Dart } from "@/domain/game";
-import { initialKeypadState, isKeyHidden, KEYPAD_ROWS, keyId, pressKey, type KeypadKey, type KeypadState } from "./keypad-logic";
+import { initialKeypadState, isKeyHidden, KEYPAD_LAYOUTS, keyId, pressKey, type KeypadKey, type KeypadLayout, type KeypadState } from "./keypad-logic";
 
 export type KeypadTexts = { bull: string; undo: string; double: string; triple: string };
 
@@ -14,7 +14,16 @@ type Props = {
   canThrow?: boolean;
   canUndo?: boolean;
   texts: KeypadTexts;
+  /** "full": legacy 5 × 5; "cricket": 0, 15–20, Bull (Figma). */
+  layout?: KeypadLayout;
 };
+
+/**
+ * Literal classes per layout so Tailwind generates them. Every key spans two columns of a grid
+ * twice as wide as the longest row, so a shorter row can start half a key in and sit centered.
+ */
+const GRID: Record<KeypadLayout, string> = { full: "grid-cols-10 grid-rows-5", cricket: "grid-cols-8 grid-rows-3" };
+const ROW_OFFSET = ["", "col-start-2", "col-start-3", "col-start-4"];
 
 function label(key: KeypadKey, texts: KeypadTexts): string {
   switch (key.kind) {
@@ -45,7 +54,7 @@ function keyClasses(key: KeypadKey, state: KeypadState): string {
 }
 
 /** Port of ScoreInputView: 5 rows, modifier toggles, undo. Emits finished darts via callback. */
-export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canUndo = true, texts }: Props) {
+export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canUndo = true, texts, layout = "full" }: Props) {
   const [state, setState] = useState<KeypadState>(initialKeypadState);
 
   const press = (key: KeypadKey) => {
@@ -56,22 +65,26 @@ export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canU
   };
 
   return (
-    <div className="grid h-full grid-cols-5 grid-rows-5 gap-keypad-gap" role="group">
-      {KEYPAD_ROWS.flat().map((key) => {
-        const hidden = isKeyHidden(state, key);
-        const isUndo = key.kind === "undo";
-        return (
-          <button
-            key={keyId(key)}
-            type="button"
-            onClick={() => press(key)}
-            disabled={disabled || hidden || (isUndo ? !canUndo : !canThrow)}
-            aria-pressed={key.kind === "double" || key.kind === "triple" ? state.modifier === key.kind : undefined}
-            className={`${keyClasses(key, state)} ${hidden ? "invisible" : ""}`}
-          >
-            {label(key, texts)}
-          </button>
-        );
+    <div className={`grid h-full gap-keypad-gap ${GRID[layout]}`} role="group">
+      {KEYPAD_LAYOUTS[layout].flatMap((row, _, rows) => {
+        const longest = Math.max(...rows.map((r) => r.length));
+        return row.map((key, i) => {
+          const hidden = isKeyHidden(state, key);
+          const isUndo = key.kind === "undo";
+          const offset = i === 0 ? ROW_OFFSET[longest - row.length] : "";
+          return (
+            <button
+              key={keyId(key)}
+              type="button"
+              onClick={() => press(key)}
+              disabled={disabled || hidden || (isUndo ? !canUndo : !canThrow)}
+              aria-pressed={key.kind === "double" || key.kind === "triple" ? state.modifier === key.kind : undefined}
+              className={`col-span-2 ${offset} ${keyClasses(key, state)} ${hidden ? "invisible" : ""}`}
+            >
+              {label(key, texts)}
+            </button>
+          );
+        });
       })}
     </div>
   );

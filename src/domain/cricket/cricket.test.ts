@@ -121,13 +121,15 @@ describe("cricket (M7, legacy §4)", () => {
     expect(cricket.standings(s)).toEqual([[A], [B], [C]]);
   });
 
-  it("board: points as score, marks per field with closed-by-all, hint for the highest open field", () => {
+  it("board: points as score, marks per field (15 to Bull) with closed-by-all, the next player", () => {
     const s = play(leg(), T(20), S(19));
     const v = cricket.board(s, { a: "Casey", b: "Sam" });
     expect(v.mode).toBe("cricket");
     expect(v.players[0].score).toBe(0);
     expect(v.players[0].marks?.find((m) => m.field === 20)).toEqual({ field: 20, marks: 3, closed: false });
-    expect(v.hint).toEqual({ kind: "marks", field: 19, missing: 2 });
+    expect(v.hint).toBeNull(); // Figma: no hint line in Cricket
+    expect(v.nextPlayerId).toBe(B);
+    expect(v.players[0].marks?.map((m) => m.field)).toEqual([15, 16, 17, 18, 19, 20, 25]);
     expect(v.dartsLeft).toBe(1);
     expect(v.players[0].average).toBeNull(); // no average in Cricket
   });

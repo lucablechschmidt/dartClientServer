@@ -27,6 +27,18 @@ export const KEYPAD_ROWS: KeypadKey[][] = [
   [{ kind: "bull" }, { kind: "number", value: 0 }, { kind: "undo" }, { kind: "double" }, { kind: "triple" }],
 ];
 
+const numbers = (...values: number[]): KeypadKey[] => values.map((value) => ({ kind: "number", value }));
+
+/**
+ * Key layouts: the legacy keypad, and Cricket's (Figma): only 0, 15–20 and Bull, the modifiers and
+ * undo in a shorter centered row. Every other field would count nothing in Cricket anyway.
+ */
+export const KEYPAD_LAYOUTS = {
+  full: KEYPAD_ROWS,
+  cricket: [numbers(0, 15, 16, 17), [...numbers(18, 19, 20), { kind: "bull" }], [{ kind: "double" }, { kind: "triple" }, { kind: "undo" }]],
+} satisfies Record<string, KeypadKey[][]>;
+export type KeypadLayout = keyof typeof KEYPAD_LAYOUTS;
+
 export function keyId(key: KeypadKey): string {
   return key.kind === "number" ? `n${key.value}` : key.kind;
 }
