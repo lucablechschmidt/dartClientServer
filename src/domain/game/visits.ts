@@ -1,3 +1,4 @@
+import { dartScore } from "./scoring";
 import { MAX_DARTS_PER_VISIT, type Dart, type LegState, type PlayerId, type Result, type UndoError, type Visit } from "./types";
 
 /** Helpers for the modes that are added in M7 (Cricket, Elimination, SplitScore); X01 keeps its own. */
@@ -43,3 +44,28 @@ export const rethrowable = (visit: Visit): Dart[] => visit.darts.map((d) => (d.t
 
 /** Full visit or bust: the visit takes no more darts. */
 export const isClosedByDarts = (visit: Visit): boolean => visit.isBust || visit.darts.length >= MAX_DARTS_PER_VISIT;
+
+/** The last visit if it still takes darts (not full, not busted, the leg not finished). */
+export function lastOpenVisit(state: LegState, finished: boolean): Visit | null {
+  const last = state.visits.at(-1);
+  return last && !isClosedByDarts(last) && !finished ? last : null;
+}
+
+const emptyVisit = (playerId: PlayerId): Visit => ({ playerId, darts: [], isBust: false });
+
+/** The visit a panel shows: the open one of the player on turn, otherwise the player's last one. */
+export function shownVisit(state: LegState, player: PlayerId, active: PlayerId, open: Visit | null): Visit {
+  if (player === active) return open ?? emptyVisit(player);
+  return state.visits.filter((v) => v.playerId === player).at(-1) ?? emptyVisit(player);
+}
+
+/** All darts a player has thrown, overthrown slots included (legacy getPlayerDarts). */
+export const dartsOf = (state: LegState, player: PlayerId): number =>
+  state.visits.filter((v) => v.playerId === player).reduce((n, v) => n + v.darts.length, 0);
+
+/** Points scored per closed visit of a player (overthrown darts score 0); 0 before the first one. */
+export function pointsPerVisit(state: LegState, player: PlayerId, open: Visit | null): number {
+  const closed = state.visits.filter((v) => v.playerId === player && v !== open);
+  const points = closed.reduce((sum, v) => sum + v.darts.reduce((n, d) => n + dartScore(d), 0), 0);
+  return closed.length === 0 ? 0 : points / closed.length;
+}

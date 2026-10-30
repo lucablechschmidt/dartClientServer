@@ -77,3 +77,17 @@ export function placeNumbers(standings: PlayerId[][]): Record<PlayerId, number> 
   }
   return out;
 }
+
+/**
+ * Place groups from a comparison (negative = `a` ahead): equal players share a group. A `winner`
+ * stands alone in first place regardless of the comparison (Cricket, Elimination).
+ */
+export function groupStandings(players: PlayerId[], compare: (a: PlayerId, b: PlayerId) => number, winner: PlayerId | null = null): PlayerId[][] {
+  const groups: PlayerId[][] = winner ? [[winner]] : [];
+  const rest = players.filter((p) => p !== winner).sort(compare);
+  rest.forEach((p, i) => {
+    if (i > 0 && compare(rest[i - 1], p) === 0) groups.at(-1)!.push(p);
+    else groups.push([p]);
+  });
+  return groups;
+}

@@ -4,7 +4,7 @@ export function QrCode({ svg, label }: { svg: string; label: string }) {
     <div
       role="img"
       aria-label={label}
-      className="mx-auto w-56 max-w-full rounded-lg bg-white p-2 [&>svg]:h-auto [&>svg]:w-full"
+      className="mx-auto w-qr max-w-full rounded-box bg-qr-bg p-2 [&>svg]:h-auto [&>svg]:w-full"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

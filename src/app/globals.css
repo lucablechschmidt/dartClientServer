@@ -31,10 +31,17 @@
   --bg-grouped: light-dark(#f2f2f7, #000000);
   --card-bg: light-dark(#ffffff, #1c1c1e);
   --separator: light-dark(rgb(60 60 67 / 0.29), rgb(84 84 88 / 0.6));
-  --menu-bg: #8e8e93; /* Color.gray in CustomMenu */
   --tab-bg: light-dark(rgb(242 242 247 / 0.92), rgb(28 28 30 / 0.92));
   --cricket-closed: light-dark(#8e8e93, rgb(200 200 200 / 0.5));
   --accent: var(--frame-active);
+  /* Tints for the setup screens (Figma layout, own colors): derived, so they follow light/dark and the accent */
+  --accent-soft: color-mix(in srgb, var(--accent) 15%, transparent);
+  --accent-wash: color-mix(in srgb, var(--accent) 10%, transparent);
+  --fill: color-mix(in srgb, var(--fg) 5%, transparent);
+  --fill-strong: color-mix(in srgb, var(--fg) 10%, transparent);
+  --on-accent: #ffffff;                 /* text and icons on accent, undo red and hint gray */
+  --scrim: rgb(0 0 0 / 0.4);            /* behind the confirm sheet */
+  --qr-bg: #ffffff;                     /* QR codes need a light ground in both themes to scan */
 
   --touch-min: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -70,10 +77,16 @@
   --color-bg-grouped: var(--bg-grouped);
   --color-card-bg: var(--card-bg);
   --color-separator: var(--separator);
-  --color-menu-bg: var(--menu-bg);
   --color-tab-bg: var(--tab-bg);
   --color-cricket-closed: var(--cricket-closed);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-wash: var(--accent-wash);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-on-accent: var(--on-accent);
+  --color-scrim: var(--scrim);
+  --color-qr-bg: var(--qr-bg);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --spacing-touch: var(--touch-min);
@@ -82,6 +95,17 @@
   --radius-panel: 18px;
   --radius-slot: 14px;
   --radius-pill: 10px;
+  /* Tiles, option rows, stepper keys and full-width buttons; small controls: inputs, check boxes, badges */
+  --radius-tile: 12px;
+  --radius-box: 8px;
+
+  --shadow-floating: 0 10px 30px rgb(0 0 0 / 0.18);  /* anything floating: choice list, confirm sheet, tab bar */
+
+  /* Type sizes of the setup screens beyond the base scale */
+  --text-title: 1.875rem;                          /* "Neues Spiel" */
+  --text-title--line-height: 1.2;
+  --text-display: 2.25rem;                         /* start score 501 */
+  --text-display--line-height: 1.1;
 
   /* Fixed sizes of reusable parts (theme.md §3); fluid values use clamp() with vmin/vw/vh */
   --spacing-row: 3.4rem;                          /* list row height (CardRow) */
@@ -93,6 +117,14 @@
   --spacing-slot-w: clamp(3.6rem, 16vw, 6.5rem);  /* dart slot in the large panel */
   --spacing-slot-h: clamp(2.8rem, 6.5vh, 4rem);
   --spacing-slot-gap: clamp(0.6rem, 2.2vw, 1.3rem);
+  --spacing-icon: 1.5rem;                          /* icons in cards and buttons */
+  --spacing-icon-sm: 1.25rem;                      /* chevrons, stepper signs */
+  --spacing-icon-xs: 1rem;                         /* check marks, avatar icons */
+  --spacing-avatar: 2rem;                          /* initials circle in the player picker */
+  --spacing-check: 1.75rem;                        /* check box with the throwing position */
+  --spacing-icon-box: 2.75rem;                     /* tinted square with the target icon */
+  --spacing-cta: 3.5rem;                           /* height of "Spiel starten" */
+  --spacing-qr: 14rem;                             /* invite QR code */
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

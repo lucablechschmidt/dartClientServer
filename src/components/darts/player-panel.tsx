@@ -1,9 +1,10 @@
 import type { PlayerPanelData } from "@/domain/game";
 import { CircleSlashIcon } from "@/components/ui/icons";
-import { CricketMarks } from "./cricket-marks";
+import { CricketMarks, type CricketMarksTexts } from "./cricket-marks";
 import { DartSlots } from "./dart-slots";
 
-export type PlayerPanelTexts = { darts: string; average: string; visit: string; marks?: string; bull?: string };
+/** Cricket texts are only needed where a mode shows marks. */
+export type PlayerPanelTexts = { darts: string; average: string; visit: string } & Partial<CricketMarksTexts>;
 
 type Props = { player: PlayerPanelData; size?: "large" | "small"; texts: PlayerPanelTexts };
 
@@ -46,7 +47,9 @@ export function PlayerPanel({ player, size = "large", texts }: Props) {
         )}
       </div>
       <DartSlots slots={player.slots} isBust={player.isBust} label={texts.visit} />
-      {player.marks && <CricketMarks marks={player.marks} bull={texts.bull ?? "Bull"} label={texts.marks ?? ""} />}
+      {player.marks && texts.marks && texts.bull && texts.bullShort && texts.markSymbols && (
+        <CricketMarks marks={player.marks} texts={{ marks: texts.marks, bull: texts.bull, bullShort: texts.bullShort, markSymbols: texts.markSymbols }} />
+      )}
     </div>
   );
 }

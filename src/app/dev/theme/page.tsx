@@ -5,7 +5,7 @@ import { de } from "@/i18n/de";
 const TOKENS = [
   "bg", "fg", "fg-muted", "frame-bg", "frame-fg", "frame-text", "frame-active",
   "key-bg", "key-fg", "key-zero", "key-double", "key-triple", "key-undo",
-  "hint-bg", "cricket-closed", "accent",
+  "hint-bg", "cricket-closed", "accent", "accent-soft", "accent-wash", "fill", "fill-strong", "on-accent", "scrim", "qr-bg",
 ];
 
 /** Literal class names so Tailwind generates them; one per token in TOKENS. */
@@ -14,6 +14,8 @@ const SWATCH: Record<string, string> = {
   "frame-text": "bg-frame-text", "frame-active": "bg-frame-active", "key-bg": "bg-key-bg", "key-fg": "bg-key-fg",
   "key-zero": "bg-key-zero", "key-double": "bg-key-double", "key-triple": "bg-key-triple", "key-undo": "bg-key-undo",
   "hint-bg": "bg-hint-bg", "cricket-closed": "bg-cricket-closed", accent: "bg-accent",
+  "accent-soft": "bg-accent-soft", "accent-wash": "bg-accent-wash", fill: "bg-fill", "fill-strong": "bg-fill-strong",
+  "on-accent": "bg-on-accent", scrim: "bg-scrim", "qr-bg": "bg-qr-bg",
 };
 
 const KEYS = [
@@ -69,7 +71,7 @@ export default function ThemeGallery() {
         </div>
       }
       hint={
-        <div className="mx-3 rounded-full bg-hint-bg px-4 py-1 text-center fluid-text-sm text-white">T20, T20, Bullseye</div>
+        <div className="mx-3 rounded-full bg-hint-bg px-4 py-1 text-center fluid-text-sm text-on-accent">T20, T20, Bullseye</div>
       }
       keypad={
         <div className="grid h-full grid-cols-5 grid-rows-5 gap-1.5 px-3 pb-3">
@@ -77,7 +79,7 @@ export default function ThemeGallery() {
             <button
               key={label}
               type="button"
-              className={`min-h-touch rounded-xl fluid-text-lg font-medium text-key-fg ${keyClass(label)}`}
+              className={`min-h-touch rounded-panel fluid-text-lg font-medium text-key-fg ${keyClass(label)}`}
             >
               {label}
             </button>
@@ -93,7 +95,7 @@ export function TokenTable() {
     <ul className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-4">
       {TOKENS.map((t) => (
         <li key={t} className="flex items-center gap-2 fluid-text-sm">
-          <span className={`inline-block size-8 rounded border border-frame-fg ${SWATCH[t]}`} />
+          <span className={`inline-block size-8 rounded-box border border-frame-fg ${SWATCH[t]}`} />
           <code>--{t}</code>
         </li>
       ))}

@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { Stepper } from "@/components/ui/stepper";
-import { RuleTile, ScoreChoice, SetupCard, SetupShell, type SetupProps } from "./setup-shell";
-
-type Rule = "single" | "double" | "triple";
-
-const RULES: readonly Rule[] = ["single", "double", "triple"];
-const SCORES = [501, 401, 301].map((value) => ({ value, label: String(value) }));
+import { RuleTile, ruleChoices, SCORE_CHOICES, ScoreChoice, SetupCard, SetupShell, type Rule, type SetupProps } from "./setup-shell";
 
 /** Port of ClassicGameSetUpView in the Figma layout: start score, in/out rule, best of sets and legs (1, 3, 5 …). */
 export function X01Setup(props: SetupProps) {
@@ -29,10 +24,10 @@ export function X01Setup(props: SetupProps) {
         const multi = playerCount >= 3;
         return (
           <SetupCard>
-            <ScoreChoice title={texts.startScore} subtitle={texts.cardSubtitles.x01} value={startScore} options={SCORES} onChange={setStartScore} />
+            <ScoreChoice title={texts.startScore} subtitle={texts.cardSubtitles.x01} value={startScore} options={SCORE_CHOICES} onChange={setStartScore} />
             <div className="grid grid-cols-2 gap-3">
-              <RuleTile name="inRule" label={texts.inRule} value={inRule} onChange={setInRule} options={RULES.map((r) => ({ value: r, label: texts.inNames[r] }))} />
-              <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outNames[r] }))} />
+              <RuleTile name="inRule" label={texts.inRule} value={inRule} onChange={setInRule} options={ruleChoices(texts.inNames)} />
+              <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={ruleChoices(texts.outNames)} />
             </div>
             {/* One row each: "Best of Legs" next to − 1 + does not fit half a phone width. */}
             <div className="flex flex-col divide-y divide-separator">

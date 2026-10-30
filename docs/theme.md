@@ -32,7 +32,13 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--bg-grouped` | systemGroupedBackground (`List`) | Hintergrund der Listen-Screens (Setup, Spieler) | `#F2F2F7` | `#000000` |
 | `--card-bg` | secondarySystemGroupedBackground | Karte mit den Listenzeilen | `#FFFFFF` | `#1C1C1E` |
 | `--separator` | separator | Trennlinie zwischen Listenzeilen | `rgb(60 60 67 / .29)` | `rgb(84 84 88 / .6)` |
-| `--menu-bg` | `Color.gray` (`CustomMenu`) | Options-Pillen im Setup (In/Out, Punkte, Sets, Legs) | `#8E8E93` | `#8E8E93` |
+| `--accent-soft` | – (Figma-Setup) | Avatar, Kästchen mit dem Ziel-Icon | `--accent` 15 % | `--accent` 15 % |
+| `--accent-wash` | – (Figma-Setup) | gewählte Option, geöffnete Kachel | `--accent` 10 % | `--accent` 10 % |
+| `--fill` | – (Figma-Setup) | Kacheln Einstieg/Abschluss, Plus-Taste | `--fg` 5 % | `--fg` 5 % |
+| `--fill-strong` | – (Figma-Setup) | Gast-Avatar, „GAST“-Kennzeichen, aktiver Tab | `--fg` 10 % | `--fg` 10 % |
+| `--on-accent` | – | Text und Icons auf Akzent, Undo-Rot und Hinweis-Grau | `#FFFFFF` | `#FFFFFF` |
+| `--scrim` | – | Abdunklung hinter dem Bestätigungs-Dialog | `rgb(0 0 0 / .4)` | `rgb(0 0 0 / .4)` |
+| `--qr-bg` | – | heller Grund des QR-Codes (muss in beiden Modi scanbar sein) | `#FFFFFF` | `#FFFFFF` |
 | `--tab-bg` | Tab-Bar-Material | Tab-Leiste unten | `rgb(242 242 247 / .92)` | `rgb(28 28 30 / .92)` |
 
 **Zustände aus `ButtonsView`**, nicht als eigene Tokens, sondern abgeleitet:
@@ -60,6 +66,6 @@ Regeln für die Web-App:
 5. **Container Queries** für die Panels (`container-type: inline-size`), damit ein Panel in der Kleinvariante ohne JavaScript Average und Darts ausblendet.
 6. Keine festen Pixelhöhen außer der Touch-Mindesthöhe; keine `window.innerHeight`-Berechnungen in JavaScript.
 7. **Safe Areas**: `padding: env(safe-area-inset-*)` auf dem Grid, `viewport-fit=cover` im Meta-Tag, damit die PWA (M12) randlos sein kann.
-8. **Nur Tokens, kein Inline-Style, keine Ad-hoc-Werte.** Farben, Radien, feste Größen und fluide `clamp()`-Größen stehen als Tokens in `globals.css` (`@theme`: `--color-*`, `--radius-panel|slot|pill`, `--spacing-row|tab|panel-x|keypad-gap|icon-inline|panel-sm|slot-w|slot-h|slot-gap`); Komponenten nutzen nur die daraus erzeugten Klassen (`rounded-panel`, `w-slot-w`, `gap-keypad-gap` …). Safe-Area-Abstände über `pt-safe`, `pb-safe`, `pb-safe-min`; wiederkehrende Layouts als Klasse in `@layer components` (`score-grid`, `header-grid`). `style={…}` ist per ESLint verboten (`react/forbid-dom-props`), Tailwind-Ad-hoc-Werte wie `rounded-[18px]` sind es per Konvention: ein neuer Wert wird ein Token.
+8. **Nur Tokens, kein Inline-Style, keine Ad-hoc-Werte.** Farben, Radien, feste Größen und fluide `clamp()`-Größen stehen als Tokens in `globals.css` (`@theme`: `--color-*`, `--radius-panel|slot|pill|tile|box`, `--shadow-floating`, `--text-title|display`, `--spacing-row|tab|panel-x|keypad-gap|icon-inline|icon|icon-sm|icon-xs|avatar|check|icon-box|cta|qr|panel-sm|slot-w|slot-h|slot-gap`); Komponenten nutzen nur die daraus erzeugten Klassen (`rounded-panel`, `w-slot-w`, `gap-keypad-gap` …). Safe-Area-Abstände über `pt-safe`, `pb-safe`, `pb-safe-min`; wiederkehrende Layouts als Klasse in `@layer components` (`score-grid`, `header-grid`). `style={…}` ist per ESLint verboten (`react/forbid-dom-props`), Tailwind-Ad-hoc-Werte wie `rounded-[18px]` sind es per Konvention: ein neuer Wert wird ein Token.
 
 Testgeräte für die DoD: iPhone-Breite 375 px hoch und quer, Tablet 768 px hoch und quer, Desktop-Fenster 1280 px. Der Zählscreen darf in keinem davon scrollen oder abschneiden.

@@ -12,7 +12,7 @@ type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
 
 export function TextInput({ inline = false, className = "", ...props }: TextInputProps) {
   const width = inline ? "min-w-0 flex-1" : "w-full";
-  return <input {...props} className={`min-h-touch ${width} rounded-lg border border-separator bg-transparent px-3 text-fg ${className}`} />;
+  return <input {...props} className={`min-h-touch ${width} rounded-box border border-separator bg-transparent px-3 text-fg ${className}`} />;
 }
 
 const tones = { accent: "text-accent", danger: "text-key-undo", muted: "text-fg-muted" } as const;
@@ -30,7 +30,7 @@ export function TextButton({ tone = "accent", flush = false, type = "button", cl
 
 /** The one filled button of a screen (Anmelden, Mitspielen, Nochmal versuchen). */
 export function PrimaryButton({ type = "submit", className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button type={type} {...props} className={`min-h-touch w-full rounded-lg bg-accent font-semibold text-white disabled:opacity-50 ${className}`} />;
+  return <button type={type} {...props} className={`min-h-touch w-full rounded-box bg-accent font-semibold text-on-accent disabled:opacity-50 ${className}`} />;
 }
 
 /** Label above a full-width input. */

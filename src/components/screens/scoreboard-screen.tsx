@@ -33,12 +33,10 @@ type Props = {
   onCancel: (matchId: string) => Promise<unknown>;
 };
 
-const RULE_SHORT = { single: "Single", double: "Double", triple: "Triple" } as const;
-
 /** Rules in the header: X01 start and in/out, Elimination target and out, the other modes their name (M7). */
 function headerTitle(mode: ModeId, rules: Rules, texts: Texts["game"]): string {
-  if (mode === "x01") return `${rules.startScore} · ${RULE_SHORT[rules.inRule]} In · ${RULE_SHORT[rules.outRule]} Out`;
-  if (mode === "elimination") return `${texts.modes.elimination} · ${rules.startScore} · ${RULE_SHORT[rules.outRule]} Out`;
+  if (mode === "x01") return [rules.startScore, texts.inNames[rules.inRule], texts.outNames[rules.outRule]].join(" · ");
+  if (mode === "elimination") return [texts.modes.elimination, rules.startScore, texts.outNames[rules.outRule]].join(" · ");
   return texts.modes[mode];
 }
 
@@ -150,7 +148,7 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
           <div className="h-full px-3">
             <PlayerPanels
               players={board.players}
-              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit, marks: texts.marks, bull: texts.bull }}
+              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit, marks: texts.marks, bull: texts.bull, bullShort: texts.bullShort, markSymbols: texts.markSymbols }}
               onSelect={starterOk ? chooseStarter : undefined}
               selectLabel={texts.toStart}
             />

@@ -3,8 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
 import { BackButton } from "@/components/ui/back-button";
-import { ChoiceMenu, type Choice } from "@/components/ui/choice-menu";
-import { ArrowRightIcon, ChevronDownIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
+import { ChoiceMenu, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
+import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
 import type { Player } from "@/domain/player";
 import type { ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
@@ -26,6 +26,13 @@ type Props = SetupProps & {
 };
 
 const FORM_ID = "new-match";
+
+export type Rule = "single" | "double" | "triple";
+const RULES: readonly Rule[] = ["single", "double", "triple"];
+/** In or out rule as choices, labelled with the shared rule names ("Single In" …). */
+export const ruleChoices = (names: Record<Rule, string>): Choice<Rule>[] => RULES.map((r) => ({ value: r, label: names[r] }));
+/** Start score (X01) and target (Elimination), as in legacy. */
+export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((value) => ({ value, label: String(value) }));
 
 /**
  * What every setup shares, in the Figma layout (Design/GameSetUpGameOptions*.png, own colors):
@@ -49,7 +56,7 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
       </div>
       <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{texts.title}</h1>
+          <h1 className="text-title font-bold tracking-tight">{texts.title}</h1>
           <p className="text-sm text-fg-muted">{texts.modes[mode]}</p>
         </div>
 
@@ -68,12 +75,9 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
           >
             {(current, open) => (
               <span className="flex items-center gap-3">
-                <PhoneIcon className="h-6 w-6 shrink-0 text-fg-muted" />
-                <span className="flex flex-1 flex-col">
-                  <span className="text-xs text-fg-muted">{texts.inputMode}</span>
-                  <span className="font-semibold">{current}</span>
-                </span>
-                <ChevronDownIcon className={`h-5 w-5 shrink-0 ${open ? "rotate-180" : ""}`} />
+                <PhoneIcon className="size-icon shrink-0 text-fg-muted" />
+                <LabeledValue label={texts.inputMode} value={current} />
+                <DisclosureChevron open={open} />
               </span>
             )}
           </ChoiceMenu>
@@ -92,10 +96,10 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
             type="submit"
             form={FORM_ID}
             disabled={order.length === 0}
-            className="flex min-h-14 w-full items-center justify-between rounded-2xl bg-accent px-5 text-lg font-bold text-white disabled:opacity-40"
+            className="flex min-h-cta w-full items-center justify-between rounded-panel bg-accent px-5 text-lg font-bold text-on-accent disabled:opacity-40"
           >
             {texts.start}
-            <ArrowRightIcon className="h-6 w-6" />
+            <ArrowRightIcon className="size-icon" />
           </button>
           <p className="mt-2 text-center text-xs text-fg-muted">{[texts.summaryPlayers.replace("{n}", String(order.length)), ...summary].join(" · ")}</p>
         </div>
@@ -113,8 +117,8 @@ export function SetupCard({ children }: { children: ReactNode }) {
 export function ScoreChoice({ title, subtitle, value, options, onChange }: { title: string; subtitle: string; value: number; options: readonly Choice<number>[]; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
-        <TargetIcon className="h-6 w-6" />
+      <span className="grid size-icon-box shrink-0 place-items-center rounded-tile bg-accent-soft text-accent">
+        <TargetIcon className="size-icon" />
       </span>
       <span className="flex flex-1 flex-col">
         <span className="font-semibold">{title}</span>
@@ -123,8 +127,8 @@ export function ScoreChoice({ title, subtitle, value, options, onChange }: { tit
       <ChoiceMenu name="startScore" label={title} value={value} onChange={onChange} options={options} align="end">
         {(current, open) => (
           <span className="flex items-center gap-1">
-            <span className="text-4xl font-bold tabular">{current}</span>
-            <ChevronDownIcon className={`h-5 w-5 ${open ? "rotate-180" : ""}`} />
+            <span className="text-display font-bold tabular">{current}</span>
+            <DisclosureChevron open={open} />
           </span>
         )}
       </ChoiceMenu>
@@ -135,14 +139,11 @@ export function ScoreChoice({ title, subtitle, value, options, onChange }: { tit
 /** A tile with a small label above the chosen rule ("Einstieg / Single In"); opened it is outlined in the accent. */
 export function RuleTile<V extends string>({ name, label, value, options, onChange }: { name: string; label: string; value: V; options: readonly Choice<V>[]; onChange: (v: V) => void }) {
   return (
-    <ChoiceMenu name={name} label={label} value={value} onChange={onChange} options={options} className="rounded-xl border border-transparent bg-fg/5 px-3 py-2" openClassName="border-accent bg-accent/10">
+    <ChoiceMenu name={name} label={label} value={value} onChange={onChange} options={options} className="rounded-tile border border-transparent bg-fill px-3 py-2" openClassName="border-accent bg-accent-wash">
       {(current, open) => (
         <span className="flex items-center gap-2">
-          <span className="flex flex-1 flex-col">
-            <span className="text-xs text-fg-muted">{label}</span>
-            <span className="font-semibold">{current}</span>
-          </span>
-          <ChevronDownIcon className={`h-5 w-5 shrink-0 ${open ? "rotate-180" : ""}`} />
+          <LabeledValue label={label} value={current} />
+          <DisclosureChevron open={open} />
         </span>
       )}
     </ChoiceMenu>

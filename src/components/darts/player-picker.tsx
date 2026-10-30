@@ -66,19 +66,19 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
           return (
             <CardRow key={p.id} onClick={() => onToggle(p.id)} pressed={selected} label={fill(selected ? texts.deselect : texts.select, p.name)}>
               <span className="flex min-w-0 items-center gap-3">
-                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-semibold ${guest ? "bg-fg/10 text-fg-muted" : "bg-accent/15 text-accent"}`} aria-hidden="true">
-                  {guest ? <PersonIcon className="h-4 w-4" /> : letters[p.id]}
+                <span className={`grid size-avatar shrink-0 place-items-center rounded-full text-xs font-semibold ${guest ? "bg-fill-strong text-fg-muted" : "bg-accent-soft text-accent"}`} aria-hidden="true">
+                  {guest ? <PersonIcon className="size-icon-xs" /> : letters[p.id]}
                 </span>
                 <span className={`truncate text-base ${selected ? "font-semibold" : ""}`}>{p.name}</span>
               </span>
               <span className="flex shrink-0 items-center gap-3">
-                {guest && <span className="rounded-md bg-fg/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">{texts.guestBadge}</span>}
+                {guest && <span className="rounded-box bg-fill-strong px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">{texts.guestBadge}</span>}
                 {selected ? (
-                  <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent text-sm font-semibold text-white tabular" aria-label={texts.selected.replace("{n}", String(pos + 1))}>
+                  <span className="grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent tabular" aria-label={texts.selected.replace("{n}", String(pos + 1))}>
                     {pos + 1}
                   </span>
                 ) : (
-                  <span className="h-7 w-7 rounded-lg border-icon border-separator" />
+                  <span className="size-check rounded-box border-icon border-separator" />
                 )}
               </span>
             </CardRow>
@@ -87,7 +87,7 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
       </CardList>
       <AddRow
         variant="button"
-        icon={<PersonPlusIcon className="h-5 w-5" />}
+        icon={<PersonPlusIcon className="size-icon-sm" />}
         label={texts.addGuest}
         placeholder={texts.guestNamePlaceholder}
         saveLabel={texts.save}

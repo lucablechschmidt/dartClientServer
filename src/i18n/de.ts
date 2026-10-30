@@ -10,6 +10,10 @@ const modeNames = {
   splitscore: "SplitScore",
 } as const;
 
+/** In/out rules as shown in the setup and the scoreboard header. */
+const inNames = { single: "Single In", double: "Double In", triple: "Triple In" } as const;
+const outNames = { single: "Single Out", double: "Double Out", triple: "Triple Out" } as const;
+
 export const de = {
   app: {
     title: "Darts Scorer",
@@ -137,8 +141,8 @@ export const de = {
     cardSubtitles: { x01: "X01 · Klassisch", elimination: "Elimination" },
     inRule: "Einstieg",
     outRule: "Abschluss",
-    inNames: { single: "Single In", double: "Double In", triple: "Triple In" },
-    outNames: { single: "Single Out", double: "Double Out", triple: "Triple Out" },
+    inNames,
+    outNames,
     bestOfSets: "Best of Sets",
     bestOfLegs: "Best of Legs",
     fewer: "weniger",
@@ -204,6 +208,11 @@ export const de = {
     points: "Punkte",
     total: "Summe aller Spieler: {n}",
     marks: "Marks",
+    /** Cricket marks 0–3 as on a chalk board: nothing, a stroke, a cross, a circled cross. */
+    markSymbols: ["", "/", "X", "Ⓧ"],
+    bullShort: "B",
+    inNames,
+    outNames,
     modes: modeNames,
     hints: {
       marks: "Noch {n}× {field}",

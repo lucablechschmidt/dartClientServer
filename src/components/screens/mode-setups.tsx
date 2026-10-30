@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FixedRules, RuleTile, ScoreChoice, SetupCard, SetupShell, type SetupProps } from "./setup-shell";
-
-type Rule = "single" | "double" | "triple";
-const RULES: readonly Rule[] = ["single", "double", "triple"];
-const TARGETS = [501, 401, 301].map((value) => ({ value, label: String(value) }));
+import { FixedRules, RuleTile, ruleChoices, SCORE_CHOICES, ScoreChoice, SetupCard, SetupShell, type Rule, type SetupProps } from "./setup-shell";
 
 /** Port of CricketGameSetUpView: no game options, only input mode and players. */
 export function CricketSetup(props: SetupProps) {
@@ -30,8 +26,8 @@ export function EliminationSetup(props: SetupProps) {
       options={() => (
         <SetupCard>
           <input type="hidden" name="inRule" value="single" />
-          <ScoreChoice title={texts.targetScore} subtitle={texts.cardSubtitles.elimination} value={target} options={TARGETS} onChange={setTarget} />
-          <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={RULES.map((r) => ({ value: r, label: texts.outNames[r] }))} />
+          <ScoreChoice title={texts.targetScore} subtitle={texts.cardSubtitles.elimination} value={target} options={SCORE_CHOICES} onChange={setTarget} />
+          <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={ruleChoices(texts.outNames)} />
         </SetupCard>
       )}
     />

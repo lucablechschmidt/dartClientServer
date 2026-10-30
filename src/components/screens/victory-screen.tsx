@@ -13,7 +13,7 @@ type Props = {
   pending: boolean;
 };
 
-const button = "min-h-touch w-full rounded-xl px-4 font-medium";
+const button = "min-h-touch w-full rounded-tile px-4 font-medium";
 
 /** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
 export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending }: Props) {
@@ -60,7 +60,7 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
             </button>
           )}
           <form action={onRestart}>
-            <button type="submit" disabled={pending} className={`${button} bg-accent text-white`}>{texts.restart}</button>
+            <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>{texts.restart}</button>
           </form>
           <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>{texts.home}</Link>
         </div>

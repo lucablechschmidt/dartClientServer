@@ -45,7 +45,7 @@ export function LegVictoryScreen({ view, names, texts, canUndo, onContinue, onUn
           e.stopPropagation();
           onUndo();
         }}
-        className="min-h-touch w-full max-w-md rounded-xl border border-frame-fg px-4 font-medium disabled:opacity-50"
+        className="min-h-touch w-full max-w-md rounded-tile border border-frame-fg px-4 font-medium disabled:opacity-50"
       >
         {texts.undoLastDart}
       </button>
