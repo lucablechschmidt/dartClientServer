@@ -17,6 +17,7 @@ import {
   type MatchState,
 } from "./match";
 import { replayMatch } from "./replay";
+import { matchResult } from "./result";
 import { applyDart, currentPlayer, isLegFinished, startPlayOut } from "./modes";
 import { newLeg } from "./state";
 import type { Dart, LegState, Rules } from "./types";
@@ -264,5 +265,16 @@ describe("declaring the winner after a leg (M9, tournaments)", () => {
     const decided = ok(decideWinner(afterLeg, A));
     expect(ok(undoMatchDart(decided))).toEqual(afterLeg);
     expect(ok(undoMatchVisit(decided))).toEqual(afterLeg);
+  });
+});
+
+describe("matchResult (M9)", () => {
+  it("winner, legs over all sets and the 3-dart average per player", () => {
+    const m = winLeg(winLeg(newMatch([A, B], rules, { legsToWinSet: 1, setsToWinMatch: 2 }), A), A);
+    const r = matchResult(m);
+    expect(r.winner).toBe(A);
+    expect(r.legs).toEqual({ [A]: 2, [B]: 0 });
+    // A: two visits of D20 (40 each); B: one missed visit in leg 2 (B started it)
+    expect(r.averages).toEqual({ [A]: 40, [B]: 0 });
   });
 });
