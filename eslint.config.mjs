@@ -3,6 +3,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
+import betterTailwind from "eslint-plugin-better-tailwindcss";
 
 /**
  * Layering (architecture.md §9). Imports may only point "left":
@@ -71,6 +72,41 @@ const eslintConfig = defineConfig([
       "react/forbid-component-props": [
         "error",
         { forbid: [{ propName: "style", message: "Use theme tokens or a utility in globals.css instead of inline style." }] },
+      ],
+    },
+  },
+  {
+    // Tailwind classes are checked against the theme in globals.css (docs/theme.md §3 rule 8): known classes,
+    // no conflicts or duplicates, and only tokens. Class order is Prettier's job (prettier-plugin-tailwindcss).
+    files: ["src/**/*.tsx"],
+    plugins: { "better-tailwindcss": betterTailwind },
+    settings: { "better-tailwindcss": { entryPoint: "src/app/globals.css" } },
+    rules: {
+      ...betterTailwind.configs["correctness-error"].rules,
+      "better-tailwindcss/no-duplicate-classes": "error",
+      "better-tailwindcss/no-unnecessary-whitespace": "error",
+      "better-tailwindcss/no-deprecated-classes": "error",
+      "better-tailwindcss/no-restricted-classes": [
+        "error",
+        {
+          restrict: [
+            { pattern: "^.*-\\[.+\\]$", message: 'Arbitrary value "$0": make it a token in globals.css (theme.md §3 rule 8).' },
+            {
+              pattern: "^rounded(-[trblse]{1,2})?(-(sm|md|lg|xl|2xl|3xl))?$",
+              message: 'Raw radius "$0": use rounded-panel|slot|pill|tile|box or rounded-full.',
+            },
+            {
+              pattern: "^(bg|text|border|ring|outline|fill|stroke)-[a-z-]+\\/\\d+$",
+              message: 'Opacity tint "$0": use a tint token (accent-soft, fill …).',
+            },
+            { pattern: "^shadow(-(2xs|xs|sm|md|lg|xl|2xl))?$", message: 'Raw shadow "$0": use shadow-floating.' },
+            { pattern: "^text-([2-9]xl)$", message: 'Raw font size "$0": use text-title, text-display or a fluid-text-* class.' },
+            {
+              pattern: "^(bg|text|border|ring)-(white|black)$",
+              message: '"$0" bypasses the theme: use on-accent, scrim, qr-bg or another color token.',
+            },
+          ],
+        },
       ],
     },
   },
