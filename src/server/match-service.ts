@@ -170,7 +170,13 @@ function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
     next.legs.forEach((leg, i) => {
       if (i >= legs.length) {
         const created = { id: deps.newId(), ...numbers[i], winnerPlayerId: null };
-        deps.matches.createLeg({ id: created.id, matchId: m.id, setNo: created.setNo, legNo: created.legNo, starterPlayerId: next.players[leg.starter] });
+        deps.matches.createLeg({
+          id: created.id,
+          matchId: m.id,
+          setNo: created.setNo,
+          legNo: created.legNo,
+          starterPlayerId: next.players[leg.starter],
+        });
         legs.push(created);
       }
       const old = m.state.legs[i];
@@ -263,7 +269,13 @@ function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResul
 export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
   return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit).map((m) => {
     const name = (id: PlayerId) => m.players.find((p) => p.id === id)?.name ?? "";
-    return { id: m.id, mode: m.mode, names: m.players.map((p) => p.name), endedAt: m.finishedAt ?? m.startedAt, result: withNames(recentResult(m), name) };
+    return {
+      id: m.id,
+      mode: m.mode,
+      names: m.players.map((p) => p.name),
+      endedAt: m.finishedAt ?? m.startedAt,
+      result: withNames(recentResult(m), name),
+    };
   });
 }
 
@@ -305,7 +317,8 @@ export function commitVisit(deps: Deps, session: Session, matchId: string, legIn
     if (!r.ok) return { ok: false, reason: r.reason };
     next = r.value;
   }
-  if (next.legs.length !== legIndex + 1 || currentLeg(next).visits.length !== seq + 1 || openVisit(currentLeg(next))) return { ok: false, reason: "out-of-sync" };
+  if (next.legs.length !== legIndex + 1 || currentLeg(next).visits.length !== seq + 1 || openVisit(currentLeg(next)))
+    return { ok: false, reason: "out-of-sync" };
 
   const stored = persist(deps, m, next);
   deps.events.publish(matchId);

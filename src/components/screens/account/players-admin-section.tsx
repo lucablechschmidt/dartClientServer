@@ -42,7 +42,7 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
           return (
             <CardRow key={p.id} className="flex-col items-stretch gap-1">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate fluid-text-lg">{p.name}</span>
+                <span className="fluid-text-lg truncate">{p.name}</span>
                 {p.isAdmin && <span className="shrink-0 text-sm text-fg-muted">{t.adminBadge}</span>}
               </div>
               <div className="flex flex-wrap gap-x-3">

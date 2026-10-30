@@ -15,7 +15,14 @@ export function replay(players: PlayerId[], rules: Rules, visits: Visit[], start
 export type StoredLeg = { starter: number; visits: Visit[]; playOut: boolean };
 
 /** All legs of a match, in order. A match without a stored leg gets an empty first one. */
-export function replayMatch(players: PlayerId[], rules: Rules, format: MatchFormat, legs: StoredLeg[], starter = 0, mode: ModeId = "x01"): MatchState {
+export function replayMatch(
+  players: PlayerId[],
+  rules: Rules,
+  format: MatchFormat,
+  legs: StoredLeg[],
+  starter = 0,
+  mode: ModeId = "x01",
+): MatchState {
   const states = legs.map((l) => replay(players, rules, l.visits, l.starter, l.playOut, mode));
   return { mode, players: [...players], rules, format, legs: states.length > 0 ? states : [newLeg(players, rules, starter, mode)] };
 }

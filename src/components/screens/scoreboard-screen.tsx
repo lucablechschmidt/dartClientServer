@@ -12,7 +12,20 @@ import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { TextButton } from "@/components/ui/form-controls";
 import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { currentLeg, matchCurrentPlayer, mayEnter, mayPlayOut, maySetStarter, mayUndo, projectMatch, type Dart, type MatchState, type ModeId, type PlayerId, type Rules } from "@/domain/game";
+import {
+  currentLeg,
+  matchCurrentPlayer,
+  mayEnter,
+  mayPlayOut,
+  maySetStarter,
+  mayUndo,
+  projectMatch,
+  type Dart,
+  type MatchState,
+  type ModeId,
+  type PlayerId,
+  type Rules,
+} from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { CricketBoard } from "./cricket-board";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
@@ -49,11 +62,29 @@ const legKey = (m: MatchState) => `${m.legs.length}:${currentLeg(m).visits.lengt
  * victory screen between two legs and the victory screen at the end (M5). Scoring and server sync
  * live in `useVisitSync`.
  */
-export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, onRestart, onCancel }: Props) {
+export function ScoreboardScreen({
+  initial,
+  texts,
+  onCommitVisit,
+  onUndoVisit,
+  onPlayOut,
+  onSetStarter,
+  onLoad,
+  onRestart,
+  onCancel,
+}: Props) {
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
-  const { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter } = useVisitSync<Reason>({ initial, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, errorText });
+  const { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter } = useVisitSync<Reason>({
+    initial,
+    onCommitVisit,
+    onUndoVisit,
+    onPlayOut,
+    onSetStarter,
+    onLoad,
+    errorText,
+  });
 
   const legClosed = closedLeg === legKey(state);
   const view = useMemo(() => projectMatch(state, initial.names, legClosed), [state, initial.names, legClosed]);
@@ -77,22 +108,29 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   const turnHint = !isOpen
     ? texts.closed
     : enterOk
-      ? starterOk && playerIds.length > 1 ? texts.chooseStarter : null
+      ? starterOk && playerIds.length > 1
+        ? texts.chooseStarter
+        : null
       : texts.turnOf.replace("{name}", initial.names[matchCurrentPlayer(state)] ?? "");
-  const lastName = view.lastPlayerId ? initial.names[view.lastPlayerId] ?? "" : "";
+  const lastName = view.lastPlayerId ? (initial.names[view.lastPlayerId] ?? "") : "";
 
   const header = (
     <ScreenHeader
       left={
         initial.access.canCancel && isOpen ? (
-          <button type="button" onClick={() => setAsking("cancel")} aria-label={texts.cancel} className="grid min-h-touch min-w-touch place-items-center text-fg">
+          <button
+            type="button"
+            onClick={() => setAsking("cancel")}
+            aria-label={texts.cancel}
+            className="grid min-h-touch min-w-touch place-items-center text-fg"
+          >
             <XmarkCircleIcon className="h-8 w-8" />
           </button>
         ) : (
           <BackButton href="/" label={texts.back} />
         )
       }
-      title={<span className="fluid-text-sm text-fg-muted tabular">{rules}</span>}
+      title={<span className="fluid-text-sm tabular text-fg-muted">{rules}</span>}
       right={
         <span className={`fluid-text-sm ${error || sync === "unsaved" ? "text-key-undo" : "text-fg-muted"}`} role="status" data-sync={sync}>
           {status}
@@ -138,7 +176,16 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   }
 
   if (view.progress === "leg-finished" && !legClosed) {
-    return <LegVictoryScreen view={view} names={initial.names} texts={texts} canUndo={undoOk && sync === "saved"} onContinue={() => setClosedLeg(legKey(state))} onUndo={undoAndReopen} />;
+    return (
+      <LegVictoryScreen
+        view={view}
+        names={initial.names}
+        texts={texts}
+        canUndo={undoOk && sync === "saved"}
+        onContinue={() => setClosedLeg(legKey(state))}
+        onUndo={undoAndReopen}
+      />
+    );
   }
 
   const keypad = (
@@ -155,7 +202,16 @@ export function ScoreboardScreen({ initial, texts, onCommitVisit, onUndoVisit, o
   if (board.mode === "cricket") {
     return (
       <>
-        <CricketBoard board={board} names={initial.names} texts={texts} header={header} keypad={keypad} isOpen={isOpen} turnHint={turnHint} onSelectStarter={starterOk ? chooseStarter : undefined} />
+        <CricketBoard
+          board={board}
+          names={initial.names}
+          texts={texts}
+          header={header}
+          keypad={keypad}
+          isOpen={isOpen}
+          turnHint={turnHint}
+          onSelectStarter={starterOk ? chooseStarter : undefined}
+        />
         {confirm}
       </>
     );

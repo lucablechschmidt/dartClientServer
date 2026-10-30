@@ -2,10 +2,24 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Session } from "@/domain/player";
 import type { Dart } from "@/domain/game";
 import { memoryDeps } from "./testing";
-import { cancelMatch, commitVisit, createMatch, listOpenMatches, listRecentMatches, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit } from "./match-service";
+import {
+  cancelMatch,
+  commitVisit,
+  createMatch,
+  listOpenMatches,
+  listRecentMatches,
+  loadMatchView,
+  restartMatch,
+  setPlayOut,
+  setStarter,
+  undoVisit,
+} from "./match-service";
 import { createGuest, createPlayer } from "./player-service";
 
-const ok = <T extends { ok: boolean }>(r: T) => { if (!r.ok) throw new Error("expected ok"); return r as Extract<T, { ok: true }>; };
+const ok = <T extends { ok: boolean }>(r: T) => {
+  if (!r.ok) throw new Error("expected ok");
+  return r as Extract<T, { ok: true }>;
+};
 const sessionAdmin = { playerId: "admin-session", name: "Admin", isAdmin: true };
 let deps: ReturnType<typeof memoryDeps>;
 let n: number;
@@ -125,7 +139,12 @@ describe("input rights (E13)", () => {
   it("single: only the host's device enters; closed matches reject everything", () => {
     const a = ok(createPlayer(deps, "Casey")).player;
     const b = ok(createPlayer(deps, "Sam")).player;
-    const id = createMatch(deps, { playerIds: [a.id, b.id], rules: { startScore: 501, inRule: "single", outRule: "double" }, starterIndex: 0, hostPlayerId: a.id });
+    const id = createMatch(deps, {
+      playerIds: [a.id, b.id],
+      rules: { startScore: 501, inRule: "single", outRule: "double" },
+      starterIndex: 0,
+      hostPlayerId: a.id,
+    });
     expect(commitVisit(deps, as(b.id), id, 0, 0, [T20, T20, T20])).toEqual({ ok: false, reason: "forbidden" });
     const r = commitVisit(deps, as(a.id), id, 0, 0, [T20, T20, T20]);
     expect(r.ok).toBe(true);
@@ -145,7 +164,13 @@ describe("input rights (E13)", () => {
     const g = ok(createGuest(deps, "Gast")).player;
     deps.players.setPasswordHash(a.id, "h");
     deps.players.setPasswordHash(b.id, "h"); // regular players have a login since M3
-    const id = createMatch(deps, { playerIds: [a.id, b.id, g.id], rules: { startScore: 501, inRule: "single", outRule: "double" }, starterIndex: 0, inputMode: "per-player", hostPlayerId: a.id });
+    const id = createMatch(deps, {
+      playerIds: [a.id, b.id, g.id],
+      rules: { startScore: 501, inRule: "single", outRule: "double" },
+      starterIndex: 0,
+      inputMode: "per-player",
+      hostPlayerId: a.id,
+    });
     expect(commitVisit(deps, as(b.id), id, 0, 0, [T20]).ok).toBe(false);
     expect(commitVisit(deps, as(a.id), id, 0, 0, [T20, T20, T20]).ok).toBe(true);
     expect(commitVisit(deps, as(a.id), id, 0, 1, [T20]).ok).toBe(false); // b's turn, not the host
@@ -160,7 +185,12 @@ describe("input rights (E13)", () => {
     const published: string[] = [];
     deps.events = { publish: (id) => published.push(id) };
     const a = ok(createPlayer(deps, "Casey")).player;
-    const id = createMatch(deps, { playerIds: [a.id], rules: { startScore: 501, inRule: "single", outRule: "double" }, starterIndex: 0, hostPlayerId: a.id });
+    const id = createMatch(deps, {
+      playerIds: [a.id],
+      rules: { startScore: 501, inRule: "single", outRule: "double" },
+      starterIndex: 0,
+      hostPlayerId: a.id,
+    });
     commitVisit(deps, as(a.id), id, 0, 0, [T20, T20, T20]);
     undoVisit(deps, as(a.id), id);
     commitVisit(deps, as(a.id), id, 0, 0, [T20]); // invalid (only one dart, no complete visit) → nothing
@@ -169,7 +199,12 @@ describe("input rights (E13)", () => {
   });
   it("matches older than 24 h are closed; the overview lists only open ones", () => {
     const a = ok(createPlayer(deps, "Casey")).player;
-    const id = createMatch(deps, { playerIds: [a.id], rules: { startScore: 501, inRule: "single", outRule: "double" }, starterIndex: 0, hostPlayerId: a.id });
+    const id = createMatch(deps, {
+      playerIds: [a.id],
+      rules: { startScore: 501, inRule: "single", outRule: "double" },
+      starterIndex: 0,
+      hostPlayerId: a.id,
+    });
     expect(listOpenMatches(deps).map((m) => m.id)).toEqual([id]);
     n += 24 * 60 * 60 * 1000; // now() = 1000 + n
     expect(commitVisit(deps, as(a.id), id, 0, 0, [T20])).toEqual({ ok: false, reason: "match-closed" });
@@ -181,7 +216,11 @@ describe("input rights (E13)", () => {
 describe("legs, sets and places (M5)", () => {
   const short = { startScore: 40, inRule: "single", outRule: "single" } as const;
   const OUT: Dart[] = [{ field: 20, type: "double" }];
-  const MISS: Dart[] = [{ field: 0, type: "single" }, { field: 0, type: "single" }, { field: 0, type: "single" }];
+  const MISS: Dart[] = [
+    { field: 0, type: "single" },
+    { field: 0, type: "single" },
+    { field: 0, type: "single" },
+  ];
   const players = (...names: string[]) => names.map((name) => ok(createPlayer(deps, name)).player.id);
   /** Commits a visit at the position the server expects (next leg after a finished one). */
   const commit = (id: string, darts: Dart[], session: Session = sessionAdmin) => {
@@ -205,7 +244,10 @@ describe("legs, sets and places (M5)", () => {
     expect(v.state.legs[1].visits[0].playerId).toBe(b);
     v = commit(id, OUT); // Casey wins leg 2 → match
     expect(v.status).toBe("finished");
-    expect(deps.matches.loadMatch(id)!.legs.map((l) => [l.setNo, l.legNo, l.winnerPlayerId])).toEqual([[1, 1, a], [1, 2, a]]);
+    expect(deps.matches.loadMatch(id)!.legs.map((l) => [l.setNo, l.legNo, l.winnerPlayerId])).toEqual([
+      [1, 1, a],
+      [1, 2, a],
+    ]);
   });
 
   it("undo across the leg boundary deletes the emptied leg and reopens the previous one", () => {
@@ -302,7 +344,17 @@ describe("legs, sets and places (M5)", () => {
     expect(recent.map((m) => [m.id, m.result])).toEqual([
       [gone, { kind: "abandoned" }],
       [single, { kind: "winner", winner: "Casey" }],
-      [three, { kind: "places", order: [{ player: "Casey", place: 1 }, { player: "Sam", place: 2 }, { player: "Kim", place: 3 }] }],
+      [
+        three,
+        {
+          kind: "places",
+          order: [
+            { player: "Casey", place: 1 },
+            { player: "Sam", place: 2 },
+            { player: "Kim", place: 3 },
+          ],
+        },
+      ],
       [bo3, { kind: "score", winner: "Sam", unit: "legs", score: [2, 1] }],
     ]);
     expect(recent[0].names).toEqual(["Casey", "Sam"]);
@@ -325,7 +377,12 @@ describe("other game modes through the server (M7)", () => {
 
   it("elimination: mode and target stored, a bust is replayed on the server, the win finishes the match", () => {
     const [a, b] = players("Casey", "Sam");
-    const id = createMatch(deps, { mode: "elimination", playerIds: [a, b], rules: { startScore: 40, inRule: "single", outRule: "single" }, format: { legsToWinSet: 3, setsToWinMatch: 3 } });
+    const id = createMatch(deps, {
+      mode: "elimination",
+      playerIds: [a, b],
+      rules: { startScore: 40, inRule: "single", outRule: "single" },
+      format: { legsToWinSet: 3, setsToWinMatch: 3 },
+    });
     let v = loadMatchView(deps, id)!;
     expect(v.state.mode).toBe("elimination");
     expect(v.format).toEqual({ legsToWinSet: 1, setsToWinMatch: 1 });
@@ -341,7 +398,11 @@ describe("other game modes through the server (M7)", () => {
 
   it("splitscore: nine rounds, then finished; equal points share the place", () => {
     const [a, b, c] = players("Casey", "Sam", "Kim");
-    const id = createMatch(deps, { mode: "splitscore", playerIds: [a, b, c], rules: { startScore: 40, inRule: "single", outRule: "single" } });
+    const id = createMatch(deps, {
+      mode: "splitscore",
+      playerIds: [a, b, c],
+      rules: { startScore: 40, inRule: "single", outRule: "single" },
+    });
     const miss = [S(0), S(0), S(0)];
     for (let i = 0; i < 24; i++) commit(id, miss);
     commit(id, [S(25), S(0), S(0)]); // bull round: Casey hits
@@ -349,7 +410,14 @@ describe("other game modes through the server (M7)", () => {
     const v = commit(id, [S(25), S(0), S(0)]); // Kim hits too
     expect(v.status).toBe("finished");
     expect(deps.store.matches.get(id)!.placements).toEqual({ [a]: 1, [b]: 3, [c]: 1 });
-    expect(listRecentMatches(deps)[0].result).toEqual({ kind: "places", order: [{ player: "Casey", place: 1 }, { player: "Kim", place: 1 }, { player: "Sam", place: 3 }] });
+    expect(listRecentMatches(deps)[0].result).toEqual({
+      kind: "places",
+      order: [
+        { player: "Casey", place: 1 },
+        { player: "Kim", place: 1 },
+        { player: "Sam", place: 3 },
+      ],
+    });
     expect(listRecentMatches(deps)[0].mode).toBe("splitscore");
   });
 

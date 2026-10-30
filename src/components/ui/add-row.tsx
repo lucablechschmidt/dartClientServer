@@ -39,9 +39,21 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, v
     <>
       {open ? (
         <form action={submit} className="flex w-full gap-2">
-          <TextInput inline name="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={40} autoFocus placeholder={placeholder} autoComplete="off" />
+          <TextInput
+            inline
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            maxLength={40}
+            autoFocus
+            placeholder={placeholder}
+            autoComplete="off"
+          />
           <TextButton type="submit">{saveLabel}</TextButton>
-          <TextButton tone="muted" onClick={() => setOpen(false)}>{cancelLabel}</TextButton>
+          <TextButton tone="muted" onClick={() => setOpen(false)}>
+            {cancelLabel}
+          </TextButton>
         </form>
       ) : (
         <button
@@ -59,6 +71,7 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, v
       {open && error && <FormError>{error}</FormError>}
     </>
   );
-  if (variant === "button") return <div className="flex flex-col rounded-panel border border-separator bg-card-bg px-4 py-1">{content}</div>;
+  if (variant === "button")
+    return <div className="flex flex-col rounded-panel border border-separator bg-card-bg px-4 py-1">{content}</div>;
   return <CardRow className="flex-col items-stretch">{content}</CardRow>;
 }

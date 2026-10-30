@@ -15,7 +15,6 @@ type Props = {
   onRedeem: (prev: InviteFormState, formData: FormData) => Promise<InviteFormState>;
 };
 
-
 /** Case A (name + password), case F/reset (password only, name is fixed), case E (notice only). */
 export function InviteScreen({ info, texts, onRedeem }: Props) {
   const [state, action, pending] = useActionState(onRedeem, { error: null });
@@ -37,7 +36,7 @@ export function InviteScreen({ info, texts, onRedeem }: Props) {
                   </Field>
                 </CardRow>
               ) : (
-                <CardRow className="justify-center fluid-text-lg">{texts.forPlayer.replace("{name}", info.playerName)}</CardRow>
+                <CardRow className="fluid-text-lg justify-center">{texts.forPlayer.replace("{name}", info.playerName)}</CardRow>
               )}
               <CardRow>
                 <Field label={texts.password}>
@@ -50,9 +49,7 @@ export function InviteScreen({ info, texts, onRedeem }: Props) {
                 </Field>
               </CardRow>
               <CardRow className="flex-col items-stretch">
-                <PrimaryButton disabled={pending}>
-                  {info.kind === "register" ? texts.register : texts.setPassword}
-                </PrimaryButton>
+                <PrimaryButton disabled={pending}>{info.kind === "register" ? texts.register : texts.setPassword}</PrimaryButton>
                 {state.error && <FormError centered>{texts.errors[state.error]}</FormError>}
               </CardRow>
             </CardList>

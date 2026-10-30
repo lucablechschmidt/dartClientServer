@@ -26,7 +26,14 @@ const throwAll = (s: MatchState, darts: Dart[]) =>
 
 /** Match with three players, after `visits` complete visits. */
 const legAfter = (visits: number) =>
-  throwAll(newMatch(players.map((p) => p.id), rules, { legsToWinSet: 1, setsToWinMatch: 1 }), Array.from({ length: visits * 3 }, () => S20));
+  throwAll(
+    newMatch(
+      players.map((p) => p.id),
+      rules,
+      { legsToWinSet: 1, setsToWinMatch: 1 },
+    ),
+    Array.from({ length: visits * 3 }, () => S20),
+  );
 
 describe("isOpen", () => {
   it("running and younger than 24 h", () => {
@@ -99,7 +106,11 @@ describe("closed matches and cancel", () => {
 describe("legs and play-out (M5)", () => {
   const short = { startScore: 40, inRule: "single", outRule: "single" } as const;
   const D20: Dart = { field: 20, type: "double" };
-  const MISS: Dart[] = [{ field: 0, type: "single" }, { field: 0, type: "single" }, { field: 0, type: "single" }];
+  const MISS: Dart[] = [
+    { field: 0, type: "single" },
+    { field: 0, type: "single" },
+    { field: 0, type: "single" },
+  ];
   const m: MatchAccess = { ...base, inputMode: "per-player" };
 
   it("between two legs the starter of the next leg enters", () => {

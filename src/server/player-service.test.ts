@@ -14,7 +14,10 @@ beforeEach(() => {
   n = 0;
   deps = memoryDeps({ newId: () => `id${++n}`, now: () => 1000 });
 });
-const ok = <T extends { ok: boolean }>(r: T) => { if (!r.ok) throw new Error("expected ok"); return r as Extract<T, { ok: true }>; };
+const ok = <T extends { ok: boolean }>(r: T) => {
+  if (!r.ok) throw new Error("expected ok");
+  return r as Extract<T, { ok: true }>;
+};
 
 describe("player service: unique names", () => {
   it("rejects a second player with the same name, ignoring case, guests included", () => {

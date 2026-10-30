@@ -50,16 +50,27 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
         <form className="flex w-full gap-2">
           <input type="hidden" name="id" value={p.id} />
           <TextInput inline name="name" defaultValue={p.name} required maxLength={40} autoFocus aria-label={texts.namePlaceholder} />
-          <TextButton type="submit" formAction={act(onRename)}>{texts.save}</TextButton>
-          {mayDelete(p) && <TextButton type="submit" tone="danger" formAction={act(onDelete)}>{deleteLabel}</TextButton>}
+          <TextButton type="submit" formAction={act(onRename)}>
+            {texts.save}
+          </TextButton>
+          {mayDelete(p) && (
+            <TextButton type="submit" tone="danger" formAction={act(onDelete)}>
+              {deleteLabel}
+            </TextButton>
+          )}
         </form>
         {errors[p.id] && <FormError>{texts.errors[errors[p.id]!]}</FormError>}
       </CardRow>
     ) : (
       <CardRow key={p.id}>
-        <span className="truncate fluid-text-lg">{p.name}</span>
+        <span className="fluid-text-lg truncate">{p.name}</span>
         {mayEdit(p) ? (
-          <button type="button" onClick={() => open(p.id)} aria-label={`${texts.edit}: ${p.name}`} className="grid min-h-touch min-w-touch place-items-center text-fg">
+          <button
+            type="button"
+            onClick={() => open(p.id)}
+            aria-label={`${texts.edit}: ${p.name}`}
+            className="grid min-h-touch min-w-touch place-items-center text-fg"
+          >
             <WrenchIcon className="h-6 w-6" />
           </button>
         ) : (
@@ -82,7 +93,13 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
         <SectionHeading>{texts.guests}</SectionHeading>
         <CardList label={texts.guests}>
           {guests.map((p) => row(p, texts.remove))}
-          <AddRow label={texts.addGuest} placeholder={texts.guestNamePlaceholder} saveLabel={texts.save} cancelLabel={texts.cancel} onSubmit={addGuest} />
+          <AddRow
+            label={texts.addGuest}
+            placeholder={texts.guestNamePlaceholder}
+            saveLabel={texts.save}
+            cancelLabel={texts.cancel}
+            onSubmit={addGuest}
+          />
         </CardList>
       </div>
     </GroupedSection>

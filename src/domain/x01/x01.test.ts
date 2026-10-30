@@ -262,9 +262,7 @@ describe("selectors", () => {
     const points = own.reduce((sum, v) => sum + visitScore(v), 0);
     expect(own.at(-1)?.isBust).toBe(true);
     expect(threeDartAverage(s, A)).toBe(points / own.length);
-    expect(threeDartAverage(s, A)).toBeLessThan(
-      own.slice(0, -1).reduce((sum, v) => sum + visitScore(v), 0) / (own.length - 1),
-    );
+    expect(threeDartAverage(s, A)).toBeLessThan(own.slice(0, -1).reduce((sum, v) => sum + visitScore(v), 0) / (own.length - 1));
   });
   it("zero average before any closed visit", () => {
     expect(threeDartAverage(newLeg([A, B], rules()), A)).toBe(0);

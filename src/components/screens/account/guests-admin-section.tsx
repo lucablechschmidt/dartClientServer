@@ -7,7 +7,15 @@ import type { Player, PlayerError, PlayerResult } from "@/domain/player";
 import type { AccountTexts } from "./types";
 
 /** Admin: today's guests with "make permanent" (E12); hidden when there are none. */
-export function GuestsAdminSection({ guests, texts, onPromoteGuest }: { guests: Player[]; texts: AccountTexts; onPromoteGuest: (playerId: string) => Promise<PlayerResult> }) {
+export function GuestsAdminSection({
+  guests,
+  texts,
+  onPromoteGuest,
+}: {
+  guests: Player[];
+  texts: AccountTexts;
+  onPromoteGuest: (playerId: string) => Promise<PlayerResult>;
+}) {
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
   if (guests.length === 0) return null;
   const t = texts.admin;
@@ -18,7 +26,7 @@ export function GuestsAdminSection({ guests, texts, onPromoteGuest }: { guests: 
         {guests.map((p) => (
           <CardRow key={p.id} className="flex-col items-stretch">
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate fluid-text-lg">{p.name}</span>
+              <span className="fluid-text-lg truncate">{p.name}</span>
               <TextButton
                 onClick={async () => {
                   const r = await onPromoteGuest(p.id);

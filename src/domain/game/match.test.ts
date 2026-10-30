@@ -187,7 +187,12 @@ describe("choosing the starter (ToStart)", () => {
 describe("replayMatch", () => {
   it("rebuilds the same state from stored legs", () => {
     const m = play(winLeg(newMatch([A, B], rules, bestOf3), A), S(3));
-    const again = replayMatch(m.players, m.rules, m.format, m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })));
+    const again = replayMatch(
+      m.players,
+      m.rules,
+      m.format,
+      m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })),
+    );
     expect(again).toEqual(m);
   });
 
@@ -204,13 +209,19 @@ describe("replayMatch", () => {
       for (let i = 0; i < 400 && matchStatus(m) !== "finished"; i++) {
         const type = types[rand(3)];
         const field = rand(5) === 0 ? 25 : rand(21);
-        const dart: Dart = field === 25 && type === "triple" ? { field, type: "single" } : field === 0 ? { field, type: "single" } : { field, type };
+        const dart: Dart =
+          field === 25 && type === "triple" ? { field, type: "single" } : field === 0 ? { field, type: "single" } : { field, type };
         const r = applyMatchDart(m, dart);
         if (!r.ok) throw new Error(r.reason);
         m = r.value;
         (thrown[m.legs.length - 1] ??= []).push(dart);
       }
-      const again = replayMatch(m.players, m.rules, m.format, m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })));
+      const again = replayMatch(
+        m.players,
+        m.rules,
+        m.format,
+        m.legs.map((l) => ({ starter: l.starter, visits: l.visits, playOut: l.playOut })),
+      );
       expect(again).toEqual(m);
       // Each leg on its own equals feeding its darts one by one through applyDart.
       for (const [i, leg] of m.legs.entries()) {

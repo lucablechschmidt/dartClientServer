@@ -14,7 +14,14 @@ type Props = {
 export function PlayerPanels({ players, texts, onSelect, selectLabel = "" }: Props) {
   const tappable = (p: PlayerPanelData, panel: ReactNode) =>
     onSelect ? (
-      <button key={p.id} type="button" onClick={() => onSelect(p.id)} aria-label={`${selectLabel}: ${p.name}`} aria-pressed={p.isActive} className="text-left">
+      <button
+        key={p.id}
+        type="button"
+        onClick={() => onSelect(p.id)}
+        aria-label={`${selectLabel}: ${p.name}`}
+        aria-pressed={p.isActive}
+        className="text-left"
+      >
         {panel}
       </button>
     ) : (
@@ -27,7 +34,9 @@ export function PlayerPanels({ players, texts, onSelect, selectLabel = "" }: Pro
   return (
     <div className="grid content-start gap-2">
       <PlayerPanel player={active} texts={texts} />
-      <div className="flex gap-2 overflow-x-auto px-0.5 pb-1">{players.map((p) => tappable(p, <PlayerPanel player={p} size="small" texts={texts} />))}</div>
+      <div className="flex gap-2 overflow-x-auto px-0.5 pb-1">
+        {players.map((p) => tappable(p, <PlayerPanel player={p} size="small" texts={texts} />))}
+      </div>
     </div>
   );
 }

@@ -26,7 +26,7 @@ const undo = (state: LegState, times = 1): LegState => {
   }
   return state;
 };
-const ok = <T,>(r: { ok: true; value: T } | { ok: false; reason: string }): T => {
+const ok = <T>(r: { ok: true; value: T } | { ok: false; reason: string }): T => {
   if (!r.ok) throw new Error(r.reason);
   return r.value;
 };

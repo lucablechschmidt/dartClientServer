@@ -7,7 +7,10 @@ import { PersonIcon, PersonPlusIcon } from "@/components/ui/icons";
 import { isGuest, type Player } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
 
-export type PlayerPickerTexts = Pick<Texts["newGame"], "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "nameTaken" | "selected" | "select" | "deselect"> & {
+export type PlayerPickerTexts = Pick<
+  Texts["newGame"],
+  "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "nameTaken" | "selected" | "select" | "deselect"
+> & {
   save: string;
   cancel: string;
 };
@@ -56,7 +59,9 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
       <CardList label={texts.choosePlayers}>
         {players.length === 0 && (
           <CardRow className="justify-center text-fg-muted">
-            <Link href="/players" className="underline">{texts.noPlayers}</Link>
+            <Link href="/players" className="underline">
+              {texts.noPlayers}
+            </Link>
           </CardRow>
         )}
         {players.map((p) => {
@@ -64,17 +69,32 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
           const selected = pos >= 0;
           const guest = isGuest(p);
           return (
-            <CardRow key={p.id} onClick={() => onToggle(p.id)} pressed={selected} label={fill(selected ? texts.deselect : texts.select, p.name)}>
+            <CardRow
+              key={p.id}
+              onClick={() => onToggle(p.id)}
+              pressed={selected}
+              label={fill(selected ? texts.deselect : texts.select, p.name)}
+            >
               <span className="flex min-w-0 items-center gap-3">
-                <span className={`grid size-avatar shrink-0 place-items-center rounded-full text-xs font-semibold ${guest ? "bg-fill-strong text-fg-muted" : "bg-accent-soft text-accent"}`} aria-hidden="true">
+                <span
+                  className={`grid size-avatar shrink-0 place-items-center rounded-full text-xs font-semibold ${guest ? "bg-fill-strong text-fg-muted" : "bg-accent-soft text-accent"}`}
+                  aria-hidden="true"
+                >
                   {guest ? <PersonIcon className="size-icon-xs" /> : letters[p.id]}
                 </span>
                 <span className={`truncate text-base ${selected ? "font-semibold" : ""}`}>{p.name}</span>
               </span>
               <span className="flex shrink-0 items-center gap-3">
-                {guest && <span className="rounded-box bg-fill-strong px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">{texts.guestBadge}</span>}
+                {guest && (
+                  <span className="rounded-box bg-fill-strong px-2 py-0.5 text-xs font-semibold tracking-wide text-fg-muted uppercase">
+                    {texts.guestBadge}
+                  </span>
+                )}
                 {selected ? (
-                  <span className="grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent tabular" aria-label={texts.selected.replace("{n}", String(pos + 1))}>
+                  <span
+                    className="tabular grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent"
+                    aria-label={texts.selected.replace("{n}", String(pos + 1))}
+                  >
                     {pos + 1}
                   </span>
                 ) : (

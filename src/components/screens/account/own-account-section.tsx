@@ -38,17 +38,27 @@ export function OwnAccountSection({ session, texts, onRename, onChangePassword, 
       </CardRow>
       <CardRow className="flex-col items-stretch">
         <form action={pwAction} className="flex w-full flex-col gap-2">
-          <Field label={t.oldPassword}><TextInput name="oldPassword" type="password" required autoComplete="current-password" /></Field>
-          <Field label={t.newPassword}><TextInput name="newPassword" type="password" required minLength={8} autoComplete="new-password" /></Field>
-          <Field label={t.newPasswordRepeat}><TextInput name="newPasswordRepeat" type="password" required minLength={8} autoComplete="new-password" /></Field>
-          <TextButton type="submit" disabled={pwPending} className="self-end">{t.changePassword}</TextButton>
+          <Field label={t.oldPassword}>
+            <TextInput name="oldPassword" type="password" required autoComplete="current-password" />
+          </Field>
+          <Field label={t.newPassword}>
+            <TextInput name="newPassword" type="password" required minLength={8} autoComplete="new-password" />
+          </Field>
+          <Field label={t.newPasswordRepeat}>
+            <TextInput name="newPasswordRepeat" type="password" required minLength={8} autoComplete="new-password" />
+          </Field>
+          <TextButton type="submit" disabled={pwPending} className="self-end">
+            {t.changePassword}
+          </TextButton>
         </form>
         {pwState.error && <FormError>{t.errors[pwState.error]}</FormError>}
         {pwState.saved && <FormNote>{t.saved}</FormNote>}
       </CardRow>
       <CardRow className="justify-center">
         <form action={onLogout}>
-          <TextButton type="submit" tone="danger">{texts.auth.logout}</TextButton>
+          <TextButton type="submit" tone="danger">
+            {texts.auth.logout}
+          </TextButton>
         </form>
       </CardRow>
     </CardList>

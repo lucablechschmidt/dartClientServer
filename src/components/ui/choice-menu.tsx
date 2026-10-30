@@ -26,7 +26,17 @@ type Props<V extends string | number> = {
  * with a filled check, the others with an empty circle. Tapping an option, outside or Escape
  * closes it. The value is also kept in a hidden input so a form submits it.
  */
-export function ChoiceMenu<V extends string | number>({ name, options, value, onChange, label, children, className = "", openClassName = "", align = "start" }: Props<V>) {
+export function ChoiceMenu<V extends string | number>({
+  name,
+  options,
+  value,
+  onChange,
+  label,
+  children,
+  className = "",
+  openClassName = "",
+  align = "start",
+}: Props<V>) {
   const [open, setOpen] = useState(false);
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -75,7 +85,7 @@ export function ChoiceMenu<V extends string | number>({ name, options, value, on
                     onChange(o.value);
                     setOpen(false);
                   }}
-                  className={`flex min-h-touch w-full items-center justify-between gap-6 whitespace-nowrap rounded-tile px-3 text-left ${selected ? "bg-accent-wash font-semibold" : ""}`}
+                  className={`flex min-h-touch w-full items-center justify-between gap-6 rounded-tile px-3 text-left whitespace-nowrap ${selected ? "bg-accent-wash font-semibold" : ""}`}
                 >
                   {o.label}
                   {selected ? (

@@ -22,7 +22,13 @@ export type RecentMatchItem = {
     | { kind: "winner"; winner: string };
 };
 
-type Props = { texts: Texts["gameMenu"]; overviewTexts: Texts["overview"]; matches: OpenMatchItem[]; recent?: RecentMatchItem[]; now: number };
+type Props = {
+  texts: Texts["gameMenu"];
+  overviewTexts: Texts["overview"];
+  matches: OpenMatchItem[];
+  recent?: RecentMatchItem[];
+  now: number;
+};
 
 /** Mode name before the time; Classic Game (X01) stays unmarked as the usual case. */
 const modePrefix = (mode: Mode, t: Texts["gameMenu"]) => (mode === "x01" ? "" : `${t.modes[mode]} · `);
@@ -54,7 +60,7 @@ export function resultText(result: RecentMatchItem["result"], t: Texts["overview
 export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Props) {
   return (
     <div className="flex flex-1 flex-col">
-      <nav aria-label={texts.title} className="flex flex-1 flex-col items-center justify-center gap-6 py-8 fluid-text-xl">
+      <nav aria-label={texts.title} className="fluid-text-xl flex flex-1 flex-col items-center justify-center gap-6 py-8">
         {MODES.map((mode) => (
           <Link key={mode} href={`/new/${mode}`} className="min-h-touch px-4 py-1 text-fg">
             {texts.modes[mode]}
@@ -94,7 +100,9 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
                       {relativeTime(m.endedAt, now, overviewTexts)}
                     </span>
                   </span>
-                  <span className={`truncate text-sm ${m.result.kind === "abandoned" ? "text-fg-muted" : ""}`}>{resultText(m.result, overviewTexts)}</span>
+                  <span className={`truncate text-sm ${m.result.kind === "abandoned" ? "text-fg-muted" : ""}`}>
+                    {resultText(m.result, overviewTexts)}
+                  </span>
                 </Link>
               </CardRow>
             ))}

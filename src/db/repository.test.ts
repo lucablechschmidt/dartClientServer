@@ -14,14 +14,20 @@ import { rowToVisit, visitToSlots } from "./visit-mapping";
 type Repos = { players: PlayerRepository; matches: MatchRepository };
 
 const impls: [string, () => Repos][] = [
-  ["sqlite (in-memory file)", () => {
-    const db = openDatabase(":memory:");
-    return { players: new SqlitePlayerRepository(db), matches: new SqliteMatchRepository(db) };
-  }],
-  ["memory", () => {
-    const store = new MemoryStore();
-    return { players: new MemoryPlayerRepository(store), matches: new MemoryMatchRepository(store) };
-  }],
+  [
+    "sqlite (in-memory file)",
+    () => {
+      const db = openDatabase(":memory:");
+      return { players: new SqlitePlayerRepository(db), matches: new SqliteMatchRepository(db) };
+    },
+  ],
+  [
+    "memory",
+    () => {
+      const store = new MemoryStore();
+      return { players: new MemoryPlayerRepository(store), matches: new MemoryMatchRepository(store) };
+    },
+  ],
 ];
 
 let n = 0;
@@ -33,7 +39,18 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
   const seed = (repo: Repos) => {
     repo.players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
     repo.players.createPlayer({ id: "p2", name: "Sam", createdAt: 2, guestUntil: null });
-    repo.matches.createMatch({ mode: "x01", id: "m1", legId: "l1", rules, playerIds: ["p1", "p2"], starterIndex: 1, format, inputMode: "single", hostPlayerId: null, startedAt: 10 });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "m1",
+      legId: "l1",
+      rules,
+      playerIds: ["p1", "p2"],
+      starterIndex: 1,
+      format,
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 10,
+    });
   };
 
   it("players: create, list in creation order, rename, delete", () => {
@@ -53,7 +70,10 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     repo.players.createPlayer({ id: "g", name: "Gast", createdAt: 2, guestUntil: 100 });
     expect(repo.players.hasAdmin()).toBe(true);
     const listed = repo.players.listPlayers(0);
-    expect(listed.map((p) => [p.name, p.hasLogin, p.isAdmin])).toEqual([["Admin", true, true], ["Gast", false, false]]);
+    expect(listed.map((p) => [p.name, p.hasLogin, p.isAdmin])).toEqual([
+      ["Admin", true, true],
+      ["Gast", false, false],
+    ]);
     expect(listed.some((p) => "passwordHash" in p)).toBe(false);
     expect(repo.players.credentialsByName("admin")).toEqual({ id: "a", name: "Admin", passwordHash: "$2a$14$x", isAdmin: true });
     expect(repo.players.credentialsById("g")?.passwordHash).toBeNull();
@@ -97,8 +117,30 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
     repo.players.createPlayer({ id: "a", name: "Gast A", createdAt: 2, guestUntil: 100 });
     repo.players.createPlayer({ id: "b", name: "Gast B", createdAt: 3, guestUntil: 300 });
-    repo.matches.createMatch({ mode: "x01", id: "mg", legId: "lg", rules, playerIds: ["r", "a", "b"], starterIndex: 0, format, inputMode: "single", hostPlayerId: null, startedAt: 10 });
-    repo.matches.createMatch({ mode: "x01", id: "mr", legId: "lr", rules, playerIds: ["r"], starterIndex: 0, format, inputMode: "single", hostPlayerId: null, startedAt: 10 });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "mg",
+      legId: "lg",
+      rules,
+      playerIds: ["r", "a", "b"],
+      starterIndex: 0,
+      format,
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 10,
+    });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "mr",
+      legId: "lr",
+      rules,
+      playerIds: ["r"],
+      starterIndex: 0,
+      format,
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 10,
+    });
     const v: Visit = { playerId: "r", darts: [{ field: 20, type: "triple" }], isBust: false };
     repo.matches.syncVisits("lg", [v], 0, nextId, 10);
     expect(repo.matches.listExpiredGuestMatches(200)).toEqual([]);
@@ -116,18 +158,68 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
   it("field hits accumulate per player and field", () => {
     const repo = make();
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
-    repo.players.addFieldHits("r", new Map([[20, 4], [5, 3]]));
-    repo.players.addFieldHits("r", new Map([[20, 1], [0, 0]]));
-    expect(repo.players.fieldHitsOf("r")).toEqual(new Map([[20, 5], [5, 3]]));
+    repo.players.addFieldHits(
+      "r",
+      new Map([
+        [20, 4],
+        [5, 3],
+      ]),
+    );
+    repo.players.addFieldHits(
+      "r",
+      new Map([
+        [20, 1],
+        [0, 0],
+      ]),
+    );
+    expect(repo.players.fieldHitsOf("r")).toEqual(
+      new Map([
+        [20, 5],
+        [5, 3],
+      ]),
+    );
     expect(repo.players.fieldHitsOf("nobody")).toEqual(new Map());
   });
 
   it("lists open matches: running and started after openSince, newest first", () => {
     const repo = make();
     repo.players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
-    repo.matches.createMatch({ mode: "x01", id: "old", legId: "l0", rules, playerIds: ["p1"], starterIndex: 0, format, inputMode: "single", hostPlayerId: "p1", startedAt: 10 });
-    repo.matches.createMatch({ mode: "x01", id: "new", legId: "l1", rules, playerIds: ["p1"], starterIndex: 0, format, inputMode: "per-player", hostPlayerId: "p1", startedAt: 500 });
-    repo.matches.createMatch({ mode: "x01", id: "done", legId: "l2", rules, playerIds: ["p1"], starterIndex: 0, format, inputMode: "single", hostPlayerId: "p1", startedAt: 600 });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "old",
+      legId: "l0",
+      rules,
+      playerIds: ["p1"],
+      starterIndex: 0,
+      format,
+      inputMode: "single",
+      hostPlayerId: "p1",
+      startedAt: 10,
+    });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "new",
+      legId: "l1",
+      rules,
+      playerIds: ["p1"],
+      starterIndex: 0,
+      format,
+      inputMode: "per-player",
+      hostPlayerId: "p1",
+      startedAt: 500,
+    });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "done",
+      legId: "l2",
+      rules,
+      playerIds: ["p1"],
+      starterIndex: 0,
+      format,
+      inputMode: "single",
+      hostPlayerId: "p1",
+      startedAt: 600,
+    });
     repo.matches.setMatchStatus("done", "abandoned", 700);
     expect(repo.matches.listOpenMatches(100).map((m) => [m.id, m.inputMode])).toEqual([["new", "per-player"]]);
     expect(repo.matches.listOpenMatches(0).map((m) => m.id)).toEqual(["new", "old"]);
@@ -171,7 +263,21 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(loaded.state.legs[0].visits).toEqual(s.visits);
 
     // bust visit with overthrown slots
-    s = { ...s, visits: [...s.visits, { playerId: "p2", darts: [{ field: 20, type: "single" }, { field: 0, type: "overthrown" }, { field: 0, type: "overthrown" }], isBust: true }] };
+    s = {
+      ...s,
+      visits: [
+        ...s.visits,
+        {
+          playerId: "p2",
+          darts: [
+            { field: 20, type: "single" },
+            { field: 0, type: "overthrown" },
+            { field: 0, type: "overthrown" },
+          ],
+          isBust: true,
+        },
+      ],
+    };
     repo.matches.syncVisits("l1", s.visits, s.visits.length - 1, nextId, 102);
     loaded = repo.matches.loadMatch("m1")!;
     expect(loaded.state.legs[0].visits.at(-1)).toEqual(s.visits.at(-1));
@@ -206,7 +312,18 @@ describe.each(impls)("Legs (M5): %s", (_name, make) => {
   const seed = (repo: Repos) => {
     repo.players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
     repo.players.createPlayer({ id: "p2", name: "Sam", createdAt: 2, guestUntil: null });
-    repo.matches.createMatch({ mode: "x01", id: "m1", legId: "l1", rules, playerIds: ["p1", "p2"], starterIndex: 0, format: { legsToWinSet: 2, setsToWinMatch: 3 }, inputMode: "single", hostPlayerId: null, startedAt: 10 });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "m1",
+      legId: "l1",
+      rules,
+      playerIds: ["p1", "p2"],
+      starterIndex: 0,
+      format: { legsToWinSet: 2, setsToWinMatch: 3 },
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 10,
+    });
   };
   const v = (playerId: string): Visit => ({ playerId, darts: [{ field: 20, type: "single" }], isBust: false });
 
@@ -219,8 +336,14 @@ describe.each(impls)("Legs (M5): %s", (_name, make) => {
     repo.matches.setPlayOut("l2", true);
     const m = repo.matches.loadMatch("m1")!;
     expect(m.format).toEqual({ legsToWinSet: 2, setsToWinMatch: 3 });
-    expect(m.legs.map((l) => [l.id, l.setNo, l.legNo])).toEqual([["l1", 1, 1], ["l2", 1, 2]]);
-    expect(m.state.legs.map((l) => [l.starter, l.visits.length, l.playOut])).toEqual([[0, 1, false], [1, 2, true]]);
+    expect(m.legs.map((l) => [l.id, l.setNo, l.legNo])).toEqual([
+      ["l1", 1, 1],
+      ["l2", 1, 2],
+    ]);
+    expect(m.state.legs.map((l) => [l.starter, l.visits.length, l.playOut])).toEqual([
+      [0, 1, false],
+      [1, 2, true],
+    ]);
   });
 
   it("changes the starter, deletes a leg with its visits, sets places", () => {
@@ -243,7 +366,18 @@ describe.each(impls)("History (M5): %s", (_name, make) => {
     repo.players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
     repo.players.createPlayer({ id: "p2", name: "Sam", createdAt: 2, guestUntil: null });
     const create = (id: string, startedAt: number) =>
-      repo.matches.createMatch({ mode: "x01", id, legId: `l-${id}`, rules, playerIds: ["p1", "p2"], starterIndex: 0, format: { legsToWinSet: 2, setsToWinMatch: 1 }, inputMode: "single", hostPlayerId: null, startedAt });
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `l-${id}`,
+        rules,
+        playerIds: ["p1", "p2"],
+        starterIndex: 0,
+        format: { legsToWinSet: 2, setsToWinMatch: 1 },
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt,
+      });
     create("done", 10);
     create("gone", 20);
     create("old", 5);
@@ -255,8 +389,16 @@ describe.each(impls)("History (M5): %s", (_name, make) => {
     repo.matches.setPlacements("done", { p1: 2, p2: 1 });
     repo.matches.setMatchStatus("gone", "abandoned", 30);
     const recent = repo.matches.listRecentMatches(100, 10);
-    expect(recent.map((m) => [m.id, m.status])).toEqual([["done", "finished"], ["gone", "abandoned"], ["old", "running"]]);
-    expect(recent[0]).toMatchObject({ format: { legsToWinSet: 2, setsToWinMatch: 1 }, legWinners: ["p2", "p2"], placements: { p1: 2, p2: 1 } });
+    expect(recent.map((m) => [m.id, m.status])).toEqual([
+      ["done", "finished"],
+      ["gone", "abandoned"],
+      ["old", "running"],
+    ]);
+    expect(recent[0]).toMatchObject({
+      format: { legsToWinSet: 2, setsToWinMatch: 1 },
+      legWinners: ["p2", "p2"],
+      placements: { p1: 2, p2: 1 },
+    });
     expect(recent[0].players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
     expect(repo.matches.listRecentMatches(100, 1).map((m) => m.id)).toEqual(["done"]);
   });

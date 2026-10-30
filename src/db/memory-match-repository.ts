@@ -12,7 +12,11 @@ export class MemoryMatchRepository implements MatchRepository {
       const seated = m.playerIds.map((id) => this.store.players.get(id)!);
       const guests = seated.filter((p) => p.guestUntil !== null);
       if (guests.length === 0 || Math.max(...guests.map((p) => p.guestUntil!)) > now) continue;
-      out.push({ id: m.id, regularPlayerIds: seated.filter((p) => p.guestUntil === null).map((p) => p.id), visits: m.legs.flatMap((l) => l.visits) });
+      out.push({
+        id: m.id,
+        regularPlayerIds: seated.filter((p) => p.guestUntil === null).map((p) => p.id),
+        visits: m.legs.flatMap((l) => l.visits),
+      });
     }
     return out;
   }
@@ -39,7 +43,13 @@ export class MemoryMatchRepository implements MatchRepository {
     return [...this.store.matches.values()]
       .filter((m) => m.status === "running" && m.startedAt > openSince)
       .sort((a, b) => b.startedAt - a.startedAt)
-      .map((m) => ({ id: m.id, mode: m.mode, players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)), inputMode: m.inputMode, startedAt: m.startedAt }));
+      .map((m) => ({
+        id: m.id,
+        mode: m.mode,
+        players: m.playerIds.map((id) => toPlayer(this.store.players.get(id)!)),
+        inputMode: m.inputMode,
+        startedAt: m.startedAt,
+      }));
   }
   listRecentMatches(openSince: number, limit: number): RecentMatch[] {
     return [...this.store.matches.values()]
@@ -73,7 +83,14 @@ export class MemoryMatchRepository implements MatchRepository {
       finishedAt: m.finishedAt,
       format: m.format,
       legs: m.legs.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
-      state: replayMatch(m.playerIds, m.rules, m.format, m.legs.map((l) => ({ starter: l.starterIndex, visits: l.visits, playOut: l.playOut })), 0, m.mode),
+      state: replayMatch(
+        m.playerIds,
+        m.rules,
+        m.format,
+        m.legs.map((l) => ({ starter: l.starterIndex, visits: l.visits, playOut: l.playOut })),
+        0,
+        m.mode,
+      ),
     };
   }
   private matchOfLeg(legId: string): StoredMatch {

@@ -24,15 +24,35 @@ export function X01Setup(props: SetupProps) {
         const multi = playerCount >= 3;
         return (
           <SetupCard>
-            <ScoreChoice title={texts.startScore} subtitle={texts.cardSubtitles.x01} value={startScore} options={SCORE_CHOICES} onChange={setStartScore} />
+            <ScoreChoice
+              title={texts.startScore}
+              subtitle={texts.cardSubtitles.x01}
+              value={startScore}
+              options={SCORE_CHOICES}
+              onChange={setStartScore}
+            />
             <div className="grid grid-cols-2 gap-3">
               <RuleTile name="inRule" label={texts.inRule} value={inRule} onChange={setInRule} options={ruleChoices(texts.inNames)} />
               <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={ruleChoices(texts.outNames)} />
             </div>
             {/* One row each: "Best of Legs" next to − 1 + does not fit half a phone width. */}
             <div className="flex flex-col divide-y divide-separator">
-              <Stepper name="setsToWinMatch" label={texts.bestOfSets} value={multi ? 1 : sets} onChange={setSets} disabled={multi} {...stepper} />
-              <Stepper name="legsToWinSet" label={texts.bestOfLegs} value={multi ? 1 : legs} onChange={setLegs} disabled={multi} {...stepper} />
+              <Stepper
+                name="setsToWinMatch"
+                label={texts.bestOfSets}
+                value={multi ? 1 : sets}
+                onChange={setSets}
+                disabled={multi}
+                {...stepper}
+              />
+              <Stepper
+                name="legsToWinSet"
+                label={texts.bestOfLegs}
+                value={multi ? 1 : legs}
+                onChange={setLegs}
+                disabled={multi}
+                {...stepper}
+              />
             </div>
             {multi && <p className="text-xs text-fg-muted">{texts.setsLegsTwoOnly}</p>}
           </SetupCard>

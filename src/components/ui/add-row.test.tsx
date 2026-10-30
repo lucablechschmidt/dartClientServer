@@ -9,7 +9,11 @@ describe("AddRow", () => {
   it("expands, shows the error from onSubmit and stays open; closes on success", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValueOnce("Diesen Namen gibt es schon.").mockResolvedValueOnce(null);
-    render(<ul><AddRow {...props} onSubmit={onSubmit} /></ul>);
+    render(
+      <ul>
+        <AddRow {...props} onSubmit={onSubmit} />
+      </ul>,
+    );
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
     await user.type(screen.getByPlaceholderText("Name des Gastes"), "Mara{Enter}");
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("gibt es schon"));
@@ -22,7 +26,11 @@ describe("AddRow", () => {
   it("cancel closes without submitting", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
-    render(<ul><AddRow {...props} onSubmit={onSubmit} /></ul>);
+    render(
+      <ul>
+        <AddRow {...props} onSubmit={onSubmit} />
+      </ul>,
+    );
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
     await user.click(screen.getByRole("button", { name: "Abbrechen" }));
     expect(onSubmit).not.toHaveBeenCalled();

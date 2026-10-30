@@ -13,7 +13,6 @@ type Props = {
   onLogin: (prev: LoginFormState, formData: FormData) => Promise<LoginFormState>;
 };
 
-
 /** Name and password, styled like the list screens. The error stays in the card, the form stays open. */
 export function LoginScreen({ texts, next, onLogin }: Props) {
   const [state, action, pending] = useActionState(onLogin, { error: null });
@@ -35,9 +34,7 @@ export function LoginScreen({ texts, next, onLogin }: Props) {
               </Field>
             </CardRow>
             <CardRow className="flex-col items-stretch">
-              <PrimaryButton disabled={pending}>
-                {texts.submit}
-              </PrimaryButton>
+              <PrimaryButton disabled={pending}>{texts.submit}</PrimaryButton>
               {state.error && <FormError centered>{texts.errors[state.error]}</FormError>}
             </CardRow>
           </CardList>

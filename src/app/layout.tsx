@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

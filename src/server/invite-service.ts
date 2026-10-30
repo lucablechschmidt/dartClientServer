@@ -7,9 +7,7 @@ import { playerNameSchema } from "./player-service";
 /** Invites via QR code (M3, E10): valid for 24 h, single use. */
 export const INVITE_LIFETIME_MS = 24 * 60 * 60 * 1000;
 
-export type InviteInfo =
-  | { kind: "register" }
-  | { kind: "password"; playerName: string; reset: boolean };
+export type InviteInfo = { kind: "register" } | { kind: "password"; playerName: string; reset: boolean };
 
 export type RedeemResult = { ok: true; token: string; session: Session } | { ok: false; reason: RedeemError };
 
@@ -60,7 +58,11 @@ const nameConflict = (deps: Deps, name: string): RedeemError | null => {
  * two requests with the same QR code may both pass the first check while bcrypt runs, but only
  * one of them gets through the transaction.
  */
-export async function redeem(deps: Deps, token: string, input: { name?: string; password: string; passwordRepeat: string }): Promise<RedeemResult> {
+export async function redeem(
+  deps: Deps,
+  token: string,
+  input: { name?: string; password: string; passwordRepeat: string },
+): Promise<RedeemResult> {
   const id = tokenId(token);
   const invite = deps.auth.findInvite(id, deps.now());
   if (!invite) return { ok: false, reason: "invalid-token" };

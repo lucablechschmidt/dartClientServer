@@ -38,7 +38,11 @@ const zeros = (players: PlayerId[]) => Object.fromEntries(players.map((p) => [p,
  * next one) and the score after them. The legs of a won set stay visible ("Legs 2:1 · Sets 1:0")
  * until the first leg of the next set exists. Also used for the history, from the stored winners.
  */
-export function walkWinners(players: PlayerId[], format: MatchFormat, winners: (PlayerId | null)[]): { numbers: LegNumber[]; score: MatchScore } {
+export function walkWinners(
+  players: PlayerId[],
+  format: MatchFormat,
+  winners: (PlayerId | null)[],
+): { numbers: LegNumber[]; score: MatchScore } {
   let legs = zeros(players);
   const sets = zeros(players);
   let setNo = 1;
@@ -69,7 +73,12 @@ export function walkWinners(players: PlayerId[], format: MatchFormat, winners: (
   return { numbers, score };
 }
 
-const walk = (m: MatchState) => walkWinners(m.players, m.format, m.legs.map((leg) => (isLegFinished(leg) ? winnerOf(leg) : null)));
+const walk = (m: MatchState) =>
+  walkWinners(
+    m.players,
+    m.format,
+    m.legs.map((leg) => (isLegFinished(leg) ? winnerOf(leg) : null)),
+  );
 
 /** Set and leg number per leg, in the order of `m.legs`. */
 export const legNumbers = (m: MatchState): LegNumber[] => walk(m).numbers.slice(0, m.legs.length);
@@ -143,7 +152,9 @@ export const undoMatchVisit = (m: MatchState): Result<MatchState, UndoError> =>
   undoInLeg(m, (leg) => {
     const toggled = playOutUndo(leg);
     if (toggled) return { ok: true, value: toggled };
-    return leg.visits.length > 0 ? { ok: true, value: { ...leg, visits: leg.visits.slice(0, -1) } } : { ok: false, reason: "nothing-to-undo" };
+    return leg.visits.length > 0
+      ? { ok: true, value: { ...leg, visits: leg.visits.slice(0, -1) } }
+      : { ok: false, reason: "nothing-to-undo" };
   });
 
 /** The most recent visit of the whole match (empty legs skipped), or null. */

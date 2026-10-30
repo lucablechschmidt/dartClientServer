@@ -5,8 +5,7 @@ import type { VisitRow } from "./schema";
 
 type Slot = { field: number | null; type: DartType | null };
 
-const slotToDart = (s: Slot): Dart | null =>
-  s.field === null || s.type === null ? null : { field: s.field, type: s.type };
+const slotToDart = (s: Slot): Dart | null => (s.field === null || s.type === null ? null : { field: s.field, type: s.type });
 
 export function rowToVisit(row: VisitRow): Visit {
   const slots: Slot[] = [

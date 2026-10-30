@@ -60,8 +60,14 @@ describe("invite: register (case A, C, D, E)", () => {
 
   it("E: expired or unknown tokens are invalid; password rules apply before anything is created", async () => {
     const token = createRegisterInvite(deps);
-    expect(await redeem(deps, token, { name: "Mara", password: "kurz", passwordRepeat: "kurz" })).toEqual({ ok: false, reason: "password-too-short" });
-    expect(await redeem(deps, token, { name: "Mara", password: "passwort1", passwordRepeat: "passwort2" })).toEqual({ ok: false, reason: "password-mismatch" });
+    expect(await redeem(deps, token, { name: "Mara", password: "kurz", passwordRepeat: "kurz" })).toEqual({
+      ok: false,
+      reason: "password-too-short",
+    });
+    expect(await redeem(deps, token, { name: "Mara", password: "passwort1", passwordRepeat: "passwort2" })).toEqual({
+      ok: false,
+      reason: "password-mismatch",
+    });
     clock += INVITE_LIFETIME_MS;
     expect(inviteInfo(deps, token)).toBeNull();
     expect(await redeem(deps, token, { name: "Mara", ...pw })).toEqual({ ok: false, reason: "invalid-token" });
@@ -107,4 +113,3 @@ describe("invite: password (case F and reset)", () => {
     expect((await login(deps, "Mara", "neues-pw-99")).ok).toBe(true);
   });
 });
-

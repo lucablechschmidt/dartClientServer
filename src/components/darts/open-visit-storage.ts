@@ -36,7 +36,11 @@ export function reapply(state: MatchState, darts: Dart[]): MatchState | null {
 export function storeOpenVisit(matchId: string, state: MatchState): void {
   try {
     const open = openVisit(currentLeg(state));
-    if (open) localStorage.setItem(storageKey(matchId), JSON.stringify({ ...nextVisitPosition(state), darts: rethrowable(open) } satisfies StoredOpen));
+    if (open)
+      localStorage.setItem(
+        storageKey(matchId),
+        JSON.stringify({ ...nextVisitPosition(state), darts: rethrowable(open) } satisfies StoredOpen),
+      );
     else localStorage.removeItem(storageKey(matchId));
   } catch {
     /* private mode or similar: then do without */

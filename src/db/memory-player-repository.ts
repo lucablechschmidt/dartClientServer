@@ -17,7 +17,15 @@ export class MemoryPlayerRepository implements PlayerRepository {
   }
   createPlayer(player: NewPlayer): void {
     const passwordHash = player.passwordHash ?? null;
-    this.store.players.set(player.id, { id: player.id, name: player.name, createdAt: player.createdAt, guestUntil: player.guestUntil, passwordHash, hasLogin: passwordHash !== null, isAdmin: player.isAdmin ?? false });
+    this.store.players.set(player.id, {
+      id: player.id,
+      name: player.name,
+      createdAt: player.createdAt,
+      guestUntil: player.guestUntil,
+      passwordHash,
+      hasLogin: passwordHash !== null,
+      isAdmin: player.isAdmin ?? false,
+    });
   }
   renamePlayer(id: PlayerId, name: string): void {
     const p = this.store.players.get(id);

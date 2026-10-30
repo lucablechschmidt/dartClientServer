@@ -46,7 +46,9 @@ type Options<Reason extends string> = {
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
   onLoad: (matchId: string) => Promise<ActionReply<Reason>>;
   /** Text for a domain or server error; shown in the status line. */
-  errorText: (reason: Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "no-play-out" | "leg-started" | "unknown-player") => string;
+  errorText: (
+    reason: Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "no-play-out" | "leg-started" | "unknown-player",
+  ) => string;
 };
 
 const RETRY_MS = [500, 1000, 2000, 4000, 8000];
@@ -60,7 +62,15 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * client and server diverged: the server state is adopted. Changes from other devices arrive via SSE.
  * M5: the state is the whole match; play-out and the starter go through the same queue.
  */
-export function useVisitSync<Reason extends string>({ initial, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onLoad, errorText }: Options<Reason>) {
+export function useVisitSync<Reason extends string>({
+  initial,
+  onCommitVisit,
+  onUndoVisit,
+  onPlayOut,
+  onSetStarter,
+  onLoad,
+  errorText,
+}: Options<Reason>) {
   const [state, setState] = useState(initial.state);
   const [sync, setSync] = useState<SyncStatus>("saved");
   const [error, setError] = useState<string | null>(null);

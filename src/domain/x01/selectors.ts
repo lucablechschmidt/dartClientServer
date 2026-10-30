@@ -2,9 +2,7 @@ import { visitScore } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId, type Visit } from "../game/types";
 
 export function scoreOf(state: LegState, playerId: PlayerId): number {
-  return state.visits
-    .filter((v) => v.playerId === playerId)
-    .reduce((rest, v) => rest - visitScore(v), state.rules.startScore);
+  return state.visits.filter((v) => v.playerId === playerId).reduce((rest, v) => rest - visitScore(v), state.rules.startScore);
 }
 
 /** Rest before a given visit (for checkout detection and display). */
@@ -110,9 +108,7 @@ export function lastVisitOf(state: LegState, playerId: PlayerId): Visit {
 
 /** Port of getPlayerDarts: all darts including overthrown slots and the open visit. */
 export function dartsThrown(state: LegState, playerId: PlayerId): number {
-  return state.visits
-    .filter((v) => v.playerId === playerId)
-    .reduce((n, v) => n + v.darts.length, 0);
+  return state.visits.filter((v) => v.playerId === playerId).reduce((n, v) => n + v.darts.length, 0);
 }
 
 /**
@@ -120,9 +116,7 @@ export function dartsThrown(state: LegState, playerId: PlayerId): number {
  * divided by the number of all closed visits (busts count in the denominator).
  */
 export function threeDartAverage(state: LegState, playerId: PlayerId): number {
-  const closed = state.visits
-    .map((v, i) => ({ v, i }))
-    .filter(({ v, i }) => v.playerId === playerId && !isOpenVisit(state, i));
+  const closed = state.visits.map((v, i) => ({ v, i })).filter(({ v, i }) => v.playerId === playerId && !isOpenVisit(state, i));
   if (closed.length === 0) return 0;
   const points = closed.reduce((sum, { v }) => sum + visitScore(v), 0);
   return points / closed.length;

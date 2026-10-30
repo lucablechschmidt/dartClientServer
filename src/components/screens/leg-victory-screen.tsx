@@ -14,7 +14,9 @@ type Props = {
 export function scoreLine(view: MatchBoardView, players: PlayerId[], texts: { legs: string; sets: string }): string | null {
   if (!view.score) return null;
   const pair = (r: Record<PlayerId, number>) => players.map((p) => r[p]).join(":");
-  return [view.score.legs && `${texts.legs} ${pair(view.score.legs)}`, view.score.sets && `${texts.sets} ${pair(view.score.sets)}`].filter(Boolean).join(" · ");
+  return [view.score.legs && `${texts.legs} ${pair(view.score.legs)}`, view.score.sets && `${texts.sets} ${pair(view.score.sets)}`]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /**

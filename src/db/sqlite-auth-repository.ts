@@ -11,7 +11,13 @@ export class SqliteAuthRepository implements AuthRepository {
     this.db.insert(sessions).values(session).run();
   }
   findSession(id: string, now: number): SessionRecord | null {
-    return this.db.select().from(sessions).where(and(eq(sessions.id, id), gt(sessions.expiresAt, now))).get() ?? null;
+    return (
+      this.db
+        .select()
+        .from(sessions)
+        .where(and(eq(sessions.id, id), gt(sessions.expiresAt, now)))
+        .get() ?? null
+    );
   }
   deleteSession(id: string): void {
     this.db.delete(sessions).where(eq(sessions.id, id)).run();
@@ -28,7 +34,13 @@ export class SqliteAuthRepository implements AuthRepository {
     this.db.insert(invites).values(invite).run();
   }
   findInvite(id: string, now: number): InviteRecord | null {
-    return this.db.select().from(invites).where(and(eq(invites.id, id), gt(invites.expiresAt, now), isNull(invites.usedAt))).get() ?? null;
+    return (
+      this.db
+        .select()
+        .from(invites)
+        .where(and(eq(invites.id, id), gt(invites.expiresAt, now), isNull(invites.usedAt)))
+        .get() ?? null
+    );
   }
   markInviteUsed(id: string, now: number): void {
     this.db.update(invites).set({ usedAt: now }).where(eq(invites.id, id)).run();

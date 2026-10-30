@@ -8,7 +8,6 @@ import { log } from "./log";
 import { clientIp, loginLimiter } from "./rate-limit";
 import { clearSessionCookie, readSessionToken, setSessionCookie } from "./session-cookie";
 
-
 /** Only relative paths as target, otherwise back to the home page (no open redirect). */
 const safeNext = (raw: FormDataEntryValue | null) => {
   const s = String(raw ?? "");

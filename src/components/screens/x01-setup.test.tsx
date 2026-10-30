@@ -14,7 +14,15 @@ const commonTexts = { back: "Zurück", save: "Speichern", cancel: "Abbrechen" };
 describe("X01Setup", () => {
   it("numbers players in tap order, allows deselecting and only then enables Start Game", async () => {
     const user = userEvent.setup();
-    const { container } = render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: true as const, id: "x" })} />);
+    const { container } = render(
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={async () => {}}
+        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+      />,
+    );
     const start = screen.getByRole("button", { name: "Spiel starten" });
     expect(start).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
@@ -36,7 +44,9 @@ describe("X01Setup", () => {
   it("marks guests and selects a newly added guest right away", async () => {
     const user = userEvent.setup();
     const onAddGuest = vi.fn(async (fd: FormData) => ({ ok: true as const, id: `guest-${fd.get("name")}` }));
-    const { container } = render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={onAddGuest} />);
+    const { container } = render(
+      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={onAddGuest} />,
+    );
     expect(screen.getByRole("button", { name: "Gecko auswählen" })).toHaveTextContent("Gast");
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
     await user.type(screen.getByPlaceholderText("Name des Gastes"), "Neu{Enter}");
@@ -50,7 +60,15 @@ describe("X01Setup", () => {
 
   it("shows an error and keeps the field when the guest name is taken", async () => {
     const user = userEvent.setup();
-    render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: false as const, reason: "name-taken" as const })} />);
+    render(
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={async () => {}}
+        onAddGuest={async () => ({ ok: false as const, reason: "name-taken" as const })}
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Gast hinzufügen" }));
     await user.type(screen.getByPlaceholderText("Name des Gastes"), "Haflinger{Enter}");
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Diesen Namen gibt es schon."));
@@ -59,7 +77,15 @@ describe("X01Setup", () => {
 
   it("sets and legs are choosable with 2 players and locked to 1 from 3 players on (E7)", async () => {
     const user = userEvent.setup();
-    const { container } = render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: true as const, id: "x" })} />);
+    const { container } = render(
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={async () => {}}
+        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+      />,
+    );
     const legs = () => container.querySelector('input[name="legsToWinSet"]');
     await user.click(screen.getByRole("button", { name: "Moschusochse auswählen" }));
     await user.click(screen.getByRole("button", { name: "Haflinger auswählen" }));
@@ -74,7 +100,15 @@ describe("X01Setup", () => {
 
   it("in and out rule open a list, the choice goes into the form and the summary below the start button", async () => {
     const user = userEvent.setup();
-    const { container } = render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={async () => {}} onAddGuest={async () => ({ ok: true as const, id: "x" })} />);
+    const { container } = render(
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={async () => {}}
+        onAddGuest={async () => ({ ok: true as const, id: "x" })}
+      />,
+    );
     const trigger = screen.getByRole("button", { name: "Einstieg: Single In" });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");

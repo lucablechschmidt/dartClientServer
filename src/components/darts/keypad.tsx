@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import type { Dart } from "@/domain/game";
-import { initialKeypadState, isKeyHidden, KEYPAD_LAYOUTS, keyId, pressKey, type KeypadKey, type KeypadLayout, type KeypadState } from "./keypad-logic";
+import {
+  initialKeypadState,
+  isKeyHidden,
+  KEYPAD_LAYOUTS,
+  keyId,
+  pressKey,
+  type KeypadKey,
+  type KeypadLayout,
+  type KeypadState,
+} from "./keypad-logic";
 
 export type KeypadTexts = { bull: string; undo: string; double: string; triple: string };
 
@@ -27,21 +36,30 @@ const ROW_OFFSET = ["", "col-start-2", "col-start-3", "col-start-4"];
 
 function label(key: KeypadKey, texts: KeypadTexts): string {
   switch (key.kind) {
-    case "number": return String(key.value);
-    case "bull": return texts.bull;
-    case "undo": return texts.undo;
-    case "double": return texts.double;
-    case "triple": return texts.triple;
+    case "number":
+      return String(key.value);
+    case "bull":
+      return texts.bull;
+    case "undo":
+      return texts.undo;
+    case "double":
+      return texts.double;
+    case "triple":
+      return texts.triple;
   }
 }
 
 /** Colors as in ButtonsView: numbers black/white, in modifier mode dimmed with yellow (Double) or green (Triple) text. */
 function keyClasses(key: KeypadKey, state: KeypadState): string {
-  const base = "min-h-touch rounded-panel fluid-text-lg font-normal tracking-tight text-key-fg select-none active:scale-95 transition-transform disabled:opacity-30";
+  const base =
+    "min-h-touch rounded-panel fluid-text-lg font-normal tracking-tight text-key-fg select-none active:scale-95 transition-transform disabled:opacity-30";
   switch (key.kind) {
-    case "undo": return `${base} bg-key-undo`;
-    case "double": return `${base} bg-key-double ${state.modifier === "double" ? "ring-4 ring-fg/60" : ""}`;
-    case "triple": return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-fg/60" : ""}`;
+    case "undo":
+      return `${base} bg-key-undo`;
+    case "double":
+      return `${base} bg-key-double ${state.modifier === "double" ? "ring-4 ring-fg/60" : ""}`;
+    case "triple":
+      return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-fg/60" : ""}`;
     case "number":
       if (key.value === 0) return `${base} bg-key-zero`;
     // fallthrough

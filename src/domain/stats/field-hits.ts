@@ -9,10 +9,14 @@ export type FieldHits = Map<number, number>;
 export function hitsOfDart(dart: Dart): number {
   if (dart.field === 0) return 0;
   switch (dart.type) {
-    case "single": return 1;
-    case "double": return 2;
-    case "triple": return 3;
-    case "overthrown": return 0;
+    case "single":
+      return 1;
+    case "double":
+      return 2;
+    case "triple":
+      return 3;
+    case "overthrown":
+      return 0;
   }
 }
 

@@ -6,7 +6,20 @@ import { Stepper } from "./stepper";
 
 function Demo({ disabled = false }: { disabled?: boolean }) {
   const [v, setV] = useState(1);
-  return <Stepper name="legs" label="Best of Legs" value={v} onChange={setV} min={1} max={5} step={2} disabled={disabled} decreaseLabel="weniger" increaseLabel="mehr" />;
+  return (
+    <Stepper
+      name="legs"
+      label="Best of Legs"
+      value={v}
+      onChange={setV}
+      min={1}
+      max={5}
+      step={2}
+      disabled={disabled}
+      decreaseLabel="weniger"
+      increaseLabel="mehr"
+    />
+  );
 }
 
 describe("Stepper", () => {

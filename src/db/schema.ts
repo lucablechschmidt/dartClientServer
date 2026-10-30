@@ -24,7 +24,9 @@ export const sessions = sqliteTable(
   "session",
   {
     id: text("id").primaryKey(),
-    playerId: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
     createdAt: integer("created_at").notNull(),
     expiresAt: integer("expires_at").notNull(),
   },
@@ -49,7 +51,9 @@ export const invites = sqliteTable("invite", {
 export const playerFieldHits = sqliteTable(
   "player_field_hits",
   {
-    playerId: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
     field: integer("field").notNull(),
     hits: integer("hits").notNull(),
   },
@@ -64,10 +68,14 @@ export const matches = sqliteTable("match", {
   outRule: text("out_rule", { enum: ["single", "double", "triple"] }).notNull(),
   legsToWinSet: integer("legs_to_win_set").notNull().default(1),
   setsToWinMatch: integer("sets_to_win_match").notNull().default(1),
-  status: text("status", { enum: ["running", "finished", "abandoned"] }).notNull().default("running"),
+  status: text("status", { enum: ["running", "finished", "abandoned"] })
+    .notNull()
+    .default("running"),
   isTournament: integer("is_tournament", { mode: "boolean" }).notNull().default(false),
   /** E13: one phone for everyone or each player on their own device. */
-  inputMode: text("input_mode", { enum: ["single", "per-player"] }).notNull().default("single"),
+  inputMode: text("input_mode", { enum: ["single", "per-player"] })
+    .notNull()
+    .default("single"),
   /** E13: player whose device started the match; NULL only for matches before M4. */
   hostPlayerId: text("host_player_id").references(() => players.id),
   createdBy: text("created_by"),
@@ -78,8 +86,12 @@ export const matches = sqliteTable("match", {
 export const matchPlayers = sqliteTable(
   "match_player",
   {
-    matchId: text("match_id").notNull().references(() => matches.id, { onDelete: "cascade" }),
-    playerId: text("player_id").notNull().references(() => players.id),
+    matchId: text("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id),
     seat: integer("seat").notNull(),
     placement: integer("placement"),
   },
@@ -90,10 +102,14 @@ export const legs = sqliteTable(
   "leg",
   {
     id: text("id").primaryKey(),
-    matchId: text("match_id").notNull().references(() => matches.id, { onDelete: "cascade" }),
+    matchId: text("match_id")
+      .notNull()
+      .references(() => matches.id, { onDelete: "cascade" }),
     setNo: integer("set_no").notNull().default(1),
     legNo: integer("leg_no").notNull().default(1),
-    starterPlayerId: text("starter_player_id").notNull().references(() => players.id),
+    starterPlayerId: text("starter_player_id")
+      .notNull()
+      .references(() => players.id),
     winnerPlayerId: text("winner_player_id").references(() => players.id),
     finishedAt: integer("finished_at"),
     /** M5: 3+ players, places fixed, the last player still plays to his checkout. */
@@ -108,8 +124,12 @@ export const visits = sqliteTable(
   "visit",
   {
     id: text("id").primaryKey(),
-    legId: text("leg_id").notNull().references(() => legs.id, { onDelete: "cascade" }),
-    playerId: text("player_id").notNull().references(() => players.id),
+    legId: text("leg_id")
+      .notNull()
+      .references(() => legs.id, { onDelete: "cascade" }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id),
     seq: integer("seq").notNull(),
     d1Field: integer("d1_field"),
     d1Type: text("d1_type", dartType),

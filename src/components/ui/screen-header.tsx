@@ -10,7 +10,7 @@ export function ScreenHeader({ left, title, right }: Props) {
   return (
     <header className="header-grid min-h-touch px-3 py-1">
       <div className="justify-self-start">{left}</div>
-      <div className="text-center fluid-text-lg">{title}</div>
+      <div className="fluid-text-lg text-center">{title}</div>
       <div className="justify-self-end">{right}</div>
     </header>
   );

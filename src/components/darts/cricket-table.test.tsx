@@ -8,7 +8,17 @@ import { CricketTable } from "./cricket-table";
 const fields = [15, 16, 17, 18, 19, 20, 25];
 /** marks per field in table order; 18 closed by everyone. */
 const player = (id: string, name: string, marks: number[]): PlayerPanelData => ({
-  id, name, score: 0, darts: 0, average: null, isActive: false, isWinner: false, slots: [], isBust: false, placement: null, isOut: false,
+  id,
+  name,
+  score: 0,
+  darts: 0,
+  average: null,
+  isActive: false,
+  isWinner: false,
+  slots: [],
+  isBust: false,
+  placement: null,
+  isOut: false,
   marks: fields.map((field, i) => ({ field, marks: marks[i], closed: field === 18 })),
 });
 const players = [player("m", "Mosch", [0, 0, 0, 3, 3, 0, 0]), player("l", "Lena", [1, 0, 0, 3, 0, 2, 0])];

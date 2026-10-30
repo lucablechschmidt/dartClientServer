@@ -43,8 +43,27 @@ describe("GameMenu overview", () => {
         now={now}
         matches={[]}
         recent={[
-          { id: "r1", mode: "x01", names: ["Luca", "Mara"], endedAt: now - 5 * 60_000, result: { kind: "score", winner: "Mara", unit: "legs", score: [2, 1] } },
-          { id: "r2", mode: "splitscore", names: ["Luca", "Mara", "Finn"], endedAt: now - 2 * 86_400_000, result: { kind: "places", order: [{ player: "Finn", place: 1 }, { player: "Luca", place: 1 }, { player: "Mara", place: 3 }] } },
+          {
+            id: "r1",
+            mode: "x01",
+            names: ["Luca", "Mara"],
+            endedAt: now - 5 * 60_000,
+            result: { kind: "score", winner: "Mara", unit: "legs", score: [2, 1] },
+          },
+          {
+            id: "r2",
+            mode: "splitscore",
+            names: ["Luca", "Mara", "Finn"],
+            endedAt: now - 2 * 86_400_000,
+            result: {
+              kind: "places",
+              order: [
+                { player: "Finn", place: 1 },
+                { player: "Luca", place: 1 },
+                { player: "Mara", place: 3 },
+              ],
+            },
+          },
           { id: "r3", mode: "x01", names: ["Luca", "Mara"], endedAt: now, result: { kind: "abandoned" } },
         ]}
       />,

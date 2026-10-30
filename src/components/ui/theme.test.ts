@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  applyPreference,
-  nextPreference,
-  readPreference,
-  resolveTheme,
-  themeInitScript,
-} from "./theme";
+import { applyPreference, nextPreference, readPreference, resolveTheme, themeInitScript } from "./theme";
 
 const storageWith = (value: string | null) => ({ getItem: () => value });
 

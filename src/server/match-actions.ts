@@ -2,7 +2,18 @@
 
 import { redirect } from "next/navigation";
 import { MODE_IDS, type Dart, type ModeId } from "@/domain/game";
-import { cancelMatch, commitVisit, createMatch, loadMatchView, restartMatch, setPlayOut, setStarter, undoVisit, type ActionError, type ActionResult } from "./match-service";
+import {
+  cancelMatch,
+  commitVisit,
+  createMatch,
+  loadMatchView,
+  restartMatch,
+  setPlayOut,
+  setStarter,
+  undoVisit,
+  type ActionError,
+  type ActionResult,
+} from "./match-service";
 import { log } from "./log";
 import { requireSession } from "./request";
 

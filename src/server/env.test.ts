@@ -17,7 +17,9 @@ describe("readEnv", () => {
   });
   it("a hash mangled by $-expansion fails with a hint on escaping", () => {
     // What Next's dotenv-expand makes of an unescaped "$2b$12$…" in .env
-    expect(() => readEnv({ ADMIN_USER: "darts", ADMIN_PASSWORD_HASH: "D9HmJZSfdcgsldYPsFwPfeGQL9USgbCm2j4nOg8Mr4DlrQrWSdc5m" })).toThrow(/ADMIN_PASSWORD_HASH.*\\\$/);
+    expect(() => readEnv({ ADMIN_USER: "darts", ADMIN_PASSWORD_HASH: "D9HmJZSfdcgsldYPsFwPfeGQL9USgbCm2j4nOg8Mr4DlrQrWSdc5m" })).toThrow(
+      /ADMIN_PASSWORD_HASH.*\\\$/,
+    );
     expect(() => readEnv({ APP_URL: "not a url" })).toThrow(/APP_URL/);
   });
 });

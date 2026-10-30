@@ -8,7 +8,16 @@ function Demo() {
   const [v, setV] = useState("a");
   return (
     <form>
-      <ChoiceMenu name="pick" label="Wahl" value={v} onChange={setV} options={[{ value: "a", label: "Alpha" }, { value: "b", label: "Beta" }]}>
+      <ChoiceMenu
+        name="pick"
+        label="Wahl"
+        value={v}
+        onChange={setV}
+        options={[
+          { value: "a", label: "Alpha" },
+          { value: "b", label: "Beta" },
+        ]}
+      >
         {(current) => current}
       </ChoiceMenu>
       <button type="button">draußen</button>

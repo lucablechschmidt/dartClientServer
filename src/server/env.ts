@@ -6,7 +6,11 @@ import { z } from "zod";
  */
 const schema = z.object({
   ADMIN_USER: z.string().trim().min(1).optional(),
-  ADMIN_PASSWORD_HASH: z.string().trim().regex(/^\$2[aby]\$\d\d\$/, "bcrypt hash expected").optional(),
+  ADMIN_PASSWORD_HASH: z
+    .string()
+    .trim()
+    .regex(/^\$2[aby]\$\d\d\$/, "bcrypt hash expected")
+    .optional(),
   APP_URL: z.string().url().default("http://127.0.0.1:3100"),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
 });

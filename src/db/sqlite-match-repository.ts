@@ -1,7 +1,17 @@
 import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, ne, or, sql } from "drizzle-orm";
 import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import type { Db } from "./client";
-import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, Player, RecentMatch } from "./repository";
+import type {
+  ExpiredGuestMatch,
+  LoadedMatch,
+  MatchRepository,
+  MatchStatus,
+  NewLeg,
+  NewMatch,
+  OpenMatch,
+  Player,
+  RecentMatch,
+} from "./repository";
 import { legs, matchPlayers, matches, players, visits } from "./schema";
 import { toPlayer } from "./sqlite-player-repository";
 import { rowToVisit, visitToSlots } from "./visit-mapping";
@@ -28,8 +38,15 @@ export class SqliteMatchRepository implements MatchRepository {
         .where(and(eq(matchPlayers.matchId, id), isNull(players.guestUntil)))
         .all()
         .map((r) => r.id);
-      const legIds = this.db.select({ id: legs.id }).from(legs).where(eq(legs.matchId, id)).all().map((r) => r.id);
-      const rows = legIds.length ? this.db.select().from(visits).where(inArray(visits.legId, legIds)).orderBy(asc(visits.legId), asc(visits.seq)).all() : [];
+      const legIds = this.db
+        .select({ id: legs.id })
+        .from(legs)
+        .where(eq(legs.matchId, id))
+        .all()
+        .map((r) => r.id);
+      const rows = legIds.length
+        ? this.db.select().from(visits).where(inArray(visits.legId, legIds)).orderBy(asc(visits.legId), asc(visits.seq)).all()
+        : [];
       return { id, regularPlayerIds, visits: rows.map(rowToVisit) };
     });
   }
@@ -121,7 +138,12 @@ export class SqliteMatchRepository implements MatchRepository {
     const visitRows = this.db
       .select()
       .from(visits)
-      .where(inArray(visits.legId, legRows.map((l) => l.id)))
+      .where(
+        inArray(
+          visits.legId,
+          legRows.map((l) => l.id),
+        ),
+      )
       .orderBy(asc(visits.seq))
       .all();
     const rules = { startScore: match.startScore, inRule: match.inRule, outRule: match.outRule };
@@ -149,7 +171,9 @@ export class SqliteMatchRepository implements MatchRepository {
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number, ids: () => string, now: number): void {
     this.db.transaction((tx) => {
-      tx.delete(visits).where(and(eq(visits.legId, legId), gte(visits.seq, fromSeq))).run();
+      tx.delete(visits)
+        .where(and(eq(visits.legId, legId), gte(visits.seq, fromSeq)))
+        .run();
       const rows = all.slice(fromSeq).map((v, i) => ({
         id: ids(),
         legId,
@@ -189,7 +213,10 @@ export class SqliteMatchRepository implements MatchRepository {
   setPlacements(matchId: string, placements: Record<PlayerId, number | null>): void {
     this.db.transaction((tx) => {
       for (const [playerId, placement] of Object.entries(placements)) {
-        tx.update(matchPlayers).set({ placement }).where(and(eq(matchPlayers.matchId, matchId), eq(matchPlayers.playerId, playerId))).run();
+        tx.update(matchPlayers)
+          .set({ placement })
+          .where(and(eq(matchPlayers.matchId, matchId), eq(matchPlayers.playerId, playerId)))
+          .run();
       }
     });
   }

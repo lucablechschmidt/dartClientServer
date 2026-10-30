@@ -6,7 +6,9 @@ export function InviteLinkView({ link, label, hint }: { link: InviteLink; label:
   return (
     <div className="flex flex-col gap-2 py-2">
       <QrCode svg={link.svg} label={label} />
-      <a href={link.url} className="break-all text-center text-sm text-accent underline">{link.url}</a>
+      <a href={link.url} className="text-center text-sm break-all text-accent underline">
+        {link.url}
+      </a>
       <p className="text-center text-sm text-fg-muted">{hint}</p>
     </div>
   );

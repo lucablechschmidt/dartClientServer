@@ -32,16 +32,26 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
       <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2">
         <div className="text-center">
           <p className="fluid-text-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
-          <p className="fluid-text-sm text-fg-muted tabular">
+          <p className="fluid-text-sm tabular text-fg-muted">
             🎯 {winner.darts}
             {avg(winner.average)}
           </p>
-          {view.score && <p className="fluid-text-sm tabular">{scoreLine(view, players.map((p) => p.id), texts)}</p>}
-          {view.board.total !== undefined && <p className="fluid-text-sm tabular">{texts.total.replace("{n}", String(view.board.total))}</p>}
+          {view.score && (
+            <p className="fluid-text-sm tabular">
+              {scoreLine(
+                view,
+                players.map((p) => p.id),
+                texts,
+              )}
+            </p>
+          )}
+          {view.board.total !== undefined && (
+            <p className="fluid-text-sm tabular">{texts.total.replace("{n}", String(view.board.total))}</p>
+          )}
         </div>
-        <ul className="flex flex-col gap-1 fluid-text-sm">
+        <ul className="fluid-text-sm flex flex-col gap-1">
           {others.map((p) => (
-            <li key={p.id} className="flex justify-between gap-2 tabular">
+            <li key={p.id} className="tabular flex justify-between gap-2">
               <span>{places ? `${view.places[p.id]}. ${p.name}` : p.name}</span>
               <span>
                 {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`}
@@ -60,9 +70,13 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
             </button>
           )}
           <form action={onRestart}>
-            <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>{texts.restart}</button>
+            <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>
+              {texts.restart}
+            </button>
           </form>
-          <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>{texts.home}</Link>
+          <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>
+            {texts.home}
+          </Link>
         </div>
       </div>
     </div>

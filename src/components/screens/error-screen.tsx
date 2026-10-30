@@ -27,7 +27,7 @@ export function ErrorScreen({ title, text, homeLabel, retry }: Props) {
             </CardRow>
           )}
           <CardRow className="justify-center">
-            <Link href="/" className="min-h-touch flex w-full items-center justify-center text-accent">
+            <Link href="/" className="flex min-h-touch w-full items-center justify-center text-accent">
               {homeLabel}
             </Link>
           </CardRow>

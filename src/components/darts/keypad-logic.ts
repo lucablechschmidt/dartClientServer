@@ -12,10 +12,7 @@ export type KeypadKey =
 export type Modifier = "none" | "double" | "triple";
 export type KeypadState = { modifier: Modifier };
 
-export type KeypadOutput =
-  | { state: KeypadState; dart: Dart }
-  | { state: KeypadState; undo: true }
-  | { state: KeypadState };
+export type KeypadOutput = { state: KeypadState; dart: Dart } | { state: KeypadState; undo: true } | { state: KeypadState };
 
 export const initialKeypadState: KeypadState = { modifier: "none" };
 

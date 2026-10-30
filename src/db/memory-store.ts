@@ -3,7 +3,14 @@ import type { InputMode, MatchFormat, ModeId, PlayerId, Rules, Visit } from "@/d
 import type { MatchStatus, Player } from "./repository";
 
 export type StoredPlayer = Player & { passwordHash: string | null };
-export const toPlayer = (p: StoredPlayer): Player => ({ id: p.id, name: p.name, createdAt: p.createdAt, guestUntil: p.guestUntil, hasLogin: p.hasLogin, isAdmin: p.isAdmin });
+export const toPlayer = (p: StoredPlayer): Player => ({
+  id: p.id,
+  name: p.name,
+  createdAt: p.createdAt,
+  guestUntil: p.guestUntil,
+  hasLogin: p.hasLogin,
+  isAdmin: p.isAdmin,
+});
 
 export type StoredMatch = {
   id: string;

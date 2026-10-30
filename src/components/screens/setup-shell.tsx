@@ -62,7 +62,9 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
 
         <form id={FORM_ID} action={onStart} className="flex flex-col gap-3">
           <input type="hidden" name="mode" value={mode} />
-          {order.map((id) => <input key={id} type="hidden" name="playerId" value={id} />)}
+          {order.map((id) => (
+            <input key={id} type="hidden" name="playerId" value={id} />
+          ))}
           {options(order.length)}
           <ChoiceMenu
             name="inputMode"
@@ -87,7 +89,13 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
           <h2 className="text-lg font-bold">{texts.choosePlayersTitle}</h2>
           <span className="text-sm text-fg-muted">{texts.selectedCount.replace("{n}", String(order.length))}</span>
         </div>
-        <PlayerPicker players={players} order={order} onToggle={toggle} onAddGuest={onAddGuest} texts={{ ...texts, save: commonTexts.save, cancel: commonTexts.cancel }} />
+        <PlayerPicker
+          players={players}
+          order={order}
+          onToggle={toggle}
+          onAddGuest={onAddGuest}
+          texts={{ ...texts, save: commonTexts.save, cancel: commonTexts.cancel }}
+        />
       </div>
 
       <div className="sticky bottom-0 bg-bg-grouped px-4 pt-3 pb-safe-min">
@@ -101,7 +109,9 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
             {texts.start}
             <ArrowRightIcon className="size-icon" />
           </button>
-          <p className="mt-2 text-center text-xs text-fg-muted">{[texts.summaryPlayers.replace("{n}", String(order.length)), ...summary].join(" · ")}</p>
+          <p className="mt-2 text-center text-xs text-fg-muted">
+            {[texts.summaryPlayers.replace("{n}", String(order.length)), ...summary].join(" · ")}
+          </p>
         </div>
       </div>
     </div>
@@ -114,7 +124,19 @@ export function SetupCard({ children }: { children: ReactNode }) {
 }
 
 /** Top row of the options card: target icon, title and subtitle, the score big with its choice list. */
-export function ScoreChoice({ title, subtitle, value, options, onChange }: { title: string; subtitle: string; value: number; options: readonly Choice<number>[]; onChange: (v: number) => void }) {
+export function ScoreChoice({
+  title,
+  subtitle,
+  value,
+  options,
+  onChange,
+}: {
+  title: string;
+  subtitle: string;
+  value: number;
+  options: readonly Choice<number>[];
+  onChange: (v: number) => void;
+}) {
   return (
     <div className="flex items-center gap-3">
       <span className="grid size-icon-box shrink-0 place-items-center rounded-tile bg-accent-soft text-accent">
@@ -127,7 +149,7 @@ export function ScoreChoice({ title, subtitle, value, options, onChange }: { tit
       <ChoiceMenu name="startScore" label={title} value={value} onChange={onChange} options={options} align="end">
         {(current, open) => (
           <span className="flex items-center gap-1">
-            <span className="text-display font-bold tabular">{current}</span>
+            <span className="tabular text-display font-bold">{current}</span>
             <DisclosureChevron open={open} />
           </span>
         )}
@@ -137,9 +159,29 @@ export function ScoreChoice({ title, subtitle, value, options, onChange }: { tit
 }
 
 /** A tile with a small label above the chosen rule (in rule / Single In); opened it is outlined in the accent. */
-export function RuleTile<V extends string>({ name, label, value, options, onChange }: { name: string; label: string; value: V; options: readonly Choice<V>[]; onChange: (v: V) => void }) {
+export function RuleTile<V extends string>({
+  name,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  value: V;
+  options: readonly Choice<V>[];
+  onChange: (v: V) => void;
+}) {
   return (
-    <ChoiceMenu name={name} label={label} value={value} onChange={onChange} options={options} className="rounded-tile border border-transparent bg-fill px-3 py-2" openClassName="border-accent bg-accent-wash">
+    <ChoiceMenu
+      name={name}
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={options}
+      className="rounded-tile border border-transparent bg-fill px-3 py-2"
+      openClassName="border-accent bg-accent-wash"
+    >
       {(current, open) => (
         <span className="flex items-center gap-2">
           <LabeledValue label={label} value={current} />

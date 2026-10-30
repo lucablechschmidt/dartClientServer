@@ -1,13 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import {
-  applyPreference,
-  nextPreference,
-  readPreference,
-  THEME_STORAGE_KEY,
-  type ThemePreference,
-} from "./theme";
+import { applyPreference, nextPreference, readPreference, THEME_STORAGE_KEY, type ThemePreference } from "./theme";
 
 type Labels = Record<ThemePreference, string> & { label: string };
 

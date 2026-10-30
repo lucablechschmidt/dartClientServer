@@ -13,10 +13,7 @@ export type TabItem = { href: string; label: string; icon: ReactNode };
 export function TabBar({ items, label }: { items: TabItem[]; label: string }) {
   const pathname = usePathname();
   return (
-    <nav
-      aria-label={label}
-      className="flex shrink-0 justify-center px-4 pt-2 pb-safe-min"
-    >
+    <nav aria-label={label} className="flex shrink-0 justify-center px-4 pt-2 pb-safe-min">
       <ul className="flex rounded-full bg-tab-bg p-1.5 shadow-floating backdrop-blur">
         {items.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);

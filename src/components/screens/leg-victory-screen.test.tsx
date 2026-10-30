@@ -7,7 +7,10 @@ import { LegVictoryScreen } from "./leg-victory-screen";
 
 const names = { a: "Casey", b: "Sam" };
 const won = (() => {
-  const r = applyMatchDart(newMatch(["a", "b"], { startScore: 40, inRule: "single", outRule: "double" }, { legsToWinSet: 2, setsToWinMatch: 1 }), { field: 20, type: "double" });
+  const r = applyMatchDart(
+    newMatch(["a", "b"], { startScore: 40, inRule: "single", outRule: "double" }, { legsToWinSet: 2, setsToWinMatch: 1 }),
+    { field: 20, type: "double" },
+  );
   if (!r.ok) throw new Error(r.reason);
   return projectMatch(r.value, names);
 })();

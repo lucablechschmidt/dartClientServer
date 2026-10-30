@@ -32,7 +32,9 @@ export function rounds(state: LegState): Rounds {
   state.visits.forEach((visit) => {
     if (visit.darts.length < MAX_DARTS_PER_VISIT) return;
     const hit = visit.darts.some((d) => d.type !== "overthrown");
-    points[visit.playerId] = hit ? points[visit.playerId] + visit.darts.reduce((n, d) => n + dartScore(d), 0) : Math.ceil(points[visit.playerId] / 2);
+    points[visit.playerId] = hit
+      ? points[visit.playerId] + visit.darts.reduce((n, d) => n + dartScore(d), 0)
+      : Math.ceil(points[visit.playerId] / 2);
   });
   const last = state.visits.at(-1);
   const next = last && last.darts.length < MAX_DARTS_PER_VISIT ? state.visits.length - 1 : state.visits.length;

@@ -60,5 +60,7 @@ function hasWon(players: PlayerId[], marks: Tally["marks"], points: Record<Playe
   return allClosed && players.every((p) => p === player || points[p] < points[player]);
 }
 
-export const closedFields = (t: Tally, player: PlayerId): number => CRICKET_FIELDS.filter((f) => t.marks[player][f] >= MARKS_TO_CLOSE).length;
-export const isClosedForAll = (t: Tally, players: PlayerId[], field: CricketField): boolean => players.every((p) => t.marks[p][field] >= MARKS_TO_CLOSE);
+export const closedFields = (t: Tally, player: PlayerId): number =>
+  CRICKET_FIELDS.filter((f) => t.marks[player][f] >= MARKS_TO_CLOSE).length;
+export const isClosedForAll = (t: Tally, players: PlayerId[], field: CricketField): boolean =>
+  players.every((p) => t.marks[p][field] >= MARKS_TO_CLOSE);

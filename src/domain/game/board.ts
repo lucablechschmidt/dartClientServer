@@ -56,7 +56,12 @@ export type ScoreboardView = {
  * The three dart slots of a panel. `missed` marks darts that count nothing (SplitScore off the
  * target) like overthrown slots.
  */
-export function slotsOf(visit: Visit, isActive: boolean, finished: boolean, missed: (index: number) => boolean = () => false): DartSlotView[] {
+export function slotsOf(
+  visit: Visit,
+  isActive: boolean,
+  finished: boolean,
+  missed: (index: number) => boolean = () => false,
+): DartSlotView[] {
   return Array.from({ length: MAX_DARTS_PER_VISIT }, (_, i) => {
     const d = visit.darts[i];
     return {
@@ -82,7 +87,11 @@ export function placeNumbers(standings: PlayerId[][]): Record<PlayerId, number> 
  * Place groups from a comparison (negative = `a` ahead): equal players share a group. A `winner`
  * stands alone in first place regardless of the comparison (Cricket, Elimination).
  */
-export function groupStandings(players: PlayerId[], compare: (a: PlayerId, b: PlayerId) => number, winner: PlayerId | null = null): PlayerId[][] {
+export function groupStandings(
+  players: PlayerId[],
+  compare: (a: PlayerId, b: PlayerId) => number,
+  winner: PlayerId | null = null,
+): PlayerId[][] {
   const groups: PlayerId[][] = winner ? [[winner]] : [];
   const rest = players.filter((p) => p !== winner).sort(compare);
   rest.forEach((p, i) => {

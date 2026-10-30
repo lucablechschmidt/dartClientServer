@@ -9,9 +9,12 @@ import { useEffect, useRef, useState } from "react";
 export function useConfirmTap(windowMs = 5000) {
   const [armed, setArmed] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   const tap = (key: string, run: () => void) => {
     if (timer.current) clearTimeout(timer.current);

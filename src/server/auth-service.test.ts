@@ -99,7 +99,10 @@ describe("changeOwnPassword", () => {
     const a = await login(deps, "Luca", "admin-secret");
     const b = await login(deps, "Luca", "admin-secret");
     if (!a.ok || !b.ok) throw new Error();
-    expect(await changeOwnPassword(deps, a.session, a.token, "falsch", "neues-passwort")).toEqual({ ok: false, reason: "invalid-credentials" });
+    expect(await changeOwnPassword(deps, a.session, a.token, "falsch", "neues-passwort")).toEqual({
+      ok: false,
+      reason: "invalid-credentials",
+    });
     expect(await changeOwnPassword(deps, a.session, a.token, "admin-secret", "kurz")).toEqual({ ok: false, reason: "password-too-short" });
     expect(await changeOwnPassword(deps, a.session, a.token, "admin-secret", "neues-passwort")).toEqual({ ok: true });
     expect(sessionFromToken(deps, a.token)).not.toBeNull();

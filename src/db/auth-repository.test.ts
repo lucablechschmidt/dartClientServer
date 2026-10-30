@@ -6,16 +6,26 @@ import { SqliteAuthRepository } from "./sqlite-auth-repository";
 import { SqlitePlayerRepository } from "./sqlite-player-repository";
 
 const impls: [string, () => { auth: AuthRepository; db?: Db }][] = [
-  ["sqlite (in-memory file)", () => {
-    const db = openDatabase(":memory:");
-    new SqlitePlayerRepository(db).createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null, passwordHash: "h" });
-    return { auth: new SqliteAuthRepository(db), db };
-  }],
+  [
+    "sqlite (in-memory file)",
+    () => {
+      const db = openDatabase(":memory:");
+      new SqlitePlayerRepository(db).createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null, passwordHash: "h" });
+      return { auth: new SqliteAuthRepository(db), db };
+    },
+  ],
   ["memory", () => ({ auth: new MemoryAuthRepository() })],
 ];
 
 const session = (id: string, expiresAt: number) => ({ id, playerId: "p1", createdAt: 1, expiresAt });
-const invite = (id: string, expiresAt: number) => ({ id, kind: "register" as const, playerId: null, resetSessions: false, createdAt: 1, expiresAt });
+const invite = (id: string, expiresAt: number) => ({
+  id,
+  kind: "register" as const,
+  playerId: null,
+  resetSessions: false,
+  createdAt: 1,
+  expiresAt,
+});
 
 describe.each(impls)("AuthRepository: %s", (_name, make) => {
   it("sessions: valid until expiresAt, deletable singly, per player (with exception) and when expired", () => {

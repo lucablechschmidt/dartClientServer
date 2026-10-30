@@ -87,7 +87,11 @@ describe("projectMatch (M5)", () => {
   it("3 players: places on the panels, out players marked, last player can play out", () => {
     let m = throwAll(newMatch(["a", "b", "c"], short, { legsToWinSet: 1, setsToWinMatch: 1 }), OUT);
     let v = projectMatch(m, names);
-    expect(v.board.players.map((p) => [p.placement, p.isOut])).toEqual([[1, true], [null, false], [null, false]]);
+    expect(v.board.players.map((p) => [p.placement, p.isOut])).toEqual([
+      [1, true],
+      [null, false],
+      [null, false],
+    ]);
     expect(v.lastPlayerId).toBeNull();
     m = throwAll(m, MISS, MISS, MISS, OUT); // b misses, c out
     v = projectMatch(m, names);

@@ -4,14 +4,20 @@ const base = process.env.BASE_URL ?? "http://localhost:3100";
 const shots = process.argv[2] ?? ".";
 const browser = await chromium.launch();
 const [user, pass] = (process.env.BASIC_AUTH ?? "").split(":");
-const page = await browser.newPage({ viewport: { width: 375, height: 667 }, httpCredentials: user ? { username: user, password: pass } : undefined });
+const page = await browser.newPage({
+  viewport: { width: 375, height: 667 },
+  httpCredentials: user ? { username: user, password: pass } : undefined,
+});
 const log = (...a) => console.log("•", ...a);
 // Any Content-Security-Policy violation in the browser fails the run (architecture.md §10).
 const cspViolations = [];
 const watchCsp = (p) => p.on("console", (m) => /Content Security Policy|Refused to/i.test(m.text()) && cspViolations.push(m.text()));
 watchCsp(page);
 browser.on("disconnected", () => {});
-const fail = (m) => { console.error("✗", m); process.exitCode = 1; };
+const fail = (m) => {
+  console.error("✗", m);
+  process.exitCode = 1;
+};
 const expect = (cond, m) => (cond ? log("ok:", m) : fail(m));
 
 const stamp = Date.now().toString(36);
@@ -159,7 +165,6 @@ await page.waitForURL((u) => u.toString() !== url && /\/match\//.test(u.toString
 const activeName = await page.locator(".border-frame-active").first().innerText();
 expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${activeName.split("\n")[0]})`);
 
-
 // --- Guests (E12): created in the setup, selected right away, survive a reload, listed under today's guests
 {
   const guest = `G${stamp}`;
@@ -183,7 +188,10 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.goto(`${base}/players`, { waitUntil: "networkidle" });
   const guestCard = page.getByRole("list", { name: "Gäste heute" });
   expect((await guestCard.getByText(guest, { exact: true }).count()) === 1, "guest listed under Gäste heute");
-  expect((await page.getByRole("list", { name: "Spieler" }).getByText(guest, { exact: true }).count()) === 0, "guest not in the regular list");
+  expect(
+    (await page.getByRole("list", { name: "Spieler" }).getByText(guest, { exact: true }).count()) === 0,
+    "guest not in the regular list",
+  );
   await page.getByRole("button", { name: `Bearbeiten: ${guest}` }).click();
   await page.getByRole("button", { name: "Entfernen" }).click();
   await page.getByRole("alert").filter({ hasText: "Spielt schon mit" }).waitFor({ timeout: 5000 });
@@ -215,7 +223,11 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.getByRole("dialog").getByRole("button", { name: "Abbrechen" }).click();
   await page.waitForURL((u) => new URL(u).pathname === "/");
   await page.waitForLoadState("networkidle");
-  expect((await page.getByRole("list", { name: "Laufende Spiele" }).count()) === 0 || !(await page.getByRole("list", { name: "Laufende Spiele" }).innerText()).includes(`G${stamp}x`), "cancelled match left the overview");
+  expect(
+    (await page.getByRole("list", { name: "Laufende Spiele" }).count()) === 0 ||
+      !(await page.getByRole("list", { name: "Laufende Spiele" }).innerText()).includes(`G${stamp}x`),
+    "cancelled match left the overview",
+  );
   await page.goto(cancelledUrl, { waitUntil: "networkidle" });
   expect((await page.getByText("Spiel beendet").count()) === 1, "cancelled match shows Spiel beendet");
   expect(await page.getByRole("button", { name: "20", exact: true }).isDisabled(), "keypad disabled on a closed match");
@@ -235,7 +247,10 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   const matchUrl = page.url();
   // A finds the match via the overview
   await pageA.goto(`${base}/`, { waitUntil: "networkidle" });
-  await pageA.getByRole("list", { name: "Laufende Spiele" }).getByRole("link", { name: new RegExp(`${ADMIN} · A${stamp}`) }).click();
+  await pageA
+    .getByRole("list", { name: "Laufende Spiele" })
+    .getByRole("link", { name: new RegExp(`${ADMIN} · A${stamp}`) })
+    .click();
   await pageA.waitForURL(matchUrl);
   expect(await pageA.getByRole("button", { name: "20", exact: true }).isDisabled(), "A's keypad is locked while admin is on turn");
   expect((await pageA.getByText(`${ADMIN} ist dran`).count()) === 1, "A sees who is on turn");
@@ -271,7 +286,8 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
       await key(n).click();
       await page.waitForTimeout(150);
     }
-    if (await page.locator("[role=status]").count()) await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
+    if (await page.locator("[role=status]").count())
+      await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
   };
   const T180 = ["Triple", "20", "Triple", "20", "Triple", "20"];
   const OUT121 = ["Triple", "20", "Triple", "20", "1"]; // 121 with single out
@@ -325,7 +341,7 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await page.getByRole("button", { name: `${guest} abwählen` }).waitFor({ timeout: 5000 });
   await page.getByRole("button", { name: `${guest} abwählen` }).click();
   await setup([ADMIN, `A${stamp}`, `B${stamp}`, guest]);
-  expect(await page.getByRole("button", { name: "Best of Legs mehr" }).count() === 0, "sets/legs steppers not on the scoreboard");
+  expect((await page.getByRole("button", { name: "Best of Legs mehr" }).count()) === 0, "sets/legs steppers not on the scoreboard");
   await page.getByRole("button", { name: `Anwurf: ${guest}` }).click();
   expect((await active()) === guest, "ToStart: the guest throws first");
   await tap(...T180, ...MISS, ...MISS, ...MISS); // guest 180, admin, A, B miss
@@ -335,7 +351,10 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await tap(...MISS, ...OUT121); // admin miss, A out: place 2
   await tap(...OUT121); // B out: place 3, admin last
   await page.getByText(`${guest} gewinnt!`).waitFor({ timeout: 5000 });
-  expect((await page.getByText(`3. B${stamp}`).count()) === 1 && (await page.getByText(`4. ${ADMIN}`).count()) === 1, "victory lists places 3 and 4");
+  expect(
+    (await page.getByText(`3. B${stamp}`).count()) === 1 && (await page.getByText(`4. ${ADMIN}`).count()) === 1,
+    "victory lists places 3 and 4",
+  );
   await page.screenshot({ path: `${shots}/match-places.png` });
   await page.getByRole("button", { name: `${ADMIN} spielt zu Ende` }).click();
   await key("0").waitFor({ timeout: 5000 });
@@ -360,7 +379,8 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
       await key(n).click();
       await page.waitForTimeout(120);
     }
-    if (await page.locator("[role=status]").count()) await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
+    if (await page.locator("[role=status]").count())
+      await page.locator("[role=status][data-sync=saved]").waitFor({ state: "attached", timeout: 5000 });
   };
   const MISS = ["0", "0", "0"];
   const start = async (mode, before) => {
@@ -446,7 +466,6 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await loginAs(contexts[`A${stamp}`].page, `A${stamp}`, "neuesPasswortA");
   log("reset: A logs in with the new password");
 }
-
 
 // 404: unknown match shows the not-found page with a link home
 await page.goto(`${base}/match/does-not-exist`, { waitUntil: "networkidle" });

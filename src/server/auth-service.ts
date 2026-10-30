@@ -28,7 +28,14 @@ export function bootstrapAdmin(deps: Deps, env: Env): boolean {
       deps.players.setAdmin(existing.id, true);
       return true;
     }
-    deps.players.createPlayer({ id: deps.newId(), name, createdAt: deps.now(), guestUntil: null, passwordHash: admin.passwordHash, isAdmin: true });
+    deps.players.createPlayer({
+      id: deps.newId(),
+      name,
+      createdAt: deps.now(),
+      guestUntil: null,
+      passwordHash: admin.passwordHash,
+      isAdmin: true,
+    });
     return true;
   });
 }

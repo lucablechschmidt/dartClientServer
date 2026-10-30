@@ -44,7 +44,11 @@ export const cricket: GameMode = {
       isBust: false,
       placement: null,
       isOut: false,
-      marks: CRICKET_FIELDS.map((field) => ({ field, marks: Math.min(3, t.marks[id][field]), closed: isClosedForAll(t, state.players, field) })),
+      marks: CRICKET_FIELDS.map((field) => ({
+        field,
+        marks: Math.min(3, t.marks[id][field]),
+        closed: isClosedForAll(t, state.players, field),
+      })),
     }));
     return {
       mode: "cricket",

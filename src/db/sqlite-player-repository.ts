@@ -30,13 +30,20 @@ export class SqlitePlayerRepository implements PlayerRepository {
       .map(toPlayer);
   }
   createPlayer(player: NewPlayer): void {
-    this.db.insert(players).values({ ...player, passwordHash: player.passwordHash ?? null, isAdmin: player.isAdmin ?? false }).run();
+    this.db
+      .insert(players)
+      .values({ ...player, passwordHash: player.passwordHash ?? null, isAdmin: player.isAdmin ?? false })
+      .run();
   }
   renamePlayer(id: PlayerId, name: string): void {
     this.db.update(players).set({ name }).where(eq(players.id, id)).run();
   }
   private rowByName(name: string): PlayerRow | undefined {
-    return this.db.select().from(players).where(sql`lower(${players.name}) = lower(${name})`).get();
+    return this.db
+      .select()
+      .from(players)
+      .where(sql`lower(${players.name}) = lower(${name})`)
+      .get();
   }
   private rowById(id: PlayerId): PlayerRow | undefined {
     return this.db.select().from(players).where(eq(players.id, id)).get();
@@ -81,7 +88,10 @@ export class SqlitePlayerRepository implements PlayerRepository {
     this.db
       .insert(playerFieldHits)
       .values(rows)
-      .onConflictDoUpdate({ target: [playerFieldHits.playerId, playerFieldHits.field], set: { hits: sql`${playerFieldHits.hits} + excluded.hits` } })
+      .onConflictDoUpdate({
+        target: [playerFieldHits.playerId, playerFieldHits.field],
+        set: { hits: sql`${playerFieldHits.hits} + excluded.hits` },
+      })
       .run();
   }
   fieldHitsOf(playerId: PlayerId): FieldHits {
@@ -90,6 +100,9 @@ export class SqlitePlayerRepository implements PlayerRepository {
   }
   deleteOrphanGuests(now: number): void {
     const seated = this.db.selectDistinct({ id: matchPlayers.playerId }).from(matchPlayers);
-    this.db.delete(players).where(and(isNotNull(players.guestUntil), lte(players.guestUntil, now), notInArray(players.id, seated))).run();
+    this.db
+      .delete(players)
+      .where(and(isNotNull(players.guestUntil), lte(players.guestUntil, now), notInArray(players.id, seated)))
+      .run();
   }
 }

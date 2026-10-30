@@ -94,7 +94,11 @@ describe("splitscore (M7, legacy §6)", () => {
   it("board: points as score, overthrown slots, target as hint", () => {
     const v = splitscore.board(play(leg(), S(15), S(14)), { a: "Casey" });
     expect(v.mode).toBe("splitscore");
-    expect(v.players[0].slots.map((x) => [x.label, x.isOverthrown])).toEqual([["15", false], ["✕", true], [null, false]]);
+    expect(v.players[0].slots.map((x) => [x.label, x.isOverthrown])).toEqual([
+      ["15", false],
+      ["✕", true],
+      [null, false],
+    ]);
     expect(v.players[0].score).toBe(40);
     expect(v.dartsLeft).toBe(1);
   });

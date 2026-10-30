@@ -35,8 +35,7 @@ export const GUEST_LIFETIME_MS = 24 * 60 * 60 * 1000;
 export const isGuest = (player: Pick<Player, "guestUntil">): boolean => player.guestUntil !== null;
 
 /** Regular player always; guest only while their time has not expired. */
-export const isListed = (player: Pick<Player, "guestUntil">, now: number): boolean =>
-  player.guestUntil === null || player.guestUntil > now;
+export const isListed = (player: Pick<Player, "guestUntil">, now: number): boolean => player.guestUntil === null || player.guestUntil > now;
 
 /** Result of "delete player": players with a match are kept (their visits reference them). */
 export type DeletePlayerResult = "deleted" | "player-in-match";
