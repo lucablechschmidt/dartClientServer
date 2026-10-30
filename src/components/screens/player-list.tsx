@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AddRow } from "@/components/ui/add-row";
 import { CardList, CardRow, GroupedSection } from "@/components/ui/card-list";
-import { FormError, SectionHeading, TextButton, TextInput } from "@/components/ui/form-controls";
+import { ErrorLine, SectionHeading, TextButton, TextInput } from "@/components/ui/form-controls";
 import { WrenchIcon } from "@/components/ui/icons";
 import { isGuest, type Player, type PlayerError, type PlayerResult, type Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
@@ -32,7 +32,8 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
   // Close the row only after the action; an unmount in onSubmit would abort the action.
   const act = (action: (fd: FormData) => Promise<PlayerResult>) => async (fd: FormData) => {
     const r = await action(fd);
-    report(String(fd.get("id")), r);
+    const id = fd.get("id");
+    report(typeof id === "string" ? id : "", r);
     if (r.ok) setEditing(null);
   };
   const open = (id: string) => {
@@ -59,7 +60,7 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
             </TextButton>
           )}
         </form>
-        {errors[p.id] && <FormError>{texts.errors[errors[p.id]!]}</FormError>}
+        <ErrorLine error={errors[p.id]} texts={texts.errors} />
       </CardRow>
     ) : (
       <CardRow key={p.id}>

@@ -79,3 +79,8 @@ export function FormNote({ children }: { children: ReactNode }) {
 export function SectionHeading({ children }: { children: ReactNode }) {
   return <h2 className="px-4 text-sm tracking-wide text-fg-muted uppercase">{children}</h2>;
 }
+
+/** The error of one row, if any, with its text from a map of error texts (e.g. `account.errors`). */
+export function ErrorLine<E extends string>({ error, texts }: { error: E | undefined; texts: Record<E, string> }) {
+  return error ? <FormError>{texts[error]}</FormError> : null;
+}

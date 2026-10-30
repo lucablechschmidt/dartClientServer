@@ -121,7 +121,7 @@ export function useVisitSync<Reason extends string>({
             setState((local) => {
               const pending = openVisit(currentLeg(local));
               const fits = pending && closedVisits(local) === closedVisits(server) && pending.playerId === matchCurrentPlayer(server);
-              return (fits && reapply(server, rethrowable(pending))) || server;
+              return fits ? (reapply(server, rethrowable(pending)) ?? server) : server;
             });
           }
           setSync("saved");
@@ -162,7 +162,10 @@ export function useVisitSync<Reason extends string>({
 
   const throwDart = (dart: Dart) => {
     const r = applyMatchDart(state, dart);
-    if (!r.ok) return setError(errorText(r.reason));
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
     update(r.value);
     const open = openVisit(currentLeg(state));
     syncServer(state, r.value, [...(open ? rethrowable(open) : []), dart]);
@@ -170,7 +173,10 @@ export function useVisitSync<Reason extends string>({
 
   const undo = () => {
     const r = undoMatchDart(state);
-    if (!r.ok) return setError(errorText(r.reason));
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
     update(r.value);
     syncServer(state, r.value, []);
   };
@@ -179,7 +185,10 @@ export function useVisitSync<Reason extends string>({
   const playOut = (value: boolean) => {
     const leg = currentLeg(state);
     const r = value ? startPlayOut(leg) : resign(leg);
-    if (!r.ok) return setError(errorText(r.reason));
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
     update({ ...state, legs: [...state.legs.slice(0, -1), r.value] });
     enqueue(() => onPlayOut(initial.id, value));
   };
@@ -187,7 +196,10 @@ export function useVisitSync<Reason extends string>({
   /** ToStart before the first dart of a leg. */
   const chooseStarter = (playerId: PlayerId) => {
     const r = setLegStarter(state, playerId);
-    if (!r.ok) return setError(errorText(r.reason));
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
     update(r.value);
     enqueue(() => onSetStarter(initial.id, playerId));
   };

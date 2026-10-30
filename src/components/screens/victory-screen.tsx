@@ -20,12 +20,12 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
   const players = view.board.players;
   const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
-  const byId = (id: string) => players.find((p) => p.id === id)!;
+  const byId = (id: string) => players.filter((p) => p.id === id);
   const places = view.ranking.length > 2;
   const scoreLabel = view.board.mode === "x01" ? texts.rest : texts.points;
   const avg = (a: number | null) => (a === null ? "" : ` · ${texts.average} ${a.toFixed(2)}`);
-  const others = view.ranking.filter((id) => id !== winner.id).map(byId);
-  const last = view.lastPlayerId ? byId(view.lastPlayerId) : null;
+  const others = view.ranking.filter((id) => id !== winner.id).flatMap(byId);
+  const last = view.lastPlayerId ? (byId(view.lastPlayerId).at(0) ?? null) : null;
   // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
   return (
     <div className="flex h-full flex-col overflow-y-auto">

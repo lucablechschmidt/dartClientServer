@@ -49,6 +49,13 @@ function label(key: KeypadKey, texts: KeypadTexts): string {
   }
 }
 
+/** Number and Bull keys: black, dimmed with yellow (Double) or green (Triple) text while a modifier is on. */
+function fieldKey(base: string, state: KeypadState): string {
+  if (state.modifier === "double") return `${base} bg-key-bg opacity-75 text-key-double`;
+  if (state.modifier === "triple") return `${base} bg-key-bg opacity-75 text-key-triple`;
+  return `${base} bg-key-bg`;
+}
+
 /** Colors as in ButtonsView: numbers black/white, in modifier mode dimmed with yellow (Double) or green (Triple) text. */
 function keyClasses(key: KeypadKey, state: KeypadState): string {
   const base =
@@ -61,13 +68,9 @@ function keyClasses(key: KeypadKey, state: KeypadState): string {
     case "triple":
       return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-fg/60" : ""}`;
     case "number":
-      if (key.value === 0) return `${base} bg-key-zero`;
-    // fallthrough
-    case "bull": {
-      if (state.modifier === "double") return `${base} bg-key-bg opacity-75 text-key-double`;
-      if (state.modifier === "triple") return `${base} bg-key-bg opacity-75 text-key-triple`;
-      return `${base} bg-key-bg`;
-    }
+      return key.value === 0 ? `${base} bg-key-zero` : fieldKey(base, state);
+    case "bull":
+      return fieldKey(base, state);
   }
 }
 

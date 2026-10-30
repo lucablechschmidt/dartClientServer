@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CardList, CardRow } from "@/components/ui/card-list";
-import { FormError, SectionHeading, TextButton } from "@/components/ui/form-controls";
+import { ErrorLine, SectionHeading, TextButton } from "@/components/ui/form-controls";
 import { useConfirmTap } from "@/components/ui/use-confirm-tap";
 import type { Player, PlayerError, PlayerResult, Session } from "@/domain/player";
 import { InviteLinkView } from "./invite-link-view";
@@ -26,6 +26,10 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
   const [passwordInvite, setPasswordInvite] = useState<{ playerId: string; link: InviteLink } | null>(null);
   const report = (id: string, r: PlayerResult) => setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason }));
+  const createPasswordInvite = async (id: string) => {
+    const link = await onCreatePasswordInvite(id);
+    setPasswordInvite(link ? { playerId: id, link } : null);
+  };
   const deletePlayer = async (id: string) => {
     const fd = new FormData();
     fd.set("id", id);
@@ -46,13 +50,7 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
                 {p.isAdmin && <span className="shrink-0 text-sm text-fg-muted">{t.adminBadge}</span>}
               </div>
               <div className="flex flex-wrap gap-x-3">
-                <TextButton
-                  flush
-                  onClick={async () => {
-                    const link = await onCreatePasswordInvite(p.id);
-                    setPasswordInvite(link ? { playerId: p.id, link } : null);
-                  }}
-                >
+                <TextButton flush onClick={() => void createPasswordInvite(p.id)}>
                   {p.hasLogin ? t.resetPassword : t.createLogin}
                 </TextButton>
                 {!protectedPlayer && (
@@ -61,7 +59,7 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
                   </TextButton>
                 )}
               </div>
-              {errors[p.id] && <FormError>{texts.errors[errors[p.id]!]}</FormError>}
+              <ErrorLine error={errors[p.id]} texts={texts.errors} />
               {passwordInvite?.playerId === p.id && <InviteLinkView link={passwordInvite.link} label={hint} hint={hint} />}
             </CardRow>
           );

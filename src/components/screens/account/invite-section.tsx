@@ -15,7 +15,7 @@ export function InviteSection({ texts, onCreateInvite }: { texts: AccountTexts; 
       <SectionHeading>{t.invite}</SectionHeading>
       <CardList label={t.invite}>
         <CardRow className="flex-col items-stretch gap-3">
-          <TextButton onClick={async () => setInvite(await onCreateInvite())}>{t.createInvite}</TextButton>
+          <TextButton onClick={() => void onCreateInvite().then(setInvite)}>{t.createInvite}</TextButton>
           {invite && <InviteLinkView link={invite} label={t.createInvite} hint={t.inviteHint} />}
         </CardRow>
       </CardList>
