@@ -72,6 +72,8 @@ export const matches = sqliteTable("match", {
     .notNull()
     .default("running"),
   isTournament: integer("is_tournament", { mode: "boolean" }).notNull().default(false),
+  /** M9: winner declared after a leg when time runs short (tournament matches); overrides the computed winner. */
+  decidedWinnerId: text("decided_winner_id").references(() => players.id),
   /** E13: one phone for everyone or each player on their own device. */
   inputMode: text("input_mode", { enum: ["single", "per-player"] })
     .notNull()

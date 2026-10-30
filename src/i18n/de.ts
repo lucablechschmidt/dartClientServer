@@ -213,6 +213,9 @@ export const de = {
     target: "Ziel",
     onTurn: "Am Wurf",
     nextPlayer: "Nächster Spieler: {name}",
+    decideWinner: "Sieger festlegen",
+    decideWinnerQuestion: "Match jetzt beenden? Wer gewinnt?",
+    decideWinnerConfirm: "Festlegen",
     inNames,
     outNames,
     modes: modeNames,
@@ -232,6 +235,7 @@ export const de = {
       "leg-started": "Das Leg läuft schon.",
       "no-play-out": "Zu Ende spielen geht gerade nicht.",
       "unknown-player": "Spieler gehört nicht zum Spiel.",
+      "not-between-legs": "Der Sieger lässt sich nur nach einem Leg festlegen.",
     },
   },
 } as const;

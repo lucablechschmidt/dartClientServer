@@ -1,0 +1,1 @@
+ALTER TABLE `match` ADD `decided_winner_id` text REFERENCES player(id);

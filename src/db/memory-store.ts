@@ -23,6 +23,8 @@ export type StoredMatch = {
   startedAt: number;
   finishedAt: number | null;
   format: MatchFormat;
+  isTournament: boolean;
+  decidedWinner: PlayerId | null;
   placements: Record<PlayerId, number | null>;
   legs: StoredLeg[];
 };

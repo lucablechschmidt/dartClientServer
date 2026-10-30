@@ -3,6 +3,7 @@ import type { LoadedMatch, OpenMatch, RecentMatch } from "@/db/repository";
 import type { Session } from "@/domain/player";
 import {
   applyMatchDart,
+  decideWinner as decideMatchWinner,
   canCancel,
   canEnter,
   canPlayOut,
@@ -65,6 +66,8 @@ export const newMatchSchema = z.object({
   inputMode: z.enum(["single", "per-player"]).default("single"),
   /** Player of the session that starts the match (E13). */
   hostPlayerId: z.string().min(1).nullable().default(null),
+  /** M9: started from a tournament fixture. */
+  isTournament: z.boolean().default(false),
 });
 export type NewMatchInput = z.input<typeof newMatchSchema>;
 
@@ -80,6 +83,8 @@ export type MatchView = {
   board: ScoreboardView;
   inputMode: InputMode;
   hostPlayerId: PlayerId | null;
+  /** M9: tournament fixtures offer declaring the winner after a leg. */
+  isTournament: boolean;
   /** E13: basis for permissions and the actor, so the client recomputes them itself after every local dart. */
   match: MatchAccess;
   actor: Actor | null;
@@ -96,7 +101,8 @@ export type ActionError =
   | "forbidden"
   | "match-closed"
   | "leg-started"
-  | "no-play-out";
+  | "no-play-out"
+  | "not-between-legs";
 export type ActionResult = { ok: true; view: MatchView } | { ok: false; reason: ActionError };
 
 export const dartSchema = z
@@ -127,6 +133,7 @@ function toView(m: LoadedMatch, session: Session | null, now: number): MatchView
     board: projectBoard(currentLeg(m.state), names),
     inputMode: m.inputMode,
     hostPlayerId: m.hostPlayerId,
+    isTournament: m.isTournament,
     match,
     actor,
     access: {
@@ -192,6 +199,7 @@ function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
         legs[i] = { ...legs[i], winnerPlayerId: winner };
       }
     });
+    if (next.decidedWinner !== m.state.decidedWinner) deps.matches.setDecidedWinner(m.id, next.decidedWinner);
     if (status !== m.status) {
       deps.matches.setMatchStatus(m.id, status, now);
       deps.matches.setPlacements(m.id, finalPlacements(next));
@@ -220,6 +228,7 @@ export function createMatch(deps: Deps, raw: NewMatchInput): string {
     format: formatFor(input.mode, input.playerIds.length, input.format),
     inputMode: input.inputMode,
     hostPlayerId: input.hostPlayerId,
+    isTournament: input.isTournament,
     startedAt: deps.now(),
   });
   return id;
@@ -358,6 +367,24 @@ export function setPlayOut(deps: Deps, session: Session, matchId: string, playOu
   const r = playOut ? startPlayOut(leg) : resign(leg);
   if (!r.ok) return { ok: false, reason: r.reason };
   const stored = persist(deps, m, { ...m.state, legs: [...m.state.legs.slice(0, -1), r.value] });
+  deps.events.publish(matchId);
+  return { ok: true, view: toView(stored, session, now) };
+}
+
+/**
+ * M9: declare the winner of a tournament fixture after a leg when time runs short (free choice).
+ * Host or admin, like choosing the starter; undo on the victory screen takes it back.
+ */
+export function decideWinner(deps: Deps, session: Session, matchId: string, playerId: PlayerId): ActionResult {
+  const m = deps.matches.loadMatch(matchId);
+  if (!m?.isTournament) return { ok: false, reason: "not-found" };
+  const match = accessOf(m);
+  const now = deps.now();
+  if (!isOpen(match, now)) return { ok: false, reason: "match-closed" };
+  if (!maySetStarter(match, actorOf(session))) return { ok: false, reason: "forbidden" };
+  const r = decideMatchWinner(m.state, playerId);
+  if (!r.ok) return { ok: false, reason: r.reason === "unknown-player" ? "not-found" : r.reason };
+  const stored = persist(deps, m, r.value);
   deps.events.publish(matchId);
   return { ok: true, view: toView(stored, session, now) };
 }

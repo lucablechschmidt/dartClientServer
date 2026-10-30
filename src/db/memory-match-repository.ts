@@ -33,6 +33,8 @@ export class MemoryMatchRepository implements MatchRepository {
       inputMode: input.inputMode,
       hostPlayerId: input.hostPlayerId,
       startedAt: input.startedAt,
+      isTournament: input.isTournament ?? false,
+      decidedWinner: null,
       finishedAt: null,
       format: input.format,
       placements: Object.fromEntries(input.playerIds.map((p) => [p, null])),
@@ -81,6 +83,7 @@ export class MemoryMatchRepository implements MatchRepository {
       hostPlayerId: m.hostPlayerId,
       startedAt: m.startedAt,
       finishedAt: m.finishedAt,
+      isTournament: m.isTournament,
       format: m.format,
       legs: m.legs.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
       state: replayMatch(
@@ -90,8 +93,13 @@ export class MemoryMatchRepository implements MatchRepository {
         m.legs.map((l) => ({ starter: l.starterIndex, visits: l.visits, playOut: l.playOut })),
         0,
         m.mode,
+        m.decidedWinner,
       ),
     };
+  }
+  setDecidedWinner(matchId: string, playerId: PlayerId | null): void {
+    const m = this.store.matches.get(matchId);
+    if (m) m.decidedWinner = playerId;
   }
   private matchOfLeg(legId: string): StoredMatch {
     const m = [...this.store.matches.values()].find((x) => x.legs.some((l) => l.id === legId));

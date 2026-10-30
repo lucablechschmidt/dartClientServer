@@ -9,6 +9,7 @@ import {
   restartMatchAction,
   setPlayOutAction,
   setStarterAction,
+  decideWinnerAction,
   undoVisitAction,
 } from "@/server/match-actions";
 import { loadMatchView } from "@/server/match-service";
@@ -27,6 +28,7 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
       onUndoVisit={undoVisitAction}
       onPlayOut={setPlayOutAction}
       onSetStarter={setStarterAction}
+      onDecideWinner={decideWinnerAction}
       onLoad={loadMatchAction}
       onRestart={restartMatchAction}
       onCancel={cancelMatchAction}

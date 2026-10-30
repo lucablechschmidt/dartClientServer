@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 type Props = {
   open: boolean;
@@ -9,13 +9,15 @@ type Props = {
   cancelLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** Optional content between the question and the buttons (e.g. a choice). */
+  children?: ReactNode;
 };
 
 /**
  * Confirmation prompt as an in-app overlay (no browser `confirm`): text and two buttons, the
  * confirming one red. Escape and a tap on the backdrop cancel. Reusable.
  */
-export function ConfirmSheet({ open, text, confirmLabel, cancelLabel, onConfirm, onCancel }: Props) {
+export function ConfirmSheet({ open, text, confirmLabel, cancelLabel, onConfirm, onCancel, children }: Props) {
   const cancelRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -35,6 +37,7 @@ export function ConfirmSheet({ open, text, confirmLabel, cancelLabel, onConfirm,
         onClick={(e) => e.stopPropagation()}
       >
         <p className="pb-4 text-center text-base">{text}</p>
+        {children}
         <div className="flex gap-2">
           <button
             ref={cancelRef}

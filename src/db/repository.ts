@@ -21,6 +21,8 @@ export type MatchSummary = {
   hostPlayerId: PlayerId | null;
   startedAt: number;
   finishedAt: number | null;
+  /** M9: the match is a tournament fixture. */
+  isTournament: boolean;
 };
 
 /** For the game overview (M4): open matches, newest first. */
@@ -58,6 +60,8 @@ export type NewMatch = {
   inputMode: InputMode;
   hostPlayerId: PlayerId | null;
   startedAt: number;
+  /** M9: created by a tournament. */
+  isTournament?: boolean;
 };
 
 /** A guest match whose last guest has expired (E12): everything the cleanup needs. */
@@ -126,6 +130,8 @@ export type MatchRepository = {
   setPlayOut(legId: string, playOut: boolean): void;
   /** Final places of the match; null = not decided (match running again). */
   setPlacements(matchId: string, placements: Record<PlayerId, number | null>): void;
+  /** M9: winner declared after a leg; null takes the declaration back. */
+  setDecidedWinner(matchId: string, playerId: PlayerId | null): void;
 
   // Guest matches (E12)
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[];

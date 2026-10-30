@@ -22,7 +22,15 @@ export function replayMatch(
   legs: StoredLeg[],
   starter = 0,
   mode: ModeId = "x01",
+  decidedWinner: PlayerId | null = null,
 ): MatchState {
   const states = legs.map((l) => replay(players, rules, l.visits, l.starter, l.playOut, mode));
-  return { mode, players: [...players], rules, format, legs: states.length > 0 ? states : [newLeg(players, rules, starter, mode)] };
+  return {
+    mode,
+    players: [...players],
+    rules,
+    format,
+    legs: states.length > 0 ? states : [newLeg(players, rules, starter, mode)],
+    decidedWinner,
+  };
 }

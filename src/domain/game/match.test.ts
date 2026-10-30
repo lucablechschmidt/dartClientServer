@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyMatchDart,
   currentLeg,
+  decideWinner,
   legNumbers,
   matchCurrentPlayer,
   matchScore,
@@ -245,3 +246,23 @@ function ok<T>(r: { ok: true; value: T } | { ok: false; reason: string }): T {
   if (!r.ok) throw new Error(r.reason);
   return r.value;
 }
+
+describe("declaring the winner after a leg (M9, tournaments)", () => {
+  it("only between two legs; the declared player wins, the match is finished", () => {
+    const fresh = newMatch([A, B], rules, { legsToWinSet: 3, setsToWinMatch: 1 });
+    expect(decideWinner(fresh, B)).toEqual({ ok: false, reason: "not-between-legs" });
+    const afterLeg = winLeg(fresh, A);
+    expect(decideWinner(afterLeg, "x")).toEqual({ ok: false, reason: "unknown-player" });
+    const decided = ok(decideWinner(afterLeg, B)); // free choice, not only the leader
+    expect(matchWinner(decided)).toBe(B);
+    expect(matchStatus(decided)).toBe("finished");
+    expect(applyMatchDart(decided, S(1))).toEqual({ ok: false, reason: "leg-finished" });
+  });
+
+  it("undo takes the decision back first, as a step of its own (device and server)", () => {
+    const afterLeg = winLeg(newMatch([A, B], rules, { legsToWinSet: 3, setsToWinMatch: 1 }), A);
+    const decided = ok(decideWinner(afterLeg, A));
+    expect(ok(undoMatchDart(decided))).toEqual(afterLeg);
+    expect(ok(undoMatchVisit(decided))).toEqual(afterLeg);
+  });
+});

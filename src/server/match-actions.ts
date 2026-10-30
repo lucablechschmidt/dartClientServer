@@ -6,6 +6,7 @@ import {
   cancelMatch,
   commitVisit,
   createMatch,
+  decideWinner,
   loadMatchView,
   restartMatch,
   setPlayOut,
@@ -48,6 +49,11 @@ export async function commitVisitAction(matchId: string, legIndex: number, seq: 
 export async function setPlayOutAction(matchId: string, playOut: boolean): Promise<ActionResult> {
   const { deps, session } = await requireSession();
   return setPlayOut(deps, session, matchId, playOut);
+}
+
+export async function decideWinnerAction(matchId: string, playerId: string): Promise<ActionResult> {
+  const { deps, session } = await requireSession();
+  return decideWinner(deps, session, matchId, playerId);
 }
 
 export async function setStarterAction(matchId: string, playerId: string): Promise<ActionResult> {

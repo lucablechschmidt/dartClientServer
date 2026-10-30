@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   applyMatchDart,
+  decideWinner,
   closedVisits,
   currentLeg,
   matchCurrentPlayer,
@@ -34,6 +35,8 @@ export type MatchViewLike = {
   match: MatchAccess;
   actor: Actor | null;
   access: { isOpen: boolean; canEnter: boolean; canUndo: boolean; canCancel: boolean };
+  /** M9: tournament fixtures offer declaring the winner after a leg. */
+  isTournament: boolean;
 };
 export type ActionReply<Reason extends string> = { ok: true; view: MatchViewLike } | { ok: false; reason: Reason };
 export type SyncStatus = "saved" | "saving" | "unsaved";
@@ -44,10 +47,12 @@ type Options<Reason extends string> = {
   onUndoVisit: (matchId: string) => Promise<ActionReply<Reason>>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply<Reason>>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
+  onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
   onLoad: (matchId: string) => Promise<ActionReply<Reason>>;
   /** Text for a domain or server error; shown in the status line. */
   errorText: (
-    reason: Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "no-play-out" | "leg-started" | "unknown-player",
+    reason:
+      Reason | "leg-finished" | "invalid-dart" | "nothing-to-undo" | "no-play-out" | "leg-started" | "unknown-player" | "not-between-legs",
   ) => string;
 };
 
@@ -68,6 +73,7 @@ export function useVisitSync<Reason extends string>({
   onUndoVisit,
   onPlayOut,
   onSetStarter,
+  onDecideWinner,
   onLoad,
   errorText,
 }: Options<Reason>) {
@@ -148,7 +154,11 @@ export function useVisitSync<Reason extends string>({
       const { legIndex, seq } = nextVisitPosition(prev);
       committed.current = closed;
       enqueue(() => onCommitVisit(initial.id, legIndex, seq, thrown));
-    } else if (closed < committed.current || currentLeg(next).playOut !== currentLeg(prev).playOut) {
+    } else if (
+      closed < committed.current ||
+      currentLeg(next).playOut !== currentLeg(prev).playOut ||
+      next.decidedWinner !== prev.decidedWinner
+    ) {
       // undo of a stored visit, or of a play-out decision (a step of its own on the server too)
       committed.current = closed;
       enqueue(() => onUndoVisit(initial.id));
@@ -204,5 +214,16 @@ export function useVisitSync<Reason extends string>({
     enqueue(() => onSetStarter(initial.id, playerId));
   };
 
-  return { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter };
+  /** M9: declare the winner of a tournament fixture after a leg. */
+  const decide = (playerId: PlayerId) => {
+    const r = decideWinner(state, playerId);
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
+    update(r.value);
+    enqueue(() => onDecideWinner(initial.id, playerId));
+  };
+
+  return { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter, decide };
 }

@@ -6,6 +6,7 @@ import {
   cancelMatch,
   commitVisit,
   createMatch,
+  decideWinner,
   listOpenMatches,
   listRecentMatches,
   loadMatchView,
@@ -426,5 +427,33 @@ describe("other game modes through the server (M7)", () => {
     const id = createMatch(deps, { mode: "cricket", playerIds: [a, b], rules: { startScore: 0, inRule: "single", outRule: "single" } });
     expect(loadMatchView(deps, restartMatch(deps, id)!)!.state.mode).toBe("cricket");
     expect(loadMatchView(deps, id)!.board.players[0].marks).toHaveLength(7);
+  });
+});
+
+describe("declaring the winner (M9)", () => {
+  const short = { startScore: 40, inRule: "single", outRule: "single" } as const;
+  it("tournament fixtures only, between two legs, by host or admin; undo takes it back", () => {
+    const a = ok(createPlayer(deps, "Casey")).player.id;
+    const b = ok(createPlayer(deps, "Sam")).player.id;
+    const plain = createMatch(deps, { playerIds: [a, b], rules: short, format: { legsToWinSet: 3, setsToWinMatch: 1 } });
+    expect(decideWinner(deps, sessionAdmin, plain, b)).toEqual({ ok: false, reason: "not-found" });
+    const id = createMatch(deps, {
+      playerIds: [a, b],
+      rules: short,
+      format: { legsToWinSet: 3, setsToWinMatch: 1 },
+      isTournament: true,
+      hostPlayerId: a,
+    });
+    const host = { playerId: a, name: "Casey", isAdmin: false };
+    expect(decideWinner(deps, host, id, b)).toEqual({ ok: false, reason: "not-between-legs" });
+    ok(commitVisit(deps, host, id, 0, 0, [{ field: 20, type: "double" }])); // Casey wins leg 1
+    expect(decideWinner(deps, { playerId: b, name: "Sam", isAdmin: false }, id, b)).toEqual({ ok: false, reason: "forbidden" });
+    const v = ok(decideWinner(deps, host, id, b)).view;
+    expect(v.status).toBe("finished");
+    expect(deps.store.matches.get(id)!.placements).toEqual({ [a]: 2, [b]: 1 });
+    const u = ok(undoVisit(deps, host, id)).view;
+    expect(u.status).toBe("running");
+    expect(u.state.decidedWinner).toBeNull();
+    expect(loadMatchView(deps, id)!.state.decidedWinner).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { applyDart, currentPlayer, isLegFinished, openVisit, playOutUndo, undoDart, winnerOf } from "./modes";
 import { newLeg } from "./state";
-import type { ApplyError, Dart, LegState, ModeId, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
+import type { ApplyError, Dart, DecideError, LegState, ModeId, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
 
 /**
  * A match is a list of legs (M5). `LegState` stays the unit that applyDart/undoDart know; legs,
@@ -19,6 +19,8 @@ export type MatchState = {
   format: MatchFormat;
   /** Never empty; the last one is the current leg. */
   legs: LegState[];
+  /** M9: winner declared after a leg when time runs short (tournaments); overrides the computed winner. */
+  decidedWinner: PlayerId | null;
 };
 
 export type LegNumber = { setNo: number; legNo: number };
@@ -26,7 +28,7 @@ export type MatchScore = { legs: Record<PlayerId, number>; sets: Record<PlayerId
 export type MatchProgress = "running" | "leg-finished" | "finished";
 
 export function newMatch(players: PlayerId[], rules: Rules, format: MatchFormat, starter = 0, mode: ModeId = "x01"): MatchState {
-  return { mode, players: [...players], rules, format, legs: [newLeg(players, rules, starter, mode)] };
+  return { mode, players: [...players], rules, format, legs: [newLeg(players, rules, starter, mode)], decidedWinner: null };
 }
 
 export const currentLeg = (m: MatchState): LegState => m.legs[m.legs.length - 1];
@@ -88,6 +90,7 @@ export const nextLegNumber = (m: MatchState): LegNumber => walk(m).numbers[m.leg
 export const matchScore = (m: MatchState): MatchScore => walk(m).score;
 
 export function matchWinner(m: MatchState): PlayerId | null {
+  if (m.decidedWinner) return m.decidedWinner;
   const { sets } = matchScore(m);
   return m.players.find((p) => sets[p] >= m.format.setsToWinMatch) ?? null;
 }
@@ -144,18 +147,37 @@ function undoInLeg(m: MatchState, undo: (leg: LegState) => Result<LegState, Undo
   return { ok: true, value: dropEmpty ? { ...next, legs: next.legs.slice(0, -1) } : next };
 }
 
-/** Undo one dart (client, local scoring). */
-export const undoMatchDart = (m: MatchState): Result<MatchState, UndoError> => undoInLeg(m, undoDart);
+/** A declared winner is undone first, as a step of its own (device and server alike). */
+const withoutDecision = (m: MatchState): MatchState | null => (m.decidedWinner ? { ...m, decidedWinner: null } : null);
 
-/** Undo one stored step on the server: a whole visit, or a play-out decision (E11 `undoVisit`). */
-export const undoMatchVisit = (m: MatchState): Result<MatchState, UndoError> =>
-  undoInLeg(m, (leg) => {
+/** Undo one dart (client, local scoring). */
+export const undoMatchDart = (m: MatchState): Result<MatchState, UndoError> => {
+  const undecided = withoutDecision(m);
+  return undecided ? { ok: true, value: undecided } : undoInLeg(m, undoDart);
+};
+
+/** Undo one stored step on the server: a whole visit, a play-out decision or a declared winner (E11 `undoVisit`). */
+export const undoMatchVisit = (m: MatchState): Result<MatchState, UndoError> => {
+  const undecided = withoutDecision(m);
+  if (undecided) return { ok: true, value: undecided };
+  return undoInLeg(m, (leg) => {
     const toggled = playOutUndo(leg);
     if (toggled) return { ok: true, value: toggled };
     return leg.visits.length > 0
       ? { ok: true, value: { ...leg, visits: leg.visits.slice(0, -1) } }
       : { ok: false, reason: "nothing-to-undo" };
   });
+};
+
+/**
+ * M9: when time runs short in a tournament, the winner can be declared after any finished leg (free
+ * choice, the screen preselects the leader). The match is finished from then on.
+ */
+export function decideWinner(m: MatchState, playerId: PlayerId): Result<MatchState, DecideError> {
+  if (!m.players.includes(playerId)) return { ok: false, reason: "unknown-player" };
+  if (matchStatus(m) !== "leg-finished") return { ok: false, reason: "not-between-legs" };
+  return { ok: true, value: { ...m, decidedWinner: playerId } };
+}
 
 /** The most recent visit of the whole match (empty legs skipped), or null. */
 export const lastVisitOfMatch = (m: MatchState): Visit | null => currentLeg(withoutEmptyLegs(m)).visits.at(-1) ?? null;

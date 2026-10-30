@@ -64,6 +64,7 @@ export class SqliteMatchRepository implements MatchRepository {
           outRule: input.rules.outRule,
           inputMode: input.inputMode,
           hostPlayerId: input.hostPlayerId,
+          isTournament: input.isTournament ?? false,
           legsToWinSet: input.format.legsToWinSet,
           setsToWinMatch: input.format.setsToWinMatch,
           startedAt: input.startedAt,
@@ -164,9 +165,10 @@ export class SqliteMatchRepository implements MatchRepository {
       hostPlayerId: match.hostPlayerId,
       startedAt: match.startedAt,
       finishedAt: match.finishedAt,
+      isTournament: match.isTournament,
       format,
       legs: legRows.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
-      state: replayMatch(playerIds, rules, format, stored, 0, match.mode),
+      state: replayMatch(playerIds, rules, format, stored, 0, match.mode, match.decidedWinnerId),
     };
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number, ids: () => string, now: number): void {
@@ -197,6 +199,9 @@ export class SqliteMatchRepository implements MatchRepository {
       .set({ status, finishedAt: status === "running" ? null : now })
       .where(eq(matches.id, matchId))
       .run();
+  }
+  setDecidedWinner(matchId: string, playerId: PlayerId | null): void {
+    this.db.update(matches).set({ decidedWinnerId: playerId }).where(eq(matches.id, matchId)).run();
   }
   createLeg(leg: NewLeg): void {
     this.db.insert(legs).values(leg).run();

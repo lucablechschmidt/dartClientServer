@@ -43,6 +43,13 @@
       "when": 1793283845269,
       "tag": "0005_short_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793359016013,
+      "tag": "0006_burly_obadiah_stane",
+      "breakpoints": true
     }
   ]
 }

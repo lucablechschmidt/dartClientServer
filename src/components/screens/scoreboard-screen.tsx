@@ -42,6 +42,7 @@ type Props = {
   onUndoVisit: (matchId: string) => Promise<ActionReply>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
+  onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
   onCancel: (matchId: string) => Promise<unknown>;
@@ -69,6 +70,7 @@ export function ScoreboardScreen({
   onUndoVisit,
   onPlayOut,
   onSetStarter,
+  onDecideWinner,
   onLoad,
   onRestart,
   onCancel,
@@ -76,12 +78,13 @@ export function ScoreboardScreen({
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
-  const { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter } = useVisitSync<Reason>({
+  const { state, sync, error, isOpen, throwDart, undo, playOut, chooseStarter, decide } = useVisitSync<Reason>({
     initial,
     onCommitVisit,
     onUndoVisit,
     onPlayOut,
     onSetStarter,
+    onDecideWinner,
     onLoad,
     errorText,
   });
@@ -184,6 +187,7 @@ export function ScoreboardScreen({
         canUndo={undoOk && sync === "saved"}
         onContinue={() => setClosedLeg(legKey(state))}
         onUndo={undoAndReopen}
+        onDecide={initial.isTournament && actor !== null && isOpen && maySetStarter(initial.match, actor) ? decide : undefined}
       />
     );
   }
