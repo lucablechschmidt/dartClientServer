@@ -56,6 +56,7 @@
 | Validierung | **Zod** | Eingaben aus Server Actions prüfen |
 | Auth (seit M3) | **eigene Sessions** (Name/Passwort, bcrypt, Cookie 1 Jahr), Einladung per QR-Code durch den Admin (E10) | Kein E-Mail-Versand nötig, kein Fremddienst, keine Auth-Bibliothek; die Logik ist 300 Zeilen mit Tests |
 | CI | **ein Skript `scripts/ci.sh`**, aufgerufen von GitHub Actions (`.github/workflows/ci.yml`, E15) | Die Pipeline-Datei ist nur ein Aufruf; der Inhalt lebt im Repo und wandert mit |
+| Code-Qualität | **Prettier** (mit `prettier-plugin-tailwindcss`), **ESLint** mit `typescript-eslint` strict + stylistic (typgeprüft) und `eslint-plugin-better-tailwindcss`, **commitlint** in **lefthook**-Hooks | Das Gegenstück zu `very_good_analysis` in Flutter: Stil, Typsicherheit, Theme-Tokens und Commit-Format werden geprüft statt nur vereinbart (§9) |
 | Tests | **Vitest** (Domänenlogik, Server, UI-Logik), **Playwright** als Bibliothek im Smoke-Skript `scripts/smoke-match.mjs` (ein Durchlauf aller Modi); der Umbau zu `@playwright/test`-Specs ist M6 | Die Darts-Regeln sind reine Funktionen und gut testbar |
 | Deployment | **Docker Compose** auf dem Pi | Reproduzierbar, einfacher Rollback |
 | Ingress | **Tailscale Funnel** (auf dem Host, nicht im Container) | Einziger gangbarer Weg bei DS-Lite ohne eigene Domain; TLS endet auf dem Pi |
@@ -201,7 +202,13 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 - **Fehler und Logs:** Server Actions antworten mit `Result`-Werten, Ausnahmen sind Bugs. Unerwartete Fehler landen über `error.tsx`/`not-found.tsx` je Route-Gruppe nie als weiße Seite beim Nutzer, sondern mit Zurück-Button; der Server loggt sie als eine JSON-Zeile (`src/server/log.ts`: `log.info|warn|error(event, fields)`). Geloggt werden Start und Aufräumen, Login und Fehlversuch mit IP, Sperre durch das Rate-Limit, eingelöste Einladung und Spielabbruch; nie Passwörter, Hashes oder Tokens.
 - **Tests:** Domäne mit Vitest (Tabellen-Tests, Property-Test für Replay), Server Actions gegen das In-Memory-Repository, Komponenten mit Testing Library nur dort, wo es Logik in der UI gibt (Keypad-Modifier, Panel-Varianten), Playwright für den Durchstich (M6).
 - **Fehler:** Domäne wirft nie, sondern liefert `Result`-Werte (`{ ok, state } | { ok: false, reason }`); Server Actions übersetzen in Nutzertexte.
-- **Texte** zentral in `src/i18n/de.ts`, auch wenn v1 nur Deutsch ist.
+- **Texte** zentral in `src/i18n/de.ts`, auch wenn v1 nur Deutsch ist; Code, Kommentare und Commits sind englisch.
+- **Werkzeuge erzwingen die Regeln** (seit 30.10.2026):
+  - **Prettier** formatiert alles außer Doku und Generiertem (`printWidth` 140, Tailwind-Klassen in fester Reihenfolge); `npm run format`, in der CI `format:check`.
+  - **ESLint**: Next-Presets, `typescript-eslint` `strictTypeChecked` + `stylisticTypeChecked` mit Typinformation (eingestellt auf `type` statt `interface`, kurze Void-Pfeile und Zahlen in Template-Strings erlaubt, `||` bei Strings erlaubt; in Tests `!` und leere Callbacks), dazu die Schichtregel (`no-restricted-imports`) und das Verbot von `style={…}`.
+  - **Tailwind-Lint** (`eslint-plugin-better-tailwindcss`, liest `globals.css`): unbekannte, widersprüchliche, doppelte und veraltete Klassen sind Fehler; `no-restricted-classes` setzt `theme.md` §3 Regel 8 durch (keine beliebigen Werte `-[…]`, keine rohen Radien, keine `/Deckkraft`-Tönungen, keine rohen Schatten, kein `text-2xl` und größer, kein `white`/`black`). Grenze: geprüft werden `className`-Attribute, nicht Klassen-Strings, die eine Hilfsfunktion zusammenbaut.
+  - **TypeScript** `strict` plus `noFallthroughCasesInSwitch`, `noImplicitOverride`, `noImplicitReturns`. `noUncheckedIndexedAccess` bewusst nicht: Die Zugriffe auf Spieler-Records bräuchten Assertions ohne Gewinn; wo ein Platz wirklich fehlen kann, liest der Code mit `.at()`.
+  - **Commits** nach Conventional Commits (`CLAUDE.md`), geprüft von `commitlint`; `lefthook` führt vor jedem Commit Prettier und ESLint auf den gestagten Dateien aus.
 
 ---
 
