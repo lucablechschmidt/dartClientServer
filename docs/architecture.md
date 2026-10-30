@@ -127,8 +127,18 @@ match           id, mode ('x01' | 'cricket' | 'elimination' | 'splitscore'),
                 start_score (X01 Start 501|401|301, Elimination Ziel, SplitScore Start 40, Cricket 0), in_rule ('single'|'double'|'triple'),
                 out_rule ('single'|'double'|'triple'), legs_to_win_set, sets_to_win_match,
                 status ('running'|'finished'|'abandoned'),
-                is_tournament, created_by NULL, started_at, finished_at NULL
+                is_tournament, decided_winner_id NULL (M9: Sieger nach einem Leg festgelegt),
+                created_by NULL, started_at, finished_at NULL
 match_player    match_id, player_id, seat (Reihenfolge), placement NULL (gleiche Plätze möglich, SplitScore)   PK(match_id, player_id)
+
+tournament      id, name, format ('round-robin'|'knockout'|'groups-knockout'), group_count, advance_per_group,
+                start_score, in_rule, out_rule, input_mode, created_by NULL, created_at          (M9)
+tournament_player       tournament_id, player_id, seed (ausgelost)         PK(tournament_id, player_id)
+tournament_round_format tournament_id, phase ('group'|'knockout'), round (0 = Gruppenphase),
+                        legs_to_win_set, sets_to_win_match                 PK(tournament_id, phase, round)
+tournament_match        tournament_id, fixture_id, match_id                PK(tournament_id, fixture_id)
+                (Der Spielplan wird nicht gespeichert: die Domäne baut ihn aus Format und Setzliste,
+                 Ergebnisse kommen aus den verknüpften Matches.)
 
 player_field_hits player_id, field (0–20|25), hits                      PK(player_id, field)
                 (E12: Feldtreffer regulärer Spieler aus gelöschten Gast-Matches; Treffer = 1/2/3 je Single/Double/Triple)
@@ -171,6 +181,7 @@ Reines TypeScript in `src/domain/`, ohne Datenbank- oder React-Abhängigkeit, Te
 
 - `src/domain/game/` (seit M7): alles Modusunabhängige. Gemeinsame Typen (`LegState` mit `mode`, `MatchState`), die Schnittstelle `GameMode` und die Registry `modes.ts` mit den Funktionen, die alle anderen aufrufen (`applyDart`, `undoDart`, `openVisit`, `currentPlayer`, `isLegFinished`, `standings`, `projectBoard` …), Matches über Legs und Sets (`match.ts`), Rechte (`permissions.ts`, E13), Replay und die Projektion für den Zählscreen (`board.ts`, `view.ts`).
 - `src/domain/x01/`, `cricket/`, `elimination/`, `splitscore/`: je ein Modus hinter `GameMode` (Regeln in `legacy-analysis.md` §2–6). Der Zustand eines Legs ist immer die Liste seiner Aufnahmen; jede Funktion ist `(state, …) → Result<state>` ohne Seiteneffekte, Undo ist Löschen des letzten Platzes und erneutes Auswerten.
+- `src/domain/tournament/` (M9): Spielplan als Liste von Spielen, deren Seiten aus einem Spieler, dem Sieger eines anderen Spiels, einem Gruppenplatz oder einem Freilos kommen; `resolve` leitet daraus ab, wer spielt. Round Robin per Berger-Tabelle, K.-o. mit Standard-Setzpositionen, Gruppen per Schlangen-Auslosung, Tabelle mit Siegen, Leg-Differenz, direktem Vergleich, Average.
 - `src/domain/checkouts.ts`: die drei Finish-Tabellen aus `Checkouts.swift`.
 - `src/domain/stats/` (M8): Averages wie im Legacy definiert, dazu First-9, Checkout-Quote, 180/140+/100+, Highest Finish, Best Leg, Feldtreffer, Elo (nur 1 vs 1).
 
@@ -198,7 +209,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 - **Liskov/Interface Segregation:** Komponenten bekommen schmale Props-Typen (z. B. `PlayerPanelData`), nie das ganze `LegState` oder DB-Zeilen. Views sind damit mit Fixtures renderbar.
 - **Dependency Inversion:** Server Actions bekommen das Repository (`MatchRepository`-Interface) injiziert; in Tests ersetzt ein In-Memory-Repository SQLite. Zeit und IDs kommen über `clock()`/`newId()`, nicht aus `Date.now()`/`crypto` direkt.
 - **Komponenten:** dumme, wiederverwendbare Bausteine in `src/components/ui` (`TabBar`, `ScreenHeader`, `BackButton`, `ChoiceMenu` und `Stepper` (Setup im Figma-Layout, `Design/`), `CardList`/`CardRow`/`GroupedSection`, `AddRow`, `ConfirmSheet`, `QrCode`, `icons.tsx`, Formular-Bausteine in `form-controls.tsx`: `TextInput`, `TextButton`, `PrimaryButton`, `Field`, `FormError`, `FormNote`, `SectionHeading`; Hook `useConfirmTap`) und `src/components/darts` (`Keypad`, `PlayerPanel`, `PlayerPanels`, `DartSlots`, `CheckoutHint`, `ScoreGrid`, `PlayerPicker`; Hooks `useVisitSync` für Zählen und Server-Abgleich, `useMatchEvents` für den Live-Stand), zusammengesetzt in `src/components/screens` (der Konto-Tab in Abschnitten unter `screens/account/`). Keine Datenzugriffe in Komponenten, Zustand kommt per Props, Ereignisse gehen per Callback hoch. Wiederkehrende Formen (Zeile „tippen → Eingabefeld → Speichern“) gehören als Baustein nach `ui`, nicht kopiert in Screens. Ein Screen über etwa 200 Zeilen wird geteilt (Hooks für Logik, Unterkomponenten für Abschnitte). Bekommt ein `ui`-Baustein Zustand, Seiteneffekte oder Fachlogik, ist er keiner mehr: die Logik wandert in einen Hook oder der Baustein nach `darts`/`screens`. Jeder neue `ui`-Baustein bekommt einen Eintrag auf `/dev/theme` (ersetzt Storybook).
-- **Repositories nach Verantwortung:** `PlayerRepository` (Spieler, Login-Daten, Admin, Gäste, gesicherte Feldtreffer), `MatchRepository` (Matches, Legs, Aufnahmen, Gast-Matches aufräumen), `AuthRepository` (Sessions, Einladungen); in `Deps` als `players`, `matches`, `auth`. Alle drei teilen in Produktion eine SQLite-Verbindung (daher eine Transaktion über alle), in Tests einen `MemoryStore`. Statistik (M8) und Turniere (M9) bekommen eigene. Eine Schnittstelle, die über etwa 15 Methoden wächst, wird geteilt.
+- **Repositories nach Verantwortung:** `PlayerRepository` (Spieler, Login-Daten, Admin, Gäste, gesicherte Feldtreffer), `MatchRepository` (Matches, Legs, Aufnahmen, Gast-Matches aufräumen), `AuthRepository` (Sessions, Einladungen), `TournamentRepository` (Turniere, M9); in `Deps` als `players`, `matches`, `auth`, `tournaments`. Alle drei teilen in Produktion eine SQLite-Verbindung (daher eine Transaktion über alle), in Tests einen `MemoryStore`. Statistik (M8) und Turniere (M9) bekommen eigene. Eine Schnittstelle, die über etwa 15 Methoden wächst, wird geteilt.
 - **Fehler und Logs:** Server Actions antworten mit `Result`-Werten, Ausnahmen sind Bugs. Unerwartete Fehler landen über `error.tsx`/`not-found.tsx` je Route-Gruppe nie als weiße Seite beim Nutzer, sondern mit Zurück-Button; der Server loggt sie als eine JSON-Zeile (`src/server/log.ts`: `log.info|warn|error(event, fields)`). Geloggt werden Start und Aufräumen, Login und Fehlversuch mit IP, Sperre durch das Rate-Limit, eingelöste Einladung und Spielabbruch; nie Passwörter, Hashes oder Tokens.
 - **Tests:** Domäne mit Vitest (Tabellen-Tests, Property-Test für Replay), Server Actions gegen das In-Memory-Repository, Komponenten mit Testing Library nur dort, wo es Logik in der UI gibt (Keypad-Modifier, Panel-Varianten), Playwright für den Durchstich (M6).
 - **Fehler:** Domäne wirft nie, sondern liefert `Result`-Werte (`{ ok, state } | { ok: false, reason }`); Server Actions übersetzen in Nutzertexte.

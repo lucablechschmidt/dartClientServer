@@ -1,7 +1,7 @@
 # M9-Plan – Turniere
 
 > Detailplan zu `project.md` M9. Turniere sind immer 1 vs 1 (Entscheidung „Spielerzahl“, `project.md` Geklärte Fragen 4). Wird vor M8 umgesetzt (30.10.2026); bis Elo existiert, wird die Setzliste ausgelost. Jedes Turnierspiel ist ein normales X01-Match (`is_tournament`, Spalte gibt es seit M1); der Turnier-Code organisiert nur, wer wann gegen wen spielt. Test-first, jeder grüne Schritt ein Commit.
-> Stand: Fragen in §9 am 30.10.2026 beantwortet und in §1–§4 eingearbeitet. Noch nicht umgesetzt.
+> Stand: Fragen in §9 am 30.10.2026 beantwortet und eingearbeitet; §2–§4 umgesetzt am 30.10.2026 (Domäne, Server, Seiten, Smoke-Test mit K.-o. zu dritt). Offen: Deploy und DoD am Board.
 > Luca: §0.
 
 ---

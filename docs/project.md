@@ -226,14 +226,14 @@ Detailplan: `docs/m8-plan.md`.
 
 ## M9 – Turniere
 
-**Ziel:** Ein Abend als Turnier, immer 1 vs 1: Jeder gegen jeden oder K.-o.-Baum, Setzliste aus der Elo-Rangliste, jedes Turnierspiel ist ein normales X01-Match.
+**Ziel:** Ein Abend als Turnier, immer 1 vs 1: Jeder gegen jeden, K.-o.-Baum oder Gruppen + K.-o., Setzliste ausgelost (Elo-Vorschlag kommt mit M8), jedes Turnierspiel ist ein normales X01-Match.
 
 Detailplan: `docs/m9-plan.md`.
 
-- [ ] `src/domain/tournament/`: Round Robin (Port des Generators aus `Tournament.swift`, Berger-Tabelle, Freilos bei ungerader Zahl), K.-o.-Baum mit Freilosen nach Setzliste, Gruppen + Playoffs, Tabelle mit Tie-Breaks; Tests
-- [ ] Schema `tournament`, `tournament_player`, `tournament_match`; Match entsteht beim Start des Spiels (`is_tournament`)
-- [ ] Seiten `/tournaments`, `/tournaments/new`, `/tournaments/[id]` (Spielplan, Tabelle oder Baum, „Spielen“, Sieger)
-- [ ] Match-Ende trägt den Sieger ein und öffnet die nächste Runde; Undo vom Sieg-Screen, solange das nächste Spiel des Siegers nicht begonnen hat
+- [x] `src/domain/tournament/`: Round Robin (Berger-Tabelle statt des Legacy-Generators, Freilos bei ungerader Zahl), K.-o.-Baum mit Freilosen nach Setzliste, Gruppen + K.-o., Tabelle mit Tie-Breaks; Tests
+- [x] Schema `tournament`, `tournament_player`, `tournament_round_format`, `tournament_match`; Match entsteht beim Start des Spiels (`is_tournament`)
+- [x] Seiten `/tournaments`, `/tournaments/new`, `/tournaments/[id]` (Spielplan, Tabelle oder Baum, „Spielen“, Sieger)
+- [x] Match-Ende trägt den Sieger ein und öffnet die nächste Runde; Undo vom Sieg-Screen, solange das nächste Spiel des Siegers nicht begonnen hat; „Sieger festlegen“ nach einem Leg
 
 **DoD:** Round Robin zu viert komplett über die App, Tabelle stimmt mit der Handrechnung; K.-o. zu sechst mit Freilosen bis zum Finale.
 
