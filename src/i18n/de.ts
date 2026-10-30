@@ -282,4 +282,7 @@ export const de = {
   },
 } as const;
 
-export type Texts = typeof de;
+/** The shape of `de` with every text widened to `string`, so another language (`en: Texts`) needs the same keys but its own wording. */
+type Widen<T> = T extends string ? string : { readonly [K in keyof T]: Widen<T[K]> };
+
+export type Texts = Widen<typeof de>;
