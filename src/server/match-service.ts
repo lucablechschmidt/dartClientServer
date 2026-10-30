@@ -13,6 +13,7 @@ import {
   isEditable,
   isLegFinished,
   isOpen,
+  lastVisitOfMatch,
   legNumbers,
   MATCH_OPEN_MS,
   matchStatus,
@@ -28,6 +29,7 @@ import {
   setLegStarter,
   startPlayOut,
   undoMatchVisit,
+  undoStep,
   walkWinners,
   winnerOf,
   type Actor,
@@ -38,6 +40,7 @@ import {
   type MatchState,
   type ModeId,
   type PlayerId,
+  type Result,
   type Rules,
   type ScoreboardView,
 } from "@/domain/game";
@@ -313,13 +316,15 @@ export function cancelMatch(deps: Deps, session: Session, matchId: string): { ok
  * Darts are counted locally on the phone; only the finished visit goes over the network.
  * `legIndex` and `seq` are the expected position (M5: the first visit of the next leg has
  * legIndex = number of legs, seq 0); the server replays the darts through the rules itself and
- * accepts only if exactly one completed visit results.
+ * accepts only if exactly one completed visit results. A repeated send of the visit stored last
+ * (the reply got lost, M6) is answered with the current state instead of `out-of-sync`.
  */
 export function commitVisit(deps: Deps, session: Session, matchId: string, legIndex: number, seq: number, rawDarts: Dart[]): ActionResult {
   const parsed = thrownDartsSchema.safeParse(rawDarts);
   if (!parsed.success) return { ok: false, reason: "invalid-dart" };
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
+  if (isStoredLast(m.state, legIndex, seq, parsed.data)) return { ok: true, view: toView(m, session, deps.now()) };
   const progress = matchStatus(m.state);
   if (progress === "finished") return { ok: false, reason: "leg-finished" };
   const denied = gate(m, session, deps.now(), canEnter);
@@ -327,28 +332,48 @@ export function commitVisit(deps: Deps, session: Session, matchId: string, legIn
   const expected = nextVisitPosition(m.state);
   if (legIndex !== expected.legIndex || seq !== expected.seq || openVisit(currentLeg(m.state))) return { ok: false, reason: "out-of-sync" };
 
-  let next = m.state;
-  for (const [i, dart] of parsed.data.entries()) {
-    if (i > 0 && openVisit(currentLeg(next)) === null) return { ok: false, reason: "out-of-sync" }; // visit was already closed
-    const r = applyMatchDart(next, dart);
-    if (!r.ok) return { ok: false, reason: r.reason };
-    next = r.value;
-  }
-  if (next.legs.length !== legIndex + 1 || currentLeg(next).visits.length !== seq + 1 || openVisit(currentLeg(next)))
-    return { ok: false, reason: "out-of-sync" };
-
-  const stored = persist(deps, m, next);
+  const r = closeVisit(m.state, legIndex, seq, parsed.data);
+  if (!r.ok) return r;
+  const stored = persist(deps, m, r.value);
   deps.events.publish(matchId);
   return { ok: true, view: toView(stored, session, deps.now()) };
 }
 
-/** Removes the last stored step (a visit, or a play-out decision); the client reopens it locally. */
-export function undoVisit(deps: Deps, session: Session, matchId: string): ActionResult {
+/** The darts of one visit at `legIndex`/`seq` through the rules; exactly one closed visit must result. */
+function closeVisit(state: MatchState, legIndex: number, seq: number, darts: Dart[]): Result<MatchState, ActionError> {
+  let next = state;
+  for (const [i, dart] of darts.entries()) {
+    if (i > 0 && openVisit(currentLeg(next)) === null) return { ok: false, reason: "out-of-sync" }; // visit was already closed
+    const r = applyMatchDart(next, dart);
+    if (!r.ok) return r;
+    next = r.value;
+  }
+  if (next.legs.length !== legIndex + 1 || currentLeg(next).visits.length !== seq + 1 || openVisit(currentLeg(next)))
+    return { ok: false, reason: "out-of-sync" };
+  return { ok: true, value: next };
+}
+
+/** Whether the last stored step is exactly this visit (same position, same darts). */
+function isStoredLast(state: MatchState, legIndex: number, seq: number, darts: Dart[]): boolean {
+  if (undoStep(state) !== `visit:${String(legIndex)}:${String(seq)}`) return false;
+  const before = undoMatchVisit(state);
+  if (!before.ok) return false;
+  const again = closeVisit(before.value, legIndex, seq, darts);
+  return again.ok && JSON.stringify(lastVisitOfMatch(again.value)) === JSON.stringify(lastVisitOfMatch(state));
+}
+
+/**
+ * Removes the last stored step (a visit, a play-out decision or a declared winner); the client reopens
+ * it locally. `step` (M6) is what the client wants to take back (`undoStep`); if the server's last step
+ * is a different one, e.g. because the same undo arrives twice, nothing is undone.
+ */
+export function undoVisit(deps: Deps, session: Session, matchId: string, step?: string): ActionResult {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
   const match = accessOf(m);
   const now = deps.now();
   if (!isEditable(match, now)) return { ok: false, reason: "match-closed" };
+  if (step !== undefined && step !== undoStep(m.state)) return { ok: false, reason: "out-of-sync" };
   const r = undoMatchVisit(m.state);
   if (!r.ok) return { ok: false, reason: r.reason };
   if (!canUndo(m.state, match, actorOf(session), now)) return { ok: false, reason: "forbidden" };

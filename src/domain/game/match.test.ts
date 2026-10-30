@@ -13,6 +13,7 @@ import {
   setLegStarter,
   undoMatchDart,
   undoMatchVisit,
+  undoStep,
   type MatchFormat,
   type MatchState,
 } from "./match";
@@ -158,6 +159,23 @@ describe("undoMatchVisit (server side)", () => {
 
   it("nothing to undo in a fresh match", () => {
     expect(undoMatchVisit(newMatch([A, B], rules, bestOf3))).toEqual({ ok: false, reason: "nothing-to-undo" });
+  });
+});
+
+describe("undoStep (M6: an undo names what it takes back)", () => {
+  it("the last visit by position, across the leg boundary; a play-out decision; a declared winner; nothing", () => {
+    const one = winLeg(newMatch([A, B], rules, bestOf3), A);
+    expect(undoStep(play(one, ...MISS))).toBe("visit:1:0");
+    expect(undoStep(one)).toBe(`visit:0:${String(currentLeg(one).visits.length - 1)}`);
+    const fixed = play(newMatch([A, B, C], rules, { legsToWinSet: 1, setsToWinMatch: 1 }), ...OUT, ...OUT);
+    expect(undoStep({ ...fixed, legs: [ok(startPlayOut(currentLeg(fixed)))] })).toBe("play-out:0");
+    expect(undoStep(ok(decideWinner(one, B)))).toBe("decision:b");
+    expect(undoStep(newMatch([A, B], rules, bestOf3))).toBeNull();
+  });
+
+  it("changes with every undo, so a repeated undo does not match any more", () => {
+    const two = play(winLeg(newMatch([A, B], rules, bestOf3), A), ...MISS);
+    expect(undoStep(ok(undoMatchVisit(two)))).not.toBe(undoStep(two));
   });
 });
 

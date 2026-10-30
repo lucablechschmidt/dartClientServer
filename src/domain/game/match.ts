@@ -170,6 +170,20 @@ export const undoMatchVisit = (m: MatchState): Result<MatchState, UndoError> => 
 };
 
 /**
+ * Names the step `undoMatchVisit` would take back: a declared winner, the play-out decision of a leg
+ * or the visit at its position. The client sends it with an undo, so a repeated send (lost reply)
+ * cannot take back a second step (M6).
+ */
+export function undoStep(m: MatchState): string | null {
+  if (m.decidedWinner) return `decision:${m.decidedWinner}`;
+  const base = withoutEmptyLegs(m);
+  const legIndex = base.legs.length - 1;
+  const leg = currentLeg(base);
+  if (playOutUndo(leg)) return `play-out:${legIndex}`;
+  return leg.visits.length > 0 ? `visit:${legIndex}:${leg.visits.length - 1}` : null;
+}
+
+/**
  * M9: when time runs short in a tournament, the winner can be declared after any finished leg (free
  * choice, the screen preselects the leader). The match is finished from then on.
  */

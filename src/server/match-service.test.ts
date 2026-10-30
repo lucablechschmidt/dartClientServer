@@ -58,8 +58,8 @@ describe("match service", () => {
     expect(r.view.board.players[0].score).toBe(321);
     expect(r.view.board.activePlayerId).toBe(b.id);
     expect(loadMatchView(deps, id)!.board).toEqual(r.view.board);
-    // same or later position → the client is stale
-    expect(commitVisit(deps, sessionAdmin, id, 0, 0, [T20, T20, T20])).toEqual({ ok: false, reason: "out-of-sync" });
+    // same position with other darts, or a later one → the client is stale
+    expect(commitVisit(deps, sessionAdmin, id, 0, 0, miss3)).toEqual({ ok: false, reason: "out-of-sync" });
     expect(commitVisit(deps, sessionAdmin, id, 0, 2, [T20, T20, T20])).toEqual({ ok: false, reason: "out-of-sync" });
     // incomplete visit without bust or checkout
     expect(commitVisit(deps, sessionAdmin, id, 0, 1, [T20, T20])).toEqual({ ok: false, reason: "out-of-sync" });
@@ -82,6 +82,23 @@ describe("match service", () => {
     // a third dart after the bust no longer belongs to this visit
     expect(undoVisit(deps, sessionAdmin, id).ok).toBe(true);
     expect(commitVisit(deps, sessionAdmin, id, 0, 2, [T20, T20, S(1)])).toEqual({ ok: false, reason: "out-of-sync" });
+  });
+
+  it("M6: a visit sent twice (lost reply) is stored once, also the checkout; an undo sent twice undoes once", () => {
+    const { id } = setup(301);
+    ok(commitVisit(deps, sessionAdmin, id, 0, 0, [T20, T20, T20]));
+    const again = ok(commitVisit(deps, sessionAdmin, id, 0, 0, [T20, T20, T20]));
+    expect(again.view.state.legs[0].visits).toHaveLength(1);
+    ok(commitVisit(deps, sessionAdmin, id, 0, 1, miss3));
+    const checkout = [T20, { field: 11, type: "triple" }, { field: 14, type: "double" }] as Dart[];
+    ok(commitVisit(deps, sessionAdmin, id, 0, 2, checkout));
+    expect(ok(commitVisit(deps, sessionAdmin, id, 0, 2, checkout)).view.status).toBe("finished");
+
+    const step = "visit:0:2";
+    expect(ok(undoVisit(deps, sessionAdmin, id, step)).view.state.legs[0].visits).toHaveLength(2);
+    expect(undoVisit(deps, sessionAdmin, id, step)).toEqual({ ok: false, reason: "out-of-sync" });
+    expect(loadMatchView(deps, id)!.state.legs[0].visits).toHaveLength(2);
+    expect(undoVisit(deps, sessionAdmin, id, "visit:0:1").ok).toBe(true);
   });
 
   it("rejects unknown matches and invalid darts", () => {

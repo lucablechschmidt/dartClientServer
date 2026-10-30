@@ -61,9 +61,9 @@ export async function setStarterAction(matchId: string, playerId: string): Promi
   return setStarter(deps, session, matchId, playerId);
 }
 
-export async function undoVisitAction(matchId: string): Promise<ActionResult> {
+export async function undoVisitAction(matchId: string, step?: string): Promise<ActionResult> {
   const { deps, session } = await requireSession();
-  return undoVisit(deps, session, matchId);
+  return undoVisit(deps, session, matchId, step);
 }
 
 export async function loadMatchAction(matchId: string): Promise<ActionResult> {
