@@ -66,6 +66,9 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
             {texts.modes[mode]}
           </Link>
         ))}
+        <Link href="/tournaments" className="min-h-touch px-4 py-1 text-accent">
+          {texts.tournaments}
+        </Link>
       </nav>
       {matches.length > 0 && (
         <section className="flex flex-col gap-2 px-4 pb-4">

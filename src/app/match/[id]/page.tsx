@@ -13,6 +13,7 @@ import {
   undoVisitAction,
 } from "@/server/match-actions";
 import { loadMatchView } from "@/server/match-service";
+import { tournamentOfMatch } from "@/server/tournament-service";
 import { requireSession } from "@/server/request";
 
 async function Match({ params }: { params: Promise<{ id: string }> }) {
@@ -20,6 +21,7 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
   const { deps, session } = await requireSession();
   const view = loadMatchView(deps, id, session);
   if (!view) notFound();
+  const tournamentId = tournamentOfMatch(deps, id);
   return (
     <ScoreboardScreen
       initial={view}
@@ -29,6 +31,7 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
       onPlayOut={setPlayOutAction}
       onSetStarter={setStarterAction}
       onDecideWinner={decideWinnerAction}
+      tournamentHref={tournamentId ? `/tournaments/${tournamentId}` : undefined}
       onLoad={loadMatchAction}
       onRestart={restartMatchAction}
       onCancel={cancelMatchAction}

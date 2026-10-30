@@ -1,17 +1,10 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { CheckoutHint } from "@/components/darts/checkout-hint";
-import { hintText } from "@/components/darts/hint-text";
 import { Keypad } from "@/components/darts/keypad";
-import { PlayerPanels } from "@/components/darts/player-panels";
 import { ScoreGrid } from "@/components/darts/score-grid";
 import { useVisitSync, type ActionReply as Reply, type MatchViewLike } from "@/components/darts/use-visit-sync";
-import { BackButton } from "@/components/ui/back-button";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
-import { TextButton } from "@/components/ui/form-controls";
-import { XmarkCircleIcon } from "@/components/ui/icons";
-import { ScreenHeader } from "@/components/ui/screen-header";
 import {
   currentLeg,
   matchCurrentPlayer,
@@ -22,13 +15,13 @@ import {
   projectMatch,
   type Dart,
   type MatchState,
-  type ModeId,
   type PlayerId,
-  type Rules,
 } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { CricketBoard } from "./cricket-board";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
+import { headerTitle, ScoreboardHeader } from "./scoreboard-header";
+import { StandardBoard } from "./standard-board";
 import { VictoryScreen } from "./victory-screen";
 
 export type { MatchViewLike };
@@ -43,17 +36,12 @@ type Props = {
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
+  /** M9: set for tournament games; the victory screen leads back there. */
+  tournamentHref?: string;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
   onCancel: (matchId: string) => Promise<unknown>;
 };
-
-/** Rules in the header: X01 start and in/out, Elimination target and out, the other modes their name (M7). */
-function headerTitle(mode: ModeId, rules: Rules, texts: Texts["game"]): string {
-  if (mode === "x01") return [rules.startScore, texts.inNames[rules.inRule], texts.outNames[rules.outRule]].join(" · ");
-  if (mode === "elimination") return [texts.modes.elimination, rules.startScore, texts.outNames[rules.outRule]].join(" · ");
-  return texts.modes[mode];
-}
 
 /** Identifies one finished-leg state, so closing the leg victory screen survives re-renders but not an undo. */
 const legKey = (m: MatchState) => `${m.legs.length}:${currentLeg(m).visits.length}`;
@@ -74,6 +62,7 @@ export function ScoreboardScreen({
   onLoad,
   onRestart,
   onCancel,
+  tournamentHref,
 }: Props) {
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
@@ -118,27 +107,13 @@ export function ScoreboardScreen({
   const lastName = view.lastPlayerId ? (initial.names[view.lastPlayerId] ?? "") : "";
 
   const header = (
-    <ScreenHeader
-      left={
-        initial.access.canCancel && isOpen ? (
-          <button
-            type="button"
-            onClick={() => setAsking("cancel")}
-            aria-label={texts.cancel}
-            className="grid min-h-touch min-w-touch place-items-center text-fg"
-          >
-            <XmarkCircleIcon className="h-8 w-8" />
-          </button>
-        ) : (
-          <BackButton href="/" label={texts.back} />
-        )
-      }
-      title={<span className="text-fluid-sm text-fg-muted tabular-nums">{rules}</span>}
-      right={
-        <span className={`text-fluid-sm ${error || sync === "unsaved" ? "text-key-undo" : "text-fg-muted"}`} role="status" data-sync={sync}>
-          {status}
-        </span>
-      }
+    <ScoreboardHeader
+      title={rules}
+      status={status}
+      sync={sync}
+      hasError={error !== null}
+      onCancel={initial.access.canCancel && isOpen ? () => setAsking("cancel") : null}
+      texts={texts}
     />
   );
 
@@ -170,6 +145,7 @@ export function ScoreboardScreen({
               onUndoWinningDart={undo}
               onPlayOut={playOutOk ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
+              tournamentHref={tournamentHref}
             />
           }
         />
@@ -223,31 +199,14 @@ export function ScoreboardScreen({
 
   return (
     <>
-      <ScoreGrid
+      <StandardBoard
+        board={board}
+        texts={texts}
         header={header}
-        panels={
-          <div className="h-full px-3">
-            <PlayerPanels
-              players={board.players}
-              texts={{ darts: texts.darts, average: texts.average, visit: texts.visit }}
-              onSelect={starterOk ? chooseStarter : undefined}
-              selectLabel={texts.toStart}
-            />
-          </div>
-        }
-        hint={
-          <div className="flex items-center gap-2 px-3">
-            <div className="flex-1">
-              <CheckoutHint hint={turnHint ?? hintText(board.hint, texts)} />
-            </div>
-            {view.playOut && playOutOk && (
-              <TextButton tone="danger" onClick={() => setAsking("resign")}>
-                {texts.resign}
-              </TextButton>
-            )}
-          </div>
-        }
-        keypad={<div className="h-full px-3 pb-3">{keypad}</div>}
+        keypad={keypad}
+        turnHint={turnHint}
+        onSelectStarter={starterOk ? chooseStarter : undefined}
+        onResign={view.playOut && playOutOk ? () => setAsking("resign") : null}
       />
       {confirm}
     </>

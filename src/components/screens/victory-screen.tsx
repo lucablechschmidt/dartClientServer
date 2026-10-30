@@ -8,6 +8,8 @@ type Props = {
   texts: Texts["game"];
   onUndoWinningDart: () => void;
   onRestart: () => Promise<void>;
+  /** M9: a tournament game leads back to its tournament instead of offering a rematch. */
+  tournamentHref?: string;
   /** M5 plan §9.2: set when the last player may still play out (3+ players, this device may enter for him). */
   onPlayOut: (() => void) | null;
   pending: boolean;
@@ -16,7 +18,7 @@ type Props = {
 const button = "min-h-touch w-full rounded-tile px-4 font-medium";
 
 /** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
-export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending }: Props) {
+export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending, tournamentHref }: Props) {
   const players = view.board.players;
   const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
@@ -69,11 +71,17 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
               {texts.playOut.replace("{name}", last.name)}
             </button>
           )}
-          <form action={onRestart}>
-            <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>
-              {texts.restart}
-            </button>
-          </form>
+          {tournamentHref ? (
+            <Link href={tournamentHref} className={`${button} inline-flex items-center justify-center bg-accent text-on-accent`}>
+              {texts.toTournament}
+            </Link>
+          ) : (
+            <form action={onRestart}>
+              <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>
+                {texts.restart}
+              </button>
+            </form>
+          )}
           <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>
             {texts.home}
           </Link>

@@ -23,6 +23,11 @@ type Props = SetupProps & {
   options: (playerCount: number) => ReactNode;
   /** Rules for the line below the start button ("501 · Single In / Double Out"). */
   summary: string[];
+  /** M9: the tournament setup reuses the shell with its own heading, way back and start condition. */
+  heading?: { title: string; subtitle: string };
+  backHref?: string;
+  canStart?: (playerCount: number) => boolean;
+  startLabel?: string;
 };
 
 const FORM_ID = "new-match";
@@ -40,7 +45,20 @@ export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((val
  * PlayerPicker, and the start button at the bottom with a summary. The picker sits outside the
  * form (its own guest form); the start button belongs to the form via `form=`.
  */
-export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGuest, options, summary }: Props) {
+export function SetupShell({
+  mode,
+  players,
+  texts,
+  commonTexts,
+  onStart,
+  onAddGuest,
+  options,
+  summary,
+  heading,
+  backHref = "/",
+  canStart = (n) => n > 0,
+  startLabel,
+}: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
   const toggle = (id: string) => setOrder((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
@@ -52,12 +70,12 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
   return (
     <div className="flex flex-1 flex-col bg-bg-grouped text-fg">
       <div className="flex px-3">
-        <BackButton href="/" label={commonTexts.back} />
+        <BackButton href={backHref} label={commonTexts.back} />
       </div>
       <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-4">
         <div>
-          <h1 className="text-title font-bold tracking-tight">{texts.title}</h1>
-          <p className="text-sm text-fg-muted">{texts.modes[mode]}</p>
+          <h1 className="text-title font-bold tracking-tight">{heading?.title ?? texts.title}</h1>
+          <p className="text-sm text-fg-muted">{heading?.subtitle ?? texts.modes[mode]}</p>
         </div>
 
         <form id={FORM_ID} action={onStart} className="flex flex-col gap-3">
@@ -103,10 +121,10 @@ export function SetupShell({ mode, players, texts, commonTexts, onStart, onAddGu
           <button
             type="submit"
             form={FORM_ID}
-            disabled={order.length === 0}
+            disabled={!canStart(order.length)}
             className="flex min-h-cta w-full items-center justify-between rounded-panel bg-accent px-5 text-lg font-bold text-on-accent disabled:opacity-40"
           >
-            {texts.start}
+            {startLabel ?? texts.start}
             <ArrowRightIcon className="size-icon" />
           </button>
           <p className="mt-2 text-center text-xs text-fg-muted">
