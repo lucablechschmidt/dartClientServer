@@ -30,7 +30,9 @@ per coherent change (not per file, not a whole day in one): `type(scope): summar
 lower case, no period, at most ~72 characters, details in the body. Types: `feat`, `fix`, `refactor`,
 `test`, `docs`, `style` (formatting only), `perf`, `build`, `ci`, `chore`. Scopes are the area touched,
 e.g. `x01`, `cricket`, `elimination`, `splitscore`, `game`, `setup`, `scoreboard`, `server`, `db`,
-`auth`, `ui`, `theme`, `smoke`, `architecture`. Breaking changes get `!` and a `BREAKING CHANGE:` footer.
+`auth`, `ui`, `theme`, `smoke`, `architecture`. Breaking changes get `!` and a `BREAKING CHANGE:` footer. `commitlint`
+(`commitlint.config.mjs`) checks every message in a `commit-msg` hook, and a `pre-commit` hook runs Prettier
+and ESLint on the staged files (`lefthook.yml`, installed by `npm install`; skip once with `LEFTHOOK=0`).
 
 Note: `/Users/utrapp/repos/CLAUDE.md` (one directory up) belongs to a different
 project, the HCI/Flutter course material. Its rules about labs, personas and
