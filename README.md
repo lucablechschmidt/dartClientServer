@@ -223,7 +223,23 @@ flowchart RL
   app --> i18n
 ```
 
-Arrows are the allowed imports; ESLint rejects all others. Components get data and actions only as props from the pages. Services get everything through `Deps`: the repositories `players`, `matches` and `auth`, plus clock, ids, randomness, event hub and transaction. That is why they run in tests against in-memory repositories (`src/server/testing.ts`). Only visits are stored; remaining score, winner and statistics are always computed from them (`docs/architecture.md` §6).
+Arrows are the allowed imports; ESLint rejects all others. Components get data and actions only as props from the pages. Services get everything through `Deps`: the repositories `players`, `matches`, `auth` and `tournaments`, plus clock, ids, randomness, event hub and transaction. That is why they run in tests against in-memory repositories (`src/server/testing.ts`). Only visits are stored; remaining score, winner and statistics are always computed from them (`docs/architecture.md` §6).
+
+### Adding a language
+
+The app is German only for now; every visible text lives in `src/i18n/de.ts`.
+
+1. Create `src/i18n/en.ts` with `export const en: Texts = { … }` (`Texts` from `./de`) and translate every text. Keep placeholders such as `{n}` and `{name}`; the components fill them in.
+2. Run `npm run typecheck`. `Texts` has the keys of `de` with plain strings as values, so a missing or misspelled key fails the check.
+
+There is no language selection yet. Pages and server actions import `de` directly, and `src/app/layout.tsx` sets `lang="de"`. Choosing by the browser's (that is, the system's) language would mean:
+
+- A helper in `src/i18n` picks the texts from the `Accept-Language` header and falls back to `de`.
+- Pages call that helper (they already read the request via `connection()`) instead of importing `de`, and pass the texts on as props. Components need no change.
+- The layout sets `lang` to the chosen language.
+- The smoke test drives the app by its German labels, so it then needs `locale: "de-DE"` in its Playwright contexts.
+
+The component tests take every label from `de`, so they stay as they are. To run one against another language too, wrap it in `describe.each([de, en])`.
 
 ### Entering a visit
 
