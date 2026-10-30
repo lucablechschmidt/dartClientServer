@@ -29,6 +29,7 @@ Lies `CLAUDE.md`, `docs/project.md` (oben die Übersicht aller Meilensteine) und
 **So arbeiten wir**
 
 - Kein Code ohne abgestimmten Plan: Jeder Meilenstein hat `docs/mN-plan.md` mit Schritten (Dateien, Tests, Prüfung) und offenen Fragen; vor dem Start mit Luca durchgehen und anpassen, dann Umsetzung Schritt für Schritt, ein Commit pro grünem Schritt. Erledigte Pläne wandern nach `docs/archive/`, `project.md` wird abgehakt.
+- Commits nach Conventional Commits auf Englisch, ein Commit pro zusammenhängender Änderung (`feat(cricket): …`, `fix(setup): …`, `docs(architecture): …`; Details in `CLAUDE.md`).
 - Vor jedem Commit: `npm run lint`, `npm run typecheck`, `npm test`. Vor jedem Deploy: `./scripts/ci.sh` oder mindestens `./scripts/smoke.sh` (Produktions-Build, Standalone auf Port 3100, Browser-Durchlauf, Screenshots nach `docs/screenshots/`). Nie gegen `next dev` testen (lädt in Schleife neu), `next start` geht mit `output: standalone` nicht.
 - **Deploy nur auf ausdrücklichen Zuruf**, nie zusammen mit dem Commit in einem Befehl. Vorher committen, sonst heißt das Image `<sha>-dirty`. Ablauf und Rollback: README „Deploying to the Pi“.
 - `ssh pi` braucht den Schlüssel im Agent: `ssh-add -l` muss den ED25519-Schlüssel zeigen, sonst `ssh-add --apple-use-keychain ~/.ssh/id_ed25519` in einem echten Terminal.

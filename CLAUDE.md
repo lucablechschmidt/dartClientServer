@@ -25,6 +25,13 @@ legacy keypad, X01 first and the other three modes later, free games have 2–n
 players with placements, tournaments are 1 vs 1, Pi 3 B+ so builds happen only
 on the dev machine. Docs in `docs/` and UI texts (`src/i18n/de.ts`) are German; everything else is English, including `README.md`: identifiers, comments, JSDoc, test names, log and error messages, script output, config comments and commit messages.
 
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) in English, one commit
+per coherent change (not per file, not a whole day in one): `type(scope): summary` in the imperative,
+lower case, no period, at most ~72 characters, details in the body. Types: `feat`, `fix`, `refactor`,
+`test`, `docs`, `style` (formatting only), `perf`, `build`, `ci`, `chore`. Scopes are the area touched,
+e.g. `x01`, `cricket`, `elimination`, `splitscore`, `game`, `setup`, `scoreboard`, `server`, `db`,
+`auth`, `ui`, `theme`, `smoke`, `architecture`. Breaking changes get `!` and a `BREAKING CHANGE:` footer.
+
 Note: `/Users/utrapp/repos/CLAUDE.md` (one directory up) belongs to a different
 project, the HCI/Flutter course material. Its rules about labs, personas and
 anchor validation do not apply here.
