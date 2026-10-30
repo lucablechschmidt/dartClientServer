@@ -462,6 +462,51 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   }
 }
 
+// M9: a knockout tournament for three over the app: one bye, a semifinal, the final, back via "Zum Turnier"
+{
+  const tap = async (...names) => {
+    for (const n of names) {
+      await key(n).click();
+      await page.waitForTimeout(120);
+    }
+    // Next keeps the previous match page hidden in the DOM; only the visible status line counts.
+    if (await page.locator("[role=status]:visible").count())
+      await page.locator("[role=status][data-sync=saved]:visible").waitFor({ state: "attached", timeout: 5000 });
+  };
+  await page.goto(`${base}/`, { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: "Turniere" }).click();
+  await page.getByRole("link", { name: "Neues Turnier" }).click();
+  await page.waitForURL(/\/tournaments\/new/);
+  await page.getByLabel("Name").fill(`Cup ${stamp}`);
+  await page.getByRole("button", { name: "Format: Jeder gegen jeden" }).click();
+  await page.getByRole("button", { name: "K.-o.", exact: true }).click();
+  await page.getByRole("button", { name: "Startpunktzahl: 501" }).click();
+  await page.getByRole("button", { name: "301", exact: true }).click();
+  await page.getByRole("button", { name: "Abschluss: Double Out" }).click();
+  await page.getByRole("button", { name: "Single Out", exact: true }).click();
+  for (const n of [ADMIN, `A${stamp}`, `B${stamp}`]) await page.getByRole("button", { name: `${n} auswählen` }).click();
+  await page.screenshot({ path: `${shots}/tournament-setup.png` });
+  await page.getByRole("button", { name: "Turnier starten" }).click();
+  await page.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(new URL(u).pathname));
+  await page.getByRole("heading", { name: `Cup ${stamp}` }).waitFor();
+  const tournamentUrl = page.url();
+  expect((await page.getByText("Freilos").count()) === 1, "tournament: one bye in a bracket of four");
+  // Play every ready game: the first player checks out 301 in two visits (180, then T20 T20 1)
+  for (let game = 0; game < 2; game++) {
+    await page.getByRole("button", { name: "Spielen" }).first().click();
+    await page.waitForURL(/\/match\//);
+    await tap("Triple", "20", "Triple", "20", "Triple", "20");
+    await tap("0", "0", "0");
+    await tap("Triple", "20", "Triple", "20", "1");
+    await page.getByRole("link", { name: "Zum Turnier" }).click();
+    await page.waitForURL(tournamentUrl);
+    await page.getByRole("heading", { name: `Cup ${stamp}` }).waitFor();
+  }
+  expect((await page.getByText(/^Sieger: /).count()) === 1, "tournament: the final decides the winner");
+  await page.screenshot({ path: `${shots}/tournament.png`, fullPage: true });
+  log("tournament ok");
+}
+
 // Reset for A: A's old session ends, the new password applies
 {
   await page.goto(`${base}/account`, { waitUntil: "networkidle" });
