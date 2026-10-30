@@ -60,7 +60,7 @@ export function resultText(result: RecentMatchItem["result"], t: Texts["overview
 export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Props) {
   return (
     <div className="flex flex-1 flex-col">
-      <nav aria-label={texts.title} className="fluid-text-xl flex flex-1 flex-col items-center justify-center gap-6 py-8">
+      <nav aria-label={texts.title} className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-fluid-xl">
         {MODES.map((mode) => (
           <Link key={mode} href={`/new/${mode}`} className="min-h-touch px-4 py-1 text-fg">
             {texts.modes[mode]}

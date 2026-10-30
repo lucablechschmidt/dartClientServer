@@ -44,6 +44,7 @@
   --on-accent: #ffffff; /* text and icons on accent, undo red and hint gray */
   --scrim: rgb(0 0 0 / 0.4); /* behind the confirm sheet */
   --qr-bg: #ffffff; /* QR codes need a light ground in both themes to scan */
+  --modifier-ring: color-mix(in srgb, var(--fg) 60%, transparent); /* ring around an active Double/Triple key */
 
   --touch-min: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -90,6 +91,7 @@
   --color-on-accent: var(--on-accent);
   --color-scrim: var(--scrim);
   --color-qr-bg: var(--qr-bg);
+  --color-modifier-ring: var(--modifier-ring);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --spacing-touch: var(--touch-min);
@@ -109,6 +111,10 @@
   --text-title--line-height: 1.2;
   --text-display: 2.25rem; /* start score 501 */
   --text-display--line-height: 1.1;
+  /* Fluid sizes of the scoring screens (theme.md §3 rule 4): clamp() over vmin */
+  --text-fluid-sm: clamp(0.8rem, 2.8vmin, 1.1rem);
+  --text-fluid-lg: clamp(1.1rem, 4.5vmin, 2rem);
+  --text-fluid-xl: clamp(1.5rem, 7vmin, 3.5rem);
 
   /* Fixed sizes of reusable parts (theme.md §3); fluid values use clamp() with vmin/vw/vh */
   --spacing-row: 3.4rem; /* list row height (CardRow) */
@@ -145,9 +151,6 @@
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
   }
-  .tabular {
-    font-variant-numeric: tabular-nums;
-  }
 }
 
 /*
@@ -155,67 +158,54 @@
  * Portrait: header / panels / hint / keypad stacked.
  * Landscape: panels left, hint + keypad right.
  */
-@layer components {
-  .score-grid {
-    display: grid;
-    height: 100dvh;
-    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-    gap: 0.5rem;
-    grid-template-areas:
-      "header"
-      "panels"
-      "hint"
-      "keypad";
-    grid-template-rows: auto minmax(0, 2fr) auto minmax(0, 2fr);
-    grid-template-columns: minmax(0, 1fr);
-    overflow: hidden;
-  }
+@utility score-grid {
+  display: grid;
+  height: 100dvh;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  gap: 0.5rem;
+  grid-template-areas:
+    "header"
+    "panels"
+    "hint"
+    "keypad";
+  grid-template-rows: auto minmax(0, 2fr) auto minmax(0, 2fr);
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+
   @media (orientation: landscape) and (min-aspect-ratio: 5/4) {
-    .score-grid {
-      grid-template-areas:
-        "header header"
-        "panels hint"
-        "panels keypad";
-      grid-template-rows: auto auto minmax(0, 1fr);
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
+    grid-template-areas:
+      "header header"
+      "panels hint"
+      "panels keypad";
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .score-grid > [data-slot="header"] {
+  & > [data-slot="header"] {
     grid-area: header;
   }
-  .score-grid > [data-slot="panels"] {
+  & > [data-slot="panels"] {
     grid-area: panels;
     min-height: 0;
   }
-  .score-grid > [data-slot="hint"] {
+  & > [data-slot="hint"] {
     grid-area: hint;
   }
-  .score-grid > [data-slot="keypad"] {
+  & > [data-slot="keypad"] {
     grid-area: keypad;
     min-height: 0;
   }
-  .score-grid > [data-slot="body"] {
+  & > [data-slot="body"] {
     grid-row: 2 / -1;
     grid-column: 1 / -1;
     min-height: 0;
   }
+}
 
-  /* Header row: back button, centred title, equally wide right slot (ScreenHeader) */
-  .header-grid {
-    display: grid;
-    grid-template-columns: minmax(3rem, auto) 1fr minmax(3rem, auto);
-    align-items: center;
-  }
-
-  .fluid-text-lg {
-    font-size: clamp(1.1rem, 4.5vmin, 2rem);
-  }
-  .fluid-text-xl {
-    font-size: clamp(1.5rem, 7vmin, 3.5rem);
-  }
-  .fluid-text-sm {
-    font-size: clamp(0.8rem, 2.8vmin, 1.1rem);
-  }
+/* Header row: back button, centred title, equally wide right slot (ScreenHeader) */
+@utility header-grid {
+  display: grid;
+  grid-template-columns: minmax(3rem, auto) 1fr minmax(3rem, auto);
+  align-items: center;
 }
 
 /* Safe areas (notch, home indicator); pages use these instead of inline styles */

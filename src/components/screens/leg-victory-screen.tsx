@@ -37,9 +37,9 @@ export function LegVictoryScreen({ view, names, texts, canUndo, onContinue, onUn
       }}
       className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4 pt-safe pb-safe text-fg"
     >
-      <p className="fluid-text-xl font-semibold">{texts.legWon.replace("{name}", winner)}</p>
-      <p className="fluid-text-lg tabular">{scoreLine(view, players, texts)}</p>
-      <p className="fluid-text-sm text-fg-muted">{texts.tapToContinue}</p>
+      <p className="text-fluid-xl font-semibold">{texts.legWon.replace("{name}", winner)}</p>
+      <p className="text-fluid-lg tabular-nums">{scoreLine(view, players, texts)}</p>
+      <p className="text-fluid-sm text-fg-muted">{texts.tapToContinue}</p>
       <button
         type="button"
         disabled={!canUndo}

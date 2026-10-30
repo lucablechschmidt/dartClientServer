@@ -35,7 +35,7 @@ export function CricketBoard({ board, names, texts, header, keypad, isOpen, turn
       keypad={
         <div className="flex h-full flex-col gap-2 px-3 pb-3">
           <div className="min-h-0 flex-1">{keypad}</div>
-          <p className="fluid-text-sm text-center text-fg-muted">{turnHint ?? next}</p>
+          <p className="text-center text-fluid-sm text-fg-muted">{turnHint ?? next}</p>
         </div>
       }
     />

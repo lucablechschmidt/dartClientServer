@@ -30,7 +30,7 @@ export function GuestsAdminSection({
         {guests.map((p) => (
           <CardRow key={p.id} className="flex-col items-stretch">
             <div className="flex items-center justify-between gap-2">
-              <span className="fluid-text-lg truncate">{p.name}</span>
+              <span className="truncate text-fluid-lg">{p.name}</span>
               <TextButton onClick={() => void promote(p.id)}>{t.promoteGuest}</TextButton>
             </div>
             <ErrorLine error={errors[p.id]} texts={texts.errors} />

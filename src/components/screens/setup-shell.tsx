@@ -149,7 +149,7 @@ export function ScoreChoice({
       <ChoiceMenu name="startScore" label={title} value={value} onChange={onChange} options={options} align="end">
         {(current, open) => (
           <span className="flex items-center gap-1">
-            <span className="tabular text-display font-bold">{current}</span>
+            <span className="text-display font-bold tabular-nums">{current}</span>
             <DisclosureChevron open={open} />
           </span>
         )}

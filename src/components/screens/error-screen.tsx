@@ -15,7 +15,7 @@ type Props = {
 export function ErrorScreen({ title, text, homeLabel, retry }: Props) {
   return (
     <main className="flex min-h-dvh flex-col pt-safe pb-safe">
-      <ScreenHeader title={<h1 className="fluid-text-lg">{title}</h1>} />
+      <ScreenHeader title={<h1 className="text-fluid-lg">{title}</h1>} />
       <GroupedSection>
         <CardList>
           <CardRow className="justify-center text-center text-fg-muted">{text}</CardRow>

@@ -59,14 +59,14 @@ function fieldKey(base: string, state: KeypadState): string {
 /** Colors as in ButtonsView: numbers black/white, in modifier mode dimmed with yellow (Double) or green (Triple) text. */
 function keyClasses(key: KeypadKey, state: KeypadState): string {
   const base =
-    "min-h-touch rounded-panel fluid-text-lg font-normal tracking-tight text-key-fg select-none active:scale-95 transition-transform disabled:opacity-30";
+    "min-h-touch rounded-panel text-fluid-lg font-normal tracking-tight text-key-fg select-none active:scale-95 transition-transform disabled:opacity-30";
   switch (key.kind) {
     case "undo":
       return `${base} bg-key-undo`;
     case "double":
-      return `${base} bg-key-double ${state.modifier === "double" ? "ring-4 ring-fg/60" : ""}`;
+      return `${base} bg-key-double ${state.modifier === "double" ? "ring-4 ring-modifier-ring" : ""}`;
     case "triple":
-      return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-fg/60" : ""}`;
+      return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-modifier-ring" : ""}`;
     case "number":
       return key.value === 0 ? `${base} bg-key-zero` : fieldKey(base, state);
     case "bull":

@@ -34,7 +34,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
 
   return (
     <div className="h-full overflow-x-auto rounded-panel bg-card-bg text-fg">
-      <table aria-label={texts.marks} className="fluid-text-sm h-full w-full border-collapse">
+      <table aria-label={texts.marks} className="h-full w-full border-collapse text-fluid-sm">
         <thead>
           <tr>
             <th scope="col" className="w-cricket-label px-2 pb-1 text-left align-bottom text-xs font-semibold text-fg-muted uppercase">
@@ -46,7 +46,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
                 <span className="flex flex-col items-center leading-tight">
                   <span className="min-h-icon-inline text-xs font-semibold text-accent uppercase">{isActive ? texts.onTurn : null}</span>
                   <span className="max-w-full truncate font-semibold">{p.name}</span>
-                  <span className={`fluid-text-lg tabular font-bold ${isActive ? "text-accent" : ""}`} data-score>
+                  <span className={`text-fluid-lg font-bold tabular-nums ${isActive ? "text-accent" : ""}`} data-score>
                     {p.score}
                   </span>
                 </span>
@@ -81,7 +81,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
                 : "";
             return (
               <tr key={f.field} className="border-t border-separator">
-                <th scope="row" className={`tabular px-2 text-left font-bold ${labelTone}`}>
+                <th scope="row" className={`px-2 text-left font-bold tabular-nums ${labelTone}`}>
                   {label}
                 </th>
                 {players.map((p) => {
@@ -91,7 +91,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
                     <td key={p.id} className={`border-l border-separator px-1 text-center ${column(p.id)}`}>
                       <span
                         aria-label={`${p.name}, ${label}: ${marks}`}
-                        className={`grid place-items-center rounded-box leading-tight ${tone} ${marks === 0 ? "text-fg-muted" : "fluid-text-lg font-bold"}`}
+                        className={`grid place-items-center rounded-box leading-tight ${tone} ${marks === 0 ? "text-fg-muted" : "text-fluid-lg font-bold"}`}
                       >
                         <Mark marks={marks} symbols={texts.markSymbols} />
                       </span>
@@ -111,7 +111,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
 export function CricketTurn({ title, player, visitLabel }: { title: string; player: PlayerPanelData | undefined; visitLabel: string }) {
   return (
     <div className="flex flex-col gap-2 px-3">
-      <p className="fluid-text-xl truncate rounded-full bg-hint-bg px-4 text-center text-fg" aria-live="polite">
+      <p className="truncate rounded-full bg-hint-bg px-4 text-center text-fluid-xl text-fg" aria-live="polite">
         {title}
       </p>
       {player && <DartSlots slots={player.slots} isBust={player.isBust} label={visitLabel} />}

@@ -31,13 +31,13 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2">
         <div className="text-center">
-          <p className="fluid-text-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
-          <p className="fluid-text-sm tabular text-fg-muted">
+          <p className="text-fluid-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
+          <p className="text-fluid-sm text-fg-muted tabular-nums">
             🎯 {winner.darts}
             {avg(winner.average)}
           </p>
           {view.score && (
-            <p className="fluid-text-sm tabular">
+            <p className="text-fluid-sm tabular-nums">
               {scoreLine(
                 view,
                 players.map((p) => p.id),
@@ -46,12 +46,12 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
             </p>
           )}
           {view.board.total !== undefined && (
-            <p className="fluid-text-sm tabular">{texts.total.replace("{n}", String(view.board.total))}</p>
+            <p className="text-fluid-sm tabular-nums">{texts.total.replace("{n}", String(view.board.total))}</p>
           )}
         </div>
-        <ul className="fluid-text-sm flex flex-col gap-1">
+        <ul className="flex flex-col gap-1 text-fluid-sm">
           {others.map((p) => (
-            <li key={p.id} className="tabular flex justify-between gap-2">
+            <li key={p.id} className="flex justify-between gap-2 tabular-nums">
               <span>{places ? `${view.places[p.id]}. ${p.name}` : p.name}</span>
               <span>
                 {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`}

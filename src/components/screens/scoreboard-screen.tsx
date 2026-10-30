@@ -130,9 +130,9 @@ export function ScoreboardScreen({
           <BackButton href="/" label={texts.back} />
         )
       }
-      title={<span className="fluid-text-sm tabular text-fg-muted">{rules}</span>}
+      title={<span className="text-fluid-sm text-fg-muted tabular-nums">{rules}</span>}
       right={
-        <span className={`fluid-text-sm ${error || sync === "unsaved" ? "text-key-undo" : "text-fg-muted"}`} role="status" data-sync={sync}>
+        <span className={`text-fluid-sm ${error || sync === "unsaved" ? "text-key-undo" : "text-fg-muted"}`} role="status" data-sync={sync}>
           {status}
         </span>
       }

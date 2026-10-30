@@ -64,7 +64,7 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
       </CardRow>
     ) : (
       <CardRow key={p.id}>
-        <span className="fluid-text-lg truncate">{p.name}</span>
+        <span className="truncate text-fluid-lg">{p.name}</span>
         {mayEdit(p) ? (
           <button
             type="button"

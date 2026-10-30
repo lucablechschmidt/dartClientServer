@@ -92,7 +92,7 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
                 )}
                 {selected ? (
                   <span
-                    className="tabular grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent"
+                    className="grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent tabular-nums"
                     aria-label={texts.selected.replace("{n}", String(pos + 1))}
                   >
                     {pos + 1}

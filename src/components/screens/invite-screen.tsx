@@ -20,7 +20,7 @@ export function InviteScreen({ info, texts, onRedeem }: Props) {
   const [state, action, pending] = useActionState(onRedeem, { error: null });
   return (
     <>
-      <ScreenHeader title={<h1 className="fluid-text-lg">{texts.title}</h1>} />
+      <ScreenHeader title={<h1 className="text-fluid-lg">{texts.title}</h1>} />
       <GroupedSection>
         {info === null ? (
           <CardList>
@@ -36,7 +36,7 @@ export function InviteScreen({ info, texts, onRedeem }: Props) {
                   </Field>
                 </CardRow>
               ) : (
-                <CardRow className="fluid-text-lg justify-center">{texts.forPlayer.replace("{name}", info.playerName)}</CardRow>
+                <CardRow className="justify-center text-fluid-lg">{texts.forPlayer.replace("{name}", info.playerName)}</CardRow>
               )}
               <CardRow>
                 <Field label={texts.password}>

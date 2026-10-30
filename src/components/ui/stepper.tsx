@@ -41,7 +41,7 @@ export function Stepper({
         >
           <MinusIcon className="size-icon-sm" />
         </button>
-        <span className="tabular px-1 text-center text-lg font-semibold" aria-live="polite">
+        <span className="px-1 text-center text-lg font-semibold tabular-nums" aria-live="polite">
           {value}
         </span>
         <button

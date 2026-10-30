@@ -18,7 +18,7 @@ export function LoginScreen({ texts, next, onLogin }: Props) {
   const [state, action, pending] = useActionState(onLogin, { error: null });
   return (
     <>
-      <ScreenHeader title={<h1 className="fluid-text-lg">{texts.title}</h1>} />
+      <ScreenHeader title={<h1 className="text-fluid-lg">{texts.title}</h1>} />
       <GroupedSection>
         <form action={action}>
           <input type="hidden" name="next" value={next} />

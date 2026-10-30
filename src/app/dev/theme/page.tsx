@@ -26,6 +26,7 @@ const TOKENS = [
   "on-accent",
   "scrim",
   "qr-bg",
+  "modifier-ring",
 ];
 
 /** Literal class names so Tailwind generates them; one per token in TOKENS. */
@@ -53,6 +54,7 @@ const SWATCH: Record<string, string> = {
   "on-accent": "bg-on-accent",
   scrim: "bg-scrim",
   "qr-bg": "bg-qr-bg",
+  "modifier-ring": "bg-modifier-ring",
 };
 
 const KEYS = [
@@ -84,7 +86,7 @@ export default function ThemeGallery() {
     <ScoreGrid
       header={
         <div className="flex items-center justify-between px-3 py-2">
-          <span className="fluid-text-sm text-fg-muted">/dev/theme</span>
+          <span className="text-fluid-sm text-fg-muted">/dev/theme</span>
           <ThemeToggle labels={{ label: de.theme.label, system: de.theme.system, light: de.theme.light, dark: de.theme.dark }} />
         </div>
       }
@@ -95,15 +97,15 @@ export default function ThemeGallery() {
               key={name}
               className={`flex flex-col justify-between rounded-panel border-3 bg-frame-bg p-3 text-frame-text ${i === 0 ? "border-frame-active" : "border-frame-fg"}`}
             >
-              <div className="fluid-text-lg flex justify-between">
+              <div className="flex justify-between text-fluid-lg">
                 <span>{name}</span>
-                <span className="tabular font-semibold">{i === 0 ? 321 : 501}</span>
+                <span className="font-semibold tabular-nums">{i === 0 ? 321 : 501}</span>
               </div>
-              <div className="fluid-text-sm flex gap-3 opacity-70">
+              <div className="flex gap-3 text-fluid-sm opacity-70">
                 <span>🎯 {i === 0 ? 3 : 0}</span>
-                <span className="tabular">{i === 0 ? "60.00" : "0.00"}</span>
+                <span className="tabular-nums">{i === 0 ? "60.00" : "0.00"}</span>
               </div>
-              <div className="fluid-text-lg tabular flex justify-center gap-4">
+              <div className="flex justify-center gap-4 text-fluid-lg tabular-nums">
                 {(i === 0 ? ["T20", "T20", "T20"] : ["–", "–", "–"]).map((d, j) => (
                   <span key={j} className={j === 0 && i === 1 ? "border-b-2 border-frame-active" : ""}>
                     {d}
@@ -114,14 +116,14 @@ export default function ThemeGallery() {
           ))}
         </div>
       }
-      hint={<div className="fluid-text-sm mx-3 rounded-full bg-hint-bg px-4 py-1 text-center text-on-accent">T20, T20, Bullseye</div>}
+      hint={<div className="mx-3 rounded-full bg-hint-bg px-4 py-1 text-center text-fluid-sm text-on-accent">T20, T20, Bullseye</div>}
       keypad={
         <div className="grid h-full grid-cols-5 grid-rows-5 gap-1.5 px-3 pb-3">
           {KEYS.flat().map((label) => (
             <button
               key={label}
               type="button"
-              className={`fluid-text-lg min-h-touch rounded-panel font-medium text-key-fg ${keyClass(label)}`}
+              className={`min-h-touch rounded-panel text-fluid-lg font-medium text-key-fg ${keyClass(label)}`}
             >
               {label}
             </button>
@@ -136,7 +138,7 @@ export function TokenTable() {
   return (
     <ul className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-4">
       {TOKENS.map((t) => (
-        <li key={t} className="fluid-text-sm flex items-center gap-2">
+        <li key={t} className="flex items-center gap-2 text-fluid-sm">
           <span className={`inline-block size-8 rounded-box border border-frame-fg ${SWATCH[t]}`} />
           <code>--{t}</code>
         </li>
