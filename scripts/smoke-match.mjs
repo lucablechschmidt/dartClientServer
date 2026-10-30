@@ -401,10 +401,28 @@ expect(activeName.startsWith(`B${stamp}`), `restart: B starts (active panel: ${a
   await tap("Triple", "19", "Triple", "18", ...MISS, "Triple", "17", "Triple", "16", "Triple", "15", ...MISS);
   expect((await page.getByText(`Nächster Spieler: B${stamp}`).count()) === 1, "cricket: the next player below the keypad");
   expect((await page.getByRole("button", { name: "1", exact: true }).count()) === 0, "cricket: reduced keypad without 1–14");
-  await page.screenshot({ path: `${shots}/match-cricket.png` });
   await tap("Double", "Bull", "Bull", "20");
   await page.getByText(`A${stamp} gewinnt!`).waitFor({ timeout: 5000 });
   log("cricket ok");
+
+  // Cricket with three players, for the screenshot: every state of the table at once
+  await page.goto(`${base}/new/cricket`, { waitUntil: "networkidle" });
+  for (const n of [ADMIN, `A${stamp}`, `B${stamp}`]) await page.getByRole("button", { name: `${n} auswählen` }).click();
+  await page.getByRole("button", { name: "Spiel starten" }).click();
+  await page.waitForURL(/\/match\//);
+  await tap("Triple", "20", "Triple", "19", "18"); // admin: 20 and 19 closed, 18 one mark
+  await tap("Triple", "20", "Double", "19", "0"); // A: 20 closed, 19 two marks
+  await tap("Triple", "20", "17", "17"); // B: 20 closed (now by everyone), 17 two marks
+  const table = page.getByRole("table", { name: "Marks" });
+  expect(
+    (await table.getByRole("rowheader", { name: "20" }).getAttribute("class"))?.includes("line-through"),
+    "cricket: 20 closed by everyone is struck through",
+  );
+  expect(
+    (await table.getByRole("rowheader", { name: "19" }).getAttribute("class"))?.includes("bg-cricket-scoring"),
+    "cricket: the player on turn can score on 19",
+  );
+  await page.screenshot({ path: `${shots}/match-cricket.png` });
 
   // Elimination 301 single out: landing on A's score sends A back to 0, undo brings A back
   await start("elimination");
