@@ -12,6 +12,7 @@ if [ -n "${NPM_CACHE:-}" ]; then npm ci --no-audit --no-fund --cache "$NPM_CACHE
 
 # Known vulnerabilities in runtime dependencies only; dev-tool advisories do not block.
 step "audit";     npm audit --omit=dev --audit-level=high
+step "format";    npm run format:check
 step "lint";      npm run lint
 step "typecheck"; npm run typecheck
 step "test";      npm run test:coverage   # tests plus coverage thresholds (vitest.config.mts)

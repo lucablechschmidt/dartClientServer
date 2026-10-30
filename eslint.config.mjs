@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import prettier from "eslint-config-prettier/flat";
 
 /**
  * Layering (architecture.md §9). Imports may only point "left":
@@ -53,6 +54,8 @@ const eslintConfig = defineConfig([
       "react/forbid-component-props": ["error", { forbid: [{ propName: "style", message: "Use theme tokens or a utility in globals.css instead of inline style." }] }],
     },
   },
+  // Formatting belongs to Prettier; this switches off the ESLint rules that would fight it.
+  prettier,
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "coverage/**", "ci-screenshots/**"]),
 ]);
 

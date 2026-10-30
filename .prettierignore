@@ -1,0 +1,11 @@
+# German prose and tables are written by hand; generated or foreign files stay as they are.
+*.md
+docs/
+Design/
+Legacy/
+drizzle/
+package-lock.json
+.next/
+coverage/
+ci-screenshots/
+data/
