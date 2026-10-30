@@ -16,24 +16,25 @@ import {
 } from "./match-service";
 import { log } from "./log";
 import { requireSession } from "./request";
+import { formText, formTexts } from "./form";
 
 /** The pills offer "best of" 1/3/5 (legacy labels); stored is how many are needed to win. */
-const toWin = (bestOf: FormDataEntryValue | null) => Math.ceil((Number(bestOf) || 1) / 2);
+const toWin = (bestOf: string) => Math.ceil((Number(bestOf) || 1) / 2);
 
 export async function createMatchAction(formData: FormData): Promise<void> {
   const { deps, session } = await requireSession();
-  const mode = String(formData.get("mode") ?? "x01");
+  const mode = formText(formData, "mode", "x01");
   const id = createMatch(deps, {
     mode: (MODE_IDS as readonly string[]).includes(mode) ? (mode as ModeId) : "x01",
-    playerIds: formData.getAll("playerId").map(String),
+    playerIds: formTexts(formData, "playerId"),
     rules: {
-      startScore: Number(formData.get("startScore")),
-      inRule: String(formData.get("inRule")) as "single" | "double" | "triple",
-      outRule: String(formData.get("outRule")) as "single" | "double" | "triple",
+      startScore: Number(formText(formData, "startScore")),
+      inRule: formText(formData, "inRule") as "single" | "double" | "triple",
+      outRule: formText(formData, "outRule") as "single" | "double" | "triple",
     },
-    format: { legsToWinSet: toWin(formData.get("legsToWinSet")), setsToWinMatch: toWin(formData.get("setsToWinMatch")) },
+    format: { legsToWinSet: toWin(formText(formData, "legsToWinSet")), setsToWinMatch: toWin(formText(formData, "setsToWinMatch")) },
     starterIndex: 0,
-    inputMode: formData.get("inputMode") === "per-player" ? "per-player" : "single",
+    inputMode: formText(formData, "inputMode") === "per-player" ? "per-player" : "single",
     hostPlayerId: session.playerId,
   });
   redirect(`/match/${id}`);

@@ -7,12 +7,10 @@ import { productionDeps } from "./context";
 import { log } from "./log";
 import { clientIp, loginLimiter } from "./rate-limit";
 import { clearSessionCookie, readSessionToken, setSessionCookie } from "./session-cookie";
+import { formText } from "./form";
 
 /** Only relative paths as target, otherwise back to the home page (no open redirect). */
-const safeNext = (raw: FormDataEntryValue | null) => {
-  const s = String(raw ?? "");
-  return s.startsWith("/") && !s.startsWith("//") ? s : "/";
-};
+const safeNext = (s: string) => (s.startsWith("/") && !s.startsWith("//") ? s : "/");
 
 export async function loginAction(_prev: LoginFormState, formData: FormData): Promise<LoginFormState> {
   const ip = await clientIp();
@@ -21,7 +19,7 @@ export async function loginAction(_prev: LoginFormState, formData: FormData): Pr
     log.warn("login.blocked", { ip });
     return { error: "too-many-attempts" };
   }
-  const r = await login(productionDeps(), String(formData.get("name") ?? ""), String(formData.get("password") ?? ""));
+  const r = await login(productionDeps(), formText(formData, "name"), formText(formData, "password"));
   if (!r.ok) {
     limiter.fail(ip, Date.now());
     log.info("login.failed", { ip });
@@ -30,7 +28,7 @@ export async function loginAction(_prev: LoginFormState, formData: FormData): Pr
   limiter.reset(ip);
   log.info("login", { player: r.session.name, admin: r.session.isAdmin });
   await setSessionCookie(r.token);
-  redirect(safeNext(formData.get("next")));
+  redirect(safeNext(formText(formData, "next")));
 }
 
 export async function logoutAction(): Promise<void> {

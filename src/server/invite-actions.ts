@@ -7,6 +7,7 @@ import { redeem } from "./invite-service";
 import { log } from "./log";
 import { clientIp, loginLimiter } from "./rate-limit";
 import { setSessionCookie } from "./session-cookie";
+import { formText } from "./form";
 
 /** Redeem an invite (reachable without a session). On success, logged in on the home page. */
 export async function redeemInviteAction(token: string, _prev: InviteFormState, formData: FormData): Promise<InviteFormState> {
@@ -14,9 +15,9 @@ export async function redeemInviteAction(token: string, _prev: InviteFormState, 
   const limiter = loginLimiter();
   if (limiter.retryAfter(ip, Date.now()) > 0) return { error: "too-many-attempts" };
   const r = await redeem(productionDeps(), token, {
-    name: formData.has("name") ? String(formData.get("name")) : undefined,
-    password: String(formData.get("password") ?? ""),
-    passwordRepeat: String(formData.get("passwordRepeat") ?? ""),
+    name: formData.has("name") ? formText(formData, "name") : undefined,
+    password: formText(formData, "password"),
+    passwordRepeat: formText(formData, "passwordRepeat"),
   });
   if (!r.ok) {
     // Only token guessing counts against the limit, typos in the form do not.
