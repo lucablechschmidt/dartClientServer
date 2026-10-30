@@ -9,8 +9,8 @@
 
 **Ziele**
 - Live-Zählen am Board, mobile-first (Handy oder Tablet neben dem Board)
-- Vorhandener Legacy-Code wird bezüglich Logik, Spielmodi und UI komplett übernommen. Reihenfolge: X01 zuerst (v1), danach Cricket, Elimination und SplitScore als eigener Meilenstein (E4)
-- **Freie Spiele:** 2 bis n Spieler; es wird heruntergespielt, bis alle Platzierungen feststehen (wer auscheckt, bekommt den nächsten Platz, die übrigen spielen weiter)
+- Vorhandener Legacy-Code wird bezüglich Logik und Spielmodi komplett übernommen, die UI ebenso, außer wo ein Figma-Entwurf in `Design/` vorliegt: dann gelten dessen Layout und Bedienung, die Farben bleiben die Tokens aus `theme.md` (seit 29.10.2026: Setup-Screens, Cricket-Zählscreen). Reihenfolge: X01 zuerst (v1), danach Cricket, Elimination und SplitScore als eigener Meilenstein (E4)
+- **Freie Spiele:** 2 bis n Spieler; bei X01 wird heruntergespielt, bis alle Platzierungen feststehen (wer auscheckt, bekommt den nächsten Platz, die übrigen spielen weiter; der Letzte kann noch zu Ende spielen oder aufgeben, M5). Cricket und Elimination enden beim ersten Sieger, SplitScore nach der Bull-Runde (M7)
 - **Turniere:** immer 1 vs 1; direkter Turnierbaum oder Gruppenphase + Playoffs (Backlog)
 - Aussagekräftige Statistiken: Spielerprofil, Elo (nur aus 1-vs-1-Matches), Anzahl Treffer pro Feld
 - Daten liegen persistent auf dem eigenen Pi und sind per HTTPS aus dem Internet erreichbar (Anschluss ist DS-Lite, daher über Tailscale Funnel statt Portfreigabe)
@@ -56,7 +56,7 @@
 | Validierung | **Zod** | Eingaben aus Server Actions prüfen |
 | Auth (seit M3) | **eigene Sessions** (Name/Passwort, bcrypt, Cookie 1 Jahr), Einladung per QR-Code durch den Admin (E10) | Kein E-Mail-Versand nötig, kein Fremddienst, keine Auth-Bibliothek; die Logik ist 300 Zeilen mit Tests |
 | CI | **ein Skript `scripts/ci.sh`**, aufgerufen von GitHub Actions (`.github/workflows/ci.yml`, E15) | Die Pipeline-Datei ist nur ein Aufruf; der Inhalt lebt im Repo und wandert mit |
-| Tests | **Vitest** (Domänenlogik), **Playwright** (1–2 Smoke-Tests) | Die Darts-Regeln sind reine Funktionen und gut testbar |
+| Tests | **Vitest** (Domänenlogik, Server, UI-Logik), **Playwright** als Bibliothek im Smoke-Skript `scripts/smoke-match.mjs` (ein Durchlauf aller Modi); der Umbau zu `@playwright/test`-Specs ist M6 | Die Darts-Regeln sind reine Funktionen und gut testbar |
 | Deployment | **Docker Compose** auf dem Pi | Reproduzierbar, einfacher Rollback |
 | Ingress | **Tailscale Funnel** (auf dem Host, nicht im Container) | Einziger gangbarer Weg bei DS-Lite ohne eigene Domain; TLS endet auf dem Pi |
 | Build | **ausschließlich auf dem Entwicklungsrechner** (`docker buildx --platform linux/arm64`) | Ein Next.js-Build auf einem Pi 3 B+ mit 1 GB RAM und SD-Karte scheitert am Speicher. Auf dem Pi laufen nur Caddy und der fertige Standalone-Server (zusammen ca. 250–350 MB) |
@@ -123,21 +123,22 @@ invite          id (sha256 des Tokens), kind ('register'|'password'), player_id 
 
 match           id, mode ('x01' | 'cricket' | 'elimination' | 'splitscore'),
                 input_mode ('single' | 'per-player'), host_player_id          (E13, M4)
-                start_score (501|401|301, X01), in_rule ('single'|'double'|'triple'),
+                start_score (X01 Start 501|401|301, Elimination Ziel, SplitScore Start 40, Cricket 0), in_rule ('single'|'double'|'triple'),
                 out_rule ('single'|'double'|'triple'), legs_to_win_set, sets_to_win_match,
                 status ('running'|'finished'|'abandoned'),
                 is_tournament, created_by NULL, started_at, finished_at NULL
-match_player    match_id, player_id, seat (Reihenfolge), placement NULL   PK(match_id, player_id)
+match_player    match_id, player_id, seat (Reihenfolge), placement NULL (gleiche Plätze möglich, SplitScore)   PK(match_id, player_id)
 
 player_field_hits player_id, field (0–20|25), hits                      PK(player_id, field)
                 (E12: Feldtreffer regulärer Spieler aus gelöschten Gast-Matches; Treffer = 1/2/3 je Single/Double/Triple)
 
 leg             id, match_id, set_no, leg_no, starter_player_id,
-                winner_player_id NULL, finished_at NULL
+                winner_player_id NULL, finished_at NULL,
+                play_out                      -- M5: X01, 3+ Spieler, der Letzte spielt noch zu Ende
                 (Sets sind kein eigener Datensatz: Set-Sieger = erster mit legs_to_win_set Legs in set_no)
 
-visit           id (UUID, vom Client erzeugt → idempotente Retries),
-                leg_id, player_id, seq (fortlaufend im Leg),
+visit           id (vom Server vergeben), leg_id, player_id,
+                seq (fortlaufend im Leg; mit der Leg-Position macht sie Wiederholungen idempotent, E11),
                 d1_field, d1_type,            -- field 0–20 | 25 (Bull); type 'single'|'double'|'triple'|'overthrown'; beides NULL = Platz leer
                 d2_field, d2_type,
                 d3_field, d3_type,
@@ -147,12 +148,13 @@ visit           id (UUID, vom Client erzeugt → idempotente Retries),
 
 **Konsequenzen**
 - Der **Score einer Aufnahme** wird nie gespeichert, sondern wie `getDartThrowScore` aus den Plätzen berechnet (`overthrown` zählt 0, Bust zählt 0).
-- Eine **laufende Aufnahme** ist eine Zeile mit leeren Plätzen. Dadurch überlebt sie Reload und Container-Neustart.
-- **Undo** entfernt den letzten belegten Platz der letzten Aufnahme des Legs (bei Bust alle `overthrown`-Plätze und das Flag auf einmal); ist die Aufnahme danach leer, wird sie gelöscht. Hat der Dart ein Leg, Set oder Match beendet, wird auch das zurückgenommen, weil `winner_player_id`, `placement` und `status` reine Projektionen sind.
-- **Platzierungen** (freie Spiele, 2–n Spieler): Wer auscheckt, erhält die nächste freie `placement`; das Leg läuft für die übrigen weiter, bis nur noch einer übrig ist.
+- Gespeichert werden nur **abgeschlossene Aufnahmen** (drei Darts, Bust, Checkout). Die laufende Aufnahme liegt auf dem eingebenden Gerät im localStorage und überlebt dort einen Reload (E11).
+- **Undo** nimmt auf dem Gerät den letzten Dart zurück (bei Bust alle `overthrown`-Plätze auf einmal); auf dem Server löscht `undoVisit` die letzte gespeicherte Aufnahme oder nimmt eine Zu-Ende-Spielen-Entscheidung zurück. Ein geleertes Leg wird gelöscht. Hat die Aufnahme ein Leg, Set oder Match beendet, wird auch das zurückgenommen, weil `winner_player_id`, `placement`, `play_out`-Folgen und `status` reine Projektionen sind.
+- **Platzierungen** (X01, 3+ Spieler): Wer auscheckt, erhält die nächste freie `placement`; das Leg läuft für die übrigen weiter, bis nur noch einer übrig ist. Die anderen Modi platzieren nach ihren Regeln (Sieger, dann Punkte).
+- **Darts, die nichts zählen**, stehen als `overthrown` in der Aufnahme: Bust-Füllplätze (X01), der überwerfende Dart (Elimination) und Darts neben dem Zielfeld (SplitScore). Sie fließen nie in Statistiken ein.
 - **Neue Statistiken** funktionieren rückwirkend über alle alten Spiele, auch Feldtreffer.
 - **Gäste** (E12) sind normale `player`-Zeilen mit `guest_until`; Matches, Legs und Aufnahmen referenzieren sie wie jeden anderen Spieler. Ein Match ist ein **Gast-Match**, sobald ein Teilnehmer `guest_until` gesetzt hat; es zählt in keiner Rangliste. Es wird gelöscht, sobald der letzte beteiligte Gast abgelaufen ist (max. `guest_until` der Teilnehmer), zusammen mit Legs und Aufnahmen; vorher werden die **Feldtreffer** der regulären Teilnehmer nach `player_field_hits` übernommen (Triple = 3, Double = 2, Single = 1 Treffer; gebustete Aufnahmen zählen nicht). Die Feldtreffer-Statistik eines regulären Spielers ist also `player_field_hits` plus die Treffer aus seinen noch vorhandenen Matches.
-- Cricket, Elimination und SplitScore brauchen **keine** zusätzlichen Tabellen; ihr Zustand (Marks, Eliminationen, Zielfeld) ist aus den Aufnahmen replaybar.
+- Cricket, Elimination und SplitScore brauchen **keine** zusätzlichen Tabellen; ihr Zustand (Marks, Eliminationen, Zielfeld) ist aus den Aufnahmen replaybar. Sets und Legs gibt es nur bei X01 mit 2 Spielern (E7).
 
 **Geprüft gegen das Swift-Modell (M0, erledigt)**
 - Speichert es pro Aufnahme, pro Dart oder nur Endstände? Pro Aufnahme mit drei Dart-Plätzen, nichts geht verloren.
@@ -166,10 +168,10 @@ visit           id (UUID, vom Client erzeugt → idempotente Retries),
 
 Reines TypeScript in `src/domain/`, ohne Datenbank- oder React-Abhängigkeit, Test-first mit Vitest.
 
-- `src/domain/x01/`: Port von `ClassicGame` + `DartThrow` + `Game` (Regeln in `legacy-analysis.md` §2–3). Kern: `replay(match, legs, visits) → MatchState` und `applyDart(state, dart) → Ereignisse`. Undo ist kein eigener Algorithmus, sondern Löschen des letzten Platzes und erneutes Replay.
+- `src/domain/game/` (seit M7): alles Modusunabhängige. Gemeinsame Typen (`LegState` mit `mode`, `MatchState`), die Schnittstelle `GameMode` und die Registry `modes.ts` mit den Funktionen, die alle anderen aufrufen (`applyDart`, `undoDart`, `openVisit`, `currentPlayer`, `isLegFinished`, `standings`, `projectBoard` …), Matches über Legs und Sets (`match.ts`), Rechte (`permissions.ts`, E13), Replay und die Projektion für den Zählscreen (`board.ts`, `view.ts`).
+- `src/domain/x01/`, `cricket/`, `elimination/`, `splitscore/`: je ein Modus hinter `GameMode` (Regeln in `legacy-analysis.md` §2–6). Der Zustand eines Legs ist immer die Liste seiner Aufnahmen; jede Funktion ist `(state, …) → Result<state>` ohne Seiteneffekte, Undo ist Löschen des letzten Platzes und erneutes Auswerten.
 - `src/domain/checkouts.ts`: die drei Finish-Tabellen aus `Checkouts.swift`.
 - `src/domain/stats/` (M8): Averages wie im Legacy definiert, dazu First-9, Checkout-Quote, 180/140+/100+, Highest Finish, Best Leg, Feldtreffer, Elo (nur 1 vs 1).
-- Cricket, Elimination, SplitScore (M7): je ein Modul mit gleicher Schnittstelle.
 
 Neu gegenüber Legacy: Leg-, Set- und Match-Ende, wechselnder Anwurf pro Leg, Platzierungen bei 2–n Spielern.
 
@@ -177,7 +179,7 @@ Neu gegenüber Legacy: Leg-, Set- und Match-Ende, wechselnder Anwurf pro Leg, Pl
 
 ## 8. Eingabe, UX und Theme
 
-Aufbau 1:1 wie im Legacy-Code (`legacy-analysis.md` §7): Spieler-Panels oben, Checkout-Hinweis und 5-Reihen-Keypad unten, Double/Triple als Modifier-Toggles, Undo auf dem Keypad. Mindest-Tipphöhe 48 px, keine Hover-Zustände, kein Scrollen auf dem Zählscreen.
+Aufbau wie im Legacy-Code (`legacy-analysis.md` §7): Spieler-Panels oben, Checkout-Hinweis und 5-Reihen-Keypad unten, Double/Triple als Modifier-Toggles, Undo auf dem Keypad. Wo ein Figma-Entwurf in `Design/` vorliegt, gelten dessen Layout und Bedienung (Setup-Screens; Cricket-Zählscreen mit Tabelle und verkleinertem Keypad). Mindest-Tipphöhe 48 px, keine Hover-Zustände, kein Scrollen auf dem Zählscreen.
 
 **Theme** (`theme.md`): Die Legacy-Farben aus `Assets.xcassets` werden als CSS-Tokens mit Light- und Dark-Werten übernommen, Dark Mode folgt der Systemeinstellung und ist per Toggle überschreibbar. Das Theme entsteht **vor** dem ersten Screen. Kein Screen verwendet Farbwerte, Radien oder Größen direkt: alles kommt aus Tokens in `globals.css` (`theme.md` §3 Regel 8), `style={…}` verbietet ESLint, Tailwind-Ad-hoc-Werte (`rounded-[18px]`) sind nicht erlaubt; ein neuer Wert wird ein Token.
 
@@ -191,7 +193,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 - **Schichten mit klarer Richtung:** `src/domain` (reine Funktionen, kennt weder DB noch React) ← `src/db` (Drizzle-Schema, Queries) ← `src/server` (Server Actions: laden, Domäne aufrufen, speichern, Zod-Validierung) ← `src/components` und `src/app` (UI). Imports gehen nur nach links, nie nach rechts. ESLint-Regel `no-restricted-imports` erzwingt das.
 - **Single Responsibility:** eine Datei, eine Aufgabe. Regeln (`rules.ts`), Zustandsübergang (`apply.ts`), Undo, Replay und Statistik sind getrennte Module mit eigenen Tests.
-- **Open/Closed über die Spielmodus-Schnittstelle (ab M7, heute nur X01):** jeder Modus implementiert dasselbe `GameMode<State>`-Interface (`initialState`, `applyDart`, `undoDart`, `isFinished`, `panelData`). Zählscreen, Server Actions und Replay kennen dann nur das Interface; Cricket, Elimination und SplitScore kommen als neue Module hinzu, ohne bestehende zu ändern. Bis M7 ruft der Server die X01-Funktionen direkt.
+- **Open/Closed über die Spielmodus-Schnittstelle (seit M7):** jeder Modus implementiert `GameMode` (`applyDart`, `undoDart`, `isOpenVisit`, `currentPlayer`, `isLegFinished`, `standings`, `board`, optional `playOut` für X01) und wird in `src/domain/game/modes.ts` eingetragen. Server, Rechte, Client-Abgleich und Zählscreen rufen nur die Funktionen aus `@/domain/game`; ein neuer Modus ändert keinen bestehenden.
 - **Liskov/Interface Segregation:** Komponenten bekommen schmale Props-Typen (z. B. `PlayerPanelData`), nie das ganze `LegState` oder DB-Zeilen. Views sind damit mit Fixtures renderbar.
 - **Dependency Inversion:** Server Actions bekommen das Repository (`MatchRepository`-Interface) injiziert; in Tests ersetzt ein In-Memory-Repository SQLite. Zeit und IDs kommen über `clock()`/`newId()`, nicht aus `Date.now()`/`crypto` direkt.
 - **Komponenten:** dumme, wiederverwendbare Bausteine in `src/components/ui` (`TabBar`, `ScreenHeader`, `BackButton`, `ChoiceMenu` und `Stepper` (Setup im Figma-Layout, `Design/`), `CardList`/`CardRow`/`GroupedSection`, `AddRow`, `ConfirmSheet`, `QrCode`, `icons.tsx`, Formular-Bausteine in `form-controls.tsx`: `TextInput`, `TextButton`, `PrimaryButton`, `Field`, `FormError`, `FormNote`, `SectionHeading`; Hook `useConfirmTap`) und `src/components/darts` (`Keypad`, `PlayerPanel`, `PlayerPanels`, `DartSlots`, `CheckoutHint`, `ScoreGrid`, `PlayerPicker`; Hooks `useVisitSync` für Zählen und Server-Abgleich, `useMatchEvents` für den Live-Stand), zusammengesetzt in `src/components/screens` (der Konto-Tab in Abschnitten unter `screens/account/`). Keine Datenzugriffe in Komponenten, Zustand kommt per Props, Ereignisse gehen per Callback hoch. Wiederkehrende Formen (Zeile „tippen → Eingabefeld → Speichern“) gehören als Baustein nach `ui`, nicht kopiert in Screens. Ein Screen über etwa 200 Zeilen wird geteilt (Hooks für Logik, Unterkomponenten für Abschnitte). Bekommt ein `ui`-Baustein Zustand, Seiteneffekte oder Fachlogik, ist er keiner mehr: die Logik wandert in einen Hook oder der Baustein nach `darts`/`screens`. Jeder neue `ui`-Baustein bekommt einen Eintrag auf `/dev/theme` (ersetzt Storybook).
@@ -208,7 +210,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 - HTTPS überall (Tailscale Funnel, TLS-Endpunkt auf dem Pi). Der Hostname ist öffentlich auffindbar, deshalb steht der Login vor allem außer `/login`, `/einladung/<token>` und `/api/health`.
 - Caddy und App sind nur auf `localhost` des Pi gebunden, nicht im Heimnetz erreichbar.
 - **Login (E10):** ein Spieler mit `password_hash` (bcrypt, Kostenfaktor 12; der erste Admin aus `.env`) kann sich einloggen. Session-Token 32 Zufallsbytes im Cookie `darts_session` (`httpOnly`, `sameSite=lax`, `secure`, 1 Jahr fest), in der DB nur der SHA-256. Einladungs- und Reset-Token ebenso, 24 h, einmalig.
-- **Autorisierung serverseitig** in jeder Seite und Action (`requireSession`, `requireAdmin`); `src/proxy.ts` leitet nur ohne Cookie um und ersetzt keine Prüfung. Eingaberechte am Match (E13) prüft `src/domain/x01/permissions.ts`, aufgerufen im Service, nie nur in der UI.
+- **Autorisierung serverseitig** in jeder Seite und Action (`requireSession`, `requireAdmin`); `src/proxy.ts` leitet nur ohne Cookie um und ersetzt keine Prüfung. Eingaberechte am Match (E13) prüft `src/domain/game/permissions.ts`, aufgerufen im Service, nie nur in der UI.
 - **Rate-Limit** im Prozess: 10 Fehlversuche je IP in 15 min für Login und Token-Einlösen; die IP kommt aus `X-Forwarded-For` von Caddy.
 - Server Actions sind durch Nexts Origin-Prüfung gegen CSRF geschützt; `COOKIE_SECURE=false` nur lokal über http.
 - **Sicherheits-Header** (`next.config.ts`): Content-Security-Policy nur mit eigener Herkunft (`default-src 'self'`, `frame-ancestors 'none'`, `form-action 'self'`, `object-src 'none'`), dazu `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `X-Content-Type-Options: nosniff`, `Permissions-Policy` ohne Kamera, Mikrofon, Ort; kein `X-Powered-By`. **Bewusster Kompromiss:** `script-src` und `style-src` erlauben `'unsafe-inline'`, weil Next.js seine Daten als Inline-Skripte streamt und das Theme-Skript vor dem ersten Paint läuft; eine Nonce pro Request würde das Root-Layout dynamisch machen und das partielle Prerendering brechen. Externe Skripte sind trotzdem blockiert. Der Smoke-Test prüft die Header und schlägt bei jeder CSP-Verletzung im Browser fehl.
@@ -228,11 +230,11 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 | E4 | Cricket, Elimination, SplitScore in v1? | **Entschieden:** eigener Meilenstein M7 nach M6; v1 = X01 |
 | E5 | Daten aus der iOS-App übernehmen? | **Entschieden:** nein |
 | E6 | SD-Karte oder SSD | **Entschieden (23.10.2026):** SD bleibt, solange sie keine Fehler zeigt; ohne Backup (E14) ist ein Ausfall ein Neustart, kein Verlust, der schmerzt |
-| E7 | Sets/Legs bei 2–n Spielern? | **Default:** Sets und Legs nur bei 2 Spielern (und Turnieren); freie Spiele mit 3+ Spielern sind ein Leg mit Platzierungen |
+| E7 | Sets/Legs bei 2–n Spielern? | **Entschieden (umgesetzt in M5):** Sets und Legs nur bei X01 mit 2 Spielern (und Turnieren), im Setup als „Best of“ 1, 3, 5 …; freie Spiele mit 3+ Spielern und die übrigen Modi sind ein Leg mit Platzierungen |
 | E8 | Elo bei Mehrspieler-Matches? | **Default:** Elo nur aus 1-vs-1-Matches; Mehrspieler-Matches zählen für alle übrigen Statistiken |
 | E9 | Dark Mode | **Entschieden:** Light und Dark von Anfang an, Tokens aus den Legacy-Assets (`theme.md`), Systemeinstellung plus Toggle |
 | E10 | Wie kommen Mitspieler zu einem Login? | **Entschieden (M3-Plan, 22.10.2026):** Keine eigene Nutzer-Tabelle: ein Spieler mit `password_hash` kann sich einloggen, `is_admin` ist eine Spalte am Spieler. Der erste Admin wird beim Start aus `.env` angelegt, wenn noch keiner existiert. Er lädt per QR-Code ein (Einmal-Token, 24 h, ohne Namen); der Eingeladene wählt Name und Passwort. Vergebene Namen werden abgelehnt; für Gäste und Spieler ohne Login erzeugt der Admin einen Login mit festem Spieler (Passwort-Token). Eingeloggte benennen sich selbst und Gäste um und ändern ihr Passwort; Admins benennen alle um, löschen Spieler außer sich und andere Admins, erzeugen Resets; „Login löschen“ gibt es seit 29.10.2026 nicht mehr. Session-Cookie 1 Jahr ab Login, ohne Verlängerung. Basic Auth in Caddy entfällt mit M3; die Datenbank wird beim M3-Deploy geleert |
-| E11 | Was geht beim Zählen über das Netz? | **Entschieden:** Darts werden am Gerät lokal durch die Domäne gezählt (sofortige Anzeige); erst die abgeschlossene Aufnahme (3 Darts, Bust oder Checkout) geht als `commitVisit(seq, geworfene Darts)` an den Server, der sie selbst nachrechnet; Undo einer gespeicherten Aufnahme ist `undoVisit`. Die offene Aufnahme liegt im localStorage des Geräts, Aufrufe laufen in einer Warteschlange mit Retry. Ein Bust zählt 0, egal wie weit überworfen; Undo stellt den letzten regulären Stand wieder her |
+| E11 | Was geht beim Zählen über das Netz? | **Entschieden:** Darts werden am Gerät lokal durch die Domäne gezählt (sofortige Anzeige); erst die abgeschlossene Aufnahme (3 Darts, Bust oder Checkout) geht als `commitVisit(legIndex, seq, geworfene Darts)` an den Server, der sie selbst nachrechnet; Undo einer gespeicherten Aufnahme ist `undoVisit`. Die offene Aufnahme liegt im localStorage des Geräts, Aufrufe laufen in einer Warteschlange mit Retry. Ein Bust zählt 0, egal wie weit überworfen; Undo stellt den letzten regulären Stand wieder her |
 | E12 | Spieler, die nur einen Abend mitwerfen? | **Entschieden:** Gäste werden im Setup „Neues Spiel“ angelegt (`player.guest_until` = jetzt + 24 h), liegen in der DB (überleben Reload und Gerätewechsel) und stehen 24 h in allen Setup-Screens (jeder Modus, jede Runde), im Tab „Spieler“ unter „Gäste heute“ (umbenennen, entfernen); der Zusatz „Gast“ erscheint nur im Setup. Namen sind über alle Spieler eindeutig, Gäste eingeschlossen. **Matches mit mindestens einem Gast zählen in keiner Rangliste und nicht für Elo**, auch nicht für die regulären Teilnehmer. Einzige Ausnahme: die **Feldtreffer** der regulären Spieler werden auch aus Gast-Matches erfasst (Triple = 3 Treffer, Double = 2, Single = 1; T20 S20 T5 → 4×20, 3×5; in einer gebusteten Aufnahme zählt kein Dart). Ein Gast-Match lebt nur so lange wie der am längsten sichtbare beteiligte Gast; beim Aufräumen werden die Feldtreffer der regulären Spieler in `player_field_hits` übernommen, dann werden Match, Legs, Aufnahmen und zuletzt der Gast gelöscht. „Dauerhaft übernehmen“ (nur Admin, ab M3) macht aus einem Gast einen regulären Spieler; seine bisherigen Matches bleiben Gast-Matches, solange ein anderer Gast beteiligt ist. Kein Login nötig, ab M3 darf jeder eingeloggte Nutzer Gäste anlegen |
 | E13 | Ein Handy für alle oder jeder sein eigenes? | **Entschieden (22.10.2026):** Beim Start wird pro Match gewählt: `input_mode` `single` (Default, das startende Handy gibt alle Darts ein) oder `per-player` (jeder Spieler mit Login auf seinem Gerät; Keypad nur aktiv, wenn der eigene Spieler am Zug ist). Spieler ohne Login (Gäste) werfen immer auf dem Start-Handy (`host_player_id`). Undo folgt denselben Rechten wie die Eingabe. Andere Geräte sehen den Stand nach jeder abgeschlossenen Aufnahme (Live-Aktualisierung vom Server); die offene Aufnahme bleibt wie bei E11 auf dem eingebenden Gerät. Das zweite Handy findet das Match über die Spielübersicht, es gibt keinen Einladungslink dafür. Braucht Sessions, daher M4 nach M3 |
 | E14 | Backup der Datenbank? | **Entschieden (23.10.2026): nein.** Es ist ein Spiel; geht `darts.db` verloren, legt der nächste Start sie mit dem Admin aus `.env` neu an, die Mitspieler werden neu eingeladen. Kein Backup-Job, kein Restore, keine Backup-Doku; M12 enthält nur Neustart-Robustheit, Updates und PWA |
