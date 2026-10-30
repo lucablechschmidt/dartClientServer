@@ -29,11 +29,11 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M2 | Gastspieler | fertig, DoD am Handy geprüft | M1b |
 | M3 | Accounts per Einladung | fertig, deployt, DoD mit zwei Handys geprüft | M4 |
 | M4 | Eingabe auf mehreren Geräten | fertig, deployt, DoD mit Rate-Limit-Probe geprüft | M4b |
-| M5 | X01 vollständig | geplant | M2 |
-| M6 | Robustheit am Board | geplant (lokales Zählen schon da) | M3 |
-| M7 | Cricket, Elimination, SplitScore | geplant | M3b |
-| M8 | Statistiken und Reporting | geplant | M5 |
-| M9 | Turniere | geplant | M7 |
+| M5 | X01 vollständig | fertig, DoD am Board offen | M2 |
+| M6 | Robustheit am Board | zurückgestellt (lokales Zählen schon da) | M3 |
+| M7 | Cricket, Elimination, SplitScore | fertig, DoD am Board offen | M3b |
+| M8 | Statistiken und Reporting | geplant, nach M9 | M5 |
+| M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | geplant | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
