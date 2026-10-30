@@ -1,7 +1,7 @@
 # M6-Plan – Robustheit am Board
 
 > Detailplan zu `project.md` M6. Der erste Punkt (lokales Zählen, Warteschlange mit Retry, offene Aufnahme im localStorage) ist seit M1 erledigt. Übrig sind die Tests, die beweisen, dass nichts verloren geht, der Umbau der Smoke-Skripte zu echten Playwright-Tests, und der Praxistest. Kommt nach M5, weil die Tests dann das vollständige X01 abdecken.
-> Stand: erste Fassung, 23.10.2026. Noch nicht umgesetzt.
+> Stand: erste Fassung 23.10.2026; am 30.10.2026 an den Code nach M5, M7 und M9 angepasst (§2a) und Frage 1 aus §8 eingearbeitet. Umsetzung läuft.
 > Luca: §0 und §8.
 
 ---
@@ -29,12 +29,21 @@ Fehlt: ein automatischer Nachweis dafür (heute nur `scripts/smoke-match.mjs` al
 - **Aufwachen**: bei `online`, `visibilitychange` und `pageshow` sofort ein Versuch, nicht erst nach dem Backoff; Backoff-Obergrenze bleibt 8 s, dazu ein Jitter, damit mehrere Geräte nicht gleichzeitig hämmern.
 - **Konflikt mit SSE (M4)**: Solange die eigene Warteschlange nicht leer ist, werden SSE-Ereignisse ignoriert (gibt es schon über `open.current`); nach dem Leeren einmal nachladen. Ein Ereignis, das einen fremden Commit auf denselben `seq` meldet, führt beim nächsten eigenen Commit zu `out-of-sync` → Server-Stand gewinnt, der Spieler sieht „Stand vom Server übernommen“ und muss die Aufnahme neu eingeben. Das ist bei `per-player` nur möglich, wenn zwei Geräte für denselben Spieler eingeben (zwei Logins desselben Spielers), und wird so hingenommen.
 
+## 2a. Anpassungen an den Stand nach M5, M7, M9 (30.10.2026)
+
+- Sync liegt inzwischen in `src/components/darts/use-visit-sync.ts` (nicht mehr in `scoreboard-screen.tsx`); die offene Aufnahme in `open-visit-storage.ts`. Position eines Commits ist `legIndex` + `seq`.
+- Über die Warteschlange laufen außer `commitVisit` und `undoVisit` auch Zu-Ende-spielen/Aufgeben (`setPlayOut`), Anwurf (`setStarter`) und Sieger festlegen (`decideWinner`, M9). Alle fünf werden gespeichert und nach einem Reload abgespielt.
+- **Wiederholung ohne Doppelwirkung:** Geht die Antwort verloren, nachdem der Server schon gespeichert hat, schickt der Client denselben Aufruf noch einmal. Ein Commit, dessen Aufnahme mit denselben Darts schon an dieser Position liegt, gilt deshalb als erfolgreich. Ein Undo nennt den Schritt, den es zurücknehmen will (Aufnahme an Position, Zu-Ende-spielen eines Legs, festgelegter Sieger); passt der nicht mehr, kommt `out-of-sync` statt eines zweiten Undos.
+- Lehnt der Server einen Eintrag fachlich ab, übernimmt der Client den Server-Stand, zeigt die Meldung und schickt die übrigen Einträge weiter (sie passen meist noch, z. B. nach einem doppelt angekommenen Undo).
+- **Frage 1 (§8), Antwort Luca:** kein Hinweis auf das Aufräumen nach 24 h. Ist eine Aufnahme 10 Minuten lang nicht gespeichert, zeigt der Zählscreen „Stand konnte nicht gespeichert werden“ mit zwei Knöpfen: „Erneut senden“ (sofortiger Versuch) und „Neu eingeben“ (Warteschlange verwerfen, Server-Stand übernehmen).
+- Fragen 2 und 3: Defaults (Tipp auf die Statuszeile löst einen Versuch aus; `test:e2e` getrennt von `npm test`).
+
 ## 3. Warteschlange im localStorage (Test-first)
 
 **Dateien**
 
-- `src/components/darts/sync-queue.ts` (reine Logik, ohne React): `Queue = { matchId, items: QueueItem[] }`, `QueueItem = { kind: "commit", seq, legNo, darts } | { kind: "undo" }`, Funktionen `enqueue`, `dequeue`, `serialize`/`restore`, `collapse` (ein Undo direkt nach einem noch nicht gesendeten Commit hebt beide auf). Tests: `sync-queue.test.ts`.
-- `scoreboard-screen.tsx`: Warteschlange aus `sync-queue.ts` statt der ad-hoc Promise-Kette; nach dem Mount erst die Warteschlange abspielen, dann die offene Aufnahme wiederherstellen; Statuszeile mit Anzahl; Tipp auf die Statuszeile = sofortiger Versuch; Listener für `online`, `visibilitychange`, `pageshow`.
+- `src/components/darts/sync-queue.ts` (reine Logik, ohne React): `Queue = { matchId, items: QueueItem[] }`, `QueueItem = { kind: "commit", legIndex, seq, darts } | { kind: "undo", step } | { kind: "play-out", value } | { kind: "starter", playerId } | { kind: "decide", playerId }`, Funktionen `enqueue`, `dequeue`, `serialize`/`restore`, `collapse` (ein Undo direkt nach einem noch nicht gesendeten Commit, Zu-Ende-spielen oder Sieger festlegen hebt beide auf). Tests: `sync-queue.test.ts`.
+- `use-visit-sync.ts`: Warteschlange aus `sync-queue.ts` statt der ad-hoc Promise-Kette; nach dem Mount erst die Warteschlange abspielen, dann die offene Aufnahme wiederherstellen; Statuszeile mit Anzahl; Tipp auf die Statuszeile = sofortiger Versuch; Listener für `online`, `visibilitychange`, `pageshow`.
 - Backoff mit Jitter in `retrying`.
 - **Commit:** „M6: Warteschlange überlebt Reload“
 
