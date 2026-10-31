@@ -88,13 +88,12 @@ npm run test:watch        # watch mode
 npx vitest run src/domain/x01   # one folder or file
 npm run lint              # ESLint incl. the layering rule
 npm run typecheck         # TypeScript without build
-./scripts/smoke.sh        # browser run against the production build (see below)
+npm run test:e2e          # browser tests (e2e/) against an existing production build
+./scripts/smoke.sh        # production build, then the browser tests, screenshots to docs/screenshots
 ./scripts/ci.sh           # everything the CI runs; needs `npx playwright install chromium` once
 ```
 
-**Browser run** (`scripts/smoke.sh`): builds for production, starts the standalone server on port 3100 with a test admin (`admin` / `admin-secret`) and a fresh database in `/tmp/sa`, then drives Chromium through `scripts/smoke-match.mjs`. Several browser contexts play the main flows. They log in and check the redirect without a session, redeem invites, test rename rights, and play a 301 leg with 180, bust, undo, reload, checkout and restart. They add, rename and remove guests, cancel a game, and play on two devices with live updates. Finally they reset a password, delete a login, log out and hit the rate limit. The run also checks security headers and fails on any Content-Security-Policy violation. Each `• ok:` line is a check and `✗` a failure. Screenshots go to `docs/screenshots/` and are committed, so the current look can be seen without building.
-
-**Layout check** of the scoring screen in five viewports, light and dark: `npx next dev --port 3100 &` then `node scripts/screenshots.mjs ./screenshots`. It reports whether a page scrolls (it must not).
+**Browser tests** (`e2e/`, Playwright): `playwright.config.ts` starts the standalone server from the last `npm run build` on port 3100 with a test admin (`admin` / `admin-secret`) and a fresh database in `/tmp/sa` (`scripts/e2e-server.sh`). One spec per area: `auth` (redirect without a session, invites, rename rights, password reset, logout, security headers), `match` (180, bust, undo across the switch, reload, checkout, restart), `guests` (guests, overview, cancel), `devices` (two phones with live updates and locks), `legs` (best of 3, four players with places), `modes` (Cricket, Elimination, SplitScore), `tournament`, `layout` (the scoring screen does not scroll in five viewports, light and dark) and last `rate-limit`, which locks the IP for 15 minutes. Every test fails on a Content-Security-Policy violation. All texts come from `src/i18n/de.ts`. `scripts/smoke.sh` builds first and saves the screenshots to `docs/screenshots/`; they are committed, so the current look can be seen without building. Against the container: `BASE_URL=https://… BASIC_AUTH=user:password npm run test:e2e` (the rate-limit test then locks your IP there). `npm run test:e2e:ui` opens Playwright's UI; a failed test leaves a trace in `test-results/`.
 
 **CI:** `.github/workflows/ci.yml` only calls `scripts/ci.sh`. The pipeline fails below the coverage thresholds, and the screenshots are attached as an artifact.
 
@@ -237,7 +236,7 @@ There is no language selection yet. Pages and server actions import `de` directl
 - A helper in `src/i18n` picks the texts from the `Accept-Language` header and falls back to `de`.
 - Pages call that helper (they already read the request via `connection()`) instead of importing `de`, and pass the texts on as props. Components need no change.
 - The layout sets `lang` to the chosen language.
-- The smoke test drives the app by its German labels, so it then needs `locale: "de-DE"` in its Playwright contexts.
+- The browser tests drive the app by its German labels (from `de`); `playwright.config.ts` already sets `locale: "de-DE"`, so they keep German.
 
 The component tests take every label from `de`, so they stay as they are. To run one against another language too, wrap it in `describe.each([de, en])`.
 
@@ -292,7 +291,7 @@ flowchart LR
 |---|---|---|
 | Develop | Mac | `npm run dev` with `.env` (Configuration) |
 | Unit and UI tests | Mac and CI | `npm test`, `npm run test:coverage` |
-| Browser run | Mac and CI | `./scripts/smoke.sh` |
+| Browser tests | Mac and CI | `./scripts/smoke.sh` (build + `npm run test:e2e`) |
 | CI | GitHub Actions | the pipeline file only calls `scripts/ci.sh` (E15) |
 | Build the image | Mac, never on the Pi | `Dockerfile`: dependencies → build → slim runtime image |
 | Ship | Mac → Pi over SSH | `./scripts/deploy.sh`, only when asked; rollback via `IMAGE_TAG` |

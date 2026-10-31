@@ -25,7 +25,7 @@ const forbid = (files, layers, message) => ({
   },
 });
 
-const TS = ["src/**/*.{ts,tsx}"];
+const TS = ["src/**/*.{ts,tsx}", "e2e/**/*.ts", "playwright.config.ts"];
 const TESTS = ["src/**/*.test.{ts,tsx}"];
 const onlyTs = (configs) => configs.map((c) => ({ ...c, files: TS }));
 
@@ -56,6 +56,11 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-empty-function": "off",
     },
+  },
+  {
+    // Playwright fixtures hand over their value with a function called `use`; that is not React's hook.
+    files: ["e2e/**/*.ts"],
+    rules: { "react-hooks/rules-of-hooks": "off" },
   },
   forbid(["src/domain/**"], ["db", "server", "components", "app", "i18n"], "src/domain is pure: no DB, server, UI or i18n imports."),
   forbid(["src/db/**"], ["server", "components", "app"], "src/db may only import from src/domain."),

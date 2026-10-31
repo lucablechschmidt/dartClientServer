@@ -50,9 +50,8 @@ npm run lint                     # ESLint: next presets, typescript-eslint stric
 npm run typecheck                # tsc; run `npm run build` first if .next/types is stale
 npm run build                    # production build, output: standalone
 npm run db:generate              # drizzle-kit migration after editing src/db/schema.ts
-node scripts/screenshots.mjs DIR # layout check, needs `npx next dev --port 3100`
-node scripts/smoke-match.mjs DIR # browser flow against port 3100 (BASE_URL/BASIC_AUTH env for the container)
-./scripts/smoke.sh               # production build + standalone on :3100 + browser flow, screenshots → docs/screenshots
+npm run test:e2e                 # Playwright tests in e2e/ against the last build (standalone on :3100; BASE_URL/BASIC_AUTH for the container)
+./scripts/smoke.sh               # production build + test:e2e, screenshots → docs/screenshots
 ./scripts/ci.sh                  # everything the CI runs (install, lint, typecheck, test, smoke); .github/workflows/ci.yml only calls this
 ./scripts/deploy.sh              # buildx arm64 → ssh pi docker load → compose up (see README), only when asked
 ```
@@ -61,7 +60,7 @@ Stack: Next 16 (App Router, Cache Components on: pages that read SQLite
 call `connection()` inside a Suspense boundary, see `src/server/request.ts`),
 Tailwind 4 (tokens in `globals.css`, no tailwind.config), Drizzle + better-sqlite3
 (pinned to 12, v13 segfaults on Node 22.13 darwin-arm64), Vitest, Playwright
-(scripts only until M6). npm install scripts are gated: `allowScripts` in
+(browser tests in `e2e/` since M6, texts from `de`). npm install scripts are gated: `allowScripts` in
 package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 

@@ -22,4 +22,6 @@ jobs:
         if: always()
         with:
           name: screenshots
-          path: ci-screenshots/
+          path: |
+            ci-screenshots/
+            test-results/

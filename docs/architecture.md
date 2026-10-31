@@ -98,7 +98,7 @@ Grenzen: Funnel erlaubt nur die Ports 443, 8443 und 10000 nach außen, ist für 
 - **Speicher:** Die SD-Karte ist das größte Betriebsrisiko (Verschleiß, Korruption bei Stromausfall). Es gibt **bewusst kein Backup** (E14): Geht die Datenbank verloren, legt der nächste Start sie samt Admin neu an, und die Mitspieler werden neu eingeladen. Wer das Risiko senken will, nimmt eine High-Endurance-Karte oder eine USB-SSD (E6).
 - **Release:** `scripts/deploy.sh` → `docker buildx build --platform linux/arm64 -t darts-app:<git-sha>` → `docker save | ssh pi docker load` → `docker compose up -d` auf dem Pi.
 - **Health:** `/api/health` (prüft den DB-Zugriff), Docker-`healthcheck`, `restart: unless-stopped`. `tailscaled` läuft als Systemdienst auf dem Host und startet mit dem Pi; Funnel-Konfiguration ist persistent (`--bg`).
-- **Vor jedem Deploy:** `npm test`, `npm run lint`, `npm run typecheck`, `./scripts/smoke.sh` (Browser-Durchlauf gegen den Produktions-Build). Dieselben Schritte laufen in der CI (`scripts/ci.sh`); der Smoke-Test dort gegen den Standalone-Build auf dem Runner.
+- **Vor jedem Deploy:** `npm test`, `npm run lint`, `npm run typecheck`, `./scripts/smoke.sh` (Produktions-Build, dann die Playwright-Tests in `e2e/`). Dieselben Schritte laufen in der CI (`scripts/ci.sh`); die Browser-Tests dort gegen den Standalone-Build auf dem Runner.
 
 **Bewusste Grenzen (ein Prozess, ein Pi)**
 
