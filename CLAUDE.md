@@ -64,14 +64,16 @@ Tailwind 4 (tokens in `globals.css`, no tailwind.config), Drizzle + better-sqlit
 package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 
-Routes: `/` game menu, `/new/x01` setup, `/players`, `/account` (own name, password,
-logout; admin: invites, players, guests), `/match/[id]` scoreboard, `/login`,
-`/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,
+Routes: `/` game menu, `/new/[mode]` setup, `/players`, `/account` (own name, password,
+logout; admin: invites, players, guests), `/match/[id]` scoreboard, `/tournaments`,
+`/tournaments/new`, `/tournaments/[id]` (M9), `/login`, `/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,
 `is_admin` is a column; `requireSession()` in every page and action, `src/proxy.ts` only
 checks the cookie. Env: `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (bcrypt, first admin bootstrap),
 `APP_URL`, `COOKIE_SECURE=false` for local http. Input rights (E13, M4): `match.input_mode` and
 `host_player_id`, pure checks in `src/domain/x01/permissions.ts`, enforced in `match-service.ts`;
-live updates via SSE at `/api/match/[id]/events` (`src/server/match-events.ts`, Caddy `flush_interval -1`). Shared UI
+live updates via SSE at `/api/match/[id]/events` (`src/server/match-events.ts`, Caddy `flush_interval -1`).
+Sync (E11, M6): `src/components/darts/use-visit-sync.ts` plays a queue kept in localStorage
+(`sync-queue.ts`); commit and undo are safe to send twice (`undoStep`). Shared UI
 building blocks (tab bar, screen header, option pills, card lists, icons) live in
 `src/components/ui/`; new screens compose those instead of adding one-off classes.
 

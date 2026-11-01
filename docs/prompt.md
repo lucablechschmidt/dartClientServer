@@ -1,40 +1,83 @@
 # Weiterarbeiten nach einem `/clear`
 
-Diesen Text als erste Nachricht an Claude Code geben (oder darauf verweisen: „lies docs/prompt.md und mach weiter“).
+Nach einem `/clear` einen der beiden Prompts unten als erste Nachricht an Claude Code geben, den Teil in `<…>` ausfüllen. Kurzform: „lies docs/prompt.md, Prompt A: <Liste>“ oder „lies docs/prompt.md, Prompt B: M8“.
+
+- **Prompt A:** Kleinkram aus dem Test am Board (Bugs, UI-Anpassungen, Texte).
+- **Prompt B:** einen Meilenstein angehen, den nächsten sinnvollen oder einen bestimmten.
+
+Beide setzen den Abschnitt „Stand“ und „So arbeiten wir“ unten voraus; Claude liest ihn mit.
 
 ---
 
-Lies `CLAUDE.md`, `docs/project.md` (oben die Übersicht aller Meilensteine) und `docs/architecture.md` (§5 Grenzen, §9 Konventionen, §11 Entscheidungen E1–E15). Für den schnellen Überblick: README, Abschnitt „Architecture at a glance“.
+## Prompt A – Bugs und UI-Anpassungen vom Board
 
-**Stand (23.10.2026)**
+```
+Lies CLAUDE.md und docs/prompt.md (Stand, So arbeiten wir). Wir haben am Board getestet.
+Bitte diese Punkte fixen bzw. anpassen:
 
-- **Auf dem Pi** (https://dartserver.swallow-pythagorean.ts.net) läuft alles bis einschließlich **M4 „Eingabe auf mehreren Geräten“**. Die DoDs von M1 bis M4 sind am Handy abgenommen, inklusive der Rate-Limit-Probe aus M4. Was dabei auffällt, meldet Luca; das wird eingearbeitet, bevor oder während es mit M5 weitergeht. Admin ist `darts`; Kontrolle des laufenden Stands: `ssh pi 'grep IMAGE_TAG darts/.env'`.
-- Seit M3 außerdem umgesetzt und getestet:
-  - CI (`scripts/ci.sh`, Abdeckungsschwellen)
-  - Transaktionen über `deps.transaction`
-  - Sicherheits-Header, Fehlerseiten, JSON-Log
-  - Theme nur über Tokens, kein Inline-Style
-  - gemeinsame Formular-Bausteine
-  - Repositories `players`, `matches`, `auth`
-  - Code, Kommentare, Commits und README auf Englisch
-- Meilensteine sind in Umsetzungsreihenfolge nummeriert (M0–M12); die Tabelle oben in `project.md` nennt die alten Nummern aus älteren Commits. Die Status-Spalte dort und das Abhaken der DoDs zieht Luca selbst nach.
-- **Die Pläne für alle offenen Meilensteine existieren bereits** (`docs/m5-plan.md` bis `docs/m12-plan.md`), jeweils mit Schritten, Dateien, Testfällen und offenen Fragen am Ende. Vor dem Start eines Meilensteins wird der Plan nur noch mit Luca durchgesehen, die Fragen werden beantwortet und der Plan bei Bedarf angepasst; ein neuer Plan entsteht nur für neue Themen.
+1. <was passiert ist / was anders sein soll, mit Screen und Modus, z. B. „Cricket, Zählscreen: …“>
+2. <…>
 
-**Als Nächstes, in dieser Reihenfolge**
+Vorgehen:
+- Geh die Liste zuerst durch und sag mir pro Punkt kurz, was du für die Ursache hältst und was du
+  ändern willst. Bei Punkten, die eine Regel aus Legacy, einen Plan (docs/mN-plan.md) oder eine
+  Entscheidung (architecture.md §11) berühren, frag, bevor du abweichst. Eindeutige Kleinigkeiten
+  (Tippfehler, Abstände, Texte) direkt machen.
+- Für jeden Bug zuerst ein Test, der ihn zeigt (Vitest oder e2e/), dann der Fix.
+- UI nur mit Tokens und Bausteinen aus src/components/ui/, Texte in src/i18n/de.ts.
+- Ein Commit pro Punkt (Conventional Commits, englisch). Am Ende lint, typecheck, npm test und
+  ./scripts/smoke.sh; bei sichtbaren Änderungen die Screenshots mit committen.
+- Was vom Board kommt und nicht sofort gemacht wird: in docs/m6-plan.md §7 (Beobachtungen) oder
+  als Punkt in docs/m11-plan.md („Kleinkram vom Board“) eintragen.
+- Nicht pushen und nicht deployen, das mache ich selbst. Zum Schluss eine kurze Liste: was erledigt
+  ist, was offen ist, was ich am Board noch einmal prüfen soll.
+```
 
-1. Rückmeldungen aus den DoDs von M1 bis M4 einarbeiten, sobald Luca sie nennt.
-2. **M5 „X01 vollständig“** (Sets, Legs, Platzierungen, Anwurf, Undo über Leg-Grenzen, Historie): Plan `docs/m5-plan.md` mit Luca durchgehen. Er beantwortet die vier Fragen in §9. Sonst gelten die Defaults: Anwurf läuft über Set-Grenzen zyklisch weiter; der letzte Spieler bekommt seinen Platz ohne weiterzuwerfen; Leg-Overlay 2 s oder Tipp; „Legs 1:0“ in der Kopfzeile. Dann Schritt für Schritt umsetzen.
-3. Danach M6 bis M11, M12 (Betrieb, inklusive Ingress und Caddy prüfen) bewusst zuletzt.
+---
 
-**So arbeiten wir**
+## Prompt B – Mit einem Meilenstein weitermachen
 
-- Kein Code ohne abgestimmten Plan: Jeder Meilenstein hat `docs/mN-plan.md` mit Schritten (Dateien, Tests, Prüfung) und offenen Fragen; vor dem Start mit Luca durchgehen und anpassen, dann Umsetzung Schritt für Schritt, ein Commit pro grünem Schritt. Erledigte Pläne wandern nach `docs/archive/`, `project.md` wird abgehakt.
-- Commits nach Conventional Commits auf Englisch, ein Commit pro zusammenhängender Änderung (`feat(cricket): …`, `fix(setup): …`, `docs(architecture): …`; Details in `CLAUDE.md`).
-- Vor jedem Commit: `npm run lint`, `npm run typecheck`, `npm test`. Vor jedem Deploy: `./scripts/ci.sh` oder mindestens `./scripts/smoke.sh` (Produktions-Build, Standalone auf Port 3100, Browser-Durchlauf, Screenshots nach `docs/screenshots/`). Nie gegen `next dev` testen (lädt in Schleife neu), `next start` geht mit `output: standalone` nicht.
-- **Deploy nur auf ausdrücklichen Zuruf**, nie zusammen mit dem Commit in einem Befehl. Vorher committen, sonst heißt das Image `<sha>-dirty`. Ablauf und Rollback: README „Deploying to the Pi“.
-- `ssh pi` braucht den Schlüssel im Agent: `ssh-add -l` muss den ED25519-Schlüssel zeigen, sonst `ssh-add --apple-use-keychain ~/.ssh/id_ed25519` in einem echten Terminal.
-- **Sprachen:** Antworten an Luca auf Deutsch. Code, Kommentare, Testnamen, Log- und Fehlermeldungen, Skripte, Commit-Nachrichten und README auf Englisch. Deutsch nur in `docs/` und in den UI-Texten (`src/i18n/de.ts`).
-- **Theme:** nur Tokens aus `globals.css`; kein `style={…}` (ESLint), keine Ad-hoc-Werte wie `rounded-[18px]` (`docs/theme.md` §3 Regel 8).
-- **Services:** alles über `Deps` (`players`, `matches`, `auth`, Uhr, Ids, Events, `transaction`); mehrere Schreibvorgänge immer in `deps.transaction`, Tests mit `memoryDeps()`/`sqliteDeps()` aus `src/server/testing.ts`.
-- **Nicht neu aufmachen:** kein `git pull` auf dem Pi (Build nur auf dem Mac); Speicherung pro Aufnahme; Bust zählt 0; Undo stellt den letzten regulären Stand her; kein Backup (E14); CI-Inhalt nur in `scripts/ci.sh` (E15, Umzug nach GitHub geplant).
-- Kleine eindeutige Fixes direkt machen, bei Struktur-Änderungen vorher vorschlagen.
+```
+Lies CLAUDE.md, docs/prompt.md (Stand, So arbeiten wir), docs/project.md (Übersicht oben) und
+docs/architecture.md (§5 Grenzen, §9 Konventionen, §11 Entscheidungen).
+
+Meilenstein: <Mx, oder: „schlag den nächsten sinnvollen vor“>
+
+Vorgehen:
+- Wenn ich keinen nenne: schlag mir anhand von project.md und dem Stand unten den nächsten
+  sinnvollen offenen Meilenstein vor, mit zwei Sätzen Begründung, und warte auf mein Ok.
+- Lies den Plan docs/mN-plan.md. Die offenen Pläne stammen vom 23.10.2026, also von vor M5–M9:
+  gleiche ihn mit dem heutigen Code ab (Dateinamen, Schnittstellen, was es schon gibt) und zeig mir,
+  was du anpassen würdest. Stell mir die offenen Fragen aus dem Plan (§ „Offene Fragen“) mit den
+  Defaults, gesammelt in einer Runde. Erst nach meinen Antworten den Plan aktualisieren und
+  committen (docs(mN): …).
+- Dann Schritt für Schritt umsetzen, Test-first bei Logik, ein Commit pro grünem Schritt.
+  Abweichungen vom Plan oder von Legacy-Regeln vorher mit mir klären.
+- Am Ende: e2e-Tests für den neuen Ablauf in e2e/, ./scripts/smoke.sh grün, Screenshots
+  aktualisiert, project.md abgehakt (Übersicht und Checkliste), Status im Plan, architecture.md
+  und README nachgezogen, wo sich etwas geändert hat.
+- Nicht pushen und nicht deployen. Zum Schluss: was fertig ist, was ich am Board prüfen soll (DoD),
+  was offen bleibt.
+```
+
+---
+
+## Stand (1.11.2026)
+
+- **Fertig, DoD am Board offen:** M5 X01 vollständig, M6 Robustheit (Praxistest mit Flugmodus offen), M7 Cricket, Elimination, SplitScore, M9 Turniere. M1–M4 sind am Handy abgenommen.
+- **Offen:** M8 Statistiken und Reporting (Elo-Setzliste für Turniere hängt daran), M10 Achievements (braucht M8), M11 Sound und Komfort, M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/m6-plan.md` §7). Ebenfalls offen aus M0: Entscheidung SD oder SSD (E6).
+- **Deploy und Push macht Luca selbst.** Was auf dem Pi läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`. Admin dort ist `darts`. Die URL steht im README.
+- **Pläne** für alle offenen Meilensteine liegen in `docs/m8-plan.md` bis `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code). Erledigte Pläne wandern erst nach der DoD am Board nach `docs/archive/`.
+- **Mehrsprachigkeit** ist vorbereitet, aber noch keine Sprachwahl gebaut: erst wenn eine zweite Sprache kommt (README „Adding a language“).
+
+## So arbeiten wir
+
+- **Plan vor Code:** Jeder Meilenstein hat `docs/mN-plan.md` mit Schritten und offenen Fragen; vor dem Start mit Luca abstimmen. Regeln aus Plan und Legacy werden so umgesetzt, wie sie dort stehen; Verbesserungen werden vorgeschlagen, nicht einfach gebaut.
+- **Commits:** Conventional Commits auf Englisch, eine zusammenhängende Änderung pro Commit (`feat(cricket): …`, `fix(sync): …`, `docs(m8): …`; Details in `CLAUDE.md`). Hooks prüfen Prettier, ESLint und das Commit-Format.
+- **Prüfen:** vor jedem Commit `npm run lint`, `npm run typecheck`, `npm test`; vor dem Abschluss `./scripts/smoke.sh` (Produktions-Build plus die Playwright-Tests in `e2e/`, Screenshots nach `docs/screenshots/`). `./scripts/ci.sh` macht alles wie die CI. Nie gegen `next dev` testen.
+- **Tests:** sichtbare Texte immer aus `de` (`de.game.undo`), nie als Literal; Logik test-first.
+- **Sprachen:** Antworten an Luca auf Deutsch. Code, Kommentare, Testnamen, Logs, Skripte, Commits und README auf Englisch; Deutsch nur in `docs/` und `src/i18n/de.ts`.
+- **UI:** nur Theme-Tokens aus `globals.css` (`docs/theme.md`), kein `style={…}`, keine Ad-hoc-Werte, keine Texte im Markup; neue Screens aus den Bausteinen in `src/components/ui/` zusammensetzen, DRY.
+- **Statistik:** nur echte Treffer zählen; Darts, die nichts zählen (daneben, Bust), sind `overthrown` und tauchen in keiner Statistik positiv auf.
+- **Services:** alles über `Deps` (`players`, `matches`, `auth`, `tournaments`, Uhr, Ids, Events, `transaction`); mehrere Schreibvorgänge in `deps.transaction`; Tests mit `memoryDeps()`/`sqliteDeps()`.
+- **Nicht neu aufmachen:** kein `git pull` auf dem Pi (Build nur auf dem Mac); Speicherung pro Aufnahme; Bust zählt 0; kein Backup (E14); CI-Inhalt nur in `scripts/ci.sh` (E15); `Legacy/Dart/` nie ändern.
