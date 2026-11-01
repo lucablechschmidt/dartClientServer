@@ -41,10 +41,12 @@ describe("useMatchEvents", () => {
     Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true });
     document.dispatchEvent(new Event("visibilitychange"));
     expect(onChange).toHaveBeenCalledTimes(2);
+    source.emit("open"); // (re)connected: changes made meanwhile sent no event
+    expect(onChange).toHaveBeenCalledTimes(3);
     unmount();
     expect(source.closed).toBe(true);
     source.emit("change");
-    expect(onChange).toHaveBeenCalledTimes(2);
+    expect(onChange).toHaveBeenCalledTimes(3);
   });
   it("does nothing when disabled", () => {
     renderHook(() => useMatchEvents("m1", () => {}, false));

@@ -4,7 +4,9 @@ import { useEffect, useRef } from "react";
 
 /**
  * Subscribes to a match's changes (SSE) and calls `onChange` on every event and when the
- * tab becomes visible. The browser reconnects EventSource on its own after drops.
+ * tab becomes visible. The browser reconnects EventSource on its own after drops; every (re)connect
+ * also calls `onChange`, because changes made while the stream was down, or between rendering the
+ * page and subscribing, sent no event to this device (M6).
  */
 export function useMatchEvents(matchId: string, onChange: () => void, enabled = true) {
   const handler = useRef(onChange);
@@ -16,10 +18,12 @@ export function useMatchEvents(matchId: string, onChange: () => void, enabled = 
     const source = new EventSource(`/api/match/${matchId}/events`);
     const fire = () => handler.current();
     source.addEventListener("change", fire);
+    source.addEventListener("open", fire);
     const onVisible = () => document.visibilityState === "visible" && fire();
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       source.removeEventListener("change", fire);
+      source.removeEventListener("open", fire);
       source.close();
       document.removeEventListener("visibilitychange", onVisible);
     };
