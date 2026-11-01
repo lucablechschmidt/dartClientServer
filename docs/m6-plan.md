@@ -1,7 +1,7 @@
 # M6-Plan – Robustheit am Board
 
 > Detailplan zu `project.md` M6. Der erste Punkt (lokales Zählen, Warteschlange mit Retry, offene Aufnahme im localStorage) ist seit M1 erledigt. Übrig sind die Tests, die beweisen, dass nichts verloren geht, der Umbau der Smoke-Skripte zu echten Playwright-Tests, und der Praxistest. Kommt nach M5, weil die Tests dann das vollständige X01 abdecken.
-> Stand: erste Fassung 23.10.2026; am 30.10.2026 an den Code nach M5, M7 und M9 angepasst (§2a) und Frage 1 aus §8 eingearbeitet. Umsetzung läuft.
+> Stand: erste Fassung 23.10.2026; am 30.10.2026 an den Code nach M5, M7 und M9 angepasst (§2a) und Frage 1 aus §8 eingearbeitet; §3–§5 umgesetzt am 31.10./1.11.2026 (Warteschlange im localStorage, Wiederholung ohne Doppelwirkung, 26 Playwright-Tests in `e2e/`, davon 7 zu Netzausfällen). Offen: §6 Praxistest am Board.
 > Luca: §0 und §8.
 
 ---
@@ -81,6 +81,11 @@ Fehlt: ein automatischer Nachweis dafür (heute nur `scripts/smoke-match.mjs` al
 ## 7. Beobachtungen vom Board
 
 (wird nach dem Praxistest gefüllt)
+
+Aus den Tests (1.11.2026):
+
+- Reißt das Netz ab, **bevor** der Zählscreen fertig geladen ist, fehlt ein nachgeladenes Code-Stück und es erscheint die Fehlerseite („Nochmal versuchen“). Ist die Seite einmal geladen und die erste Aufnahme gespeichert, geht nichts mehr verloren. Am Board heißt das: Spiel bei Netz öffnen. Abhilfe wäre ein Service Worker, der die Seite vorhält (passt zu PWA in M12).
+- Nach einem Abriss der Live-Verbindung (SSE) lädt jedes Gerät beim Wiederverbinden einmal nach; vorher konnte ein zuschauendes Handy den alten Stand behalten.
 
 ## 8. Offene Fragen (Defaults gelten ohne Antwort)
 

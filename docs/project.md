@@ -30,7 +30,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M3 | Accounts per Einladung | fertig, deployt, DoD mit zwei Handys geprüft | M4 |
 | M4 | Eingabe auf mehreren Geräten | fertig, deployt, DoD mit Rate-Limit-Probe geprüft | M4b |
 | M5 | X01 vollständig | fertig, DoD am Board offen | M2 |
-| M6 | Robustheit am Board | zurückgestellt (lokales Zählen schon da) | M3 |
+| M6 | Robustheit am Board | fertig bis auf den Praxistest am Board | M3 |
 | M7 | Cricket, Elimination, SplitScore | fertig, DoD am Board offen | M3b |
 | M8 | Statistiken und Reporting | geplant, nach M9 | M5 |
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
@@ -185,8 +185,8 @@ Detailplan: `docs/m6-plan.md`.
 **Ziel:** Ein echtes Match komplett am Board zählen, auch bei wackligem Netz.
 
 - [x] Darts zählen lokal, nur die fertige Aufnahme geht an den Server (`commitVisit`/`undoVisit`, E11); Retry-Warteschlange mit Backoff, Anzeige „nicht gespeichert“, offene Aufnahme im localStorage des Geräts
-- [ ] Playwright-Test für den Netz-Ausfall: Flugmodus während einer Aufnahme, danach ist alles gespeichert
-- [ ] Playwright-Smoke-Test: Spieler anlegen → Match anlegen → Leg auschecken → Match-Ende
+- [x] Playwright-Test für den Netz-Ausfall: Flugmodus während einer Aufnahme, danach ist alles gespeichert (`e2e/offline.spec.ts`); Warteschlange überlebt einen Reload, Hinweis nach 10 Minuten
+- [x] Playwright-Smoke-Test: Spieler anlegen → Match anlegen → Leg auschecken → Match-Ende (`e2e/`, ersetzt die Smoke-Skripte)
 - [ ] Deploy und **Praxistest am echten Board**
 
 **DoD:** Ein komplettes Best-of-3-Match wird am Board gezählt. Danach wird der Flugmodus kurz ein- und wieder ausgeschaltet, und es geht nichts verloren.
