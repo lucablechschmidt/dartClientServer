@@ -85,6 +85,7 @@ export function board(page: Page) {
     scores: () => page.locator("[data-score]").allInnerTexts(),
     /** Name of the player on turn (the panel with the active frame). */
     active: async () => (await page.locator(".border-frame-active").first().innerText()).split("\n")[0],
-    status: () => page.locator("[role=status]:visible"),
+    /** The sync status line (only the scoring screen has `data-sync`; empty, so invisible, while saved). */
+    status: () => page.locator("[role=status][data-sync]"),
   };
 }
