@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CardList, CardRow } from "@/components/ui/card-list";
+import { BackButton } from "@/components/ui/back-button";
 import { SectionHeading } from "@/components/ui/form-controls";
 import type { TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
@@ -7,9 +8,12 @@ import type { Texts } from "@/i18n/de";
 export type TournamentListItem = { id: string; name: string; format: TournamentFormat; players: string[]; winner: string | null };
 
 /** All tournaments, newest first, with format, players and the winner or "running" (M9). */
-export function TournamentList({ items, texts: t }: { items: TournamentListItem[]; texts: Texts["tournaments"] }) {
+export function TournamentList({ items, texts: t, back }: { items: TournamentListItem[]; texts: Texts["tournaments"]; back: string }) {
   return (
-    <div className="flex flex-1 flex-col gap-3 bg-bg-grouped px-4 py-4 text-fg">
+    <div className="flex flex-1 flex-col gap-3 bg-bg-grouped px-4 pb-4 text-fg">
+      <div className="flex">
+        <BackButton href="/" label={back} />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-title font-bold tracking-tight">{t.title}</h1>
         <Link href="/tournaments/new" className="min-h-touch content-center rounded-tile bg-accent px-4 font-semibold text-on-accent">

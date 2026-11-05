@@ -6,7 +6,7 @@ import { listTournaments } from "@/server/tournament-service";
 
 async function List() {
   const { deps } = await requireSession();
-  return <TournamentList items={listTournaments(deps)} texts={de.tournaments} />;
+  return <TournamentList items={listTournaments(deps)} texts={de.tournaments} back={de.ui.back} />;
 }
 
 /** Tournaments (M9): running and finished, newest first. */
