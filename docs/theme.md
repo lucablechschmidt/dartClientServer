@@ -40,6 +40,7 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--on-accent` | – | Text und Icons auf Akzent, Undo-Rot und Hinweis-Grau | `#FFFFFF` | `#FFFFFF` |
 | `--scrim` | – | Abdunklung hinter dem Bestätigungs-Dialog | `rgb(0 0 0 / .4)` | `rgb(0 0 0 / .4)` |
 | `--modifier-ring` | – (Fokus der Modifier in `ButtonsView`) | Ring um aktives Double/Triple | `--fg` 60 % | `--fg` 60 % |
+| `--heat-1` … `--heat-5` | – (neu, M8) | Feldtreffer-Heatmap auf der Dartscheibe: ein Farbton (Akzentblau), sequentiell nach Trefferanteil | oklch L 0,92 → 0,42 (hell → dunkel) | oklch L 0,32 → 0,80 (dunkel → hell) |
 | `--qr-bg` | – | heller Grund des QR-Codes (muss in beiden Modi scanbar sein) | `#FFFFFF` | `#FFFFFF` |
 | `--tab-bg` | Tab-Bar-Material | Tab-Leiste unten | `rgb(242 242 247 / .92)` | `rgb(28 28 30 / .92)` |
 

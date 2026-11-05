@@ -27,6 +27,11 @@ const TOKENS = [
   "scrim",
   "qr-bg",
   "modifier-ring",
+  "heat-1",
+  "heat-2",
+  "heat-3",
+  "heat-4",
+  "heat-5",
 ];
 
 /** Literal class names so Tailwind generates them; one per token in TOKENS. */
@@ -55,6 +60,11 @@ const SWATCH: Record<string, string> = {
   scrim: "bg-scrim",
   "qr-bg": "bg-qr-bg",
   "modifier-ring": "bg-modifier-ring",
+  "heat-1": "bg-heat-1",
+  "heat-2": "bg-heat-2",
+  "heat-3": "bg-heat-3",
+  "heat-4": "bg-heat-4",
+  "heat-5": "bg-heat-5",
 };
 
 const KEYS = [

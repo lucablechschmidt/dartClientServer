@@ -64,8 +64,8 @@ Tailwind 4 (tokens in `globals.css`, no tailwind.config), Drizzle + better-sqlit
 package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 
-Routes: `/` game menu, `/new/[mode]` setup, `/players`, `/account` (own name, password,
-logout; the same for everyone), `/admin` (tab "Verwaltung", admins only: invites, players, guests, deleting games and tournaments), `/match/[id]` scoreboard, `/tournaments`,
+Routes: `/` game menu, `/new/[mode]` setup, `/players`, `/account` (own statistics with `?range=`, rankings per
+mode, own name, password, logout; the same for everyone), `/match/[id]/stats` (X01 match page, its players only), `/admin` (tab "Verwaltung", admins only: invites, players, guests, deleting games and tournaments), `/match/[id]` scoreboard, `/tournaments`,
 `/tournaments/new`, `/tournaments/[id]` (M9), `/login`, `/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,
 `is_admin` is a column; `requireSession()` in every page and action, `src/proxy.ts` only
 checks the cookie. Env: `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (bcrypt, first admin bootstrap),
@@ -80,7 +80,8 @@ building blocks (tab bar, screen header, option pills, card lists, icons) live i
 Player names are unique across regular players and guests (case-insensitive).
 Guests (E12): `player.guest_until` set = guest, listed 24 h, their matches are deleted daily by
 `src/server/guest-cleanup.ts` (started from `instrumentation.ts`) after saving regular players'
-field hits to `player_field_hits`. `src/domain/stats/` is the start of the M8 statistics module.
+field hits to `player_field_hits`. Statistics (M8): `src/domain/stats/` (pure figures, Elo per mode),
+`src/server/stats-service.ts`, charts are own SVG (`Dartboard`, `AverageChart`), no chart library.
 
 Writes: every service that writes more than once wraps them in `deps.transaction(() => …)`
 (synchronous; bcrypt before it). Service tests build deps with `memoryDeps()`; atomicity is

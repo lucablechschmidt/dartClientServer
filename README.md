@@ -53,10 +53,11 @@ It prints the same hash three times, because each consumer reads `$` differently
 
 There is no sign-up. The admin invites every player (`docs/architecture.md` E10):
 
-- **Invite:** Konto → "Einladungslink erzeugen" shows a QR code. The new player scans it and chooses a name and a password (at least 8 characters). A name that is already taken is refused. The code works once and for 24 hours.
-- **Login for an existing player without login** (promoted guest, deleted login): Konto → Spieler → "Login erzeugen". It is also a QR code; the player only sets a password.
-- **Forgotten password:** the admin uses Konto → Spieler → "Passwort zurücksetzen". All sessions of that player end.
-- **Delete login** keeps the player and their history; **delete player** only works for players without matches. Neither works on admins.
+- **Invite:** Verwaltung (the admin's fourth tab) → "Einladungslink erzeugen" shows a QR code. The new player scans it and chooses a name and a password (at least 8 characters). A name that is already taken is refused. The code works once and for 24 hours.
+- **Login for an existing player without login** (promoted guest): Verwaltung → Spieler → "Login erzeugen". It is also a QR code; the player only sets a password.
+- **Forgotten password:** the admin uses Verwaltung → Spieler → "Passwort zurücksetzen". All sessions of that player end.
+- **Delete player** (admin, never on admins): the player and their login disappear, their open games are cancelled, finished games stay and keep counting for the others, where the player shows as "Name (gelöscht)". Open tournament games of the player are lost without playing.
+- **Delete games and tournaments** (admin): Verwaltung → "Spiele und Turniere", for games started by mistake or for testing. They leave the history and every statistic; a tournament goes with all its games.
 - Players rename themselves and guests; the admin renames everyone.
 - A login lasts one year. After 10 failed attempts within 15 minutes from one IP, logins pause.
 
@@ -78,6 +79,10 @@ The host or an admin can cancel a game. A running game older than 24 hours count
 ### Guests
 
 Anyone can add a guest in the game setup ("Gast hinzufügen"). Guests stay in the lists for 24 hours and can then play in further rounds and other modes. Games with guests never count for rankings. Once the last guest has expired, the app deletes those games, but first adds the field hits of the regular players to `player_field_hits`. This cleanup runs on start and once a day. Details: E12.
+
+### Statistics
+
+Konto shows **"Meine Statistik"**, only one's own (the admin too): games, wins, the X01 average (as in the old app, a bust counts as 0 points and as a visit), first nine, 180 / 140+ / 100+, highest score and finish, best leg per start score, the average per game as a line, the field hits on a dartboard and the last games. "Alles / Dieses Jahr / 30 Tage" filters by time. Below, one folding **ranking per mode** with its own Elo (1-vs-1 games only, start 1000, K 32): folded it shows one's own place and Elo, open everyone with place, Elo and games. Only finished games without guests count. An X01 game has its own page per leg (`/match/<id>/stats`), only for its players, linked from the victory screen and the last games. Details: `docs/m8-plan.md`.
 
 ## Testing
 

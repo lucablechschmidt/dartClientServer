@@ -38,6 +38,8 @@
 
 Sammelstelle für das, was in M6 auffällt und nicht dort erledigt wurde (Schriftgrößen im Querformat, Position der Statuszeile, Checkout-Hinweis mit zwei Wegen, „Bust“ groß einblenden). Jeder Punkt eine Zeile hier, dann ein Commit.
 
+- `/dev/theme` zeigt nur Zählscreen und Tokens; die `ui`-Bausteine fehlen dort (Regel aus architecture.md §9), u. a. `ChoiceMenu`, `Stepper`, `FoldCard`, `StatTile`, `PillLinks` (aufgefallen bei M8, 5.11.2026).
+
 ## 5. DoD
 
 Am Board: 180 löst den Sound aus, auch auf dem Zuschauer-Handy; Bust vibriert auf Android; die Schnelleingabe (falls gebaut) zählt ein Leg korrekt zu Ende.
