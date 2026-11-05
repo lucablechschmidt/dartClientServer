@@ -117,6 +117,36 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.players.findPlayerByName("CASEY")?.id).toBe("p9");
   });
 
+  it("all matches for the admin: newest first, any status, in pages", () => {
+    const repo = make();
+    seed(repo); // m1 at 10
+    const match = (id: string, startedAt: number) =>
+      repo.matches.createMatch({
+        mode: "cricket",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds: ["p2", "p1"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt,
+        isTournament: true,
+      });
+    match("m2", 30);
+    match("m3", 20);
+    repo.matches.setMatchStatus("m3", "abandoned", 25);
+    expect(repo.matches.listMatches(10, 0).map((m) => [m.id, m.status])).toEqual([
+      ["m2", "running"],
+      ["m3", "abandoned"],
+      ["m1", "running"],
+    ]);
+    expect(repo.matches.listMatches(1, 1).map((m) => m.id)).toEqual(["m3"]);
+    expect(repo.matches.listMatches(10, 0)[0]).toMatchObject({ mode: "cricket", isTournament: true, startedAt: 30 });
+    expect(repo.matches.listMatches(10, 0)[0].players.map((p) => p.name)).toEqual(["Sam", "Casey"]);
+  });
+
   it("open matches of a player: running ones they sit in or host", () => {
     const repo = make();
     seed(repo);

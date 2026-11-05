@@ -5,6 +5,7 @@ import type {
   ExpiredGuestMatch,
   LoadedMatch,
   MatchRepository,
+  MatchSummary,
   MatchStatus,
   NewLeg,
   NewMatch,
@@ -100,6 +101,27 @@ export class SqliteMatchRepository implements MatchRepository {
       .orderBy(desc(matches.startedAt))
       .all()
       .map((m) => ({ id: m.id, mode: m.mode, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
+  }
+  listMatches(limit: number, offset: number): MatchSummary[] {
+    return this.db
+      .select()
+      .from(matches)
+      .orderBy(desc(matches.startedAt))
+      .limit(limit)
+      .offset(offset)
+      .all()
+      .map((m) => ({
+        id: m.id,
+        mode: m.mode,
+        rules: { startScore: m.startScore, inRule: m.inRule, outRule: m.outRule },
+        status: m.status,
+        players: this.seatedPlayers(m.id),
+        inputMode: m.inputMode,
+        hostPlayerId: m.hostPlayerId,
+        startedAt: m.startedAt,
+        finishedAt: m.finishedAt,
+        isTournament: m.isTournament,
+      }));
   }
   listOpenMatchIdsOf(playerId: PlayerId): string[] {
     const seated = this.db.select({ id: matchPlayers.matchId }).from(matchPlayers).where(eq(matchPlayers.playerId, playerId));

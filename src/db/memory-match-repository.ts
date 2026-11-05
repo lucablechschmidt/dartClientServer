@@ -1,6 +1,16 @@
 import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredLeg, type StoredMatch } from "./memory-store";
-import type { ExpiredGuestMatch, LoadedMatch, MatchRepository, MatchStatus, NewLeg, NewMatch, OpenMatch, RecentMatch } from "./repository";
+import type {
+  ExpiredGuestMatch,
+  LoadedMatch,
+  MatchRepository,
+  MatchStatus,
+  MatchSummary,
+  NewLeg,
+  NewMatch,
+  OpenMatch,
+  RecentMatch,
+} from "./repository";
 
 /** For service tests: same semantics as SqliteMatchRepository, in memory only. */
 export class MemoryMatchRepository implements MatchRepository {
@@ -22,6 +32,25 @@ export class MemoryMatchRepository implements MatchRepository {
   }
   deleteMatch(matchId: string): void {
     this.store.matches.delete(matchId);
+    // Like ON DELETE CASCADE on tournament_match: the fixture is open again.
+    for (const t of this.store.tournaments.values()) t.links = t.links.filter((l) => l.matchId !== matchId);
+  }
+  listMatches(limit: number, offset: number): MatchSummary[] {
+    return [...this.store.matches.values()]
+      .sort((a, b) => b.startedAt - a.startedAt)
+      .slice(offset, offset + limit)
+      .map((m) => ({
+        id: m.id,
+        mode: m.mode,
+        rules: m.rules,
+        status: m.status,
+        players: m.playerIds.map((id) => toPlayer(this.store.player(id))),
+        inputMode: m.inputMode,
+        hostPlayerId: m.hostPlayerId,
+        startedAt: m.startedAt,
+        finishedAt: m.finishedAt,
+        isTournament: m.isTournament,
+      }));
   }
   createMatch(input: NewMatch): void {
     this.store.matches.set(input.id, {

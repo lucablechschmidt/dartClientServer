@@ -113,6 +113,8 @@ export type MatchRepository = {
   loadMatch(matchId: string): LoadedMatch | null;
   /** Status running and newer than `openSince` (ms timestamp), newest first. */
   listOpenMatches(openSince: number): OpenMatch[];
+  /** Admin (clean-up): every match whatever its status, newest started first, `limit` from `offset`. */
+  listMatches(limit: number, offset: number): MatchSummary[];
   /** Running matches the player sits in or hosts, whatever their age. */
   listOpenMatchIdsOf(playerId: PlayerId): string[];
   /** History (M5): finished, abandoned or running but older than `openSince`; most recently ended first. */
@@ -140,5 +142,6 @@ export type MatchRepository = {
 
   // Guest matches (E12)
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[];
+  /** Removes the match with its legs, visits and seats; a tournament fixture it played is open again. */
   deleteMatch(matchId: string): void;
 };
