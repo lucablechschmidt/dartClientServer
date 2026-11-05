@@ -87,7 +87,7 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
         </p>
       )}
       {error && <FormError>{t.errors[error]}</FormError>}
-      {view.canRedraw && (
+      {view.canRedraw && view.format !== "round-robin" && (
         <div className="flex items-center justify-between gap-3 rounded-panel bg-card-bg px-4 py-2">
           <span className="text-sm text-fg-muted">{t.seedHint}</span>
           <TextButton onClick={() => void report(onRedraw())}>{t.redraw}</TextButton>
