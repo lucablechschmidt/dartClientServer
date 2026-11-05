@@ -274,6 +274,7 @@ export const de = {
     modes: modeNames,
     hints: {
       elimination: "Nächste Elimination in {n}",
+      gap: "Nächster Spieler: {n} Punkte",
       target: "Ziel: {target}",
       targets: { double: "Doppel", triple: "Triple", bull: "Bull" },
     },

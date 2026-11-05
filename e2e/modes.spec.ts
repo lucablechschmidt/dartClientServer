@@ -43,12 +43,14 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await startMatch(admin, "elimination", [A, B]);
     const b = board(admin);
     await b.tap("20", "0", "0");
+    await expect(admin.getByText(g.hints.elimination.replace("{n}", "20"))).toBeVisible();
     await b.tap("15", "5");
     expect(await b.scores()).toEqual(["0", "20"]);
     await b.tap(g.undo);
     expect(await b.scores()).toEqual(["20", "15"]);
     await b.tap("0", "0");
     await b.tap(...K.T180); // A 200
+    await expect(admin.getByText(g.hints.gap.replace("{n}", "185"))).toBeVisible(); // B 15: 185 is out of reach
     await b.tap(...K.MISS);
     await b.tap(g.triple, "20", g.triple, "13", g.double, "1"); // 260, 299, 301
     await expect(admin.getByText(wins(A))).toBeVisible();

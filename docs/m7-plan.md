@@ -62,7 +62,7 @@ Panel: statt Rest die Punkte, kein Durchschnitt (29.10.2026), darunter die siebe
 | zwei Spieler auf demselben Stand, Dritter trifft ihn | beide auf 0 (siehe §9)                       |
 | 180                                                  | wie X01 (Sound im Backlog)                   |
 
-Panel: Punkte, darunter „nächste Elimination in N“ (kleinster positiver Abstand zu einem Mitspieler) als Hinweiszeile statt Checkout.
+Panel: Punkte, darunter „nächste Elimination in N“ (kleinster positiver Abstand zu einem Mitspieler) als Hinweiszeile statt Checkout. **Geändert am 5.11.2026 (Abweichung von Legacy):** genannt wird nur ein Abstand, den die verbleibenden Darts der Aufnahme exakt erreichen können (mit einem Dart z. B. 32 per D16, aber nicht 31). Ist keiner erreichbar, steht dort „Nächster Spieler: N Punkte“ mit dem Abstand zum nächsthöheren Spieler (nach Punkten, nicht nach Wurfreihenfolge); liegt niemand vorn, bleibt die Zeile leer.
 
 - **Commit:** „M7: Elimination“
 

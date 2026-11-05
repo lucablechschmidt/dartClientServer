@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { newLeg } from "../game/state";
 import type { Dart, LegState, OutRule } from "../game/types";
 import { elimination } from "./mode";
-import { scores } from "./scores";
+import { reachable, scores } from "./scores";
 
 const [A, B, C] = ["a", "b", "c"];
 const S = (field: number): Dart => ({ field, type: "single" });
@@ -122,5 +122,28 @@ describe("elimination (M7, legacy §5)", () => {
     expect(next(s)).toBe(B);
     expect(next(play(s, ...MISS))).toBe(C);
     expect(next(play(s, ...MISS, ...MISS))).toBe(A);
+  });
+
+  it("the hint names only an elimination the darts left can reach; otherwise the gap to the next player above", () => {
+    const hint = (state: LegState) => elimination.board(state, {}).hint;
+    // A 0, B 31, C 32; A is up
+    const s = play(leg(301, "single", [A, B, C]), ...MISS, S(20), S(11), S(0), S(20), S(12), S(0));
+    expect(hint(s)).toEqual({ kind: "elimination", points: 31 }); // three darts: 31 is easy
+    expect(hint(play(s, S(0), S(0)))).toEqual({ kind: "elimination", points: 32 }); // one dart: 31 no, D16 yes
+    // two players: A 0, B 31, one dart left: nothing to eliminate, B is 31 ahead
+    const two = play(leg(301, "single"), ...MISS, S(20), S(11), S(0), S(0), S(0));
+    expect(hint(two)).toEqual({ kind: "gap", points: 31 });
+    expect(hint(leg())).toBeNull(); // nobody ahead
+  });
+
+  it("reachable: which points the darts left can score", () => {
+    expect([reachable(32, 1), reachable(31, 1), reachable(61, 1), reachable(50, 1)]).toEqual([true, false, false, true]);
+    expect([reachable(120, 2), reachable(121, 2), reachable(180, 3), reachable(179, 3), reachable(5, 0)]).toEqual([
+      true,
+      false,
+      true,
+      false,
+      false,
+    ]);
   });
 });

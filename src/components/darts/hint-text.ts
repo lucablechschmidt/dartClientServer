@@ -11,6 +11,8 @@ export function hintText(hint: BoardHint | null, texts: HintTexts): string | nul
       return hint.text;
     case "elimination":
       return texts.hints.elimination.replace("{n}", String(hint.points));
+    case "gap":
+      return texts.hints.gap.replace("{n}", String(hint.points));
     case "target":
       return texts.hints.target.replace("{target}", (texts.hints.targets as Record<string, string>)[hint.target] ?? hint.target);
   }

@@ -31,8 +31,10 @@ export type PlayerPanelData = {
 /** The line between panels and keypad; texts come from i18n, the domain only says what. */
 export type BoardHint =
   | { kind: "checkout"; text: string }
-  /** Elimination: points to the next player above, who would be sent back to 0. */
+  /** Elimination: points to the nearest player above the darts left can reach, who would be sent back to 0. */
   | { kind: "elimination"; points: number }
+  /** Elimination, none reachable: points to the next player above. */
+  | { kind: "gap"; points: number }
   /** SplitScore: the current target. */
   | { kind: "target"; target: string };
 
