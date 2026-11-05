@@ -59,7 +59,7 @@ describe("tournaments (M9)", () => {
     let v = loadTournamentView(deps, host, id)!;
     expect(v.players.map((p) => p.id).sort()).toEqual(ids.slice(0, 4).sort());
     expect(v.fixtures).toHaveLength(6);
-    expect(v.canRedraw).toBe(true);
+    expect(v.canRedraw).toBe(false); // everyone meets everyone, the draw changes nothing
     for (const f of v.fixtures) playFixture(id, f.id);
     v = loadTournamentView(deps, host, id)!;
     expect(v.fixtures.every((f) => f.status === "done")).toBe(true);
@@ -70,11 +70,13 @@ describe("tournaments (M9)", () => {
   });
 
   it("redraw only by creator or admin and only before the first game", () => {
-    const id = create({});
+    const id = create({ format: "knockout" });
     const other = { playerId: ids[1], name: "Sam", isAdmin: false };
+    expect(loadTournamentView(deps, host, id)!.canRedraw).toBe(true);
+    expect(loadTournamentView(deps, other, id)!.canRedraw).toBe(false);
     expect(redrawTournament(deps, other, id)).toEqual({ ok: false, reason: "forbidden" });
     ok(redrawTournament(deps, host, id));
-    const first = loadTournamentView(deps, host, id)!.fixtures[0];
+    const first = loadTournamentView(deps, host, id)!.fixtures.find((f) => f.status === "ready")!;
     ok(startFixture(deps, other, id, first.id)); // anyone may start a game
     expect(redrawTournament(deps, host, id)).toEqual({ ok: false, reason: "already-started" });
     expect(loadTournamentView(deps, host, id)!.canRedraw).toBe(false);

@@ -79,12 +79,6 @@ describe("TournamentScreen (M9)", () => {
     expect(screen.getByRole("button", { name: t.redraw })).toBeInTheDocument();
   });
 
-  it("a round robin offers no redraw: every player meets everyone anyway", () => {
-    render(<TournamentScreen view={{ ...view, format: "round-robin", canRedraw: true }} onStart={vi.fn()} {...props} />);
-    expect(screen.queryByRole("button", { name: t.redraw })).toBeNull();
-    expect(screen.queryByText(t.seedHint)).toBeNull();
-  });
-
   it("the group table: place, player, games, wins, legs, average", () => {
     const groups: TournamentScreenView = {
       ...view,

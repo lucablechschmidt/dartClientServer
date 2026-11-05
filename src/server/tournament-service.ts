@@ -159,7 +159,8 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
     fixtures,
     groups: groupNumbers.map((group) => ({ group, rows: standings(plan, results, group) })),
     winner: tournamentWinner(plan, results),
-    canRedraw: mayManage(t, session) && matches.size === 0,
+    // A round robin pairs everyone with everyone: a new draw changes nothing.
+    canRedraw: t.format !== "round-robin" && mayManage(t, session) && matches.size === 0,
     canDelete: mayManage(t, session),
   };
 }
