@@ -240,7 +240,7 @@ export const de = {
     reenter: "Neu eingeben",
     cancel: "Spiel abbrechen",
     cancelQuestion: "Spiel abbrechen? Die Aufnahmen bleiben gespeichert.",
-    cancelConfirm: "Abbrechen",
+    cancelConfirm: "Spiel Abbrechen",
     cancelBack: "Zurück",
     closed: "Spiel beendet",
     turnOf: "{name} ist dran",
