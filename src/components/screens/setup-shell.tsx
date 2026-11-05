@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
-import { PlayersCard } from "./players-card";
+import { FoldCard } from "@/components/ui/fold-card";
 import { BackButton } from "@/components/ui/back-button";
 import { ChoiceMenu, ChoiceNumberField, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
 import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
@@ -109,9 +109,9 @@ export function SetupShell({
           {options(
             order.length,
             playersInOptions && (
-              <PlayersCard title={texts.choosePlayersTitle} count={count}>
+              <FoldCard title={texts.choosePlayersTitle} summary={count} defaultOpen>
                 {picker}
-              </PlayersCard>
+              </FoldCard>
             ),
           )}
           <ChoiceMenu

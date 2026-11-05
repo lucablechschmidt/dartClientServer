@@ -1,14 +1,24 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { DisclosureChevron } from "@/components/ui/choice-menu";
+import { DisclosureChevron } from "./choice-menu";
 
 /**
- * Player choice that folds away (tournament setup): one card line "Spieler auswählen · n ausgewählt",
- * open it shows the picker below, guest row included. Open at first, the line toggles it.
+ * A card that folds to one line: title left, a short summary (e.g. "3 ausgewählt") and the chevron
+ * right; open, its content follows below. Tournament players, the admin's games and tournaments.
  */
-export function PlayersCard({ title, count, children }: { title: string; count: string; children: ReactNode }) {
-  const [open, setOpen] = useState(true);
+export function FoldCard({
+  title,
+  summary,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="flex flex-col gap-3">
       <button
@@ -19,7 +29,7 @@ export function PlayersCard({ title, count, children }: { title: string; count: 
       >
         <span className="font-semibold">{title}</span>
         <span className="flex items-center gap-2 text-sm text-fg-muted">
-          {count}
+          {summary}
           <DisclosureChevron open={open} />
         </span>
       </button>
