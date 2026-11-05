@@ -38,7 +38,8 @@ test("M8: own statistics in the account tab after two x01 games", async ({ admin
   // rankings: A wins first (1016 / 984), then B as the outsider gains more than 16 (A 998.5, B 1001.5);
   // folded only the own place and Elo
   const x01 = pageA.getByRole("button", { name: new RegExp(`^${s.modes.x01}`) });
-  await expect(x01).toContainText(s.ownRank.replace("{place}", "2").replace("{elo}", "999"));
+  // the place depends on what the other tests played in the shared database, the Elo does not
+  await expect(x01).toContainText(new RegExp(s.ownRank.replace("{place}", "\\d+").replace("{elo}", "999")));
   await expect(pageA.getByRole("button", { name: new RegExp(`^${s.modes.cricket}`) })).toContainText(s.notRanked);
   await x01.click();
   const table = pageA.getByRole("table", { name: s.ranking.replace("{mode}", s.modes.x01) });
