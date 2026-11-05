@@ -34,4 +34,11 @@ test("M9: a knockout tournament for three, one bye, back to the tournament after
   }
   await expect(admin.getByText(new RegExp(`^${t.winner.replace("{name}", "")}`))).toHaveCount(1);
   await shot(admin, "tournament", true);
+
+  await admin.getByRole("link", { name: de.ui.back }).click();
+  await admin.waitForURL((u) => u.pathname === "/tournaments");
+  await expect(admin.getByRole("link", { name: new RegExp(name) })).toBeVisible();
+  await shot(admin, "tournament-list");
+  await admin.getByRole("link", { name: de.ui.back }).click();
+  await admin.waitForURL((u) => u.pathname === "/");
 });
