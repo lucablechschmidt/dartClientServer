@@ -50,6 +50,7 @@ export const de = {
       forbidden: "Dafür fehlt dir die Berechtigung.",
       "not-found": "Spieler nicht gefunden.",
     },
+    deletedName: "{name} (gelöscht)",
   },
   auth: {
     title: "Anmelden",

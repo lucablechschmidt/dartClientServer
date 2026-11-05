@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest } from "./board";
+import { addGuest, select } from "./board";
 import { ADMIN, ADMIN_PASSWORD, alertOf, expect, inviteLink, linkPath, login, shot, test } from "./fixtures";
 
 test("security headers on every response", async ({ request }) => {
@@ -66,7 +66,12 @@ test("admin deletes players on /account, also one who started a match: it is can
   stamp,
 }) => {
   const [A, H, G1, G2] = [`A${stamp}`, `H${stamp}`, `G${stamp}`, `K${stamp}`];
-  await register(A);
+  const pageA = await register(A);
+  await pageA.goto("/new/x01");
+  await addGuest(pageA, `${G1}a`);
+  await pageA.getByRole("button", { name: select(A) }).click();
+  await pageA.getByRole("button", { name: de.newGame.start }).click();
+  await pageA.waitForURL(/\/match\//);
   const host = await register(H);
   await host.goto("/new/x01");
   await addGuest(host, G1);
@@ -85,6 +90,7 @@ test("admin deletes players on /account, also one who started a match: it is can
   await expect(admin.getByText(A, { exact: true })).toHaveCount(0);
   await admin.goto("/");
   await expect(admin.getByRole("list", { name: de.overview.title }).getByRole("link", { name: new RegExp(G1) })).toHaveCount(0);
+  await expect(admin.getByText(de.players.deletedName.replace("{name}", A))).toBeVisible(); // history: cancelled, name marked
   await host.goto("/players");
   await expect(host).toHaveURL(/\/login/);
 });

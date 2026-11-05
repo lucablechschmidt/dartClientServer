@@ -16,6 +16,7 @@ import {
   type TournamentFormat,
 } from "@/domain/tournament";
 import type { Deps } from "./deps";
+import { shownName } from "./player-names";
 import { createMatch, rulesSchema } from "./match-service";
 import { formatOf, planOf } from "./tournament-plan";
 
@@ -154,7 +155,7 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
     rules: t.rules,
     inputMode: t.inputMode,
     createdAt: t.createdAt,
-    players: t.seeds.map((p) => ({ id: p.id, name: p.name })),
+    players: t.seeds.map((p) => ({ id: p.id, name: shownName(p) })),
     fixtures,
     groups: groupNumbers.map((group) => ({ group, rows: standings(plan, results, group) })),
     winner: tournamentWinner(plan, results),
@@ -175,14 +176,15 @@ export type TournamentSummary = {
 /** The tournament list, newest first, with the winner's name once decided. */
 export function listTournaments(deps: Deps): TournamentSummary[] {
   return deps.tournaments.listTournaments().map((t) => {
-    const winner = tournamentWinner(planOf(t), resultsOf(t, linkedMatches(deps, t)));
+    const winnerId = tournamentWinner(planOf(t), resultsOf(t, linkedMatches(deps, t)));
+    const winner = t.seeds.find((p) => p.id === winnerId);
     return {
       id: t.id,
       name: t.name,
       format: t.format,
-      players: t.seeds.map((p) => p.name),
+      players: t.seeds.map(shownName),
       createdAt: t.createdAt,
-      winner: t.seeds.find((p) => p.id === winner)?.name ?? null,
+      winner: winner ? shownName(winner) : null,
     };
   });
 }

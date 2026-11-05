@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { GameMenu } from "@/components/screens/game-menu";
 import { de } from "@/i18n/de";
 import { listOpenMatches, listRecentMatches } from "@/server/match-service";
+import { shownName } from "@/server/player-names";
 import { requireSession } from "@/server/request";
 
 async function Menu() {
@@ -9,7 +10,7 @@ async function Menu() {
   const matches = listOpenMatches(deps).map((m) => ({
     id: m.id,
     mode: m.mode,
-    names: m.players.map((p) => p.name),
+    names: m.players.map(shownName),
     perPlayer: m.inputMode === "per-player",
     startedAt: m.startedAt,
   }));

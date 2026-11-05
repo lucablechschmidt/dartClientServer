@@ -169,6 +169,7 @@ describe("tournaments: a deleted player (walkover)", () => {
     const v = loadTournamentView(deps, host, id)!;
     const second = v.fixtures.find((f) => f.id === semis[1].id)!;
     expect(second).toMatchObject({ status: "done", winner: stays, walkover: true, legs: [0, 0] });
+    expect(v.players.find((p) => p.id === gone)?.name).toMatch(/\(gelöscht\)$/);
     expect(v.fixtures.find((f) => f.id === semis[0].id)).toMatchObject({ status: "done", winner: winner1, walkover: false });
     const final = v.fixtures.find((f) => f.round === 2)!;
     expect([final.status, [final.a, final.b].sort()]).toEqual(["ready", [winner1, stays].sort()]);

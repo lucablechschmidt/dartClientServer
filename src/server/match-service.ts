@@ -45,6 +45,7 @@ import {
   type ScoreboardView,
 } from "@/domain/game";
 import type { Deps } from "./deps";
+import { shownName } from "./player-names";
 import { isTournamentMatchLocked } from "./tournament-plan";
 
 export const rulesSchema = z.object({
@@ -125,7 +126,7 @@ const accessOf = (m: Pick<LoadedMatch, "status" | "startedAt" | "inputMode" | "h
 const actorOf = (s: Session) => ({ id: s.playerId, isAdmin: s.isAdmin });
 
 function toView(m: LoadedMatch, session: Session | null, now: number): MatchView {
-  const names = Object.fromEntries(m.players.map((p) => [p.id, p.name]));
+  const names = Object.fromEntries(m.players.map((p) => [p.id, shownName(p)]));
   const match = accessOf(m);
   const actor = session ? actorOf(session) : null;
   return {
@@ -288,11 +289,14 @@ function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResul
 /** History in the game overview (M5): the last 20 closed matches. */
 export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
   return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit).map((m) => {
-    const name = (id: PlayerId) => m.players.find((p) => p.id === id)?.name ?? "";
+    const name = (id: PlayerId) => {
+      const p = m.players.find((x) => x.id === id);
+      return p ? shownName(p) : "";
+    };
     return {
       id: m.id,
       mode: m.mode,
-      names: m.players.map((p) => p.name),
+      names: m.players.map(shownName),
       endedAt: m.finishedAt ?? m.startedAt,
       result: withNames(recentResult(m), name),
     };
@@ -434,10 +438,11 @@ export function setStarter(deps: Deps, session: Session, matchId: string, player
   return { ok: true, view: toView(stored, session, now) };
 }
 
-/** "Restart Game" from legacy: same players, rules and format, the starter moves on by one seat. */
+/** "Restart Game" from legacy: same players, rules and format, the starter moves on by one seat. Not with a deleted player. */
 export function restartMatch(deps: Deps, matchId: string): string | null {
   const m = deps.matches.loadMatch(matchId);
-  if (!m) return null;
+  if (!m || m.players.some((p) => p.deletedAt !== null)) return null;
+  const host = m.hostPlayerId === null ? null : deps.players.findPlayerById(m.hostPlayerId);
   return createMatch(deps, {
     mode: m.mode,
     playerIds: m.players.map((p) => p.id),
@@ -445,6 +450,6 @@ export function restartMatch(deps: Deps, matchId: string): string | null {
     format: m.format,
     starterIndex: (m.state.legs[0].starter + 1) % m.players.length,
     inputMode: m.inputMode,
-    hostPlayerId: m.hostPlayerId,
+    hostPlayerId: host?.id ?? null,
   });
 }

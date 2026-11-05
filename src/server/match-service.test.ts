@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Session } from "@/domain/player";
 import type { Dart } from "@/domain/game";
+import { de } from "@/i18n/de";
 import { memoryDeps } from "./testing";
 import {
   cancelMatch,
@@ -15,7 +16,7 @@ import {
   setStarter,
   undoVisit,
 } from "./match-service";
-import { createGuest, createPlayer } from "./player-service";
+import { createGuest, createPlayer, deletePlayer } from "./player-service";
 
 const ok = <T extends { ok: boolean }>(r: T) => {
   if (!r.ok) throw new Error("expected ok");
@@ -148,6 +149,16 @@ describe("match service", () => {
     expect(v.rules.startScore).toBe(401);
     expect(v.board.activePlayerId).toBe(b.id);
     expect(restartMatch(deps, "nope")).toBeNull();
+  });
+
+  it("a deleted player keeps their name with a mark in old matches and the history; no restart with them", () => {
+    const { a, id } = setup();
+    const admin: Session = { playerId: "admin", name: "Admin", isAdmin: true };
+    ok(deletePlayer(deps, admin, a.id));
+    const shown = de.players.deletedName.replace("{name}", "Casey");
+    expect(loadMatchView(deps, id)!.board.players.map((p) => p.name)).toEqual([shown, "Sam"]);
+    expect(listRecentMatches(deps).find((m) => m.id === id)?.names).toEqual([shown, "Sam"]);
+    expect(restartMatch(deps, id)).toBeNull();
   });
 });
 
