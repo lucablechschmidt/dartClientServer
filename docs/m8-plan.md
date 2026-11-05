@@ -68,8 +68,8 @@ Für alle Modi:
 
 ## 4. Repository und Services
 
-- `src/db/stats-repository.ts` (Interface) mit SQLite- und Memory-Variante, Test gegen beide: `finishedMatches({ since?, playerId? })` → beendete Matches mit Modus, Teilnehmern (Gast? gelöscht?), Platzierungen, `finishedAt` und den Legs als `MatchState`; `fieldHitsStored(playerId)` gibt es schon im PlayerRepository.
-- `src/server/stats-service.ts`: `myStats(deps, session, range)`, `leaderboards(deps, session)` (je Modus Rangliste plus eigener Platz), `matchDetail(deps, session, matchId)` (nur Teilnehmer). Tests mit `memoryDeps()`.
+- **Umgesetzt (5.11.):** statt eines eigenen `StatsRepository` die Methode `MatchRepository.listFinishedMatches(since)` (SQLite und Memory, Test gegen beide): beendete Matches, älteste zuerst, wie `loadMatch` (Teilnehmer mit Gast-/Lösch-Status, `MatchState` aus dem Replay) plus Platzierungen. `fieldHitsOf(playerId)` gibt es schon im PlayerRepository. Die gespeicherten Feldtreffer (`player_field_hits`) haben kein Datum und zählen nur beim Zeitfilter „Alles“.
+- `src/server/stats-service.ts`: `myStats(deps, session, range)`, `leaderboards(deps, session)` (je Modus Rangliste plus eigener Platz, Elo gerundet), `matchDetail(deps, session, matchId)` (nur Teilnehmer, nur X01: bei den anderen Modi sagen Aufnahmepunkte nichts). Tests mit `memoryDeps()` und `sqliteDeps()`.
 
 ## 5. Turniere: Setzliste ausgelost oder festgelegt (Lucas Antwort zu §9.8)
 

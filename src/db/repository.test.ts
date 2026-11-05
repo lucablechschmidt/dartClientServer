@@ -147,6 +147,51 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.matches.listMatches(10, 0)[0].players.map((p) => p.name)).toEqual(["Sam", "Casey"]);
   });
 
+  it("finished matches for the statistics: only finished ones, since a time, oldest first, with places and visits", () => {
+    const repo = make();
+    seed(repo); // m1, running
+    const match = (id: string) =>
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds: ["p1", "p2"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt: 1,
+      });
+    match("m2");
+    match("m3");
+    match("m4");
+    const v: Visit = {
+      playerId: "p1",
+      darts: [
+        { field: 20, type: "triple" },
+        { field: 20, type: "triple" },
+        { field: 20, type: "triple" },
+      ],
+      isBust: false,
+    };
+    repo.matches.syncVisits("m2-l", [v], 0, nextId, 5);
+    for (const [id, at] of [
+      ["m2", 300],
+      ["m3", 100],
+    ] as const) {
+      repo.matches.setMatchStatus(id, "finished", at);
+      repo.matches.setPlacements(id, { p1: 1, p2: 2 });
+    }
+    repo.matches.setMatchStatus("m4", "abandoned", 200);
+    expect(repo.matches.listFinishedMatches(null).map((m) => m.id)).toEqual(["m3", "m2"]);
+    expect(repo.matches.listFinishedMatches(150).map((m) => m.id)).toEqual(["m2"]);
+    const m2 = repo.matches.listFinishedMatches(150)[0];
+    expect(m2).toMatchObject({ finishedAt: 300, placements: { p1: 1, p2: 2 } });
+    expect(m2.state.legs[0].visits).toEqual([v]);
+    expect(m2.players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
+  });
+
   it("open matches of a player: running ones they sit in or host", () => {
     const repo = make();
     seed(repo);

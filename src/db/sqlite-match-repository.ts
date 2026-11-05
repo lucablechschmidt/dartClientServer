@@ -3,6 +3,7 @@ import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import type { Db } from "./client";
 import type {
   ExpiredGuestMatch,
+  FinishedMatch,
   LoadedMatch,
   MatchRepository,
   MatchSummary,
@@ -101,6 +102,21 @@ export class SqliteMatchRepository implements MatchRepository {
       .orderBy(desc(matches.startedAt))
       .all()
       .map((m) => ({ id: m.id, mode: m.mode, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
+  }
+  listFinishedMatches(since: number | null): FinishedMatch[] {
+    const finished = and(eq(matches.status, "finished"), since === null ? undefined : gte(matches.finishedAt, since));
+    return this.db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(finished)
+      .orderBy(asc(matches.finishedAt))
+      .all()
+      .flatMap(({ id }) => {
+        const m = this.loadMatch(id);
+        if (!m) return [];
+        const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, id)).all();
+        return [{ ...m, placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])) }];
+      });
   }
   listMatches(limit: number, offset: number): MatchSummary[] {
     return this.db

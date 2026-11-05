@@ -47,6 +47,9 @@ export type LoadedMatch = MatchSummary & {
   state: MatchState;
 };
 
+/** M8: a finished match for the statistics, with the final places. */
+export type FinishedMatch = LoadedMatch & { placements: Record<PlayerId, number | null> };
+
 export type NewLeg = { id: string; matchId: string; setNo: number; legNo: number; starterPlayerId: PlayerId };
 
 export type NewMatch = {
@@ -113,6 +116,8 @@ export type MatchRepository = {
   loadMatch(matchId: string): LoadedMatch | null;
   /** Status running and newer than `openSince` (ms timestamp), newest first. */
   listOpenMatches(openSince: number): OpenMatch[];
+  /** M8 statistics: finished matches (finished at or after `since`), oldest first, with visits and places. */
+  listFinishedMatches(since: number | null): FinishedMatch[];
   /** Admin (clean-up): every match whatever its status, newest started first, `limit` from `offset`. */
   listMatches(limit: number, offset: number): MatchSummary[];
   /** Running matches the player sits in or hosts, whatever their age. */

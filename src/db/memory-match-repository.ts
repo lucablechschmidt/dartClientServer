@@ -2,6 +2,7 @@ import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredLeg, type StoredMatch } from "./memory-store";
 import type {
   ExpiredGuestMatch,
+  FinishedMatch,
   LoadedMatch,
   MatchRepository,
   MatchStatus,
@@ -34,6 +35,15 @@ export class MemoryMatchRepository implements MatchRepository {
     this.store.matches.delete(matchId);
     // Like ON DELETE CASCADE on tournament_match: the fixture is open again.
     for (const t of this.store.tournaments.values()) t.links = t.links.filter((l) => l.matchId !== matchId);
+  }
+  listFinishedMatches(since: number | null): FinishedMatch[] {
+    return [...this.store.matches.values()]
+      .filter((m) => m.status === "finished" && (since === null || (m.finishedAt ?? 0) >= since))
+      .sort((a, b) => (a.finishedAt ?? 0) - (b.finishedAt ?? 0))
+      .flatMap((m) => {
+        const loaded = this.loadMatch(m.id);
+        return loaded ? [{ ...loaded, placements: { ...m.placements } }] : [];
+      });
   }
   listMatches(limit: number, offset: number): MatchSummary[] {
     return [...this.store.matches.values()]
