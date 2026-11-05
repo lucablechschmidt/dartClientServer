@@ -155,6 +155,23 @@ describe("tournaments (M9)", () => {
   });
 });
 
+describe("tournaments: seed list drawn or fixed (m8-plan §5)", () => {
+  it("fixed: the order the players were tapped is the seed list, and there is no redraw", () => {
+    const tapped = [ids[3], ids[0], ids[2], ids[1]];
+    const id = create({ format: "knockout", playerIds: tapped, seeding: "fixed" });
+    const v = loadTournamentView(deps, host, id)!;
+    expect(v.players.map((p) => p.id)).toEqual(tapped);
+    expect(v.seeding).toBe("fixed");
+    expect(v.canRedraw).toBe(false);
+    expect(redrawTournament(deps, host, id)).toEqual({ ok: false, reason: "forbidden" });
+  });
+
+  it("drawn by default, with a redraw before the first game", () => {
+    const id = create({ format: "knockout" });
+    expect(loadTournamentView(deps, host, id)).toMatchObject({ seeding: "random", canRedraw: true });
+  });
+});
+
 describe("tournaments: a deleted player (walkover)", () => {
   const admin: Session = { playerId: "admin", name: "Admin", isAdmin: true };
 

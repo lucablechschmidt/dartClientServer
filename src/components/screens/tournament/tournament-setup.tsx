@@ -22,6 +22,8 @@ type Props = SetupProps & { tournamentTexts: Texts["tournaments"] };
 
 const FORMATS: readonly TournamentFormat[] = ["round-robin", "knockout", "groups-knockout"];
 const ADVANCE = ["1", "2", "4"] as const;
+const SEEDINGS = ["random", "fixed"] as const;
+type Seeding = (typeof SEEDINGS)[number];
 type Advance = (typeof ADVANCE)[number];
 
 /** Who may start: two players at least; groups need two each and no more qualifiers than members (m9-plan §1). */
@@ -47,6 +49,7 @@ export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
   const [format, setFormat] = useState<TournamentFormat>("round-robin");
   const [groups, setGroups] = useState(2);
   const [advance, setAdvance] = useState<Advance>("2");
+  const [seeding, setSeeding] = useState<Seeding>("random");
   const [startScore, setStartScore] = useState(501);
   const [inRule, setInRule] = useState<Rule>("single");
   const [outRule, setOutRule] = useState<Rule>("double");
@@ -92,6 +95,14 @@ export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
                 onChange={setFormat}
                 options={FORMATS.map((f) => ({ value: f, label: t.formats[f] }))}
               />
+              <RuleTile
+                name="seeding"
+                label={t.seeding}
+                value={seeding}
+                onChange={setSeeding}
+                options={SEEDINGS.map((s) => ({ value: s, label: t.seedings[s] }))}
+              />
+              {seeding === "fixed" && <p className="text-xs text-fg-muted">{t.seedingFixedHint}</p>}
               {format === "groups-knockout" && (
                 <div className="flex flex-col divide-y divide-separator">
                   <Stepper

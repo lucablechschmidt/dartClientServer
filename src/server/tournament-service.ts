@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { MatchStatus } from "@/db/repository";
-import type { RoundFormat, StoredTournament } from "@/db/tournament-repository";
+import type { RoundFormat, StoredTournament, TournamentSeeding } from "@/db/tournament-repository";
 import type { Session } from "@/domain/player";
 import { matchResult, type InputMode, type MatchFormat, type PlayerId, type Rules } from "@/domain/game";
 import {
@@ -34,6 +34,8 @@ export const newTournamentSchema = z
     advance: z.union([z.literal(1), z.literal(2), z.literal(4)]).default(2),
     rules: rulesSchema,
     inputMode: z.enum(["single", "per-player"]).default("single"),
+    /** M8: drawn, or the order the players were tapped. */
+    seeding: z.enum(["random", "fixed"]).default("random"),
     /** Group phase (and a plain round robin). */
     groupFormat: formatSchema.default({ legsToWinSet: 1, setsToWinMatch: 1 }),
     /** One per knockout round, first round first; missing rounds take the last one. */
@@ -72,9 +74,10 @@ export function createTournament(deps: Deps, session: Session, raw: NewTournamen
     advancePerGroup: input.advance,
     rules: input.rules,
     inputMode: input.inputMode,
+    seeding: input.seeding,
     createdBy: session.playerId,
     createdAt: deps.now(),
-    seeds: draw(input.playerIds, randomInt(deps)),
+    seeds: input.seeding === "fixed" ? input.playerIds : draw(input.playerIds, randomInt(deps)),
     roundFormats: formats,
   });
   return id;
@@ -99,6 +102,7 @@ export type TournamentView = {
   advancePerGroup: number;
   rules: Rules;
   inputMode: InputMode;
+  seeding: TournamentSeeding;
   createdAt: number;
   /** In seed order. */
   players: { id: PlayerId; name: string }[];
@@ -157,13 +161,14 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
     advancePerGroup: t.advancePerGroup,
     rules: t.rules,
     inputMode: t.inputMode,
+    seeding: t.seeding,
     createdAt: t.createdAt,
     players: t.seeds.map((p) => ({ id: p.id, name: shownName(p) })),
     fixtures,
     groups: groupNumbers.map((group) => ({ group, rows: standings(plan, results, group) })),
     winner: tournamentWinner(plan, results),
     // A round robin pairs everyone with everyone: a new draw changes nothing.
-    canRedraw: t.format !== "round-robin" && mayManage(t, session) && matches.size === 0,
+    canRedraw: t.format !== "round-robin" && t.seeding === "random" && mayManage(t, session) && matches.size === 0,
     canDelete: mayManage(t, session),
   };
 }
@@ -197,7 +202,7 @@ export function listTournaments(deps: Deps): TournamentSummary[] {
 export function redrawTournament(deps: Deps, session: Session, id: string): { ok: true } | { ok: false; reason: TournamentError } {
   const t = deps.tournaments.loadTournament(id);
   if (!t) return { ok: false, reason: "not-found" };
-  if (!mayManage(t, session)) return { ok: false, reason: "forbidden" };
+  if (!mayManage(t, session) || t.seeding === "fixed") return { ok: false, reason: "forbidden" };
   if (linkedMatches(deps, t).size > 0) return { ok: false, reason: "already-started" };
   deps.tournaments.setSeeds(
     id,

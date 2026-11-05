@@ -1,0 +1,1 @@
+ALTER TABLE `tournament` ADD `seeding` text DEFAULT 'random' NOT NULL;

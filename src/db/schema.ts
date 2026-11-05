@@ -144,6 +144,10 @@ export const tournaments = sqliteTable("tournament", {
   inputMode: text("input_mode", { enum: ["single", "per-player"] })
     .notNull()
     .default("single"),
+  /** M8 (m8-plan §5): seed list drawn ('random', with redraw) or fixed by the creator in tap order. */
+  seeding: text("seeding", { enum: ["random", "fixed"] })
+    .notNull()
+    .default("random"),
   createdBy: text("created_by").references(() => players.id, { onDelete: "set null" }),
   createdAt: integer("created_at").notNull(),
 });

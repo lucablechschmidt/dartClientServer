@@ -21,6 +21,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
           inRule: t.rules.inRule,
           outRule: t.rules.outRule,
           inputMode: t.inputMode,
+          seeding: t.seeding,
           createdBy: t.createdBy,
           createdAt: t.createdAt,
         })
@@ -79,6 +80,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
       advancePerGroup: t.advancePerGroup,
       rules: { startScore: t.startScore, inRule: t.inRule, outRule: t.outRule },
       inputMode: t.inputMode,
+      seeding: t.seeding,
       createdBy: t.createdBy,
       createdAt: t.createdAt,
       seeds,

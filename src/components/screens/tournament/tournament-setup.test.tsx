@@ -80,4 +80,16 @@ describe("TournamentSetup", () => {
     await waitFor(() => expect(new FormData(form).getAll("playerId")).toEqual(["g"]));
     expect(new FormData(form).getAll("name")).toEqual(["Freitag"]);
   });
+
+  it("seed list: drawn by default, or fixed in the order the players are tapped", async () => {
+    const user = userEvent.setup();
+    const { container } = show();
+    const seeding = () => container.querySelector('input[name="seeding"]');
+    expect(seeding()).toHaveValue("random");
+    expect(screen.queryByText(t.seedingFixedHint)).toBeNull();
+    await user.click(screen.getByRole("button", { name: `${t.seeding}: ${t.seedings.random}` }));
+    await user.click(screen.getByRole("button", { name: t.seedings.fixed }));
+    expect(seeding()).toHaveValue("fixed");
+    expect(screen.getByText(t.seedingFixedHint)).toBeInTheDocument();
+  });
 });

@@ -27,6 +27,7 @@ export async function createTournamentAction(formData: FormData): Promise<void> 
       outRule: ruleOf(formText(formData, "outRule", "double")),
     },
     inputMode: formText(formData, "inputMode") === "per-player" ? "per-player" : "single",
+    seeding: formText(formData, "seeding") === "fixed" ? "fixed" : "random",
     groupFormat: { legsToWinSet: toWin(formText(formData, "groupLegs")), setsToWinMatch: toWin(formText(formData, "groupSets")) },
     knockoutFormats: knockoutLegs.map((legs, i) => ({ legsToWinSet: toWin(legs), setsToWinMatch: toWin(knockoutSets.at(i) ?? "1") })),
   });

@@ -64,6 +64,13 @@
       "when": 1793886999957,
       "tag": "0008_nebulous_baron_strucker",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793896545329,
+      "tag": "0009_fixed_wraith",
+      "breakpoints": true
     }
   ]
 }

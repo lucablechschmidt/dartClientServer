@@ -45,3 +45,24 @@ test("M9: a knockout tournament for three, one bye, back to the tournament after
   await admin.getByRole("link", { name: de.ui.back }).click();
   await admin.waitForURL((u) => u.pathname === "/");
 });
+
+test("M8: a fixed seed list starts in the order the players were tapped, without a redraw", async ({ admin, register, stamp }) => {
+  const [A, B, C, name] = [`A${stamp}`, `B${stamp}`, `C${stamp}`, `Fix ${stamp}`];
+  for (const p of [A, B, C]) await register(p);
+  await admin.goto("/tournaments/new");
+  await admin.getByLabel(t.name).fill(name);
+  await admin.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }).click();
+  await admin.getByRole("button", { name: t.formats.knockout, exact: true }).click();
+  await admin.getByRole("button", { name: `${t.seeding}: ${t.seedings.random}` }).click();
+  await admin.getByRole("button", { name: t.seedings.fixed }).click();
+  for (const n of [C, A, ADMIN, B]) await admin.getByRole("button", { name: select(n) }).click();
+  await admin.getByRole("button", { name: t.start }).click();
+  await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));
+  // seeds 1–4 = C, A, admin, B: semifinals 1 vs 4 and 2 vs 3
+  const semis = admin.getByRole("list", { name: t.semifinal }).getByRole("listitem");
+  await expect(semis.nth(0)).toContainText(C);
+  await expect(semis.nth(0)).toContainText(B);
+  await expect(semis.nth(1)).toContainText(A);
+  await expect(semis.nth(1)).toContainText(ADMIN);
+  await expect(admin.getByRole("button", { name: t.redraw })).toHaveCount(0);
+});

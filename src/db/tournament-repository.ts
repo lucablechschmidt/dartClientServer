@@ -2,6 +2,8 @@ import type { InputMode, PlayerId, Rules } from "@/domain/game";
 import type { TournamentFormat } from "@/domain/tournament";
 import type { Player } from "./repository";
 
+export type TournamentSeeding = "random" | "fixed";
+
 /** Best of legs/sets for the group phase (round 0) or one knockout round (m9-plan §9.4). */
 export type RoundFormat = { phase: "group" | "knockout"; round: number; legsToWinSet: number; setsToWinMatch: number };
 
@@ -13,6 +15,8 @@ export type NewTournament = {
   advancePerGroup: number;
   rules: Rules;
   inputMode: InputMode;
+  /** M8: drawn (redraw allowed) or fixed by the creator. */
+  seeding: TournamentSeeding;
   createdBy: PlayerId | null;
   createdAt: number;
   /** Player ids in seed order. */

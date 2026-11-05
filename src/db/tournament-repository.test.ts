@@ -45,6 +45,7 @@ const tournament = (id: string, createdAt: number): NewTournament => ({
   advancePerGroup: 2,
   rules,
   inputMode: "single",
+  seeding: "random",
   createdBy: "p1",
   createdAt,
   seeds: ["p2", "p1", "p3"],
@@ -64,8 +65,9 @@ describe.each(impls)("tournament repository: %s", (_name, make) => {
     const r = make();
     seed(r);
     r.tournaments.createTournament(tournament("t1", 10));
-    r.tournaments.createTournament(tournament("t2", 20));
+    r.tournaments.createTournament({ ...tournament("t2", 20), seeding: "fixed" });
     const t = r.tournaments.loadTournament("t1")!;
+    expect([t.seeding, r.tournaments.loadTournament("t2")!.seeding]).toEqual(["random", "fixed"]);
     expect(t.seeds.map((p) => p.id)).toEqual(["p2", "p1", "p3"]);
     expect(t.rules).toEqual(rules);
     expect(t.roundFormats).toContainEqual({ phase: "knockout", round: 2, legsToWinSet: 3, setsToWinMatch: 1 });
