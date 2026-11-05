@@ -118,7 +118,7 @@
 
   /* Fixed sizes of reusable parts (theme.md §3); fluid values use clamp() with vmin/vw/vh */
   --spacing-row: 3.4rem; /* list row height (CardRow) */
-  --spacing-tab: 5.5rem; /* min width of a tab in the tab bar */
+  --spacing-tab: 4.5rem; /* min width of a tab in the tab bar (four fit on a 375 px phone) */
   --spacing-panel-x: 15px; /* horizontal padding of the large player panel */
   --spacing-keypad-gap: 5px; /* gap between keypad keys */
   --spacing-icon-inline: 1.3em; /* icon next to text, scales with the font */

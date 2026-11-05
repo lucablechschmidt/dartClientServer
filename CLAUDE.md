@@ -65,7 +65,7 @@ package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 
 Routes: `/` game menu, `/new/[mode]` setup, `/players`, `/account` (own name, password,
-logout; admin: invites, players, guests), `/match/[id]` scoreboard, `/tournaments`,
+logout; the same for everyone), `/admin` (tab "Verwaltung", admins only: invites, players, guests), `/match/[id]` scoreboard, `/tournaments`,
 `/tournaments/new`, `/tournaments/[id]` (M9), `/login`, `/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,
 `is_admin` is a column; `requireSession()` in every page and action, `src/proxy.ts` only
 checks the cookie. Env: `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (bcrypt, first admin bootstrap),

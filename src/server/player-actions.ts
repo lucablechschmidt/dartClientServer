@@ -7,6 +7,7 @@ import { requireSession } from "./request";
 import { formText } from "./form";
 
 const touched = () => {
+  revalidatePath("/admin");
   revalidatePath("/players");
   revalidatePath("/new/x01");
 };

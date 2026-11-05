@@ -32,7 +32,7 @@ test("invites: a taken name is rejected (case C), new players may rename only th
 
   const pageA = await register(A);
   await register(B);
-  await shot(admin, "account-admin");
+  await shot(admin, "admin");
   const edit = (name: string) => ({ name: `${de.players.edit}: ${name}` });
   await admin.goto("/players");
   await expect(admin.getByRole("button", edit(A))).toHaveCount(1);
@@ -44,7 +44,7 @@ test("invites: a taken name is rejected (case C), new players may rename only th
 test("a password reset ends the old session; the new password applies", async ({ admin, phone, register, stamp }) => {
   const A = `A${stamp}`;
   const pageA = await register(A);
-  await admin.goto("/account");
+  await admin.goto("/admin");
   const row = admin.getByRole("listitem").filter({ hasText: A });
   await row.getByRole("button", { name: de.account.admin.resetPassword }).click();
   const reset = await phone();
@@ -60,7 +60,7 @@ test("a password reset ends the old session; the new password applies", async ({
   await login(pageA, A, "neuesPasswortA");
 });
 
-test("admin deletes players on /account, also one who started a match: it is cancelled, the login is gone", async ({
+test("admin deletes players on /admin, also one who started a match: it is cancelled, the login is gone", async ({
   admin,
   register,
   stamp,
@@ -79,7 +79,7 @@ test("admin deletes players on /account, also one who started a match: it is can
   await host.getByRole("button", { name: de.newGame.start }).click();
   await host.waitForURL(/\/match\//);
 
-  await admin.goto("/account");
+  await admin.goto("/admin");
   for (const name of [A, H]) {
     const row = admin.getByRole("listitem").filter({ hasText: name });
     await row.getByRole("button", { name: de.account.admin.deletePlayer }).click();
@@ -93,6 +93,30 @@ test("admin deletes players on /account, also one who started a match: it is can
   await expect(admin.getByText(de.players.deletedName.replace("{name}", A))).toBeVisible(); // history: cancelled, name marked
   await host.goto("/players");
   await expect(host).toHaveURL(/\/login/);
+});
+
+test("the admin tab: only admins see it and the admin tools live there, the account tab is the same for everyone", async ({
+  admin,
+  register,
+  stamp,
+}) => {
+  const nav = (page: typeof admin) => page.getByRole("navigation", { name: de.nav.main });
+  const tools = de.account.admin;
+  await admin.goto("/account");
+  await expect(nav(admin).getByRole("link", { name: de.nav.admin })).toBeVisible();
+  await expect(admin.getByRole("button", { name: tools.createInvite })).toHaveCount(0);
+  await expect(admin.getByRole("button", { name: de.auth.logout })).toBeVisible();
+  await shot(admin, "account");
+  await nav(admin).getByRole("link", { name: de.nav.admin }).click();
+  await admin.waitForURL((u) => u.pathname === "/admin");
+  await expect(admin.getByRole("button", { name: tools.createInvite })).toBeVisible();
+  await expect(admin.getByRole("heading", { name: tools.players })).toBeVisible();
+
+  const player = await register(`P${stamp}`);
+  await player.goto("/account");
+  await expect(nav(player).getByRole("link", { name: de.nav.admin })).toHaveCount(0);
+  await player.goto("/admin");
+  await player.waitForURL((u) => u.pathname === "/account");
 });
 
 test("an unknown match shows the not-found page", async ({ admin }) => {

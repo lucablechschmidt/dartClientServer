@@ -23,6 +23,7 @@ export const de = {
     newGame: "Neues Spiel",
     players: "Spieler",
     account: "Konto",
+    admin: "Verwaltung",
     main: "Hauptnavigation",
   },
   theme: {

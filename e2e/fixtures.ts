@@ -70,7 +70,7 @@ export async function login(page: Page, name: string, password: string) {
 
 /** A fresh register invite, as a path on the tested server. */
 export async function inviteLink(admin: Page): Promise<string> {
-  await admin.goto("/account");
+  await admin.goto("/admin");
   await admin.getByRole("button", { name: de.account.admin.createInvite }).click();
   return linkPath(admin.locator("a[href*='/einladung/']").first());
 }

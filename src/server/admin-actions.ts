@@ -16,7 +16,7 @@ async function link(token: string): Promise<InviteLink> {
 }
 
 const touched = () => {
-  revalidatePath("/account");
+  revalidatePath("/admin");
   revalidatePath("/players");
   revalidatePath("/new/x01");
 };
