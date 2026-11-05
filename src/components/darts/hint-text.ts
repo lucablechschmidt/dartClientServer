@@ -1,4 +1,4 @@
-import type { BoardHint } from "@/domain/game";
+import type { BoardHint, ScoreboardView } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 
 type HintTexts = Pick<Texts["game"], "hints">;
@@ -14,4 +14,10 @@ export function hintText(hint: BoardHint | null, texts: HintTexts): string | nul
     case "target":
       return texts.hints.target.replace("{target}", (texts.hints.targets as Record<string, string>)[hint.target] ?? hint.target);
   }
+}
+
+/** "Nächster Spieler: …" for the line below the keypad; empty when nobody follows (leg over, play-out alone). */
+export function nextPlayerText(board: Pick<ScoreboardView, "nextPlayerId" | "players">, texts: Pick<Texts["game"], "nextPlayer">): string {
+  const next = board.players.find((p) => p.id === board.nextPlayerId);
+  return next ? texts.nextPlayer.replace("{name}", next.name) : "";
 }

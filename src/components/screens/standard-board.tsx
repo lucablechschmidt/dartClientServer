@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CheckoutHint } from "@/components/darts/checkout-hint";
-import { hintText } from "@/components/darts/hint-text";
+import { hintText, nextPlayerText } from "@/components/darts/hint-text";
+import { KeypadArea } from "@/components/darts/keypad-area";
 import { PlayerPanels } from "@/components/darts/player-panels";
 import { ScoreGrid } from "@/components/darts/score-grid";
 import { TextButton } from "@/components/ui/form-controls";
@@ -19,7 +20,10 @@ type Props = {
   onResign: (() => void) | null;
 };
 
-/** Scoring screen of X01, Elimination and SplitScore: player panels, the hint line, the legacy keypad. */
+/**
+ * Scoring screen of X01, Elimination and SplitScore: player panels, the hint line, the legacy keypad;
+ * with 3+ players the next player below the keypad, like in Cricket.
+ */
 export function StandardBoard({ board, texts, header, keypad, turnHint, onSelectStarter, onResign }: Props) {
   return (
     <ScoreGrid
@@ -46,7 +50,7 @@ export function StandardBoard({ board, texts, header, keypad, turnHint, onSelect
           )}
         </div>
       }
-      keypad={<div className="h-full px-3 pb-3">{keypad}</div>}
+      keypad={<KeypadArea keypad={keypad} note={board.players.length >= 3 ? nextPlayerText(board, texts) : null} />}
     />
   );
 }

@@ -46,13 +46,19 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
   await admin.getByRole("button", { name: deselect(H) }).click();
   await startMatch(admin, "x01", [ADMIN, A, B, H], { startScore: 301, singleOut: true });
   const b = board(admin);
+  const next = (name: string) => admin.getByText(g.nextPlayer.replace("{name}", name), { exact: true });
+  const anyNext = admin.getByText(new RegExp(`^${g.nextPlayer.replace("{name}", "")}`));
 
   await admin.getByRole("button", { name: `${g.toStart}: ${H}` }).click();
   expect(await b.active()).toBe(H);
+  await expect(next(ADMIN)).toBeVisible(); // 3+ players: the next one below the keypad
   await b.tap(...K.T180, ...K.MISS, ...K.MISS, ...K.MISS); // H 180, the others miss
   await b.tap(...K.OUT121); // H: place 1, the leg goes on
+  await expect(next(A)).toBeVisible();
+  await shot(admin, "match-next-player");
   await b.tap(...K.MISS, ...K.T180, ...K.T180); // admin miss, A and B 180
   await b.tap(...K.MISS, ...K.OUT121); // admin miss, A out: place 2
+  await expect(next(ADMIN)).toBeVisible(); // B is up, H and A are out
   await b.tap(...K.OUT121); // B out: place 3, the admin is last
   await expect(admin.getByText(wins(H))).toBeVisible();
   await expect(admin.getByText(`3. ${B}`)).toHaveCount(1);
@@ -61,6 +67,7 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
 
   await admin.getByRole("button", { name: g.playOut.replace("{name}", ADMIN) }).click();
   await b.key("0").waitFor();
+  await expect(anyNext).toHaveCount(0); // the last player plays out alone
   await b.tap(...K.MISS);
   await admin.getByRole("button", { name: g.resign }).click();
   await admin.getByRole("dialog").getByRole("button", { name: g.resign }).click();

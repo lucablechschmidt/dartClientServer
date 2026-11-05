@@ -202,7 +202,6 @@ export function ScoreboardScreen({
       <>
         <CricketBoard
           board={board}
-          names={initial.names}
           texts={texts}
           header={header}
           keypad={keypad}
