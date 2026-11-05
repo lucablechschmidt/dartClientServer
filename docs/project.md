@@ -32,7 +32,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M5 | X01 vollständig | fertig, DoD am Board offen | M2 |
 | M6 | Robustheit am Board | fertig bis auf den Praxistest am Board | M3 |
 | M7 | Cricket, Elimination, SplitScore | fertig, DoD am Board offen | M3b |
-| M8 | Statistiken und Reporting | geplant, nach M9 | M5 |
+| M8 | Statistiken und Reporting | in Arbeit (Plan überarbeitet 5.11.2026) | M5 |
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | geplant | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
@@ -214,11 +214,13 @@ Detailplan: `docs/m8-plan.md`.
 
 **Ziel:** Die Auswertungen, für die es die App gibt.
 
-- [ ] `src/domain/stats/` mit Tests: 3-Dart-Average (Definition wie Legacy), First-9, Checkout-Quote, 180/140+/100+, Highest Finish, Best Leg (Darts), Highest Score, Feldtreffer, Elo (nur 1 vs 1, E8); Gast-Matches (E12) zählen in keiner Rangliste und nicht für Elo; Feldtreffer = Treffer aus vorhandenen Aufnahmen plus `player_field_hits`
-- [ ] **Spielerprofil:** Kennzahlen gesamt, Average-Verlauf über die Zeit (Recharts), Feldtreffer als Board-Heatmap oder Balken
-- [ ] **Spieler-Rangliste:** sortierbar nach Siegquote, Average, Checkout-Quote, Elo
-- [ ] Match-Detailansicht mit Statistik pro Leg
+- [ ] `src/domain/stats/` mit Tests: 3-Dart-Average (Definition wie Legacy, Bust zählt 0), First-9, 180/140+/100+, Highest Finish, Best Leg (Darts), Highest Score, Feldtreffer, Spiele/Siege und **Elo je Modus** (nur 1 vs 1, E8); nur beendete Matches; Gast-Matches (E12) zählen in keiner Rangliste und nicht für Elo; Feldtreffer = Treffer aus vorhandenen Aufnahmen plus `player_field_hits`
+- [ ] **Meine Statistik** im Tab Konto (nur das eigene Profil, auch für den Admin): Kennzahlen, Zeitfilter, Average-Verlauf (eigenes SVG), Feldtreffer als SVG-Dartscheibe, letzte Matches
+- [ ] **Ranglisten je Modus** im Tab Konto als ausklappbare Karten (zugeklappt: eigener Platz und Elo; aufgeklappt: Platz, Name, Elo, Spiele)
+- [ ] Match-Detailansicht mit Statistik pro Leg (nur Teilnehmer)
+- [ ] Turnier-Setzliste: ausgelost oder vom Ersteller festgelegt (ohne Elo)
 - [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird)
+- Später, eigener Meilenstein: **Checkout-Quote** (Checkouts ÷ Checkout-Darts), aus M8 herausgenommen am 5.11.2026
 
 **DoD:** Die Berichte zeigen für reale Daten aus M6 korrekte Werte (mit einem von Hand nachgerechneten Match gegengeprüft).
 
