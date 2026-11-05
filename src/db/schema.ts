@@ -14,9 +14,15 @@ export const players = sqliteTable(
     /** E10: set = login possible. No separate user table. */
     passwordHash: text("password_hash"),
     isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
+    /** Set = deleted by the admin; the row stays because finished matches reference it. */
+    deletedAt: integer("deleted_at"),
   },
-  /** Names are unique across all players, guests included, case-insensitive. */
-  (t) => [uniqueIndex("player_name_unique").on(sql`lower(${t.name})`)],
+  /** Names are unique across all players that are not deleted, guests included, case-insensitive. */
+  (t) => [
+    uniqueIndex("player_name_unique")
+      .on(sql`lower(${t.name})`)
+      .where(sql`${t.deletedAt} IS NULL`),
+  ],
 );
 
 /** M3: login session. id = SHA-256 of the cookie token, expires 1 year after login (E10). */

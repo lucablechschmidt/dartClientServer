@@ -31,4 +31,6 @@ export type AuthRepository = {
   /** Only valid ones: not expired, not used. */
   findInvite(id: string, now: number): InviteRecord | null;
   markInviteUsed(id: string, now: number): void;
+  /** Password invites of a player that is being deleted. */
+  deleteInvitesOfPlayer(playerId: PlayerId): void;
 };

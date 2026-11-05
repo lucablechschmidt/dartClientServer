@@ -41,4 +41,7 @@ export class MemoryAuthRepository implements AuthRepository {
     const i = this.invites.get(id);
     if (i) i.usedAt = now;
   }
+  deleteInvitesOfPlayer(playerId: PlayerId): void {
+    for (const i of this.invites.values()) if (i.playerId === playerId) this.invites.delete(i.id);
+  }
 }

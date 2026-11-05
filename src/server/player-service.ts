@@ -59,10 +59,26 @@ export function renamePlayer(deps: Deps, session: Session, id: string, rawName: 
   });
 }
 
-/** Anyone may remove guests; regular players only the admin, never oneself or other admins. */
+/**
+ * Anyone may remove guests without a match; the admin removes any player except themself and other
+ * admins (architecture.md §6). Soft delete: the row stays for finished matches, which keep counting
+ * for the others; open matches the player sits in or hosts are cancelled, the login goes away.
+ */
 export function deletePlayer(deps: Deps, session: Session, id: string): PlayerResult {
   const player = deps.players.findPlayerById(id);
   if (!player) return { ok: false, reason: "not-found" };
-  if (!isGuest(player) && (!session.isAdmin || player.isAdmin || session.playerId === id)) return { ok: false, reason: "forbidden" };
-  return deps.transaction(() => deps.players.deletePlayer(id)) === "deleted" ? { ok: true } : { ok: false, reason: "player-in-match" };
+  if (session.isAdmin ? player.isAdmin || session.playerId === id : !isGuest(player)) return { ok: false, reason: "forbidden" };
+  const now = deps.now();
+  const cancelled = deps.transaction((): string[] | null => {
+    if (!session.isAdmin && deps.players.isSeated(id)) return null;
+    const open = deps.matches.listOpenMatchIdsOf(id);
+    for (const matchId of open) deps.matches.setMatchStatus(matchId, "abandoned", now);
+    deps.auth.deleteSessionsOfPlayer(id);
+    deps.auth.deleteInvitesOfPlayer(id);
+    deps.players.markDeleted(id, now);
+    return open;
+  });
+  if (!cancelled) return { ok: false, reason: "player-in-match" };
+  for (const matchId of cancelled) deps.events.publish(matchId);
+  return { ok: true };
 }

@@ -2,7 +2,7 @@ import { and, asc, eq, gt, isNotNull, isNull, lte, notInArray, or, sql } from "d
 import type { FieldHits } from "@/domain/stats/field-hits";
 import type { PlayerId } from "@/domain/game";
 import type { Db } from "./client";
-import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
+import type { NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
 import { matchPlayers, playerFieldHits, players, type PlayerRow } from "./schema";
 
 /** The hash stays in the DB layer; only hasLogin/isAdmin go outside. */
@@ -13,6 +13,7 @@ export const toPlayer = (r: PlayerRow): Player => ({
   guestUntil: r.guestUntil,
   hasLogin: r.passwordHash !== null,
   isAdmin: r.isAdmin,
+  deletedAt: r.deletedAt,
 });
 const toCredentials = (r: PlayerRow): PlayerCredentials => ({ id: r.id, name: r.name, passwordHash: r.passwordHash, isAdmin: r.isAdmin });
 
@@ -24,7 +25,7 @@ export class SqlitePlayerRepository implements PlayerRepository {
     return this.db
       .select()
       .from(players)
-      .where(or(isNull(players.guestUntil), gt(players.guestUntil, now)))
+      .where(and(isNull(players.deletedAt), or(isNull(players.guestUntil), gt(players.guestUntil, now))))
       .orderBy(asc(isNotNull(players.guestUntil)), asc(players.createdAt))
       .all()
       .map(toPlayer);
@@ -42,11 +43,15 @@ export class SqlitePlayerRepository implements PlayerRepository {
     return this.db
       .select()
       .from(players)
-      .where(sql`lower(${players.name}) = lower(${name})`)
+      .where(and(isNull(players.deletedAt), sql`lower(${players.name}) = lower(${name})`))
       .get();
   }
   private rowById(id: PlayerId): PlayerRow | undefined {
-    return this.db.select().from(players).where(eq(players.id, id)).get();
+    return this.db
+      .select()
+      .from(players)
+      .where(and(isNull(players.deletedAt), eq(players.id, id)))
+      .get();
   }
   findPlayerByName(name: string): Player | null {
     const r = this.rowByName(name);
@@ -76,11 +81,11 @@ export class SqlitePlayerRepository implements PlayerRepository {
   promoteGuest(id: PlayerId): void {
     this.db.update(players).set({ guestUntil: null }).where(eq(players.id, id)).run();
   }
-  deletePlayer(id: PlayerId): DeletePlayerResult {
-    const inMatch = this.db.select({ matchId: matchPlayers.matchId }).from(matchPlayers).where(eq(matchPlayers.playerId, id)).get();
-    if (inMatch) return "player-in-match";
-    this.db.delete(players).where(eq(players.id, id)).run();
-    return "deleted";
+  isSeated(id: PlayerId): boolean {
+    return this.db.select({ matchId: matchPlayers.matchId }).from(matchPlayers).where(eq(matchPlayers.playerId, id)).get() !== undefined;
+  }
+  markDeleted(id: PlayerId, now: number): void {
+    this.db.update(players).set({ deletedAt: now, passwordHash: null }).where(eq(players.id, id)).run();
   }
   addFieldHits(playerId: PlayerId, hits: FieldHits): void {
     const rows = [...hits].filter(([, n]) => n > 0).map(([field, n]) => ({ playerId, field, hits: n }));

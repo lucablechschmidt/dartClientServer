@@ -45,4 +45,7 @@ export class SqliteAuthRepository implements AuthRepository {
   markInviteUsed(id: string, now: number): void {
     this.db.update(invites).set({ usedAt: now }).where(eq(invites.id, id)).run();
   }
+  deleteInvitesOfPlayer(playerId: PlayerId): void {
+    this.db.delete(invites).where(eq(invites.playerId, playerId)).run();
+  }
 }

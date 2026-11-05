@@ -2,7 +2,7 @@ import { isListed } from "@/domain/player";
 import { addFieldHits, type FieldHits } from "@/domain/stats/field-hits";
 import type { PlayerId } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredPlayer } from "./memory-store";
-import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
+import type { NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
 
 /** For service tests: same semantics as SqlitePlayerRepository, in memory only. */
 export class MemoryPlayerRepository implements PlayerRepository {
@@ -11,7 +11,7 @@ export class MemoryPlayerRepository implements PlayerRepository {
   listPlayers(now: number): Player[] {
     const guestRank = (p: Player) => (p.guestUntil === null ? 0 : 1);
     return [...this.store.players.values()]
-      .filter((p) => isListed(p, now))
+      .filter((p) => p.deletedAt === null && isListed(p, now))
       .sort((a, b) => guestRank(a) - guestRank(b) || a.createdAt - b.createdAt)
       .map(toPlayer);
   }
@@ -25,6 +25,7 @@ export class MemoryPlayerRepository implements PlayerRepository {
       passwordHash,
       hasLogin: passwordHash !== null,
       isAdmin: player.isAdmin ?? false,
+      deletedAt: null,
     });
   }
   renamePlayer(id: PlayerId, name: string): void {
@@ -33,14 +34,19 @@ export class MemoryPlayerRepository implements PlayerRepository {
   }
   private storedByName(name: string): StoredPlayer | undefined {
     const needle = name.toLowerCase();
-    return [...this.store.players.values()].find((p) => p.name.toLowerCase() === needle);
+    return [...this.store.players.values()].find((p) => p.deletedAt === null && p.name.toLowerCase() === needle);
+  }
+  /** Like the SQLite lookups: a deleted player is not found. */
+  private live(id: PlayerId): StoredPlayer | undefined {
+    const p = this.store.players.get(id);
+    return p?.deletedAt === null ? p : undefined;
   }
   findPlayerByName(name: string): Player | null {
     const p = this.storedByName(name);
     return p ? toPlayer(p) : null;
   }
   findPlayerById(id: PlayerId): Player | null {
-    const p = this.store.players.get(id);
+    const p = this.live(id);
     return p ? toPlayer(p) : null;
   }
   private creds(p: StoredPlayer | undefined): PlayerCredentials | null {
@@ -50,7 +56,7 @@ export class MemoryPlayerRepository implements PlayerRepository {
     return this.creds(this.storedByName(name));
   }
   credentialsById(id: PlayerId): PlayerCredentials | null {
-    return this.creds(this.store.players.get(id));
+    return this.creds(this.live(id));
   }
   setPasswordHash(id: PlayerId, hash: string | null): void {
     const p = this.store.players.get(id);
@@ -70,10 +76,12 @@ export class MemoryPlayerRepository implements PlayerRepository {
     const p = this.store.players.get(id);
     if (p) p.guestUntil = null;
   }
-  deletePlayer(id: PlayerId): DeletePlayerResult {
-    if (this.store.isSeated(id)) return "player-in-match";
-    this.store.players.delete(id);
-    return "deleted";
+  isSeated(id: PlayerId): boolean {
+    return this.store.isSeated(id);
+  }
+  markDeleted(id: PlayerId, now: number): void {
+    const p = this.store.players.get(id);
+    if (p) Object.assign(p, { deletedAt: now, passwordHash: null, hasLogin: false });
   }
   addFieldHits(playerId: PlayerId, hits: FieldHits): void {
     const positive = new Map([...hits].filter(([, n]) => n > 0));

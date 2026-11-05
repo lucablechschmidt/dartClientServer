@@ -14,7 +14,7 @@ export class MemoryMatchRepository implements MatchRepository {
       if (guests.length === 0 || Math.max(...guests.map((p) => p.guestUntil ?? 0)) > now) continue;
       out.push({
         id: m.id,
-        regularPlayerIds: seated.filter((p) => p.guestUntil === null).map((p) => p.id),
+        regularPlayerIds: seated.filter((p) => p.guestUntil === null && p.deletedAt === null).map((p) => p.id),
         visits: m.legs.flatMap((l) => l.visits),
       });
     }
@@ -52,6 +52,11 @@ export class MemoryMatchRepository implements MatchRepository {
         inputMode: m.inputMode,
         startedAt: m.startedAt,
       }));
+  }
+  listOpenMatchIdsOf(playerId: PlayerId): string[] {
+    return [...this.store.matches.values()]
+      .filter((m) => m.status === "running" && (m.playerIds.includes(playerId) || m.hostPlayerId === playerId))
+      .map((m) => m.id);
   }
   listRecentMatches(openSince: number, limit: number): RecentMatch[] {
     return [...this.store.matches.values()]

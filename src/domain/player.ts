@@ -10,6 +10,8 @@ export type Player = {
   guestUntil: number | null;
   hasLogin: boolean;
   isAdmin: boolean;
+  /** Set = deleted by the admin: the row stays for old matches, the player is gone from lists and login. */
+  deletedAt: number | null;
 };
 
 /** For creation: hash and admin flag are optional (guests, players without login). */
@@ -36,9 +38,6 @@ export const isGuest = (player: Pick<Player, "guestUntil">): boolean => player.g
 
 /** Regular player always; guest only while their time has not expired. */
 export const isListed = (player: Pick<Player, "guestUntil">, now: number): boolean => player.guestUntil === null || player.guestUntil > now;
-
-/** Result of "delete player": players with a match are kept (their visits reference them). */
-export type DeletePlayerResult = "deleted" | "player-in-match";
 
 /** Error on create/rename/delete; names are unique across all players (case-insensitive), guests included. */
 export type PlayerError = "name-taken" | "player-in-match" | "forbidden" | "not-found";

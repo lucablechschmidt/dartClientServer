@@ -35,7 +35,7 @@ export class SqliteMatchRepository implements MatchRepository {
         .select({ id: players.id })
         .from(matchPlayers)
         .innerJoin(players, eq(players.id, matchPlayers.playerId))
-        .where(and(eq(matchPlayers.matchId, id), isNull(players.guestUntil)))
+        .where(and(eq(matchPlayers.matchId, id), isNull(players.guestUntil), isNull(players.deletedAt)))
         .all()
         .map((r) => r.id);
       const legIds = this.db
@@ -100,6 +100,15 @@ export class SqliteMatchRepository implements MatchRepository {
       .orderBy(desc(matches.startedAt))
       .all()
       .map((m) => ({ id: m.id, mode: m.mode, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
+  }
+  listOpenMatchIdsOf(playerId: PlayerId): string[] {
+    const seated = this.db.select({ id: matchPlayers.matchId }).from(matchPlayers).where(eq(matchPlayers.playerId, playerId));
+    return this.db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(and(eq(matches.status, "running"), or(eq(matches.hostPlayerId, playerId), inArray(matches.id, seated))))
+      .all()
+      .map((r) => r.id);
   }
   listRecentMatches(openSince: number, limit: number): RecentMatch[] {
     return this.db

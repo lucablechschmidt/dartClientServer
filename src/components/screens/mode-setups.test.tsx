@@ -6,7 +6,7 @@ import { CricketSetup, EliminationSetup, SplitScoreSetup } from "./mode-setups";
 
 const t = de.newGame;
 const choice = (label: string, value: string) => `${label}: ${value}`;
-const players = [{ id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false }];
+const players = [{ id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false, deletedAt: null }];
 const props = {
   players,
   texts: t,

@@ -53,15 +53,13 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     });
   };
 
-  it("players: create, list in creation order, rename, delete", () => {
+  it("players: create, list in creation order, rename", () => {
     const repo = make();
     repo.players.createPlayer({ id: "b", name: "Bea", createdAt: 2, guestUntil: null });
     repo.players.createPlayer({ id: "a", name: "Al", createdAt: 1, guestUntil: null });
     expect(repo.players.listPlayers(0).map((p) => p.name)).toEqual(["Al", "Bea"]);
     repo.players.renamePlayer("a", "Alex");
-    expect(repo.players.listPlayers(0)[0].name).toBe("Alex");
-    expect(repo.players.deletePlayer("b")).toBe("deleted");
-    expect(repo.players.listPlayers(0)).toHaveLength(1);
+    expect(repo.players.listPlayers(0)[0]).toMatchObject({ name: "Alex", deletedAt: null });
   });
 
   it("login lives on the player: hash never leaves the repository, hasLogin/isAdmin do", () => {
@@ -97,11 +95,51 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.players.findPlayerByName("Finn")).toBeNull();
   });
 
-  it("players in a match cannot be deleted", () => {
+  it("isSeated: only players with a seat in some match", () => {
     const repo = make();
     seed(repo);
-    expect(repo.players.deletePlayer("p1")).toBe("player-in-match");
-    expect(repo.players.listPlayers(0)).toHaveLength(2);
+    repo.players.createPlayer({ id: "p3", name: "Kim", createdAt: 3, guestUntil: null });
+    expect([repo.players.isSeated("p1"), repo.players.isSeated("p3")]).toEqual([true, false]);
+  });
+
+  it("a deleted player keeps their row for old matches, but is gone from lists, lookups and login; the name is free", () => {
+    const repo = make();
+    seed(repo);
+    repo.players.setPasswordHash("p1", "h");
+    repo.players.markDeleted("p1", 50);
+    expect(repo.players.listPlayers(0).map((p) => p.id)).toEqual(["p2"]);
+    expect(repo.players.findPlayerById("p1")).toBeNull();
+    expect(repo.players.findPlayerByName("casey")).toBeNull();
+    expect(repo.players.credentialsByName("Casey")).toBeNull();
+    expect(repo.players.credentialsById("p1")).toBeNull();
+    expect(repo.matches.loadMatch("m1")?.players[0]).toMatchObject({ id: "p1", name: "Casey", deletedAt: 50, hasLogin: false });
+    repo.players.createPlayer({ id: "p9", name: "Casey", createdAt: 60, guestUntil: null });
+    expect(repo.players.findPlayerByName("CASEY")?.id).toBe("p9");
+  });
+
+  it("open matches of a player: running ones they sit in or host", () => {
+    const repo = make();
+    seed(repo);
+    repo.players.createPlayer({ id: "h", name: "Host", createdAt: 3, guestUntil: null });
+    const match = (id: string, playerIds: string[], hostPlayerId: string | null) =>
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds,
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId,
+        startedAt: 10,
+      });
+    match("m2", ["p1", "p2"], "h");
+    match("m3", ["p2", "p1"], "p2");
+    repo.matches.setMatchStatus("m3", "finished", 20);
+    expect(repo.matches.listOpenMatchIdsOf("p1").sort()).toEqual(["m1", "m2"]);
+    expect(repo.matches.listOpenMatchIdsOf("h")).toEqual(["m2"]);
+    expect(repo.matches.listOpenMatchIdsOf("p2").sort()).toEqual(["m1", "m2"]);
   });
 
   it("guests: listed after regular players until guestUntil, then hidden", () => {
@@ -110,6 +148,27 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 2, guestUntil: null });
     expect(repo.players.listPlayers(50).map((p) => p.id)).toEqual(["r", "g"]);
     expect(repo.players.listPlayers(100).map((p) => p.id)).toEqual(["r"]);
+  });
+
+  it("expired guest matches: a deleted regular player gets no field hits", () => {
+    const repo = make();
+    repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
+    repo.players.createPlayer({ id: "d", name: "Deleted", createdAt: 2, guestUntil: null });
+    repo.players.createPlayer({ id: "g", name: "Gast", createdAt: 3, guestUntil: 100 });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "mg",
+      legId: "lg",
+      rules,
+      playerIds: ["r", "d", "g"],
+      starterIndex: 0,
+      format,
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 10,
+    });
+    repo.players.markDeleted("d", 20);
+    expect(repo.matches.listExpiredGuestMatches(100)[0].regularPlayerIds).toEqual(["r"]);
   });
 
   it("guest matches expire with the longest-lived guest; regular-only matches never", () => {

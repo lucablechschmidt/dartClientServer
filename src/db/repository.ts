@@ -1,4 +1,4 @@
-import type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials } from "@/domain/player";
+import type { NewPlayer, Player, PlayerCredentials } from "@/domain/player";
 import type { FieldHits } from "@/domain/stats/field-hits";
 import type { InputMode, MatchFormat, MatchState, ModeId, PlayerId, Rules, Visit } from "@/domain/game";
 
@@ -7,7 +7,7 @@ import type { InputMode, MatchFormat, MatchState, ModeId, PlayerId, Rules, Visit
  * SQLite: sqlite-player-repository.ts, sqlite-match-repository.ts; tests: memory-*-repository.ts.
  */
 
-export type { DeletePlayerResult, NewPlayer, Player, PlayerCredentials };
+export type { NewPlayer, Player, PlayerCredentials };
 
 export type MatchStatus = "running" | "finished" | "abandoned";
 
@@ -67,6 +67,7 @@ export type NewMatch = {
 /** A guest match whose last guest has expired (E12): everything the cleanup needs. */
 export type ExpiredGuestMatch = {
   id: string;
+  /** Regular, not deleted players: they get the field hits. */
   regularPlayerIds: PlayerId[];
   /** Visits of all legs of the match. */
   visits: Visit[];
@@ -77,15 +78,17 @@ export type ExpiredGuestMatch = {
  * responsibility (architecture.md §9, interface segregation).
  */
 export type PlayerRepository = {
-  /** Regular players, then the guests visible at `now`, each in creation order. */
+  /** Regular players, then the guests visible at `now`, each in creation order; never deleted ones. */
   listPlayers(now: number): Player[];
   createPlayer(player: NewPlayer): void;
   renamePlayer(id: PlayerId, name: string): void;
-  /** Case-insensitive name match across all players, including expired guests. */
+  /** Case-insensitive name match across all players, including expired guests. Lookups never find deleted players. */
   findPlayerByName(name: string): Player | null;
   findPlayerById(id: PlayerId): Player | null;
-  /** Deletes only players without a match. */
-  deletePlayer(id: PlayerId): DeletePlayerResult;
+  /** Has a seat in any match, whatever its status. */
+  isSeated(id: PlayerId): boolean;
+  /** Soft delete: sets deleted_at and removes the login; matches keep referencing the row. */
+  markDeleted(id: PlayerId, now: number): void;
 
   // Login lives on the player (E10). Only the auth service reads the hash.
   credentialsByName(name: string): PlayerCredentials | null;
@@ -110,6 +113,8 @@ export type MatchRepository = {
   loadMatch(matchId: string): LoadedMatch | null;
   /** Status running and newer than `openSince` (ms timestamp), newest first. */
   listOpenMatches(openSince: number): OpenMatch[];
+  /** Running matches the player sits in or hosts, whatever their age. */
+  listOpenMatchIdsOf(playerId: PlayerId): string[];
   /** History (M5): finished, abandoned or running but older than `openSince`; most recently ended first. */
   listRecentMatches(openSince: number, limit: number): RecentMatch[];
 

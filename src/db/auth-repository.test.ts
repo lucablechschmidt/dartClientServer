@@ -54,18 +54,20 @@ describe.each(impls)("AuthRepository: %s", (_name, make) => {
     expect(auth.findInvite("i1", 20)).toBeNull();
     auth.createInvite({ id: "i2", kind: "password", playerId: "p1", resetSessions: true, createdAt: 1, expiresAt: 100 });
     expect(auth.findInvite("i2", 50)).toMatchObject({ playerId: "p1", resetSessions: true });
+    auth.deleteInvitesOfPlayer("p1");
+    expect(auth.findInvite("i2", 50)).toBeNull();
   });
 });
 
 describe("AuthRepository: sqlite cascade", () => {
-  it("deleting the player removes its sessions and invites", () => {
+  it("removing an expired guest row removes its sessions and invites", () => {
     const db = openDatabase(":memory:");
     const repo = new SqlitePlayerRepository(db);
     const auth = new SqliteAuthRepository(db);
-    repo.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null, passwordHash: "h" });
+    repo.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: 10, passwordHash: "h" });
     auth.createSession(session("s1", 100));
     auth.createInvite({ id: "i1", kind: "password", playerId: "p1", resetSessions: false, createdAt: 1, expiresAt: 100 });
-    expect(repo.deletePlayer("p1")).toBe("deleted");
+    repo.deleteOrphanGuests(10);
     expect(auth.findSession("s1", 0)).toBeNull();
     expect(auth.findInvite("i1", 0)).toBeNull();
   });

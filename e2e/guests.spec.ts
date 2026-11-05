@@ -11,7 +11,7 @@ test("guests (E12): created in the setup, listed for the day, cannot be removed 
   stamp,
 }) => {
   const [A, guest] = [`A${stamp}`, `G${stamp}`];
-  await register(A);
+  const pageA = await register(A);
   await admin.goto("/new/x01");
   await addGuest(admin, guest);
   await expect(admin.getByRole("button", { name: deselect(guest) })).toContainText(de.newGame.guestBadge);
@@ -29,9 +29,12 @@ test("guests (E12): created in the setup, listed for the day, cannot be removed 
   await expect(admin.getByRole("list", { name: p.guests }).getByText(guest, { exact: true })).toHaveCount(1);
   await expect(admin.getByRole("list", { name: p.title }).getByText(guest, { exact: true })).toHaveCount(0);
 
+  // Only the admin may delete a playing guest; everybody else gets the hint.
+  await pageA.goto("/players");
+  await pageA.getByRole("button", { name: `${p.edit}: ${guest}` }).click();
+  await pageA.getByRole("button", { name: p.remove }).click();
+  await expect(alertOf(pageA)).toHaveText(p.errors["player-in-match"]);
   await admin.getByRole("button", { name: `${p.edit}: ${guest}` }).click();
-  await admin.getByRole("button", { name: p.remove }).click();
-  await expect(alertOf(admin)).toHaveText(p.errors["player-in-match"]);
   await admin.getByLabel(p.namePlaceholder, { exact: true }).fill(A);
   await admin.getByRole("button", { name: p.save }).click();
   await expect(alertOf(admin)).toHaveText(p.errors["name-taken"]);

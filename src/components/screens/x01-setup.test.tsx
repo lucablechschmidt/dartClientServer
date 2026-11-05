@@ -5,9 +5,9 @@ import { de } from "@/i18n/de";
 import { X01Setup } from "./x01-setup";
 
 const players = [
-  { id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false },
-  { id: "b", name: "Haflinger", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false },
-  { id: "g", name: "Gecko", createdAt: 0, guestUntil: 999, hasLogin: false, isAdmin: false },
+  { id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false, deletedAt: null },
+  { id: "b", name: "Haflinger", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false, deletedAt: null },
+  { id: "g", name: "Gecko", createdAt: 0, guestUntil: 999, hasLogin: false, isAdmin: false, deletedAt: null },
 ];
 const t = de.newGame;
 const commonTexts = { back: de.ui.back, save: de.players.save, cancel: de.players.cancel };

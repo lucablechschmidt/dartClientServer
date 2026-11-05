@@ -11,6 +11,7 @@ export const toPlayer = (p: StoredPlayer): Player => ({
   guestUntil: p.guestUntil,
   hasLogin: p.hasLogin,
   isAdmin: p.isAdmin,
+  deletedAt: p.deletedAt,
 });
 
 export type StoredMatch = {
