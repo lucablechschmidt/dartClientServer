@@ -17,10 +17,13 @@ import {
 } from "@/domain/tournament";
 import type { Deps } from "./deps";
 import { shownName } from "./player-names";
-import { createMatch, rulesSchema } from "./match-service";
+import { createMatch, MAX_TO_WIN, rulesSchema } from "./match-service";
 import { formatOf, planOf } from "./tournament-plan";
 
-const formatSchema = z.object({ legsToWinSet: z.number().int().min(1).max(9), setsToWinMatch: z.number().int().min(1).max(9) });
+const formatSchema = z.object({
+  legsToWinSet: z.number().int().min(1).max(MAX_TO_WIN),
+  setsToWinMatch: z.number().int().min(1).max(MAX_TO_WIN),
+});
 
 export const newTournamentSchema = z
   .object({

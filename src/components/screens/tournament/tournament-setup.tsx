@@ -5,7 +5,17 @@ import { Field, TextInput } from "@/components/ui/form-controls";
 import { Stepper } from "@/components/ui/stepper";
 import type { TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
-import { RuleTile, ruleChoices, SCORE_CHOICES, ScoreChoice, SetupCard, SetupShell, type Rule, type SetupProps } from "../setup-shell";
+import {
+  BEST_OF,
+  RuleTile,
+  ruleChoices,
+  SCORE_CHOICES,
+  ScoreChoice,
+  SetupCard,
+  SetupShell,
+  type Rule,
+  type SetupProps,
+} from "../setup-shell";
 import { knockoutRoundLabel, knockoutRounds } from "./rounds";
 
 type Props = SetupProps & { tournamentTexts: Texts["tournaments"] };
@@ -32,7 +42,7 @@ export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
   const [outRule, setOutRule] = useState<Rule>("double");
   const [groupBestOf, setGroupBestOf] = useState({ legs: 1, sets: 1 });
   const [knockoutBestOf, setKnockoutBestOf] = useState<{ legs: number; sets: number }[]>([]);
-  const stepper = { min: 1, max: 9, step: 2, decreaseLabel: texts.fewer, increaseLabel: texts.more };
+  const stepper = { ...BEST_OF, decreaseLabel: texts.fewer, increaseLabel: texts.more };
 
   return (
     <SetupShell

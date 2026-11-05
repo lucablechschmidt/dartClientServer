@@ -142,6 +142,19 @@ describe("match service", () => {
     expect(loadMatchView(deps, id)!.board).toEqual(u.view.board);
   });
 
+  it("best of up to 99 legs or sets: at most 50 to win", () => {
+    const a = ok(createPlayer(deps, "Casey")).player;
+    const b = ok(createPlayer(deps, "Sam")).player;
+    const start = (n: number) =>
+      createMatch(deps, {
+        playerIds: [a.id, b.id],
+        rules: { startScore: 501, inRule: "single", outRule: "double" },
+        format: { legsToWinSet: n, setsToWinMatch: n },
+      });
+    expect(loadMatchView(deps, start(50))!.format).toEqual({ legsToWinSet: 50, setsToWinMatch: 50 });
+    expect(() => start(51)).toThrow();
+  });
+
   it("restart keeps players and rules and rotates the starter", () => {
     const { id, b } = setup(401);
     const next = restartMatch(deps, id)!;

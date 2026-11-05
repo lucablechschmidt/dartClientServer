@@ -55,9 +55,11 @@ export const rulesSchema = z.object({
   outRule: z.enum(["single", "double", "triple"]),
 });
 
+/** Best of 99 at most (the setup's stepper), so 50 legs or sets to win. */
+export const MAX_TO_WIN = 50;
 export const formatSchema = z.object({
-  legsToWinSet: z.number().int().min(1).max(9).default(1),
-  setsToWinMatch: z.number().int().min(1).max(9).default(1),
+  legsToWinSet: z.number().int().min(1).max(MAX_TO_WIN).default(1),
+  setsToWinMatch: z.number().int().min(1).max(MAX_TO_WIN).default(1),
 });
 
 export const newMatchSchema = z.object({

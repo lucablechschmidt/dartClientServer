@@ -37,6 +37,9 @@ const RULES: readonly Rule[] = ["single", "double", "triple"];
 /** In or out rule as choices, labelled with the shared rule names ("Single In" …). */
 export const ruleChoices = (names: Record<Rule, string>): Choice<Rule>[] => RULES.map((r) => ({ value: r, label: names[r] }));
 /** Start score (X01) and target (Elimination), as in legacy. */
+/** Best of legs or sets: odd numbers 1–99 (a typed even number rounds up); the server takes up to 50 to win. */
+export const BEST_OF = { min: 1, max: 99, step: 2 } as const;
+
 export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((value) => ({ value, label: String(value) }));
 
 /**

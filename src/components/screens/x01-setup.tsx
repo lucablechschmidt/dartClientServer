@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { Stepper } from "@/components/ui/stepper";
-import { RuleTile, ruleChoices, SCORE_CHOICES, ScoreChoice, SetupCard, SetupShell, type Rule, type SetupProps } from "./setup-shell";
+import {
+  BEST_OF,
+  RuleTile,
+  ruleChoices,
+  SCORE_CHOICES,
+  ScoreChoice,
+  SetupCard,
+  SetupShell,
+  type Rule,
+  type SetupProps,
+} from "./setup-shell";
 
 /** Port of ClassicGameSetUpView in the Figma layout: start score, in/out rule, best of sets and legs (1, 3, 5 …). */
 export function X01Setup(props: SetupProps) {
@@ -12,7 +22,7 @@ export function X01Setup(props: SetupProps) {
   const [startScore, setStartScore] = useState(501);
   const [sets, setSets] = useState(1);
   const [legs, setLegs] = useState(1);
-  const stepper = { min: 1, max: 9, step: 2, decreaseLabel: texts.fewer, increaseLabel: texts.more };
+  const stepper = { ...BEST_OF, decreaseLabel: texts.fewer, increaseLabel: texts.more };
 
   return (
     <SetupShell
