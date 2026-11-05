@@ -103,3 +103,8 @@ export function buildPlan({ format, seeds, groups = 1, advance = 2 }: PlanInput)
   }
   return { format, fixtures: [...groupFixtures, ...knockout(qualifiers)] };
 }
+
+/** Games the plan will take (the setup's hint): every fixture except those against a bye. */
+export function gameCount(plan: Plan): number {
+  return plan.fixtures.filter((f) => f.a.kind !== "bye" && f.b.kind !== "bye").length;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan, draw, resolve, standings, tournamentWinner, withWalkovers, type FixtureResult, type Plan } from ".";
+import { buildPlan, draw, gameCount, resolve, standings, tournamentWinner, withWalkovers, type FixtureResult, type Plan } from ".";
 
 const players = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
 const pairKey = (a: string, b: string) => [a, b].sort().join("-");
@@ -195,6 +195,19 @@ describe("walkovers (a deleted player)", () => {
     const plan = buildPlan({ format: "knockout", seeds: players(2) });
     const final = resolve(plan, [])[0];
     expect(tournamentWinner(plan, withWalkovers(plan, [], new Set(["p1", "p2"])))).toBe(final.a);
+  });
+});
+
+describe("gameCount (setup hint)", () => {
+  it("games to be played, byes not counted", () => {
+    const count = (format: Plan["format"], n: number, groups?: number, advance?: number) =>
+      gameCount(buildPlan({ format, seeds: players(n), groups, advance }));
+    expect(count("round-robin", 4)).toBe(6);
+    expect(count("round-robin", 5)).toBe(10);
+    expect(count("knockout", 6)).toBe(5); // 8 bracket, two byes
+    expect(count("knockout", 8)).toBe(7);
+    expect(count("groups-knockout", 8, 2, 2)).toBe(12 + 3);
+    expect(count("groups-knockout", 9, 3, 2)).toBe(9 + 5); // 6 qualifiers in an 8 bracket
   });
 });
 
