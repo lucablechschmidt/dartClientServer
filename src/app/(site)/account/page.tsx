@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import { AccountScreen } from "@/components/screens/account-screen";
 import { MyStatsSection } from "@/components/screens/stats/my-stats";
+import { RankingsSection } from "@/components/screens/stats/rankings";
 import type { StatsRange } from "@/domain/stats/aggregate";
 import { de } from "@/i18n/de";
 import { changePasswordAction, renameSelfAction } from "@/server/account-actions";
 import { logoutAction } from "@/server/auth-actions";
 import { requireSession } from "@/server/request";
-import { myStats } from "@/server/stats-service";
+import { leaderboards, myStats } from "@/server/stats-service";
 
 type Search = Promise<{ range?: string }>;
 const RANGES: readonly StatsRange[] = ["all", "year", "30d"];
@@ -22,7 +23,12 @@ async function Account({ searchParams }: { searchParams: Search }) {
       onRename={renameSelfAction}
       onChangePassword={changePasswordAction}
       onLogout={logoutAction}
-      statistics={<MyStatsSection view={myStats(deps, session, range)} texts={de.stats} overviewTexts={de.overview} now={deps.now()} />}
+      statistics={
+        <>
+          <MyStatsSection view={myStats(deps, session, range)} texts={de.stats} overviewTexts={de.overview} now={deps.now()} />
+          <RankingsSection rankings={leaderboards(deps, session)} playerId={session.playerId} texts={de.stats} />
+        </>
+      }
     />
   );
 }

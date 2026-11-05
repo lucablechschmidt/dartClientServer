@@ -32,4 +32,16 @@ test("M8: own statistics in the account tab after two x01 games", async ({ admin
   await pageA.getByRole("navigation", { name: s.range }).getByRole("link", { name: s.ranges["30d"] }).click();
   await pageA.waitForURL(/range=30d/);
   await expect(tile(s.games)).toContainText("2");
+
+  // rankings: A wins first (1016 / 984), then B as the outsider gains more than 16 (A 998.5, B 1001.5);
+  // folded only the own place and Elo
+  const x01 = pageA.getByRole("button", { name: new RegExp(`^${s.modes.x01}`) });
+  await expect(x01).toContainText(s.ownRank.replace("{place}", "2").replace("{elo}", "999"));
+  await expect(pageA.getByRole("button", { name: new RegExp(`^${s.modes.cricket}`) })).toContainText(s.notRanked);
+  await x01.click();
+  const table = pageA.getByRole("table", { name: s.ranking.replace("{mode}", s.modes.x01) });
+  await expect(table.getByRole("row").filter({ hasText: A })).toHaveAttribute("aria-current", "true");
+  await expect(table.getByRole("row").filter({ hasText: B })).toContainText("1001");
+  await table.scrollIntoViewIfNeeded();
+  await shot(pageA, "account-rankings");
 });

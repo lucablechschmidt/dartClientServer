@@ -253,6 +253,7 @@ export const de = {
     place: "Platz {n}",
     details: "Details",
     modes: modeNames,
+    rankings: "Ranglisten",
     ranking: "Rangliste {mode}",
     ownRank: "Platz {place} · Elo {elo}",
     notRanked: "noch nicht gewertet",

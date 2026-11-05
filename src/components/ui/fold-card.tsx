@@ -28,7 +28,7 @@ export function FoldCard({
         className="flex min-h-touch items-center justify-between gap-3 rounded-panel bg-card-bg px-4 py-3 text-left"
       >
         <span className="font-semibold">{title}</span>
-        <span className="flex items-center gap-2 text-sm text-fg-muted">
+        <span className="flex items-center gap-2 text-sm whitespace-nowrap text-fg-muted">
           {summary}
           <DisclosureChevron open={open} />
         </span>
