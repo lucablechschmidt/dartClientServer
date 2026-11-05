@@ -160,6 +160,11 @@ export function ScoreboardScreen({
               onPlayOut={playOutOk ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
               tournamentHref={tournamentHref}
+              statsHref={
+                view.board.mode === "x01" && actor !== null && initial.match.players.some((p) => p.id === actor.id)
+                  ? `/match/${initial.id}/stats?from=match`
+                  : undefined
+              }
             />
           }
         />

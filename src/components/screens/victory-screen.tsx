@@ -13,12 +13,14 @@ type Props = {
   /** M5 plan §9.2: set when the last player may still play out (3+ players, this device may enter for him). */
   onPlayOut: (() => void) | null;
   pending: boolean;
+  /** M8: the X01 match page, only for the match's players. */
+  statsHref?: string;
 };
 
 const button = "min-h-touch w-full rounded-tile px-4 font-medium";
 
 /** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
-export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending, tournamentHref }: Props) {
+export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending, tournamentHref, statsHref }: Props) {
   const players = view.board.players;
   const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
@@ -81,6 +83,11 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
                 {texts.restart}
               </button>
             </form>
+          )}
+          {statsHref && (
+            <Link href={statsHref} className={`${button} inline-flex items-center justify-center border border-frame-fg`}>
+              {texts.matchStats}
+            </Link>
           )}
           <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>
             {texts.home}

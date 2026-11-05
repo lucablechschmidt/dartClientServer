@@ -16,6 +16,8 @@ test("M8: own statistics in the account tab after two x01 games", async ({ admin
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121); // B wins, A misses twice
   await expect(admin.getByText(wins(B))).toBeVisible();
+  const second = admin.url();
+  await expect(admin.getByRole("link", { name: de.game.matchStats })).toHaveCount(0); // the admin did not play
 
   await pageA.goto("/account");
   const tile = (label: string) => pageA.getByRole("group", { name: label });
@@ -44,4 +46,21 @@ test("M8: own statistics in the account tab after two x01 games", async ({ admin
   await expect(table.getByRole("row").filter({ hasText: B })).toContainText("1001");
   await table.scrollIntoViewIfNeeded();
   await shot(pageA, "account-rankings");
+
+  // match page: from the own recent games, from the victory screen; nobody else (the admin neither)
+  await pageA.getByRole("list", { name: s.recent }).getByRole("link").first().click();
+  await pageA.waitForURL(/\/match\/[^/]+\/stats$/);
+  const leg = pageA.getByRole("table", { name: s.detail.leg.replace("{n}", "1") });
+  await expect(leg.getByRole("row").first()).toContainText(A);
+  await expect(leg).toContainText(s.detail.rest.replace("{n}", "121"));
+  await shot(pageA, "match-stats");
+  await pageA.getByRole("link", { name: de.ui.back }).click();
+  await pageA.waitForURL((u) => u.pathname === "/account");
+  await pageA.goto(second);
+  await pageA.getByRole("link", { name: de.game.matchStats }).click();
+  await pageA.waitForURL(/\/stats\?from=match$/);
+  await pageA.getByRole("link", { name: de.ui.back }).click();
+  await pageA.waitForURL(second);
+  await admin.goto(`${new URL(second).pathname}/stats`);
+  await expect(admin.getByText(de.errorPage.notFoundTitle)).toBeVisible();
 });

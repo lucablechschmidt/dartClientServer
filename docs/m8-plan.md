@@ -50,7 +50,7 @@ Für alle Modi:
 - **Ort (Lucas Antwort, 5.11.):** alles im Tab **Konto**, kein neuer Tab:
   - Box **„Meine Statistik“**: Kacheln mit den Kennzahlen (Spiele, Siege, X01-Average, First-9, 180/140+/100+, Highest Finish, Best Leg, Highest Score), Zeitfilter-Pille „Alles / Dieses Jahr / 30 Tage“, Verlauf, Feldtreffer-Dartscheibe, die letzten eigenen Matches mit Link zur Match-Detailseite.
   - Je Modus eine **ausklappbare Karte** („Rangliste X01“ …, `FoldCard`): zugeklappt nur der eigene Platz und die eigene Elo, aufgeklappt die ganze Rangliste. In der Rangliste steht, wer in dem Modus mindestens ein gezähltes Match hat (ohne 1-vs-1-Match mit Elo 1000), sortiert nach Elo, bei Gleichstand nach Spielen.
-- **Match-Detail** `/match/[id]/stats`: pro Leg die Aufnahmen aller Spieler nebeneinander, Average je Leg; Link vom Sieg-Screen und aus „Letzte Spiele“ (nur für Teilnehmer).
+- **Match-Detail** `/match/[id]/stats`: pro Leg die Aufnahmen aller Spieler nebeneinander (Punkte, Rest, Darts), Average je Leg; nur X01 und nur für Teilnehmer. Link vom Sieg-Screen (nur für Teilnehmer, `?from=match` führt zurück ins Spiel) und aus „Letzte Spiele“ in „Meine Statistik“; nicht aus dem Verlauf im Spielmenü, den alle sehen.
 
 ## 3. Domäne (Test-first)
 
