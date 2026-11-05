@@ -72,8 +72,8 @@ export function winnerOf(state: LegState): PlayerId | null {
   return checkoutOrder(state)[0] ?? null;
 }
 
-/** Next player in seat order after `after` who has not checked out yet. */
-function nextPlayer(state: LegState, after: PlayerId): PlayerId {
+/** Next player in seat order after `after` who has not checked out yet; `after` if nobody else is left. */
+export function nextPlayer(state: LegState, after: PlayerId): PlayerId {
   const out = checkoutOrder(state);
   const i = state.players.indexOf(after);
   for (let step = 1; step <= state.players.length; step++) {

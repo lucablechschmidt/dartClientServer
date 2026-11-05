@@ -120,4 +120,12 @@ describe("splitscore (M7, legacy §6)", () => {
     expect(play(leg([A, B, C]), ...thrown)).toEqual(s);
     expect(s.visits).toHaveLength(27);
   });
+
+  it("the board names the next player in seat order", () => {
+    const s = leg([A, B, C]);
+    const next = (state: LegState) => splitscore.board(state, {}).nextPlayerId;
+    expect(next(s)).toBe(B);
+    expect(next(play(s, ...MISS))).toBe(C);
+    expect(next(play(s, ...MISS, ...MISS))).toBe(A);
+  });
 });

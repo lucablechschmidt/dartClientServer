@@ -2,7 +2,7 @@ import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type Dart, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, lastOpenVisit, playerOnTurn, pointsPerVisit, popDart, shownVisit, withDart } from "../game/visits";
+import { dartsOf, nextSeat, lastOpenVisit, playerOnTurn, pointsPerVisit, popDart, shownVisit, withDart } from "../game/visits";
 import { isValidDart, nextElimination, scores } from "./scores";
 
 const OVERTHROWN: Dart = { field: 0, type: "overthrown" };
@@ -63,6 +63,7 @@ export const elimination: GameMode = {
       hint: next === null ? null : { kind: "elimination", points: next },
       canUndo: state.visits.length > 0,
       ranking: standings(state).flat(),
+      nextPlayerId: done ? undefined : nextSeat(state.players, active),
     };
   },
 };

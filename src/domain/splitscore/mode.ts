@@ -2,7 +2,17 @@ import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type Dart, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, isClosedByDarts, lastOpenVisit, playerOnTurn, pointsPerVisit, popDart, shownVisit, withDart } from "../game/visits";
+import {
+  dartsOf,
+  nextSeat,
+  isClosedByDarts,
+  lastOpenVisit,
+  playerOnTurn,
+  pointsPerVisit,
+  popDart,
+  shownVisit,
+  withDart,
+} from "../game/visits";
 import { hitsTarget, rounds, targetOfVisit, TARGETS } from "./rounds";
 
 const OVERTHROWN: Dart = { field: 0, type: "overthrown" };
@@ -65,6 +75,7 @@ export const splitscore: GameMode = {
       canUndo: state.visits.length > 0,
       ranking: ranking.flat(),
       total: Object.values(r.points).reduce((sum, p) => sum + p, 0),
+      nextPlayerId: done ? undefined : nextSeat(state.players, active),
     };
   },
 };

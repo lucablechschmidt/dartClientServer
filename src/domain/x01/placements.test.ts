@@ -3,6 +3,7 @@ import { applyDart, resign, startPlayOut, undoDart } from "./apply";
 import { newLeg } from "../game/state";
 import { checkoutOrder, currentPlayer, isLegFinished, placements, placementsFixed, scoreOf, winnerOf } from "./selectors";
 import type { Dart, LegState, Rules } from "../game/types";
+import { projectScoreboard } from "./view";
 
 const [A, B, C, D] = ["a", "b", "c", "d"];
 /** Short legs: 40 single-out, so D20 or S20 S20 checks out. */
@@ -46,6 +47,18 @@ describe("placements with 3+ players", () => {
   it("players who are out are skipped", () => {
     const s = play(cOut(), ...MISS, ...MISS, ...MISS); // D, A, B
     expect(currentPlayer(s)).toBe(D);
+  });
+
+  it("the next player skips those who are out; none while the last one plays out alone", () => {
+    expect(projectScoreboard(newLeg([A, B, C, D], rules), {}).nextPlayerId).toBe(B);
+    const s = play(cOut(), ...MISS); // D threw, A is up
+    expect(projectScoreboard(s, {}).nextPlayerId).toBe(B);
+    expect(projectScoreboard(play(s, ...MISS), {}).nextPlayerId).toBe(D); // B is up, C is out
+    const last = play(cOut(), ...OUT, ...OUT); // D, A out: B is left
+    const alone = startPlayOut(last);
+    if (!alone.ok) throw new Error(alone.reason);
+    expect(projectScoreboard(alone.value, {}).nextPlayerId).toBeUndefined();
+    expect(projectScoreboard(last, {}).nextPlayerId).toBeUndefined(); // leg over
   });
 
   it("with all but one out the leg is finished and the last gets the last place without throwing", () => {

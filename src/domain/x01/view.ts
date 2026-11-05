@@ -8,6 +8,7 @@ import {
   dartsThrown,
   isLegFinished,
   lastVisitOf,
+  nextPlayer,
   placements,
   playersByRest,
   scoreOf,
@@ -20,6 +21,7 @@ export function projectScoreboard(state: LegState, names: Record<PlayerId, strin
   const active = currentPlayer(state);
   const winner = isLegFinished(state) ? winnerOf(state) : null;
   const open = currentVisit(state);
+  const next = isLegFinished(state) ? active : nextPlayer(state, active);
   const dartsLeft = winner ? 0 : MAX_DARTS_PER_VISIT - open.darts.length;
   const rest = scoreOf(state, active);
   const hint = winner ? null : checkoutHint(rest, dartsLeft);
@@ -53,5 +55,7 @@ export function projectScoreboard(state: LegState, names: Record<PlayerId, strin
     hint: hint ? { kind: "checkout", text: hint } : null,
     canUndo: state.visits.length > 0,
     ranking: playersByRest(state),
+    // None once the leg is over or the last player plays out alone.
+    nextPlayerId: next === active ? undefined : next,
   };
 }

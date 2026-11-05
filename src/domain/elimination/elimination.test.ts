@@ -115,4 +115,12 @@ describe("elimination (M7, legacy §5)", () => {
     }
     expect(play(leg(101, "double", [A, B, C]), ...thrown)).toEqual(s);
   });
+
+  it("the board names the next player in seat order", () => {
+    const s = leg(301, "double", [A, B, C]);
+    const next = (state: LegState) => elimination.board(state, {}).nextPlayerId;
+    expect(next(s)).toBe(B);
+    expect(next(play(s, ...MISS))).toBe(C);
+    expect(next(play(s, ...MISS, ...MISS))).toBe(A);
+  });
 });
