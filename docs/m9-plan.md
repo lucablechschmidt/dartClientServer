@@ -24,6 +24,7 @@
 - **Ablauf am Abend**: Turnierseite zeigt die nächsten offenen Spiele; „Spielen“ startet das Match mit den Regeln des Turniers (Modus `single` oder `per-player` wie in M4 wählbar beim Turnierstart) und kommt nach dem Match-Ende zur Turnierseite zurück. Spiele können in beliebiger Reihenfolge gespielt werden, sobald beide Spieler feststehen: Round Robin und Gruppen jederzeit, im K.-o. sobald beide Vorrunden-Spiele entschieden sind. Turnierspiele sind X01.
 - **Undo nach Match-Ende**: Ein beendetes Turniermatch lässt sich über „Letzten Wurf rückgängig“ auf dem Sieg-Screen wieder öffnen, solange das nächste Spiel des Siegers nicht begonnen hat; danach ist es fest.
 - **Rechte**: Turnier anlegen und Spiele starten darf jeder Eingeloggte; löschen nur der Ersteller oder der Admin.
+- **Gelöschter Spieler (5.11.2026, nach M9):** Löscht der Admin einen Spieler, wird sein laufendes Turnierspiel abgebrochen, und jede seiner noch offenen Paarungen ist kampflos verloren (Walkover): Der Gegner gewinnt ohne Legs und Average, in der Tabelle zählt das als Sieg, im K.-o. rückt der Gegner auf. Beendete Paarungen bleiben, wie sie sind. Sind beide Seiten gelöscht, rückt Seite A auf und verliert die nächste Paarung ebenso kampflos. Berechnet aus den Ergebnissen (`withWalkovers` in `src/domain/tournament/`), nichts davon wird gespeichert.
 
 ## 2. Domäne (Test-first)
 
