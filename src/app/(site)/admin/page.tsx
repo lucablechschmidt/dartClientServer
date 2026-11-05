@@ -2,23 +2,40 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminScreen } from "@/components/screens/admin-screen";
 import { de } from "@/i18n/de";
-import { createPasswordInviteAction, createRegisterInviteAction, promoteGuestAction } from "@/server/admin-actions";
+import {
+  createPasswordInviteAction,
+  createRegisterInviteAction,
+  deleteMatchAdminAction,
+  deleteTournamentAdminAction,
+  loadMoreMatchesAction,
+  promoteGuestAction,
+} from "@/server/admin-actions";
+import { listAllMatches } from "@/server/cleanup-service";
 import { deletePlayerAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
+import { listTournaments } from "@/server/tournament-service";
 
 async function Admin() {
   const { deps, session } = await requireSession();
-  if (!session.isAdmin) redirect("/account");
+  const matches = listAllMatches(deps, session, 0);
+  if (!session.isAdmin || !matches.ok) redirect("/account");
   return (
     <AdminScreen
       session={session}
       players={listPlayers(deps)}
+      tournaments={listTournaments(deps)}
+      matches={{ items: matches.items, hasMore: matches.hasMore }}
+      now={deps.now()}
       texts={de.account}
+      listTexts={{ overview: de.overview, modes: de.gameMenu.modes, formats: de.tournaments.formats }}
       onCreateInvite={createRegisterInviteAction}
       onCreatePasswordInvite={createPasswordInviteAction}
       onDeletePlayer={deletePlayerAction}
       onPromoteGuest={promoteGuestAction}
+      onDeleteMatch={deleteMatchAdminAction}
+      onDeleteTournament={deleteTournamentAdminAction}
+      onLoadMoreMatches={loadMoreMatchesAction}
     />
   );
 }
