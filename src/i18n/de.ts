@@ -186,6 +186,7 @@ export const de = {
     play: "Spielen",
     open: "Weiter",
     waiting: "offen",
+    walkover: "kampflos",
     bye: "Freilos",
     seedHint: "Die Setzliste wird ausgelost.",
     redraw: "Neu auslosen",

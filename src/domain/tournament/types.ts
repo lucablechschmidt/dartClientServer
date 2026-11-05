@@ -33,6 +33,8 @@ export type FixtureResult = {
   /** Partial: a decided fixture may lack a player's legs or average. */
   legs: Partial<Record<PlayerId, number>>;
   averages: Partial<Record<PlayerId, number>>;
+  /** Decided without a game because a player was deleted (withWalkovers). */
+  walkover?: true;
 };
 
 export type FixtureStatus = "waiting" | "ready" | "done" | "bye";

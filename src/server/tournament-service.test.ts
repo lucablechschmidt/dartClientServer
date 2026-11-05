@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Dart } from "@/domain/game";
 import type { Session } from "@/domain/player";
 import { commitVisit, decideWinner, loadMatchView, undoVisit, cancelMatch } from "./match-service";
-import { createPlayer } from "./player-service";
+import { createPlayer, deletePlayer } from "./player-service";
 import {
   createTournament,
   deleteTournament,
@@ -150,5 +150,28 @@ describe("tournaments (M9)", () => {
     ok(deleteTournament(deps, { playerId: "admin", name: "Admin", isAdmin: true }, id));
     expect(loadTournamentView(deps, host, id)).toBeNull();
     expect(loadMatchView(deps, m)).not.toBeNull();
+  });
+});
+
+describe("tournaments: a deleted player (walkover)", () => {
+  const admin: Session = { playerId: "admin", name: "Admin", isAdmin: true };
+
+  it("their running game is cancelled, their open games are lost without a game, played ones stay", () => {
+    const id = create({ format: "knockout" });
+    const semis = loadTournamentView(deps, host, id)!.fixtures.filter((f) => f.status === "ready");
+    playFixture(id, semis[0].id);
+    const running = ok(startFixture(deps, host, id, semis[1].id)).matchId;
+    const [winner1, gone, stays] = [semis[0].a!, semis[1].a!, semis[1].b!];
+
+    ok(deletePlayer(deps, admin, gone));
+
+    expect(deps.matches.loadMatch(running)?.status).toBe("abandoned");
+    const v = loadTournamentView(deps, host, id)!;
+    const second = v.fixtures.find((f) => f.id === semis[1].id)!;
+    expect(second).toMatchObject({ status: "done", winner: stays, walkover: true, legs: [0, 0] });
+    expect(v.fixtures.find((f) => f.id === semis[0].id)).toMatchObject({ status: "done", winner: winner1, walkover: false });
+    const final = v.fixtures.find((f) => f.round === 2)!;
+    expect([final.status, [final.a, final.b].sort()]).toEqual(["ready", [winner1, stays].sort()]);
+    expect(startFixture(deps, host, id, semis[1].id)).toEqual({ ok: false, reason: "not-ready" }); // decided, nothing to replay
   });
 });

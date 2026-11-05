@@ -22,6 +22,7 @@ export type TournamentScreenView = {
     matchId: string | null;
     matchStatus: "running" | "finished" | "abandoned" | null;
     legs: [number, number] | null;
+    walkover: boolean;
   })[];
   groups: { group: number; rows: StandingRow[] }[];
   winner: PlayerId | null;
@@ -148,6 +149,7 @@ function FixtureAction({
   texts: Texts["tournaments"];
   onStart: () => void;
 }) {
+  if (f.status === "done" && f.walkover) return <span className="shrink-0 text-sm text-fg-muted">{t.walkover}</span>;
   if (f.status === "done") return <span className="shrink-0 font-semibold tabular-nums">{f.legs ? f.legs.join(":") : ""}</span>;
   if (f.status === "bye") return null;
   if (f.status === "waiting") return <span className="shrink-0 text-sm text-fg-muted">{t.waiting}</span>;

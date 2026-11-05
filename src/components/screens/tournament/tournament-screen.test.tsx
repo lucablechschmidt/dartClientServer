@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
 import { TournamentScreen, type TournamentScreenView } from "./tournament-screen";
 
-const base = { group: null, phase: "knockout" as const, matchId: null, matchStatus: null, legs: null };
+const base = { group: null, phase: "knockout" as const, matchId: null, matchStatus: null, legs: null, walkover: false };
 const view: TournamentScreenView = {
   id: "t1",
   name: "Freitag",
@@ -53,6 +53,17 @@ describe("TournamentScreen (M9)", () => {
     expect(onStart).toHaveBeenCalledWith("k-r2-s1");
     expect(await screen.findByText(t.errors["not-ready"])).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: t.redraw })).toBeNull();
+  });
+
+  it("a game lost without playing (deleted player) says so instead of 0:0", () => {
+    const walkover: TournamentScreenView = {
+      ...view,
+      fixtures: [{ ...view.fixtures[1], legs: [0, 0], walkover: true, matchId: null, matchStatus: null }],
+    };
+    render(<TournamentScreen view={walkover} onStart={vi.fn()} {...props} />);
+    expect(screen.getByText(t.walkover)).toBeInTheDocument();
+    expect(screen.queryByText("0:0")).toBeNull();
+    expect(screen.getByText("Kim")).toHaveClass("font-semibold");
   });
 
   it("winner banner, a running game links back into its match, redraw before the first game", () => {

@@ -9,6 +9,7 @@ import {
   standings,
   TOURNAMENT_FORMATS,
   tournamentWinner,
+  withWalkovers,
   type FixtureResult,
   type ResolvedFixture,
   type StandingRow,
@@ -81,6 +82,8 @@ export type TournamentFixture = ResolvedFixture & {
   matchStatus: MatchStatus | null;
   /** Legs won by a and b once the fixture has a result. */
   legs: [number, number] | null;
+  /** Decided without a game: a player was deleted. */
+  walkover: boolean;
   format: MatchFormat;
 };
 
@@ -112,12 +115,15 @@ function linkedMatches(deps: Deps, t: StoredTournament) {
   );
 }
 
-function resultsOf(matches: ReturnType<typeof linkedMatches>): FixtureResult[] {
-  return [...matches].flatMap(([fixtureId, m]) => {
+/** Results of the finished games plus the walkovers against deleted players (m9-plan §1). */
+function resultsOf(t: StoredTournament, matches: ReturnType<typeof linkedMatches>): FixtureResult[] {
+  const played = [...matches].flatMap(([fixtureId, m]) => {
     if (m.status !== "finished") return [];
     const r = matchResult(m.state);
     return r.winner ? [{ fixtureId, winner: r.winner, legs: r.legs, averages: r.averages }] : [];
   });
+  const withdrawn = new Set(t.seeds.filter((p) => p.deletedAt !== null).map((p) => p.id));
+  return withWalkovers(planOf(t), played, withdrawn);
 }
 
 export function loadTournamentView(deps: Deps, session: Session, id: string): TournamentView | null {
@@ -125,7 +131,7 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
   if (!t) return null;
   const plan = planOf(t);
   const matches = linkedMatches(deps, t);
-  const results = resultsOf(matches);
+  const results = resultsOf(t, matches);
   const fixtures = resolve(plan, results).map((f): TournamentFixture => {
     const m = matches.get(f.id);
     const r = results.find((x) => x.fixtureId === f.id);
@@ -134,6 +140,7 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
       matchId: m?.id ?? null,
       matchStatus: m?.status ?? null,
       legs: r && f.a && f.b ? [r.legs[f.a] ?? 0, r.legs[f.b] ?? 0] : null,
+      walkover: r?.walkover ?? false,
       format: formatOf(t.roundFormats, f),
     };
   });
@@ -168,7 +175,7 @@ export type TournamentSummary = {
 /** The tournament list, newest first, with the winner's name once decided. */
 export function listTournaments(deps: Deps): TournamentSummary[] {
   return deps.tournaments.listTournaments().map((t) => {
-    const winner = tournamentWinner(planOf(t), resultsOf(linkedMatches(deps, t)));
+    const winner = tournamentWinner(planOf(t), resultsOf(t, linkedMatches(deps, t)));
     return {
       id: t.id,
       name: t.name,
@@ -212,7 +219,7 @@ export function startFixture(
   const matches = linkedMatches(deps, t);
   const existing = matches.get(fixtureId);
   if (existing) return { ok: true, matchId: existing.id };
-  const fixture = resolve(planOf(t), resultsOf(matches)).find((f) => f.id === fixtureId);
+  const fixture = resolve(planOf(t), resultsOf(t, matches)).find((f) => f.id === fixtureId);
   if (!fixture) return { ok: false, reason: "not-found" };
   const { a, b } = fixture;
   if (fixture.status !== "ready" || !a || !b) return { ok: false, reason: "not-ready" };

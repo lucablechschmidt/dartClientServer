@@ -61,3 +61,23 @@ export function tournamentWinner(plan: Plan, results: readonly FixtureResult[]):
   const lastRound = Math.max(...knockout.map((f) => f.round));
   return knockout.find((f) => f.round === lastRound)?.winner ?? null;
 }
+
+/**
+ * A deleted player's open fixtures are lost without a game (m9-plan §1): every ready fixture with a
+ * withdrawn side gets a result for the other side, 0 legs each and no average, until nothing changes,
+ * so the opponent moves on through later rounds too. Both sides withdrawn: side A moves on and loses
+ * its next fixture the same way. Played fixtures stay as they are.
+ */
+export function withWalkovers(plan: Plan, results: readonly FixtureResult[], withdrawn: ReadonlySet<PlayerId>): FixtureResult[] {
+  const out = [...results];
+  if (withdrawn.size === 0) return out;
+  for (;;) {
+    const open = resolve(plan, out).filter((f) => f.status === "ready" && [f.a, f.b].some((p) => p !== null && withdrawn.has(p)));
+    if (open.length === 0) return out;
+    for (const f of open) {
+      const [a, b] = [f.a ?? "", f.b ?? ""];
+      const winner = withdrawn.has(a) && !withdrawn.has(b) ? b : a;
+      out.push({ fixtureId: f.id, winner, legs: { [a]: 0, [b]: 0 }, averages: {}, walkover: true });
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan, draw, resolve, standings, tournamentWinner, type FixtureResult, type Plan } from ".";
+import { buildPlan, draw, resolve, standings, tournamentWinner, withWalkovers, type FixtureResult, type Plan } from ".";
 
 const players = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
 const pairKey = (a: string, b: string) => [a, b].sort().join("-");
@@ -163,6 +163,38 @@ describe("groups + knockout", () => {
         .filter((f) => f.phase === "knockout")
         .every((f) => f.status === "waiting"),
     ).toBe(true);
+  });
+});
+
+describe("walkovers (a deleted player)", () => {
+  it("round robin: every open game of the withdrawn player is won by the opponent, played ones stay", () => {
+    const plan = buildPlan({ format: "round-robin", seeds: players(3) });
+    const first = plan.fixtures.find((f) => [f.a, f.b].some((s) => s.kind === "player" && s.id === "p3"))!;
+    const played: FixtureResult = { fixtureId: first.id, winner: "p3", legs: { p3: 2, x: 1 }, averages: {} };
+    const results = withWalkovers(plan, [played], new Set(["p3"]));
+    expect(results[0]).toBe(played);
+    const walkovers = results.slice(1);
+    expect(walkovers).toHaveLength(1);
+    expect(walkovers[0]).toMatchObject({ walkover: true, averages: {} });
+    expect(walkovers[0].winner).not.toBe("p3");
+    expect(standings(plan, results).find((r) => r.player === walkovers[0].winner)).toMatchObject({ wins: 1, legsFor: 0 });
+  });
+
+  it("knockout: the opponents move on and the final opens without a game played", () => {
+    const plan = buildPlan({ format: "knockout", seeds: players(4) });
+    const semis = resolve(plan, []).filter((f) => f.round === 1);
+    const [gone, stays] = [semis.map((f) => f.a!), semis.map((f) => f.b!)];
+    const fixtures = resolve(plan, withWalkovers(plan, [], new Set(gone)));
+    expect(fixtures.filter((f) => f.round === 1).map((f) => [f.status, f.winner])).toEqual(stays.map((p) => ["done", p]));
+    const final = fixtures.find((f) => f.round === 2)!;
+    expect([final.status, [final.a, final.b].sort()]).toEqual(["ready", [...stays].sort()]);
+    expect(withWalkovers(plan, [], new Set())).toEqual([]);
+  });
+
+  it("both players withdrawn: side A moves on and loses the next game the same way", () => {
+    const plan = buildPlan({ format: "knockout", seeds: players(2) });
+    const final = resolve(plan, [])[0];
+    expect(tournamentWinner(plan, withWalkovers(plan, [], new Set(["p1", "p2"])))).toBe(final.a);
   });
 });
 
