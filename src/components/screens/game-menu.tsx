@@ -66,7 +66,7 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
             {texts.modes[mode]}
           </Link>
         ))}
-        <Link href="/tournaments" className="min-h-touch px-4 py-1 text-accent">
+        <Link href="/tournaments" className="min-h-touch px-4 py-1 text-fg">
           {texts.tournaments}
         </Link>
       </nav>
