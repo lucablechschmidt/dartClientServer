@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Dartboard } from "@/components/darts/dartboard";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { SectionHeading } from "@/components/ui/form-controls";
 import { PillLinks } from "@/components/ui/pill-links";
@@ -9,6 +9,7 @@ import type { ModeRecord, StatsRange } from "@/domain/stats/aggregate";
 import type { X01Stats } from "@/domain/stats/x01";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
+import { AverageChart } from "./average-chart";
 
 /** What the page gets from the server's myStats (structural, no server import). */
 export type MyStatsView = {
@@ -28,15 +29,14 @@ type Props = {
   texts: Texts["stats"];
   overviewTexts: Texts["overview"];
   now: number;
-  /** Charts (history, dartboard) from step 6, placed below the tiles. */
-  charts?: ReactNode;
 };
 
 /**
- * "Meine Statistik" in the account tab (M8): range pills, tiles with the figures, charts and the last
+ * "Meine Statistik" in the account tab (M8): range pills, tiles with the figures, the average per match,
+ * the field hits on a dartboard and the last
  * games with a link to the X01 match page. Only the own statistics, for everyone (m8-plan §2).
  */
-export function MyStatsSection({ view, texts: t, overviewTexts, now, charts }: Props) {
+export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
   const all = Object.values(view.records);
   const games = all.reduce((n, r) => n + r.games, 0);
   const wins = all.reduce((n, r) => n + r.wins, 0);
@@ -76,7 +76,22 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now, charts }: P
               <StatTile key={label} label={label} value={value} />
             ))}
           </div>
-          {charts}
+          {view.history.length > 0 && (
+            <>
+              <SectionHeading>{t.history}</SectionHeading>
+              <div className="rounded-panel bg-card-bg p-3">
+                <AverageChart points={view.history} texts={t} overviewTexts={overviewTexts} now={now} />
+              </div>
+            </>
+          )}
+          {view.fieldHits.length > 0 && (
+            <>
+              <SectionHeading>{t.fieldHits}</SectionHeading>
+              <div className="rounded-panel bg-card-bg p-3">
+                <Dartboard hits={view.fieldHits} texts={t} />
+              </div>
+            </>
+          )}
           <SectionHeading>{t.recent}</SectionHeading>
           <CardList label={t.recent}>
             {view.recent.map((m) => {

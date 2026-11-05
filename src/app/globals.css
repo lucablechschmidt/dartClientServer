@@ -45,6 +45,15 @@
   --scrim: rgb(0 0 0 / 0.4); /* behind the confirm sheet */
   --qr-bg: #ffffff; /* QR codes need a light ground in both themes to scan */
   --modifier-ring: color-mix(in srgb, var(--fg) 60%, transparent); /* ring around an active Double/Triple key */
+  /*
+   * M8 field-hit heatmap: one sequential hue (the accent blue), light → dark on a light surface; in dark
+   * mode the anchor flips (few hits dim, many bright). Lightness is monotonic per mode (dataviz skill).
+   */
+  --heat-1: light-dark(oklch(0.92 0.04 257), oklch(0.32 0.07 257));
+  --heat-2: light-dark(oklch(0.8 0.09 257), oklch(0.43 0.11 257));
+  --heat-3: light-dark(oklch(0.67 0.15 257), oklch(0.55 0.15 257));
+  --heat-4: light-dark(oklch(0.54 0.18 257), oklch(0.67 0.15 257));
+  --heat-5: light-dark(oklch(0.42 0.16 257), oklch(0.8 0.1 257));
 
   --touch-min: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -92,6 +101,11 @@
   --color-scrim: var(--scrim);
   --color-qr-bg: var(--qr-bg);
   --color-modifier-ring: var(--modifier-ring);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
+  --color-heat-5: var(--heat-5);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --spacing-touch: var(--touch-min);
