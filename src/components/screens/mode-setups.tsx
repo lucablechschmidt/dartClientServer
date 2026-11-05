@@ -42,6 +42,7 @@ export function EliminationSetup(props: SetupProps) {
             value={target}
             options={SCORE_CHOICES}
             onChange={setTarget}
+            customLabel={texts.customScore}
           />
           <RuleTile name="outRule" label={texts.outRule} value={outRule} onChange={setOutRule} options={ruleChoices(texts.outNames)} />
         </SetupCard>

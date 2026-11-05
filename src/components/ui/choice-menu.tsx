@@ -19,6 +19,11 @@ type Props<V extends string | number> = {
   openClassName?: string;
   /** Which edge of the trigger the list lines up with. */
   align?: "start" | "end";
+  /**
+   * Optional last entry (e.g. a field for an own number); `selected` when the value is none of the
+   * options, `close` closes the list.
+   */
+  last?: (props: { selected: boolean; close: () => void }) => ReactNode;
 };
 
 /**
@@ -36,16 +41,24 @@ export function ChoiceMenu<V extends string | number>({
   className = "",
   openClassName = "",
   align = "start",
+  last,
 }: Props<V>) {
   const [open, setOpen] = useState(false);
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
-  const current = options.find((o) => o.value === value)?.label ?? String(value);
+  const chosen = options.find((o) => o.value === value);
+  const current = chosen?.label ?? String(value);
 
   useEffect(() => {
     if (!open) return;
-    const outside = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false);
-    const escape = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    /** A field in the list takes its input on blur; blur it before the list goes away. */
+    const close = () => {
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && root.current?.contains(focused)) focused.blur();
+      setOpen(false);
+    };
+    const outside = (e: PointerEvent) => !root.current?.contains(e.target as Node) && close();
+    const escape = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
     return () => {
@@ -99,6 +112,11 @@ export function ChoiceMenu<V extends string | number>({
               </li>
             );
           })}
+          {last && (
+            <li role="option" aria-selected={!chosen}>
+              {last({ selected: !chosen, close: () => setOpen(false) })}
+            </li>
+          )}
         </ul>
       )}
     </div>
@@ -116,6 +134,69 @@ export function LabeledValue({ label, value }: { label: string; value: string })
     <span className="flex flex-1 flex-col">
       <span className="text-xs text-fg-muted">{label}</span>
       <span className="font-semibold">{value}</span>
+    </span>
+  );
+}
+
+/**
+ * Last entry of a number menu: a field for an own number (digits only), within min and max. Enter
+ * takes it and closes the list; leaving the field after typing takes it, too.
+ */
+export function ChoiceNumberField({
+  label,
+  value,
+  selected,
+  min,
+  max,
+  onChange,
+  close,
+}: {
+  label: string;
+  value: number;
+  selected: boolean;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  close: () => void;
+}) {
+  const [draft, setDraft] = useState(selected ? String(value) : "");
+  const [dirty, setDirty] = useState(false);
+  const take = () => {
+    const typed = draft.replace(/\D/g, "");
+    if (!dirty || typed === "") return false;
+    const n = Math.min(Math.max(Number(typed), min), max);
+    setDraft(String(n));
+    setDirty(false);
+    onChange(n);
+    return true;
+  };
+  return (
+    <span className={`flex min-h-touch items-center gap-3 rounded-tile px-3 ${selected ? "bg-accent-wash" : ""}`}>
+      <input
+        type="text"
+        inputMode="numeric"
+        aria-label={label}
+        placeholder={label}
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          setDirty(true);
+        }}
+        onBlur={() => void take()}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          if (take() || !dirty) close();
+        }}
+        className="w-full min-w-0 bg-transparent font-semibold tabular-nums placeholder:font-normal placeholder:text-fg-muted"
+      />
+      {selected ? (
+        <span className="grid size-icon shrink-0 place-items-center rounded-full bg-accent text-on-accent">
+          <CheckIcon className="size-icon-xs" />
+        </span>
+      ) : (
+        <span className="size-icon shrink-0 rounded-full border-icon border-separator" />
+      )}
     </span>
   );
 }

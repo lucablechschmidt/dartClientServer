@@ -128,4 +128,33 @@ describe("X01Setup", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(t.selectedCount.replace("{n}", "1"))).toBeInTheDocument();
   });
+
+  it("start score: the last entry of the menu is a field for an own number, 2 to 1001", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={() => Promise.resolve()} onAddGuest={vi.fn()} />,
+    );
+    const score = () => container.querySelector('input[name="startScore"]');
+    const open = (current: string) => user.click(screen.getByRole("button", { name: choice(t.startScore, current) }));
+    await open("501");
+    const options = screen.getAllByRole("option");
+    const field = screen.getByRole("textbox", { name: t.customScore });
+    expect(options.at(-1)).toContainElement(field);
+    await user.type(field, "7a01{Enter}");
+    expect(score()).toHaveValue("701");
+    expect(screen.queryByRole("listbox")).toBeNull();
+    await open("701");
+    expect(screen.getByRole("textbox", { name: t.customScore })).toHaveValue("701");
+    expect(screen.getAllByRole("option").at(-1)).toHaveAttribute("aria-selected", "true");
+    await user.clear(screen.getByRole("textbox", { name: t.customScore }));
+    await user.type(screen.getByRole("textbox", { name: t.customScore }), "5000");
+    await user.click(document.body); // tapping outside takes the number, too
+    expect(score()).toHaveValue("1001");
+    await open("1001");
+    await user.type(screen.getByRole("textbox", { name: t.customScore }), "{Control>}a{/Control}1{Enter}");
+    expect(score()).toHaveValue("2");
+    await open("2");
+    await user.click(screen.getByRole("button", { name: "301" }));
+    expect(score()).toHaveValue("301");
+  });
 });

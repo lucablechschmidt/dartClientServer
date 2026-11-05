@@ -140,6 +140,7 @@ export const de = {
     noPlayers: "Erst Spieler anlegen.",
     startScore: "Startpunktzahl",
     targetScore: "Zielpunktzahl",
+    customScore: "Eigene Punktzahl",
     cardSubtitles: { x01: "X01 · Klassisch", elimination: "Elimination" },
     inRule: "Einstieg",
     outRule: "Abschluss",

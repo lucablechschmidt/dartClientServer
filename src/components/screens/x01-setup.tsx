@@ -40,6 +40,7 @@ export function X01Setup(props: SetupProps) {
               value={startScore}
               options={SCORE_CHOICES}
               onChange={setStartScore}
+              customLabel={texts.customScore}
             />
             <div className="grid grid-cols-2 gap-3">
               <RuleTile name="inRule" label={texts.inRule} value={inRule} onChange={setInRule} options={ruleChoices(texts.inNames)} />

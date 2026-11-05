@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
 import { BackButton } from "@/components/ui/back-button";
-import { ChoiceMenu, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
+import { ChoiceMenu, ChoiceNumberField, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
 import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
 import type { Player } from "@/domain/player";
 import type { ModeId } from "@/domain/game";
@@ -39,6 +39,9 @@ export const ruleChoices = (names: Record<Rule, string>): Choice<Rule>[] => RULE
 /** Start score (X01) and target (Elimination), as in legacy. */
 /** Best of legs or sets: odd numbers 1–99 (a typed even number rounds up); the server takes up to 50 to win. */
 export const BEST_OF = { min: 1, max: 99, step: 2 } as const;
+
+/** An own start or target score (X01, Elimination, tournament) instead of 501/401/301. */
+export const CUSTOM_SCORE = { min: 2, max: 1001 } as const;
 
 export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((value) => ({ value, label: String(value) }));
 
@@ -151,12 +154,15 @@ export function ScoreChoice({
   value,
   options,
   onChange,
+  customLabel,
 }: {
   title: string;
   subtitle: string;
   value: number;
   options: readonly Choice<number>[];
   onChange: (v: number) => void;
+  /** Label of the last entry, a field for an own score (CUSTOM_SCORE). */
+  customLabel: string;
 }) {
   return (
     <div className="flex items-center gap-3">
@@ -167,7 +173,17 @@ export function ScoreChoice({
         <span className="font-semibold">{title}</span>
         <span className="text-xs text-fg-muted">{subtitle}</span>
       </span>
-      <ChoiceMenu name="startScore" label={title} value={value} onChange={onChange} options={options} align="end">
+      <ChoiceMenu
+        name="startScore"
+        label={title}
+        value={value}
+        onChange={onChange}
+        options={options}
+        align="end"
+        last={({ selected, close }) => (
+          <ChoiceNumberField label={customLabel} value={value} selected={selected} onChange={onChange} close={close} {...CUSTOM_SCORE} />
+        )}
+      >
         {(current, open) => (
           <span className="flex items-center gap-1">
             <span className="text-display font-bold tabular-nums">{current}</span>
