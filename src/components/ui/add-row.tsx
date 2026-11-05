@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { CardRow } from "./card-list";
 import { FormError, TextButton, TextInput } from "./form-controls";
 
@@ -20,6 +21,8 @@ type Props = {
 /**
  * Last row of a CardList that expands into "name input + save + cancel" (legacy AddPlayer row).
  * The row closes only after the action has finished; unmounting in onSubmit would abort it.
+ * Its form lives at the end of the body and the field and button join it with `form=`, so the row
+ * may also sit inside another form (the setup's start form) without nesting forms.
  */
 export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, variant = "row", icon }: Props) {
   const [open, setOpen] = useState(false);
@@ -27,6 +30,7 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, v
   // Controlled on purpose: React 19 resets a form after its action, which would wipe the name
   // right when the user needs to correct it (name already taken).
   const [name, setName] = useState("");
+  const formId = useId();
   const submit = async (fd: FormData) => {
     const message = await onSubmit(fd);
     setError(message);
@@ -38,23 +42,44 @@ export function AddRow({ label, placeholder, saveLabel, cancelLabel, onSubmit, v
   const content = (
     <>
       {open ? (
-        <form action={submit} className="flex w-full gap-2">
+        <div className="flex w-full gap-2">
+          {createPortal(
+            <form
+              id={formId}
+              onSubmit={(e) => {
+                // React bubbles events through the portal: keep this submit away from an outer form.
+                e.preventDefault();
+                e.stopPropagation();
+                void submit(new FormData(e.currentTarget));
+              }}
+            />,
+            document.body,
+          )}
           <TextInput
             inline
+            form={formId}
             name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              // Enter submits the row's own form (it is joined by `form=`, not by nesting).
+              if (e.key !== "Enter") return;
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }}
             required
             maxLength={40}
             autoFocus
             placeholder={placeholder}
             autoComplete="off"
           />
-          <TextButton type="submit">{saveLabel}</TextButton>
+          <TextButton type="submit" form={formId}>
+            {saveLabel}
+          </TextButton>
           <TextButton tone="muted" onClick={() => setOpen(false)}>
             {cancelLabel}
           </TextButton>
-        </form>
+        </div>
       ) : (
         <button
           type="button"

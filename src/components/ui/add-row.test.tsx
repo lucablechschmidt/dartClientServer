@@ -38,4 +38,21 @@ describe("AddRow", () => {
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: props.label })).toBeInTheDocument();
   });
+  it("works inside another form: the name goes to onSubmit only, the outer form is not submitted", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(null);
+    const outer = vi.fn((e: React.SyntheticEvent) => e.preventDefault());
+    const { container } = render(
+      <form onSubmit={outer}>
+        <input name="name" defaultValue="Freitag" />
+        <AddRow {...props} variant="button" onSubmit={onSubmit} />
+      </form>,
+    );
+    await user.click(screen.getByRole("button", { name: props.label }));
+    await user.type(screen.getByPlaceholderText(props.placeholder), "Mara{Enter}");
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    expect((onSubmit.mock.calls[0][0] as FormData).get("name")).toBe("Mara");
+    expect(outer).not.toHaveBeenCalled();
+    expect(container.querySelectorAll("form form")).toHaveLength(0);
+  });
 });
