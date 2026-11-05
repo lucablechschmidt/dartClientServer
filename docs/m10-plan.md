@@ -22,9 +22,11 @@
 | `all-finishes` | Gotta catch 'Em All! | Mit jedem Doppel ein Leg gewinnen, D1-DBull(Fortschritt sichtbar) | X01 |
 | `split-one` | Auf der Kante | SplitScore mit genau 1 Punkt beendet | SplitScore |
 | `never-halved` | Ungeteilt | SplitScore-Spiel ohne eine einzige Halbierung | SplitScore |
+| `bearly-never-halved` | Ein gutes Pferd | SplitScore-Spiel ohne eine einzige Halbierung und einem Score von genau 175 beenden | SplitScore |
 | `first-blood` | First Blood | in einem Elimination-Spiel als Erster einen Mitspieler genullt | Elimination |
 | `nine-darter` | 9-Darter | 501 in 9 Darts | X01 |
 | `shanghai` | Shanghai | Single, Double und Triple desselben Felds in einer Aufnahme als finish | X01 |
+| `almostDone` | Done but not finished | Im Cricket Spiel alle Felder zu machen ohne zu Punkten und danach noch das Spiel gewinnen | Cricket |
 
 Weitere kommen über dieselbe Tabelle dazu; jede Zeile ist eine Erkennerfunktion.
 
