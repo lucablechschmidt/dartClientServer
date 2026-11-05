@@ -17,6 +17,9 @@ test("M9: a knockout tournament for three, one bye, back to the tournament after
   await admin.getByRole("button", { name: t.formats.knockout, exact: true }).click();
   await chooseRules(admin, { startScore: 301, singleOut: true });
   for (const n of [ADMIN, A, B]) await admin.getByRole("button", { name: select(n) }).click();
+  await expect(admin.getByText(t.expectedGames.replace("{n}", "2"))).toBeVisible(); // 4 bracket, one bye
+  await admin.getByRole("button", { name: new RegExp(`^${de.newGame.choosePlayersTitle}`) }).click();
+  await expect(admin.getByRole("button", { name: select(A) })).toHaveCount(0);
   await shot(admin, "tournament-setup");
   await admin.getByRole("button", { name: t.start }).click();
   await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));

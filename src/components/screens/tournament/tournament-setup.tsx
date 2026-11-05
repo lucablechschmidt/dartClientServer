@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, TextInput } from "@/components/ui/form-controls";
 import { Stepper } from "@/components/ui/stepper";
-import type { TournamentFormat } from "@/domain/tournament";
+import { buildPlan, gameCount, type TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
 import {
   BEST_OF,
@@ -30,7 +30,17 @@ function valid(format: TournamentFormat, players: number, groups: number, advanc
   return players >= groups * 2 && Math.floor(players / groups) >= advance && groups * advance >= 2;
 }
 
-/** New tournament (M9) in the setup layout: name, format, groups, X01 rules, best of per phase and knockout round. */
+/** "Voraussichtlich n Spiele" for a valid choice: the plan built from placeholder seeds, byes not counted. */
+function expectedGames(format: TournamentFormat, players: number, groups: number, advance: number, t: Texts["tournaments"]): string {
+  const seeds = Array.from({ length: players }, (_, i) => `p${i}`);
+  const games = gameCount(buildPlan({ format, seeds, groups, advance }));
+  return games === 1 ? t.expectedGamesOne : t.expectedGames.replace("{n}", String(games));
+}
+
+/**
+ * New tournament (M9) in the setup layout: name, format, groups and the expected number of games,
+ * then the players (folding card), X01 rules, best of per phase and knockout round.
+ */
 export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
   const { texts } = props;
   const [name, setName] = useState("");
@@ -53,7 +63,8 @@ export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
       startLabel={t.start}
       canStart={(n) => name.trim() !== "" && valid(format, n, groups, Number(advance))}
       summary={[t.formats[format], String(startScore), `${texts.inNames[inRule]} / ${texts.outNames[outRule]}`]}
-      options={(playerCount) => {
+      playersInOptions
+      options={(playerCount, playersCard) => {
         const entrants = format === "knockout" ? playerCount : format === "groups-knockout" ? groups * Number(advance) : 0;
         const rounds = entrants >= 2 ? knockoutRounds(entrants) : format === "round-robin" ? 0 : 1;
         const bestOf = (i: number) => knockoutBestOf.at(i) ?? { legs: 1, sets: 1 };
@@ -102,10 +113,15 @@ export function TournamentSetup({ tournamentTexts: t, ...props }: Props) {
                   />
                 </div>
               )}
-              {playerCount > 0 && !valid(format, playerCount, groups, Number(advance)) && (
-                <p className="text-xs text-fg-muted">{t.tooFewPlayers}</p>
+              {playerCount > 0 && (
+                <p className="text-xs text-fg-muted">
+                  {valid(format, playerCount, groups, Number(advance))
+                    ? expectedGames(format, playerCount, groups, Number(advance), t)
+                    : t.tooFewPlayers}
+                </p>
               )}
             </SetupCard>
+            {playersCard}
             <SetupCard>
               <ScoreChoice
                 title={texts.startScore}

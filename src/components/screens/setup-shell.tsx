@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
+import { PlayersCard } from "./players-card";
 import { BackButton } from "@/components/ui/back-button";
 import { ChoiceMenu, ChoiceNumberField, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
 import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
@@ -19,8 +20,13 @@ export type SetupProps = {
 
 type Props = SetupProps & {
   mode: ModeId;
-  /** The mode's option card(s); they get the number of chosen players (E7: sets/legs only with 2). */
-  options: (playerCount: number) => ReactNode;
+  /**
+   * The mode's option card(s); they get the number of chosen players (E7: sets/legs only with 2) and,
+   * with `playersInOptions`, the folding players card to place among them.
+   */
+  options: (playerCount: number, players: ReactNode) => ReactNode;
+  /** Tournament: the players card sits among the options instead of below the form. */
+  playersInOptions?: boolean;
   /** Rules for the line below the start button ("501 · Single In / Double Out"). */
   summary: string[];
   /** M9: the tournament setup reuses the shell with its own heading, way back and start condition. */
@@ -48,8 +54,8 @@ export const SCORE_CHOICES: readonly Choice<number>[] = [501, 401, 301].map((val
 /**
  * What every setup shares, in the Figma layout (Design/GameSetUpGameOptions*.png, own colors):
  * title with the mode, the mode's options, the input mode (E13), the player heading with the
- * PlayerPicker, and the start button at the bottom with a summary. The picker sits outside the
- * form (its own guest form); the start button belongs to the form via `form=`.
+ * PlayerPicker (or, for the tournament, a folding players card among the options), and the start
+ * button at the bottom with a summary; the start button belongs to the form via `form=`.
  */
 export function SetupShell({
   mode,
@@ -64,6 +70,7 @@ export function SetupShell({
   backHref = "/",
   canStart = (n) => n > 0,
   startLabel,
+  playersInOptions = false,
 }: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
@@ -72,6 +79,16 @@ export function SetupShell({
     { value: "single", label: texts.inputModes.single },
     { value: "per-player", label: texts.inputModes["per-player"] },
   ];
+  const count = texts.selectedCount.replace("{n}", String(order.length));
+  const picker = (
+    <PlayerPicker
+      players={players}
+      order={order}
+      onToggle={toggle}
+      onAddGuest={onAddGuest}
+      texts={{ ...texts, save: commonTexts.save, cancel: commonTexts.cancel }}
+    />
+  );
 
   return (
     <div className="flex flex-1 flex-col bg-bg-grouped text-fg">
@@ -89,7 +106,14 @@ export function SetupShell({
           {order.map((id) => (
             <input key={id} type="hidden" name="playerId" value={id} />
           ))}
-          {options(order.length)}
+          {options(
+            order.length,
+            playersInOptions && (
+              <PlayersCard title={texts.choosePlayersTitle} count={count}>
+                {picker}
+              </PlayersCard>
+            ),
+          )}
           <ChoiceMenu
             name="inputMode"
             label={texts.inputMode}
@@ -109,17 +133,15 @@ export function SetupShell({
           </ChoiceMenu>
         </form>
 
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-bold">{texts.choosePlayersTitle}</h2>
-          <span className="text-sm text-fg-muted">{texts.selectedCount.replace("{n}", String(order.length))}</span>
-        </div>
-        <PlayerPicker
-          players={players}
-          order={order}
-          onToggle={toggle}
-          onAddGuest={onAddGuest}
-          texts={{ ...texts, save: commonTexts.save, cancel: commonTexts.cancel }}
-        />
+        {!playersInOptions && (
+          <>
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-lg font-bold">{texts.choosePlayersTitle}</h2>
+              <span className="text-sm text-fg-muted">{count}</span>
+            </div>
+            {picker}
+          </>
+        )}
       </div>
 
       <div className="sticky bottom-0 bg-bg-grouped px-4 pt-3 pb-safe-min">

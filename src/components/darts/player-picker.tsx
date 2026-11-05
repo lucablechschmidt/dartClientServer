@@ -41,8 +41,8 @@ export function initials(players: Player[]): Record<string, string> {
 /**
  * Port of PlayerSelectionView in the Figma layout: avatar, name, guest badge and a box that shows
  * the throwing position once tapped (players are tapped in order). Adding a guest is a button
- * below the list (tap → input field → Enter). Sits outside the match form because the guest row
- * is a form of its own.
+ * below the list (tap → input field → Enter). The guest row has a form of its own (AddRow), joined
+ * with `form=`, so the picker may sit inside the start form.
  */
 export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Props) {
   const fill = (s: string, name: string) => s.replace("{name}", name);

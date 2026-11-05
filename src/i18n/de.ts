@@ -178,6 +178,8 @@ export const de = {
     formats: { "round-robin": "Jeder gegen jeden", knockout: "K.-o.", "groups-knockout": "Gruppen + K.-o." },
     groups: "Gruppen",
     advance: "Weiter je Gruppe",
+    expectedGames: "Voraussichtlich {n} Spiele",
+    expectedGamesOne: "Voraussichtlich 1 Spiel",
     gamePlay: "Spielformat",
     groupPhase: "Gruppenphase",
     roundOf: "Runde {n}",
