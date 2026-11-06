@@ -134,6 +134,7 @@
   /* Appear animations (theme.md §5); used only behind motion-safe: */
   --animate-fade-in: fade-in var(--duration-base) var(--ease-ios);
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-ios);
+  --animate-pop-in: pop-in var(--duration-fast) var(--ease-ios);
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -143,6 +144,14 @@
   @keyframes sheet-in {
     from {
       transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  /* A floating list opening below its trigger */
+  @keyframes pop-in {
+    from {
+      transform: translateY(-0.25rem) scale(0.98);
       opacity: 0;
     }
   }
@@ -254,6 +263,35 @@
 }
 @utility duration-slow {
   transition-duration: var(--duration-slow);
+}
+
+/*
+ * Folding content opens in height instead of jumping (FoldCard): the grid row grows from 0fr to 1fr while
+ * the child clips; afterwards nothing stays clipped, so popups inside are not cut off.
+ */
+@keyframes unfold {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+@keyframes clip-while-unfolding {
+  from,
+  to {
+    overflow: hidden;
+  }
+}
+@utility animate-unfold {
+  display: grid;
+  animation: unfold var(--duration-base) var(--ease-ios);
+  & > * {
+    min-height: 0;
+    animation: clip-while-unfolding var(--duration-base);
+  }
 }
 
 /* Header row: back button, centred title, equally wide right slot (ScreenHeader) */

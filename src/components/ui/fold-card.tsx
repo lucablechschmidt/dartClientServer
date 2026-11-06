@@ -5,7 +5,7 @@ import { DisclosureChevron } from "./choice-menu";
 
 /**
  * A card that folds to one line: title left, a short summary (e.g. "3 ausgewählt") and the chevron
- * right; open, its content follows below. Tournament players, the admin's games and tournaments.
+ * right; open, its content follows below and unfolds in height. Tournament players, the admin's games and tournaments.
  */
 export function FoldCard({
   title,
@@ -33,7 +33,11 @@ export function FoldCard({
           <DisclosureChevron open={open} />
         </span>
       </button>
-      {open && children}
+      {open && (
+        <div className="motion-safe:animate-unfold">
+          <div className="flex flex-col gap-3">{children}</div>
+        </div>
+      )}
     </div>
   );
 }

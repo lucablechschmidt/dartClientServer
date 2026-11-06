@@ -86,7 +86,7 @@ export function ChoiceMenu<V extends string | number>({
           id={listId}
           role="listbox"
           aria-label={label}
-          className={`absolute top-full z-30 mt-2 flex min-w-full flex-col gap-1 rounded-panel bg-card-bg p-1.5 text-fg shadow-floating ${align === "end" ? "right-0" : "left-0"}`}
+          className={`absolute top-full z-30 mt-2 flex min-w-full origin-top flex-col gap-1 rounded-panel bg-card-bg p-1.5 text-fg shadow-floating motion-safe:animate-pop-in ${align === "end" ? "right-0" : "left-0"}`}
         >
           {options.map((o) => {
             const selected = o.value === value;
@@ -123,9 +123,13 @@ export function ChoiceMenu<V extends string | number>({
   );
 }
 
-/** The chevron of a choice trigger; points up while the list is open. */
+/** The chevron of a choice trigger; points up while the list is open and turns there. */
 export function DisclosureChevron({ open }: { open: boolean }) {
-  return <ChevronDownIcon className={`size-icon-sm shrink-0 ${open ? "rotate-180" : ""}`} />;
+  return (
+    <ChevronDownIcon
+      className={`size-icon-sm shrink-0 motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-ios ${open ? "rotate-180" : ""}`}
+    />
+  );
 }
 
 /** Small label above the chosen value, the content of most choice triggers (in rule / Single In). */
