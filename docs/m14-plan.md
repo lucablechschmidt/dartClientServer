@@ -82,7 +82,7 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, aus 
 
 ### 4.2 Schritt 1: Tokens
 
-- Tokens und Utilities in `globals.css`, Abschnitt in `theme.md`, `/dev/theme` zeigt sie.
+- Tokens und Utilities in `globals.css`, Abschnitt in `theme.md`.
 - **Commit:** `style(theme): motion tokens`
 
 ### 4.3 Schritt 2: die kleinen Kandidaten (je ein Commit)

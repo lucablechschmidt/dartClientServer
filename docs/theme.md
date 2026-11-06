@@ -88,3 +88,22 @@ Regeln:
 2. `GroupedSection` und `SubPage` nehmen `width` und bauen den Rahmen selbst ein; andere Screens verwenden `PageFrame` direkt. Teile außerhalb des Rahmens (der klebende Start-Button im Setup) nehmen `pageColumn()`.
 3. Mehrspaltig wird es nur im breiten Rahmen und erst ab `lg` (Statistik: Diagramm und Dartscheibe nebeneinander). Am Handy steht alles untereinander.
 4. Der Zählscreen und die Sieg-Screens haben eigene Layouts (§3) und keinen `PageFrame`.
+
+## 5. Bewegung
+
+Legacy hat keine eigenen Animationen; was unter iOS ruhig gleitet, macht SwiftUI selbst (Sheets, Disclosure). Die Web-App ergänzt das sparsam (M14, `docs/m14-plan.md` §4).
+
+| Token | Klasse | Wert | Verwendung |
+|---|---|---|---|
+| `--duration-fast` | `duration-fast` | 150 ms | Tipp-Rückmeldung, Dart setzt sich, Auswahlliste |
+| `--duration-base` | `duration-base` | 250 ms | Aufklappen, Rahmenwechsel, Einblenden |
+| `--duration-slow` | `duration-slow` | 350 ms | Sheet und Sieg-Screen kommen herein |
+| `--ease-ios` | `ease-ios` | `cubic-bezier(0.32, 0.72, 0, 1)` | alle Übergänge: schnell an, weich aus |
+
+Regeln:
+
+1. Jede Animation und jeder Übergang steht hinter `motion-safe:`. Wer am Gerät „Bewegung reduzieren“ eingeschaltet hat, sieht nichts davon; einen eigenen Schalter gibt es nicht.
+2. Nur `transform` und `opacity` (Ausnahme: das Aufklappen in der Höhe über `grid-template-rows`), keine Bibliothek, keine Federn, kein Wackeln.
+3. Erscheinen läuft als Keyframe-Animation beim Einhängen (`animate-*`, Keyframes in `globals.css`); Verschwinden ist sofort.
+4. Zählen bleibt sofort: Keine Animation verzögert eine Eingabe, einen Spielerwechsel oder einen Screen. Punktestände zählen nie hoch oder runter.
+5. Neue Dauern oder Kurven werden Tokens; `duration-300` und Ad-hoc-Kurven gibt es nicht.

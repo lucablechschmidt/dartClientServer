@@ -56,6 +56,11 @@
   --heat-4: light-dark(oklch(0.54 0.18 257), oklch(0.67 0.15 257));
   --heat-5: light-dark(oklch(0.42 0.16 257), oklch(0.8 0.1 257));
 
+  /* Motion (theme.md §5): short and calm, only with motion-safe: */
+  --duration-fast: 150ms; /* tap feedback, a dart settling, a popup list */
+  --duration-base: 250ms; /* folding, frames, fades */
+  --duration-slow: 350ms; /* sheets and screens coming in */
+
   --touch-min: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -122,6 +127,9 @@
   /* Tiles, option rows, stepper keys and full-width buttons; small controls: inputs, check boxes, badges */
   --radius-tile: 12px;
   --radius-box: 8px;
+
+  /* iOS-like curve: quick start, soft end; no springs */
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
 
   --shadow-floating: 0 10px 30px rgb(0 0 0 / 0.18); /* anything floating: choice list, confirm sheet, tab bar */
 
@@ -219,6 +227,17 @@
     grid-column: 1 / -1;
     min-height: 0;
   }
+}
+
+/* Transition lengths from the motion tokens (theme.md §5): duration-fast | duration-base | duration-slow */
+@utility duration-fast {
+  transition-duration: var(--duration-fast);
+}
+@utility duration-base {
+  transition-duration: var(--duration-base);
+}
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
 }
 
 /* Header row: back button, centred title, equally wide right slot (ScreenHeader) */
