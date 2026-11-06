@@ -84,5 +84,6 @@ export async function linkPath(link: ReturnType<Page["locator"]>): Promise<strin
 export const alertOf = (page: Page) => page.locator("[role=alert]:not(#__next-route-announcer__)");
 
 export async function shot(page: Page, name: string, fullPage = false) {
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage });
+  // Animations jump to their end, so screenshots never catch a sheet or a fold halfway (M14).
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage, animations: "disabled" });
 }
