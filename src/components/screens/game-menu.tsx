@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CardList, CardRow } from "@/components/ui/card-list";
+import { PageFrame } from "@/components/ui/page-frame";
 import { SectionHeading } from "@/components/ui/form-controls";
 import type { Texts } from "@/i18n/de";
 
@@ -71,45 +72,49 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
         </Link>
       </nav>
       {matches.length > 0 && (
-        <section className="flex flex-col gap-2 px-4 pb-4">
-          <SectionHeading>{overviewTexts.title}</SectionHeading>
-          <CardList label={overviewTexts.title}>
-            {matches.map((m) => (
-              <CardRow key={m.id}>
-                <Link href={`/match/${m.id}`} className="flex min-h-touch w-full items-center justify-between gap-3">
-                  <span className="truncate">{m.names.join(" · ")}</span>
-                  <span className="shrink-0 text-sm text-fg-muted">
-                    {modePrefix(m.mode, texts)}
-                    {m.perPlayer ? `${overviewTexts.perPlayer} · ` : ""}
-                    {relativeTime(m.startedAt, now, overviewTexts)}
-                  </span>
-                </Link>
-              </CardRow>
-            ))}
-          </CardList>
-        </section>
-      )}
-      {recent.length > 0 && (
-        <section className="flex flex-col gap-2 px-4 pb-4">
-          <SectionHeading>{overviewTexts.recent}</SectionHeading>
-          <CardList label={overviewTexts.recent}>
-            {recent.map((m) => (
-              <CardRow key={m.id}>
-                <Link href={`/match/${m.id}`} className="flex min-h-touch w-full flex-col justify-center py-1">
-                  <span className="flex items-baseline justify-between gap-3">
+        <section className="px-4 pb-4">
+          <PageFrame className="gap-2">
+            <SectionHeading>{overviewTexts.title}</SectionHeading>
+            <CardList label={overviewTexts.title}>
+              {matches.map((m) => (
+                <CardRow key={m.id}>
+                  <Link href={`/match/${m.id}`} className="flex min-h-touch w-full items-center justify-between gap-3">
                     <span className="truncate">{m.names.join(" · ")}</span>
                     <span className="shrink-0 text-sm text-fg-muted">
                       {modePrefix(m.mode, texts)}
-                      {relativeTime(m.endedAt, now, overviewTexts)}
+                      {m.perPlayer ? `${overviewTexts.perPlayer} · ` : ""}
+                      {relativeTime(m.startedAt, now, overviewTexts)}
                     </span>
-                  </span>
-                  <span className={`truncate text-sm ${m.result.kind === "abandoned" ? "text-fg-muted" : ""}`}>
-                    {resultText(m.result, overviewTexts)}
-                  </span>
-                </Link>
-              </CardRow>
-            ))}
-          </CardList>
+                  </Link>
+                </CardRow>
+              ))}
+            </CardList>
+          </PageFrame>
+        </section>
+      )}
+      {recent.length > 0 && (
+        <section className="px-4 pb-4">
+          <PageFrame className="gap-2">
+            <SectionHeading>{overviewTexts.recent}</SectionHeading>
+            <CardList label={overviewTexts.recent}>
+              {recent.map((m) => (
+                <CardRow key={m.id}>
+                  <Link href={`/match/${m.id}`} className="flex min-h-touch w-full flex-col justify-center py-1">
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="truncate">{m.names.join(" · ")}</span>
+                      <span className="shrink-0 text-sm text-fg-muted">
+                        {modePrefix(m.mode, texts)}
+                        {relativeTime(m.endedAt, now, overviewTexts)}
+                      </span>
+                    </span>
+                    <span className={`truncate text-sm ${m.result.kind === "abandoned" ? "text-fg-muted" : ""}`}>
+                      {resultText(m.result, overviewTexts)}
+                    </span>
+                  </Link>
+                </CardRow>
+              ))}
+            </CardList>
+          </PageFrame>
         </section>
       )}
     </div>

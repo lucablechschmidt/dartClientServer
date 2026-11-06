@@ -108,6 +108,10 @@
   --color-heat-4: var(--heat-4);
   --color-heat-5: var(--heat-5);
 
+  /* Page columns (theme.md §4): max-w-page for lists and forms, max-w-page-wide for statistics */
+  --container-page: 36rem;
+  --container-page-wide: 64rem;
+
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --spacing-touch: var(--touch-min);
 

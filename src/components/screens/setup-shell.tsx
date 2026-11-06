@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
 import { FoldCard } from "@/components/ui/fold-card";
 import { BackButton } from "@/components/ui/back-button";
+import { PageFrame, pageColumn } from "@/components/ui/page-frame";
 import { ChoiceMenu, ChoiceNumberField, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
 import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
 import type { Player } from "@/domain/player";
@@ -91,11 +92,11 @@ export function SetupShell({
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-bg-grouped text-fg">
-      <div className="flex px-3">
-        <BackButton href={backHref} label={commonTexts.back} />
-      </div>
-      <div className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-4">
+    <div className="flex flex-1 flex-col bg-bg-grouped px-4 text-fg">
+      <PageFrame className="flex-1 gap-4 pb-4">
+        <div className="flex">
+          <BackButton href={backHref} label={commonTexts.back} />
+        </div>
         <div>
           <h1 className="text-title font-bold tracking-tight">{heading?.title ?? texts.title}</h1>
           <p className="text-sm text-fg-muted">{heading?.subtitle ?? texts.modes[mode]}</p>
@@ -142,10 +143,10 @@ export function SetupShell({
             {picker}
           </>
         )}
-      </div>
+      </PageFrame>
 
-      <div className="sticky bottom-0 bg-bg-grouped px-4 pt-3 pb-safe-min">
-        <div className="mx-auto max-w-xl">
+      <div className="sticky bottom-0 bg-bg-grouped pt-3 pb-safe-min">
+        <div className={pageColumn()}>
           <button
             type="submit"
             form={FORM_ID}

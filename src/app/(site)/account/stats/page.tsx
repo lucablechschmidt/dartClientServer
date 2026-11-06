@@ -20,7 +20,7 @@ async function Stats({ searchParams }: { searchParams: Search }) {
 export default function StatsPage({ searchParams }: { searchParams: Search }) {
   return (
     <main className="flex flex-1 flex-col">
-      <SubPage title={de.account.pages.stats} back={de.ui.back}>
+      <SubPage title={de.account.pages.stats} back={de.ui.back} width="wide">
         <Suspense fallback={null}>
           <Stats searchParams={searchParams} />
         </Suspense>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BackButton } from "@/components/ui/back-button";
+import { PageFrame } from "@/components/ui/page-frame";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { FormError, SectionHeading, TextButton } from "@/components/ui/form-controls";
@@ -73,68 +74,70 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4 bg-bg-grouped px-4 pb-4 text-fg">
-      <div className="flex">
-        <BackButton href="/tournaments" label={back} />
-      </div>
-      <div>
-        <h1 className="text-title font-bold tracking-tight">{view.name}</h1>
-        <p className="text-sm text-fg-muted">{t.formats[view.format]}</p>
-      </div>
-      {view.winner && (
-        <p className="rounded-panel bg-accent-wash px-4 py-3 text-center text-fluid-lg font-semibold">
-          {t.winner.replace("{name}", name(view.winner))}
-        </p>
-      )}
-      {error && <FormError>{t.errors[error]}</FormError>}
-      {view.canRedraw && (
-        <div className="flex items-center justify-between gap-3 rounded-panel bg-card-bg px-4 py-2">
-          <span className="text-sm text-fg-muted">{t.seedHint}</span>
-          <TextButton onClick={() => void report(onRedraw())}>{t.redraw}</TextButton>
+    <div className="flex flex-1 flex-col bg-bg-grouped px-4 pb-4 text-fg">
+      <PageFrame className="gap-4">
+        <div className="flex">
+          <BackButton href="/tournaments" label={back} />
         </div>
-      )}
-      {view.groups.map(({ group, rows }) => (
-        <div key={group} className="flex flex-col gap-2">
-          <SectionHeading>{view.groups.length > 1 ? t.group.replace("{n}", String(group)) : t.formats["round-robin"]}</SectionHeading>
-          <StandingsTable rows={rows} names={names} label={t.group.replace("{n}", String(group))} texts={t.table} />
+        <div>
+          <h1 className="text-title font-bold tracking-tight">{view.name}</h1>
+          <p className="text-sm text-fg-muted">{t.formats[view.format]}</p>
         </div>
-      ))}
-      {sections.map((s) => (
-        <div key={s.key} className="flex flex-col gap-2">
-          <SectionHeading>{s.title}</SectionHeading>
-          <CardList label={s.title}>
-            {s.fixtures.map((f) => (
-              <CardRow key={f.id}>
-                <span className="flex min-w-0 flex-col">
-                  <span className={`truncate ${f.winner === f.a && f.status === "done" ? "font-semibold" : ""}`}>
-                    {name(f.a, f.status === "bye")}
+        {view.winner && (
+          <p className="rounded-panel bg-accent-wash px-4 py-3 text-center text-fluid-lg font-semibold">
+            {t.winner.replace("{name}", name(view.winner))}
+          </p>
+        )}
+        {error && <FormError>{t.errors[error]}</FormError>}
+        {view.canRedraw && (
+          <div className="flex items-center justify-between gap-3 rounded-panel bg-card-bg px-4 py-2">
+            <span className="text-sm text-fg-muted">{t.seedHint}</span>
+            <TextButton onClick={() => void report(onRedraw())}>{t.redraw}</TextButton>
+          </div>
+        )}
+        {view.groups.map(({ group, rows }) => (
+          <div key={group} className="flex flex-col gap-2">
+            <SectionHeading>{view.groups.length > 1 ? t.group.replace("{n}", String(group)) : t.formats["round-robin"]}</SectionHeading>
+            <StandingsTable rows={rows} names={names} label={t.group.replace("{n}", String(group))} texts={t.table} />
+          </div>
+        ))}
+        {sections.map((s) => (
+          <div key={s.key} className="flex flex-col gap-2">
+            <SectionHeading>{s.title}</SectionHeading>
+            <CardList label={s.title}>
+              {s.fixtures.map((f) => (
+                <CardRow key={f.id}>
+                  <span className="flex min-w-0 flex-col">
+                    <span className={`truncate ${f.winner === f.a && f.status === "done" ? "font-semibold" : ""}`}>
+                      {name(f.a, f.status === "bye")}
+                    </span>
+                    <span className={`truncate ${f.winner === f.b && f.status === "done" ? "font-semibold" : ""}`}>
+                      {name(f.b, f.status === "bye")}
+                    </span>
                   </span>
-                  <span className={`truncate ${f.winner === f.b && f.status === "done" ? "font-semibold" : ""}`}>
-                    {name(f.b, f.status === "bye")}
-                  </span>
-                </span>
-                <FixtureAction fixture={f} texts={t} onStart={() => void report(onStart(f.id))} />
-              </CardRow>
-            ))}
-          </CardList>
-        </div>
-      ))}
-      {view.canDelete && (
-        <TextButton tone="danger" onClick={() => setDeleting(true)}>
-          {t.delete}
-        </TextButton>
-      )}
-      <ConfirmSheet
-        open={deleting}
-        text={t.deleteQuestion}
-        confirmLabel={t.deleteConfirm}
-        cancelLabel={t.cancel}
-        onConfirm={() => {
-          setDeleting(false);
-          void report(onDelete());
-        }}
-        onCancel={() => setDeleting(false)}
-      />
+                  <FixtureAction fixture={f} texts={t} onStart={() => void report(onStart(f.id))} />
+                </CardRow>
+              ))}
+            </CardList>
+          </div>
+        ))}
+        {view.canDelete && (
+          <TextButton tone="danger" onClick={() => setDeleting(true)}>
+            {t.delete}
+          </TextButton>
+        )}
+        <ConfirmSheet
+          open={deleting}
+          text={t.deleteQuestion}
+          confirmLabel={t.deleteConfirm}
+          cancelLabel={t.cancel}
+          onConfirm={() => {
+            setDeleting(false);
+            void report(onDelete());
+          }}
+          onCancel={() => setDeleting(false)}
+        />
+      </PageFrame>
     </div>
   );
 }

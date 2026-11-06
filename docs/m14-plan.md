@@ -46,8 +46,8 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, aus 
 - Zwei Breiten als Tokens in `globals.css`: `--container-page` (schmal, 36rem = `max-w-xl`) und `--container-page-wide` (breit, 64rem = `max-w-5xl`), Klassen `max-w-page` und `max-w-page-wide`.
 - Überschrift, Zurück-Button, Abschnittslabels, `FoldCard` und Karten sitzen in derselben mittigen Spalte.
 - Die einzelnen Bausteine (`CardList`, Setup) verlieren ihr eigenes `max-w-xl`.
-- Schmal: Übersicht, Spieler, Konto, Verwaltung, Turniere, Setup, Erfolge. Breit: Statistik, Rangliste, Spielstatistik.
-- `theme.md` bekommt Abschnitt §4 „Breiten“, `/dev/theme` zeigt den Baustein.
+- Schmal: Übersicht, Spieler, Konto, Verwaltung, Turniere, Setup, Erfolge, Login. Breit: Statistik, Rangliste, Spielstatistik.
+- `theme.md` bekommt Abschnitt §4 „Breiten“.
 - **Commit:** `feat(ui): page frame with a narrow and a wide column`
 
 ### 2.3 Statistik im breiten Rahmen (B, angepasst)

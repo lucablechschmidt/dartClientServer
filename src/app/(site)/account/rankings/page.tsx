@@ -14,7 +14,7 @@ async function Rankings() {
 export default function RankingsPage() {
   return (
     <main className="flex flex-1 flex-col">
-      <SubPage title={de.account.pages.rankings} back={de.ui.back}>
+      <SubPage title={de.account.pages.rankings} back={de.ui.back} width="wide">
         <Suspense fallback={null}>
           <Rankings />
         </Suspense>

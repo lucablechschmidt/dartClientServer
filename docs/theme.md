@@ -72,3 +72,19 @@ Regeln für die Web-App:
 8. **Nur Tokens, kein Inline-Style, keine Ad-hoc-Werte.** Farben, Radien, feste Größen und fluide `clamp()`-Größen stehen als Tokens in `globals.css` (`@theme`: `--color-*`, `--radius-panel|slot|pill|tile|box`, `--shadow-floating`, `--text-title|display|fluid-sm|fluid-lg|fluid-xl`, `--spacing-row|tab|panel-x|keypad-gap|icon-inline|icon|icon-sm|icon-xs|avatar|check|icon-box|cta|qr|cricket-label|cricket-col|chart|panel-sm|slot-w|slot-h|slot-gap`); Komponenten nutzen nur die daraus erzeugten Klassen (`rounded-panel`, `w-slot-w`, `gap-keypad-gap` …). Safe-Area-Abstände über `pt-safe`, `pb-safe`, `pb-safe-min`; wiederkehrende Layouts als `@utility` (`score-grid`, `header-grid`); fluide Schriftgrößen sind die Tokens `--text-fluid-sm|lg|xl` (Klassen `text-fluid-*`), Ziffern gleich breit mit `tabular-nums`. `style={…}` ist per ESLint verboten (`react/forbid-dom-props`), Tailwind-Ad-hoc-Werte wie `rounded-[18px]` sind es per Konvention: ein neuer Wert wird ein Token.
 
 Testgeräte für die DoD: iPhone-Breite 375 px hoch und quer, Tablet 768 px hoch und quer, Desktop-Fenster 1280 px. Der Zählscreen darf in keinem davon scrollen oder abschneiden.
+
+## 4. Breiten
+
+Die Tab-Seiten und die Seiten darunter (Setup, Turniere, Spielstatistik) legen ihren Inhalt in eine mittige Spalte, den Baustein `PageFrame` (`src/components/ui/page-frame.tsx`, seit M14). Zurück-Button, Überschrift, Abschnittslabels, `FoldCard` und Karten teilen sich deren Kanten; kein Baustein begrenzt seine Breite selbst.
+
+| Token | Klasse | Breite | Verwendung |
+|---|---|---|---|
+| `--container-page` | `max-w-page` | 36rem (576 px, wie `max-w-xl`) | `narrow`, Default: Listen und Formulare (Übersicht, Spieler, Konto, Verwaltung, Turniere, Setup, Erfolge, Login) |
+| `--container-page-wide` | `max-w-page-wide` | 64rem (1024 px, wie `max-w-5xl`) | `wide`: Statistik, Rangliste, Spielstatistik |
+
+Regeln:
+
+1. Die Seite um die Spalte trägt Hintergrund und seitlichen Abstand (`px-4`), die Spalte selbst hat keinen, damit alle Seiten dieselbe Kante haben.
+2. `GroupedSection` und `SubPage` nehmen `width` und bauen den Rahmen selbst ein; andere Screens verwenden `PageFrame` direkt. Teile außerhalb des Rahmens (der klebende Start-Button im Setup) nehmen `pageColumn()`.
+3. Mehrspaltig wird es nur im breiten Rahmen und erst ab `lg` (Statistik: Diagramm und Dartscheibe nebeneinander). Am Handy steht alles untereinander.
+4. Der Zählscreen und die Sieg-Screens haben eigene Layouts (§3) und keinen `PageFrame`.

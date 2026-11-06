@@ -1,16 +1,23 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronRightIcon } from "./icons";
+import { PageFrame, type PageWidth } from "./page-frame";
 
-/** Gray page area that holds cards (iOS `List` on systemGroupedBackground). */
-export function GroupedSection({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`flex-1 bg-bg-grouped px-4 py-5 ${className}`}>{children}</section>;
+/** Gray page area that holds cards (iOS `List` on systemGroupedBackground); `className` styles the centred column inside. */
+export function GroupedSection({ children, className = "", width }: { children: ReactNode; className?: string; width?: PageWidth }) {
+  return (
+    <section className="flex-1 bg-bg-grouped px-4 py-5">
+      <PageFrame width={width} className={className}>
+        {children}
+      </PageFrame>
+    </section>
+  );
 }
 
 /** White card with rounded corners; its children are `CardRow`s. */
 export function CardList({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <ul aria-label={label} className="mx-auto w-full max-w-xl rounded-panel bg-card-bg px-4 text-fg">
+    <ul aria-label={label} className="w-full rounded-panel bg-card-bg px-4 text-fg">
       {children}
     </ul>
   );
