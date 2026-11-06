@@ -28,6 +28,10 @@ test("dark mode: the main screens", async ({ admin, register, stamp }) => {
   await b.tap(...K.MISS, ...K.OUT121);
   await expect(admin.getByText(wins(A))).toBeVisible();
   await shot(admin, "victory-dark");
+  // the same second game as in stats.spec.ts, so account-stats and account-stats-dark show the same figures
+  await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
+  await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121);
+  await expect(admin.getByText(wins(B))).toBeVisible();
 
   await open(admin, "/");
   await shot(admin, "overview-dark");
@@ -41,7 +45,9 @@ test("dark mode: the main screens", async ({ admin, register, stamp }) => {
   await open(pageA, "/account");
   await shot(pageA, "account-dark");
   await open(pageA, "/account/stats");
-  await shot(pageA, "account-stats-dark");
+  const s = de.stats;
+  await pageA.getByRole("button", { name: `${s.field} 20: ${s.hits.replace("{n}", "15")}` }).click();
+  await shot(pageA, "account-stats-dark", true);
   await open(pageA, "/account/rankings");
   await pageA.getByRole("button", { name: new RegExp(`^${de.stats.modes.x01}`) }).click();
   await shot(pageA, "account-rankings-dark");
