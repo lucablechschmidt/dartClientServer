@@ -105,6 +105,7 @@ test("the admin tab: only admins see it and the admin tools live there, the acco
   await admin.goto("/account");
   await expect(nav(admin).getByRole("link", { name: de.nav.admin })).toBeVisible();
   await expect(admin.getByRole("button", { name: tools.createInvite })).toHaveCount(0);
+  await admin.getByRole("button", { name: new RegExp(`^${de.account.profile}`) }).click();
   await expect(admin.getByRole("button", { name: de.auth.logout })).toBeVisible();
   await shot(admin, "account");
   await nav(admin).getByRole("link", { name: de.nav.admin }).click();
@@ -126,6 +127,7 @@ test("an unknown match shows the not-found page", async ({ admin }) => {
 
 test("logout: afterwards everything redirects to /login", async ({ admin }) => {
   await admin.goto("/account");
+  await admin.getByRole("button", { name: new RegExp(`^${de.account.profile}`) }).click();
   await admin.getByRole("button", { name: de.auth.logout }).click();
   await admin.waitForURL(/\/login/);
   await admin.goto("/");

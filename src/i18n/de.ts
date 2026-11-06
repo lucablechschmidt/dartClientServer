@@ -73,6 +73,7 @@ export const de = {
     newPassword: "Neues Passwort (mind. 8 Zeichen)",
     newPasswordRepeat: "Neues Passwort wiederholen",
     saved: "Gespeichert.",
+    profile: "Profil",
     more: "Mehr",
     pages: { rankings: "Rangliste", stats: "Statistik", achievements: "Erfolge" },
     admin: {

@@ -1,4 +1,5 @@
 import { CardLinkRow, CardList, GroupedSection } from "@/components/ui/card-list";
+import { FoldCard } from "@/components/ui/fold-card";
 import type { PasswordFormState, PlayerResult, Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
 import { OwnAccountSection } from "./account/own-account-section";
@@ -15,14 +16,16 @@ type Props = {
 };
 
 /**
- * Account tab, the same for everyone: own name, password, logout, then the rows to the rankings, the
+ * Account tab, the same for everyone: a folded "Profil" card (own name, password, logout), then the rows to the rankings, the
  * own statistics and the own achievements (each a page of its own). The admin tools are in the admin tab.
  */
 export function AccountScreen({ session, texts, onRename, onChangePassword, onLogout }: Props) {
   const p = texts.account.pages;
   return (
     <GroupedSection className="flex flex-col gap-5">
-      <OwnAccountSection session={session} texts={texts} onRename={onRename} onChangePassword={onChangePassword} onLogout={onLogout} />
+      <FoldCard title={texts.account.profile} summary={session.name}>
+        <OwnAccountSection session={session} texts={texts} onRename={onRename} onChangePassword={onChangePassword} onLogout={onLogout} />
+      </FoldCard>
       <CardList label={texts.account.more}>
         <CardLinkRow href="/account/rankings" label={p.rankings} />
         <CardLinkRow href="/account/stats" label={p.stats} />
