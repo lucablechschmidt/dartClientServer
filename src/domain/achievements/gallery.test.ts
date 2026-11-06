@@ -16,6 +16,10 @@ describe("achievement gallery (m10-plan §2)", () => {
   it("all finishes: progress over the 21 doubles, earned when the last one came", () => {
     const some = gallery([at(5, doubleFact(16)), at(6, doubleFact(16), doubleFact(25))]).find((x) => x.key === "all-finishes");
     expect(some).toMatchObject({ earnedAt: null, progress: { done: 2, of: 21 } });
+    // The steps name every double in board order and mark the done ones (the gallery lists the missing ones).
+    const steps = some?.progress?.steps ?? [];
+    expect(steps.map((s) => s.label)).toEqual([...Array.from({ length: 20 }, (_, i) => `D${i + 1}`), "Bull"]);
+    expect(steps.filter((s) => s.done).map((s) => s.label)).toEqual(["D16", "Bull"]);
     const all = gallery(FINISH_DOUBLES.map((d, i) => at(100 + i, doubleFact(d)))).find((x) => x.key === "all-finishes");
     expect(all).toMatchObject({ earnedAt: 120, progress: { done: 21, of: 21 } });
   });

@@ -283,6 +283,8 @@ export const de = {
     earned: "verdient {when}",
     open: "noch offen",
     progress: "{done} von {of} Doppeln",
+    missing: "Fehlen noch ({n})",
+    done: "Geschafft ({n})",
     banner: "Neu für {name}",
     items: {
       "180": { name: "180", how: "Eine Aufnahme mit drei T20." },

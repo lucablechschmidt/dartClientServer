@@ -51,6 +51,7 @@ Weitere kommen über dieselbe Tabelle dazu; jede Zeile ist eine Erkennerfunktion
 
 - Sieg-Screen: Banner-Liste „Neu: …“ (Name des Spielers und des Achievements).
 - Konto → Meine Statistik: Galerie mit `Badge`, Fortschrittsbalken für `all-finishes`.
+- Nachtrag 6.11.2026 (Luca): Ein offener Erfolg mit Fortschritt klappt beim Antippen auf und zeigt „Fehlen noch“ und „Geschafft“ als Kürzel (D1 … D20, Bull). Allgemein über `progress.steps` (`src/domain/achievements/gallery.ts`); jeder spätere Erfolg mit zählbaren Teilen füllt `steps` und klappt genauso auf.
 
 ## 6. Schritte
 

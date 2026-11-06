@@ -66,7 +66,7 @@ describe.each([
     const g = myAchievements(d, as("a"));
     expect(g.find((x) => x.key === "180")?.earnedAt).toBe(100);
     expect(g.find((x) => x.key === "shanghai")?.earnedAt).toBe(50);
-    expect(g.find((x) => x.key === "all-finishes")?.progress).toEqual({ done: 1, of: 21 });
+    expect(g.find((x) => x.key === "all-finishes")?.progress).toMatchObject({ done: 1, of: 21 });
     expect(myAchievements(d, as("b")).every((x) => x.earnedAt === null)).toBe(true);
     deleteMatchAsAdmin(d, as("admin", true), first);
     expect(myAchievements(d, as("a")).find((x) => x.key === "180")?.earnedAt).toBe(200);

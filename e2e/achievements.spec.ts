@@ -37,6 +37,12 @@ test("M10: a 180 shows the banner and lands in the gallery; undo takes it away; 
   await expect(banner).toContainText(a.items["180"].name);
   await expect(await gallery180()).toContainText(a.earned.replace("{when}", de.overview.justNow)); // back after the new finish
   await shot(pageA, "account-achievements");
+  // "Gotta catch 'Em All!" folds open and names the missing doubles (single out here, so all 21).
+  const allFinishes = pageA.getByRole("list", { name: a.title }).getByRole("listitem", { name: a.items["all-finishes"].name });
+  await allFinishes.getByRole("button").click();
+  await expect(allFinishes.getByRole("list", { name: a.missing.replace("{n}", "21") }).getByRole("listitem")).toHaveCount(21);
+  await allFinishes.getByRole("list", { name: a.missing.replace("{n}", "21") }).scrollIntoViewIfNeeded();
+  await shot(pageA, "account-achievements-open");
 
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.T180, ...K.MISS, ...K.OUT121);
