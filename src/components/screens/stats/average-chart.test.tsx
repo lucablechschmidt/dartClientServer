@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
 import { AverageChart, niceTicks } from "./average-chart";
 
@@ -44,5 +44,34 @@ describe("AverageChart (M8)", () => {
     expect(
       screen.getByText(t.historyPoint.replace("{when}", de.overview.daysAgo.replace("{n}", "2")).replace("{average}", "61.00")),
     ).toBeInTheDocument();
+  });
+
+  describe("on wide screens (M14)", () => {
+    let report: (width: number, height: number) => void = () => undefined;
+    afterEach(() => vi.unstubAllGlobals());
+    const stubResizeObserver = () =>
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(cb: ResizeObserverCallback) {
+            report = (width, height) => cb([{ contentRect: { width, height } } as ResizeObserverEntry], this as unknown as ResizeObserver);
+          }
+          observe() {}
+          disconnect() {}
+        },
+      );
+
+    it("draws in measured pixels, so the height and the text size do not grow with the width", () => {
+      stubResizeObserver();
+      render(<AverageChart points={points} texts={t} overviewTexts={de.overview} now={3 * DAY} />);
+      const svg = screen.getByRole("img", { name: t.history });
+      expect(svg).toHaveAttribute("viewBox", "0 0 320 160");
+      act(() => report(1000, 160));
+      expect(svg).toHaveAttribute("viewBox", "0 0 1000 160");
+      expect(within(svg).getByText("55.25")).toHaveClass("text-xs");
+      // The last point sits at the right edge of the plot, the full width minus the right padding.
+      const circles = svg.querySelectorAll("circle");
+      expect(Number(circles[circles.length - 1].getAttribute("cx"))).toBeGreaterThan(900);
+    });
   });
 });

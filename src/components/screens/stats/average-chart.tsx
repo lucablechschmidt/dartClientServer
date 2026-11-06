@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useElementSize } from "@/components/ui/use-element-size";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
 
@@ -16,8 +17,8 @@ export function niceTicks(min: number, max: number): number[] {
   return Array.from({ length: (hi - lo) / step + 1 }, (_, i) => lo + i * step);
 }
 
-const W = 320;
-const H = 160;
+/** Size before the first measurement (server render); the height matches the `h-chart` token. */
+const FALLBACK = { width: 320, height: 160 } as const;
 const PAD = { left: 30, right: 44, top: 10, bottom: 10 } as const;
 
 type Props = { points: Point[]; texts: Texts["stats"]; overviewTexts: Texts["overview"]; now: number };
@@ -26,9 +27,12 @@ type Props = { points: Point[]; texts: Texts["stats"]; overviewTexts: Texts["ove
  * The 3-dart average per X01 match over time (M8): one series, so no legend (the heading names it);
  * a 2px line with ringed points, hairline grid, the last value labelled. Pointing or tapping picks the
  * nearest match and names it below; a table carries the values for screen readers (dataviz skill).
+ * The height is fixed and the viewBox is the measured size in pixels, so text and line keep their size
+ * on wide screens instead of growing with the width.
  */
 export function AverageChart({ points, texts: t, overviewTexts, now }: Props) {
   const [picked, setPicked] = useState<number | null>(null);
+  const [svgRef, { width: W, height: H }] = useElementSize<SVGSVGElement>(FALLBACK);
   if (points.length === 0) return null;
   const ticks = niceTicks(Math.min(...points.map((p) => p.average)), Math.max(...points.map((p) => p.average)));
   const [lo, hi] = [ticks[0], ticks[ticks.length - 1]];
@@ -49,10 +53,11 @@ export function AverageChart({ points, texts: t, overviewTexts, now }: Props) {
   return (
     <div className="flex flex-col gap-1">
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         role="img"
         aria-label={t.history}
-        className="w-full touch-pan-y"
+        className="h-chart w-full touch-pan-y"
         onPointerMove={nearest}
         onPointerDown={nearest}
       >
