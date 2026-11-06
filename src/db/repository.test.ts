@@ -225,6 +225,45 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.players.listPlayers(100).map((p) => p.id)).toEqual(["r"]);
   });
 
+  it("saved achievements (M10): the earlier time wins, per player", () => {
+    const repo = make();
+    seed(repo);
+    repo.players.addAchievements("p1", ["180", "double-16"], 50);
+    repo.players.addAchievements("p1", ["180", "shanghai"], 20);
+    repo.players.addAchievements("p1", ["double-16"], 90);
+    expect(repo.players.achievementsStored("p1").sort((a, b) => a.key.localeCompare(b.key))).toEqual([
+      { key: "180", earnedAt: 20 },
+      { key: "double-16", earnedAt: 50 },
+      { key: "shanghai", earnedAt: 20 },
+    ]);
+    expect(repo.players.achievementsStored("p2")).toEqual([]);
+  });
+
+  it("expired guest matches carry what the achievements need, finished ones only", () => {
+    const repo = make();
+    repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
+    repo.players.createPlayer({ id: "g", name: "Gast", createdAt: 2, guestUntil: 100 });
+    for (const id of ["done", "open"])
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds: ["r", "g"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt: 10,
+      });
+    repo.matches.setMatchStatus("done", "finished", 40);
+    repo.matches.setPlacements("done", { r: 1, g: 2 });
+    const byId = Object.fromEntries(repo.matches.listExpiredGuestMatches(100).map((m) => [m.id, m.finished]));
+    expect(byId.done).toMatchObject({ mode: "x01", finishedAt: 40, placements: { r: 1, g: 2 } });
+    expect(byId.done?.state.players).toEqual(["r", "g"]);
+    expect(byId.open).toBeNull();
+  });
+
   it("expired guest matches: a deleted regular player gets no field hits", () => {
     const repo = make();
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });

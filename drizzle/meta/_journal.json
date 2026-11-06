@@ -71,6 +71,13 @@
       "when": 1793896545329,
       "tag": "0009_fixed_wraith",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793942557336,
+      "tag": "0010_broken_slyde",
+      "breakpoints": true
     }
   ]
 }

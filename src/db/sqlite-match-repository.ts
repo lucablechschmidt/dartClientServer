@@ -49,7 +49,9 @@ export class SqliteMatchRepository implements MatchRepository {
       const rows = legIds.length
         ? this.db.select().from(visits).where(inArray(visits.legId, legIds)).orderBy(asc(visits.legId), asc(visits.seq)).all()
         : [];
-      return { id, regularPlayerIds, visits: rows.map(rowToVisit) };
+      const m = this.finishedById(id);
+      const finished = m ? { mode: m.mode, state: m.state, placements: m.placements, finishedAt: m.finishedAt ?? m.startedAt } : null;
+      return { id, regularPlayerIds, visits: rows.map(rowToVisit), finished };
     });
   }
   deleteMatch(matchId: string): void {
@@ -112,11 +114,16 @@ export class SqliteMatchRepository implements MatchRepository {
       .orderBy(asc(matches.finishedAt))
       .all()
       .flatMap(({ id }) => {
-        const m = this.loadMatch(id);
-        if (!m) return [];
-        const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, id)).all();
-        return [{ ...m, placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])) }];
+        const m = this.finishedById(id);
+        return m ? [m] : [];
       });
+  }
+  /** A finished match with its places; null for any other status. */
+  private finishedById(id: string): FinishedMatch | null {
+    const m = this.loadMatch(id);
+    if (m?.status !== "finished") return null;
+    const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, id)).all();
+    return { ...m, placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])) };
   }
   listMatches(limit: number, offset: number): MatchSummary[] {
     return this.db

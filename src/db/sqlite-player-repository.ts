@@ -3,7 +3,7 @@ import type { FieldHits } from "@/domain/stats/field-hits";
 import type { PlayerId } from "@/domain/game";
 import type { Db } from "./client";
 import type { NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
-import { matchPlayers, playerFieldHits, players, type PlayerRow } from "./schema";
+import { matchPlayers, playerAchievements, playerFieldHits, players, type PlayerRow } from "./schema";
 
 /** The hash stays in the DB layer; only hasLogin/isAdmin go outside. */
 export const toPlayer = (r: PlayerRow): Player => ({
@@ -98,6 +98,24 @@ export class SqlitePlayerRepository implements PlayerRepository {
         set: { hits: sql`${playerFieldHits.hits} + excluded.hits` },
       })
       .run();
+  }
+  addAchievements(playerId: PlayerId, facts: readonly string[], earnedAt: number): void {
+    if (facts.length === 0) return;
+    this.db
+      .insert(playerAchievements)
+      .values(facts.map((key) => ({ playerId, key, earnedAt })))
+      .onConflictDoUpdate({
+        target: [playerAchievements.playerId, playerAchievements.key],
+        set: { earnedAt: sql`min(${playerAchievements.earnedAt}, excluded.earned_at)` },
+      })
+      .run();
+  }
+  achievementsStored(playerId: PlayerId): { key: string; earnedAt: number }[] {
+    return this.db
+      .select({ key: playerAchievements.key, earnedAt: playerAchievements.earnedAt })
+      .from(playerAchievements)
+      .where(eq(playerAchievements.playerId, playerId))
+      .all();
   }
   fieldHitsOf(playerId: PlayerId): FieldHits {
     const rows = this.db.select().from(playerFieldHits).where(eq(playerFieldHits.playerId, playerId)).all();

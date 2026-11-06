@@ -74,7 +74,12 @@ export type ExpiredGuestMatch = {
   regularPlayerIds: PlayerId[];
   /** Visits of all legs of the match. */
   visits: Visit[];
+  /** M10: what the achievements need, for a finished match; null otherwise. */
+  finished: (FinishedMatchCore & { finishedAt: number }) | null;
 };
+
+/** The part of a finished match the achievement detection reads. */
+export type FinishedMatchCore = { mode: ModeId; state: MatchState; placements: Record<PlayerId, number | null> };
 
 /**
  * Players, their login (E10), guests (E12) and stored field hits. Split from MatchRepository by
@@ -108,6 +113,9 @@ export type PlayerRepository = {
   deleteOrphanGuests(now: number): void;
   addFieldHits(playerId: PlayerId, hits: FieldHits): void;
   fieldHitsOf(playerId: PlayerId): FieldHits;
+  /** M10: achievement facts from a guest match being deleted; an earlier time already stored wins. */
+  addAchievements(playerId: PlayerId, facts: readonly string[], earnedAt: number): void;
+  achievementsStored(playerId: PlayerId): { key: string; earnedAt: number }[];
 };
 
 /** Matches, legs and visits. */

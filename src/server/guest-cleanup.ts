@@ -1,9 +1,10 @@
+import { factsOf } from "@/domain/achievements/detect";
 import { fieldHits } from "@/domain/stats/field-hits";
 import type { Deps } from "./deps";
 
 /**
  * E12: guest matches live only as long as their longest-visible guest. After that the field hits
- * of the regular participants are saved, then match, legs and visits are deleted,
+ * and (M10) achievements of the regular participants are saved, then match, legs and visits are deleted,
  * finally the guests that are no longer in any match. Returns the number of deleted matches.
  */
 export function cleanupGuests(deps: Deps): number {
@@ -15,6 +16,8 @@ export function cleanupGuests(deps: Deps): number {
       for (const playerId of match.regularPlayerIds) {
         const hits = fieldHits(match.visits.filter((v) => v.playerId === playerId));
         if (hits.size > 0) deps.players.addFieldHits(playerId, hits);
+        // M10: achievements from guest matches count, so they outlive the match (m10-plan §2).
+        if (match.finished) deps.players.addAchievements(playerId, [...factsOf(match.finished, playerId)], match.finished.finishedAt);
       }
       deps.matches.deleteMatch(match.id);
     });

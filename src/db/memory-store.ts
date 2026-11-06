@@ -49,6 +49,8 @@ export class MemoryStore {
   players = new Map<PlayerId, StoredPlayer>();
   matches = new Map<string, StoredMatch>();
   fieldHits = new Map<PlayerId, FieldHits>();
+  /** M10: saved achievement facts per player, fact → earliest time. */
+  achievements = new Map<PlayerId, Map<string, number>>();
   tournaments = new Map<string, Omit<NewTournament, "seeds"> & { seeds: PlayerId[]; links: { fixtureId: string; matchId: string }[] }>();
 
   /** A stored player; a missing one is a bug in the test setup. */

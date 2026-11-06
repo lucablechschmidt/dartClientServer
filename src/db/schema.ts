@@ -66,6 +66,22 @@ export const playerFieldHits = sqliteTable(
   (t) => [primaryKey({ columns: [t.playerId, t.field] })],
 );
 
+/**
+ * M10: achievements (and double-N facts) regular players earned in guest matches, saved before those
+ * are deleted (m10-plan §2); everything else is computed from the finished matches.
+ */
+export const playerAchievements = sqliteTable(
+  "player_achievement",
+  {
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    earnedAt: integer("earned_at").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.key] })],
+);
+
 export const matches = sqliteTable("match", {
   id: text("id").primaryKey(),
   mode: text("mode", { enum: ["x01", "cricket", "elimination", "splitscore"] }).notNull(),

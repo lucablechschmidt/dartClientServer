@@ -87,6 +87,14 @@ export class MemoryPlayerRepository implements PlayerRepository {
     const positive = new Map([...hits].filter(([, n]) => n > 0));
     this.store.fieldHits.set(playerId, addFieldHits(this.store.fieldHits.get(playerId) ?? new Map<number, number>(), positive));
   }
+  addAchievements(playerId: PlayerId, facts: readonly string[], earnedAt: number): void {
+    const own = this.store.achievements.get(playerId) ?? new Map<string, number>();
+    for (const key of facts) own.set(key, Math.min(own.get(key) ?? Infinity, earnedAt));
+    this.store.achievements.set(playerId, own);
+  }
+  achievementsStored(playerId: PlayerId): { key: string; earnedAt: number }[] {
+    return [...(this.store.achievements.get(playerId) ?? [])].map(([key, earnedAt]) => ({ key, earnedAt }));
+  }
   fieldHitsOf(playerId: PlayerId): FieldHits {
     return new Map(this.store.fieldHits.get(playerId) ?? []);
   }

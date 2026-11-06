@@ -27,6 +27,7 @@ export class MemoryMatchRepository implements MatchRepository {
         id: m.id,
         regularPlayerIds: seated.filter((p) => p.guestUntil === null && p.deletedAt === null).map((p) => p.id),
         visits: m.legs.flatMap((l) => l.visits),
+        finished: this.finishedCore(m.id),
       });
     }
     return out;
@@ -41,9 +42,18 @@ export class MemoryMatchRepository implements MatchRepository {
       .filter((m) => m.status === "finished" && (since === null || (m.finishedAt ?? 0) >= since))
       .sort((a, b) => (a.finishedAt ?? 0) - (b.finishedAt ?? 0))
       .flatMap((m) => {
-        const loaded = this.loadMatch(m.id);
-        return loaded ? [{ ...loaded, placements: { ...m.placements } }] : [];
+        const f = this.finishedById(m.id);
+        return f ? [f] : [];
       });
+  }
+  private finishedCore(id: string): ExpiredGuestMatch["finished"] {
+    const f = this.finishedById(id);
+    return f ? { mode: f.mode, state: f.state, placements: f.placements, finishedAt: f.finishedAt ?? f.startedAt } : null;
+  }
+  private finishedById(id: string): FinishedMatch | null {
+    const stored = this.store.matches.get(id);
+    const loaded = this.loadMatch(id);
+    return stored?.status === "finished" && loaded ? { ...loaded, placements: { ...stored.placements } } : null;
   }
   listMatches(limit: number, offset: number): MatchSummary[] {
     return [...this.store.matches.values()]

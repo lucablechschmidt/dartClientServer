@@ -76,6 +76,23 @@ describe("cleanupGuests (E12)", () => {
     expect(deps.players.fieldHitsOf(casey.id)).toEqual(new Map([[20, 9]]));
   });
 
+  it("M10: achievements the regular player earned in a finished guest match are saved first; a running one brings none", () => {
+    const casey = ok(createPlayer(deps, "Casey")).player;
+    const guest = ok(createGuest(deps, "Gast")).player;
+    const single = { startScore: 301, inRule: "single", outRule: "single" } as const;
+    const done = createMatch(deps, { playerIds: [casey.id, guest.id], rules: single, starterIndex: 0 });
+    expect(commitVisit(deps, sessionAdmin, done, 0, 0, [T(20), T(20), T(20)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, done, 0, 1, [S(0), S(0), S(0)]).ok).toBe(true);
+    expect(commitVisit(deps, sessionAdmin, done, 0, 2, [T(20), T(20), S(1)]).ok).toBe(true); // 121 out, finished
+    const finishedAt = clock;
+    const running = createMatch(deps, { playerIds: [casey.id, guest.id], rules: single, starterIndex: 0 });
+    expect(commitVisit(deps, sessionAdmin, running, 0, 0, [T(20), T(20), T(20)]).ok).toBe(true);
+    clock += GUEST_LIFETIME_MS;
+    cleanupGuests(deps);
+    expect(deps.players.achievementsStored(casey.id)).toEqual([{ key: "180", earnedAt: finishedAt }]);
+    expect(deps.players.achievementsStored(guest.id)).toEqual([]);
+  });
+
   it("a match with two guests lives until the later guest expires", () => {
     const casey = ok(createPlayer(deps, "Casey")).player;
     const early = ok(createGuest(deps, "Early")).player;
