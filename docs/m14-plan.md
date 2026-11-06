@@ -1,7 +1,7 @@
 # M14-Plan – Styling
 
 > Detailplan zu `project.md` M14. Zusammengeführt aus zwei Fragen in `docs/fragen.md` (6.11.2026): „Responsives Layout auf dem Desktop“ und „Dezente Animationen wie unter iOS“. Luca hat beide beantwortet und als eigenen Meilenstein „Styling“ eingeordnet.
-> Stand: erste Fassung, 6.11.2026. Umsetzung beginnt mit Teil A.
+> Stand: 6.11.2026. Teil A und Teil B Schritt 1–2 umgesetzt; Schritt 3 wartet auf Lucas Abnahme am Board.
 > Luca: §0.
 
 ---
