@@ -1,5 +1,4 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ACHIEVEMENTS } from "@/domain/achievements/types";
 import { de } from "@/i18n/de";
@@ -14,12 +13,9 @@ const items = ACHIEVEMENTS.map((key) => ({
 }));
 
 describe("AchievementsSection (M10)", () => {
-  it("folded: the count; open: every achievement, earned with its time, open with how to get it, progress for all finishes", async () => {
-    const user = userEvent.setup();
+  it("the count, then every achievement: earned with its time, open with how to get it, progress for all finishes", () => {
     render(<AchievementsSection items={items} texts={t} overviewTexts={de.overview} now={2 * DAY} />);
-    const fold = screen.getByRole("button", { name: new RegExp(`^${t.title}`) });
-    expect(fold).toHaveTextContent(t.count.replace("{n}", "1").replace("{of}", String(ACHIEVEMENTS.length)));
-    await user.click(fold);
+    expect(screen.getByText(t.count.replace("{n}", "1").replace("{of}", String(ACHIEVEMENTS.length)))).toBeInTheDocument();
     const list = screen.getByRole("list", { name: t.title });
     const earned = within(list).getByRole("listitem", { name: t.items["180"].name });
     expect(earned).toHaveTextContent(t.earned.replace("{when}", de.overview.daysAgo.replace("{n}", "2")));

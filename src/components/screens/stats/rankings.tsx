@@ -1,5 +1,4 @@
 import { FoldCard } from "@/components/ui/fold-card";
-import { SectionHeading } from "@/components/ui/form-controls";
 import type { ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 
@@ -8,7 +7,7 @@ type RankingRowView = { player: string; name: string; place: number; elo: number
 export type ModeRankingView = { mode: ModeId; rows: RankingRowView[]; own: RankingRowView | null };
 
 /**
- * The rankings per mode in the account tab (M8): a folded card each, showing only the own place and
+ * The rankings per mode on /account/rankings (M8): a folded card each, showing only the own place and
  * Elo; open, everyone with place, name, Elo and games, the own row marked. Visible to everyone.
  */
 export function RankingsSection({
@@ -24,7 +23,6 @@ export function RankingsSection({
   const num = "px-2 py-2 text-right tabular-nums";
   return (
     <div className="flex flex-col gap-3">
-      <SectionHeading>{t.rankings}</SectionHeading>
       {rankings.map(({ mode, rows, own }) => {
         const title = t.ranking.replace("{mode}", t.modes[mode]);
         return (

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CardList } from "@/components/ui/card-list";
-import { FoldCard } from "@/components/ui/fold-card";
 import { MedalIcon } from "@/components/ui/icons";
 import type { AchievementKey } from "@/domain/achievements/types";
 import type { Texts } from "@/i18n/de";
@@ -16,7 +15,7 @@ export type NewAchievementsView = { playerId: string; name: string; keys: Achiev
 type Texts10 = Texts["achievements"];
 
 /**
- * The own achievements in the account tab (M10): a folded card with the count; open, every achievement,
+ * The own achievements on /account/achievements (M10): the count, then every achievement,
  * earned ones with their time, open ones muted with how to get them, the progress of "Gotta catch 'Em All!".
  */
 export function AchievementsSection({
@@ -32,7 +31,8 @@ export function AchievementsSection({
 }) {
   const earned = items.filter((i) => i.earnedAt !== null).length;
   return (
-    <FoldCard title={t.title} summary={t.count.replace("{n}", String(earned)).replace("{of}", String(items.length))}>
+    <div className="flex flex-col gap-3">
+      <p className="px-4 text-sm text-fg-muted">{t.count.replace("{n}", String(earned)).replace("{of}", String(items.length))}</p>
       <CardList label={t.title}>
         {items.map((item) => {
           const { name, how } = t.items[item.key];
@@ -65,7 +65,7 @@ export function AchievementsSection({
           );
         })}
       </CardList>
-    </FoldCard>
+    </div>
   );
 }
 

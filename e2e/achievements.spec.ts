@@ -17,7 +17,8 @@ test("M10: a 180 shows the banner and lands in the gallery; undo takes it away; 
   const banner = admin.getByRole("region", { name: a.title }).filter({ hasText: a.banner.replace("{name}", A) });
   const gallery180 = async () => {
     await pageA.goto("/account");
-    await pageA.getByRole("button", { name: new RegExp(`^${a.title}`) }).click();
+    await pageA.getByRole("link", { name: de.account.pages.achievements }).click();
+    await pageA.waitForURL((u) => u.pathname === "/account/achievements");
     return pageA.getByRole("list", { name: a.title }).getByRole("listitem", { name: a.items["180"].name });
   };
 

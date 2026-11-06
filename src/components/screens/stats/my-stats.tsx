@@ -32,7 +32,7 @@ type Props = {
 };
 
 /**
- * "Meine Statistik" in the account tab (M8): range pills, tiles with the figures, the average per match,
+ * The own statistics on /account/stats (M8): range pills, tiles with the figures, the average per match,
  * the field hits on a dartboard and the last
  * games with a link to the X01 match page. Only the own statistics, for everyone (m8-plan §2).
  */
@@ -62,10 +62,9 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <SectionHeading>{t.title}</SectionHeading>
       <PillLinks
         label={t.range}
-        items={RANGES.map((r) => ({ href: `/account?range=${r}`, label: t.ranges[r], current: r === view.range }))}
+        items={RANGES.map((r) => ({ href: `/account/stats?range=${r}`, label: t.ranges[r], current: r === view.range }))}
       />
       {games === 0 ? (
         <p className="px-4 text-sm text-fg-muted">{t.none}</p>

@@ -200,3 +200,12 @@ export function MedalIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** chevron.right (rows that open a page) */
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+}

@@ -43,7 +43,7 @@ describe("MyStatsSection", () => {
     render(<MyStatsSection view={view} {...props} />);
     const pills = screen.getByRole("navigation", { name: t.range });
     expect(within(pills).getByRole("link", { name: t.ranges["30d"] })).toHaveAttribute("aria-current", "page");
-    expect(within(pills).getByRole("link", { name: t.ranges.all })).toHaveAttribute("href", "/account?range=all");
+    expect(within(pills).getByRole("link", { name: t.ranges.all })).toHaveAttribute("href", "/account/stats?range=all");
   });
 
   it("recent games link to the match page; without games a hint", () => {

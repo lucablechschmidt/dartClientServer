@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
+import { ChevronRightIcon } from "./icons";
 
 /** Gray page area that holds cards (iOS `List` on systemGroupedBackground). */
 export function GroupedSection({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -42,4 +44,19 @@ export function CardRow({
     );
   }
   return <li className={row}>{children}</li>;
+}
+
+/** A row that opens another page: label, optional detail on the right, a chevron (account → statistics …). */
+export function CardLinkRow({ href, label, detail }: { href: string; label: string; detail?: string }) {
+  return (
+    <li className="list-none border-b border-separator last:border-b-0">
+      <Link href={href} className="flex min-h-row w-full items-center justify-between gap-3 py-2">
+        <span className="font-medium">{label}</span>
+        <span className="flex items-center gap-2 text-sm text-fg-muted">
+          {detail}
+          <ChevronRightIcon className="size-icon-sm" />
+        </span>
+      </Link>
+    </li>
+  );
 }

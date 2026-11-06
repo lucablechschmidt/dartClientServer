@@ -15,11 +15,16 @@ async function Detail({ params, searchParams }: { params: Params; searchParams: 
   // Not a player of the match (the admin included) or no X01 match: as if it did not exist.
   if (!r.ok) notFound();
   return (
-    <MatchDetailScreen detail={r.detail} texts={de.stats} back={de.ui.back} backHref={from === "match" ? `/match/${id}` : "/account"} />
+    <MatchDetailScreen
+      detail={r.detail}
+      texts={de.stats}
+      back={de.ui.back}
+      backHref={from === "match" ? `/match/${id}` : "/account/stats"}
+    />
   );
 }
 
-/** M8: statistics of one X01 match per leg, for its players; from the victory screen or the own recent games. */
+/** M8: statistics of one X01 match per leg, for its players; from the victory screen or the own recent games (back there). */
 export default function MatchStatsPage({ params, searchParams }: { params: Params; searchParams: Search }) {
   return (
     <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe">
