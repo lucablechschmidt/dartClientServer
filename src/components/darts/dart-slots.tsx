@@ -2,7 +2,8 @@ import type { DartSlotView } from "@/domain/game";
 
 /**
  * The three slots of a visit (port of DartScoreView): boxes with a black frame,
- * the current slot blue, bust slots in red. Width as in legacy ≈ 1/6 of the panel width.
+ * the current slot blue, bust slots in red. Width as in legacy ≈ 1/6 of the panel width. A newly entered
+ * dart "settles" (scales from 0.9), visible at once, so the input is never delayed.
  */
 export function DartSlots({
   slots,
@@ -28,7 +29,11 @@ export function DartSlots({
             s.isOverthrown || isBust ? "text-key-undo" : "",
           ].join(" ")}
         >
-          {s.label ?? ""}
+          {s.label !== null && (
+            <span key={s.label} className="motion-safe:animate-settle">
+              {s.label}
+            </span>
+          )}
         </li>
       ))}
     </ol>

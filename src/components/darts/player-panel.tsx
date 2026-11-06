@@ -14,7 +14,8 @@ const fmt = (n: number) => n.toFixed(2);
  * M7: the score is the rest (X01) or the points. Cricket has its own board (CricketTable, Figma).
  */
 export function PlayerPanel({ player, size = "large", texts }: Props) {
-  const border = player.isActive ? "border-frame-active" : "border-frame-fg";
+  // The frame color of the player at the oche changes softly; the switch itself is immediate.
+  const border = `motion-safe:transition-colors motion-safe:duration-base motion-safe:ease-ios ${player.isActive ? "border-frame-active" : "border-frame-fg"}`;
   const dim = player.isOut ? "opacity-60" : "";
   const score = player.placement !== null ? `${player.placement}.` : player.score;
   if (size === "small") {

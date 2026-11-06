@@ -135,6 +135,7 @@
   --animate-fade-in: fade-in var(--duration-base) var(--ease-ios);
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-ios);
   --animate-pop-in: pop-in var(--duration-fast) var(--ease-ios);
+  --animate-settle: settle var(--duration-fast) var(--ease-ios);
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -153,6 +154,13 @@
     from {
       transform: translateY(-0.25rem) scale(0.98);
       opacity: 0;
+    }
+  }
+
+  /* A dart just entered in its slot: shown at once, it only grows the last tenth */
+  @keyframes settle {
+    from {
+      transform: scale(0.9);
     }
   }
 
