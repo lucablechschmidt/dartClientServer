@@ -5,6 +5,7 @@ import type { Session } from "@/domain/player";
 import { matchResult, type InputMode, type MatchFormat, type PlayerId, type Rules } from "@/domain/game";
 import {
   draw,
+  randomIntFrom,
   resolve,
   standings,
   TOURNAMENT_FORMATS,
@@ -50,11 +51,8 @@ export type NewTournamentInput = z.input<typeof newTournamentSchema>;
 
 export type TournamentError = "not-found" | "forbidden" | "already-started" | "not-ready";
 
-/** Random integer in [0, n) from the injected random bytes, for the draw (deterministic in tests). */
-const randomInt = (deps: Deps) => (n: number) => {
-  const b = deps.random(4);
-  return (((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0) % n;
-};
+/** Uniform random integer in [0, n) from the injected random bytes (crypto on the server, seeded in tests). */
+const randomInt = (deps: Deps) => randomIntFrom(deps.random);
 
 const mayManage = (t: StoredTournament, session: Session) => session.isAdmin || t.createdBy === session.playerId;
 
@@ -198,11 +196,15 @@ export function listTournaments(deps: Deps): TournamentSummary[] {
   });
 }
 
-/** A new draw of the seed list, by the creator or an admin, only before the first game started. */
+/**
+ * A new draw of the seed list, by the creator or an admin, only before the first game started: the
+ * knockout gets a new bracket, groups + knockout new groups (both follow from the seed order).
+ */
 export function redrawTournament(deps: Deps, session: Session, id: string): { ok: true } | { ok: false; reason: TournamentError } {
   const t = deps.tournaments.loadTournament(id);
   if (!t) return { ok: false, reason: "not-found" };
-  if (!mayManage(t, session) || t.seeding === "fixed") return { ok: false, reason: "forbidden" };
+  // A round robin pairs everyone with everyone, a fixed list is the creator's order: nothing to draw.
+  if (!mayManage(t, session) || t.seeding === "fixed" || t.format === "round-robin") return { ok: false, reason: "forbidden" };
   if (linkedMatches(deps, t).size > 0) return { ok: false, reason: "already-started" };
   deps.tournaments.setSeeds(
     id,

@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan, draw, gameCount, resolve, standings, tournamentWinner, withWalkovers, type FixtureResult, type Plan } from ".";
+import {
+  buildPlan,
+  draw,
+  gameCount,
+  randomIntFrom,
+  resolve,
+  standings,
+  tournamentWinner,
+  withWalkovers,
+  type FixtureResult,
+  type Plan,
+} from ".";
 
 const players = (n: number) => Array.from({ length: n }, (_, i) => `p${i + 1}`);
 const pairKey = (a: string, b: string) => [a, b].sort().join("-");
@@ -220,5 +231,39 @@ describe("draw", () => {
     const a = draw(players(6), rng());
     expect(a).toEqual(draw(players(6), rng()));
     expect([...a].sort()).toEqual(players(6));
+  });
+});
+
+describe("randomIntFrom (unbiased draw)", () => {
+  const bytes = (...values: number[]) => {
+    let i = 0;
+    return () => {
+      const v = values[i++];
+      return new Uint8Array([v >>> 24, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]);
+    };
+  };
+
+  it("draws again for values in the incomplete top block, so % n has no bias", () => {
+    // 2^32 % 3 = 1: 0xFFFFFFFF would favour 0, it is rejected and the next value counts.
+    expect(randomIntFrom(bytes(0xffffffff, 7))(3)).toBe(1);
+    expect(randomIntFrom(bytes(0xfffffffe))(3)).toBe(0xfffffffe % 3);
+  });
+
+  it("rejects a range that is not a positive integer", () => {
+    expect(() => randomIntFrom(bytes(0))(0)).toThrow(RangeError);
+    expect(() => randomIntFrom(bytes(0))(1.5)).toThrow(RangeError);
+  });
+
+  it("with crypto bytes every order of four players comes up about equally often", () => {
+    const randomInt = randomIntFrom((n) => crypto.getRandomValues(new Uint8Array(n)));
+    const counts = new Map<string, number>();
+    const rounds = 24_000;
+    for (let i = 0; i < rounds; i++) {
+      const key = draw(["a", "b", "c", "d"], randomInt).join("");
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    expect(counts.size).toBe(24);
+    // Expected 1000 each, standard deviation about 31: ±250 is eight of them.
+    for (const n of counts.values()) expect(Math.abs(n - rounds / 24)).toBeLessThan(250);
   });
 });

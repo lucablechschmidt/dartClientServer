@@ -1,6 +1,25 @@
 import type { PlayerId } from "../game/types";
 import type { Fixture, Plan, Source, TournamentFormat } from "./types";
 
+const RANGE = 2 ** 32;
+
+/**
+ * Uniform random integer in [0, n) from a source of random bytes (the server passes
+ * `crypto.getRandomValues`). Rejection sampling: 32-bit values in the incomplete top block are drawn
+ * again, so `% n` has no bias towards small numbers.
+ */
+export function randomIntFrom(random: (bytes: number) => Uint8Array): (n: number) => number {
+  return (n) => {
+    if (!Number.isInteger(n) || n < 1 || n > RANGE) throw new RangeError(`randomInt: bad range ${n}`);
+    const limit = RANGE - (RANGE % n);
+    for (;;) {
+      const b = random(4);
+      const v = ((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0;
+      if (v < limit) return v % n;
+    }
+  };
+}
+
 /** Fisher–Yates with an injected random source (`randomInt(n)` in [0, n)), so the draw is testable. */
 export function draw<T>(items: readonly T[], randomInt: (n: number) => number): T[] {
   const out = [...items];

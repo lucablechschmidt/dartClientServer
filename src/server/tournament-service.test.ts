@@ -82,6 +82,43 @@ describe("tournaments (M9)", () => {
     expect(loadTournamentView(deps, host, id)!.canRedraw).toBe(false);
   });
 
+  it("a redraw draws the knockout bracket anew (M14 bug fix)", () => {
+    const id = create({ format: "knockout", playerIds: ids.slice(0, 6) });
+    const bracket = () =>
+      loadTournamentView(deps, host, id)!
+        .fixtures.filter((f) => f.round === 1)
+        .map((f) => `${f.a}-${f.b}`)
+        .join();
+    const seen = new Set([bracket()]);
+    for (let i = 0; i < 10; i++) {
+      ok(redrawTournament(deps, host, id));
+      seen.add(bracket());
+    }
+    expect(seen.size).toBeGreaterThan(1);
+    expect([...loadTournamentView(deps, host, id)!.players.map((p) => p.id)].sort()).toEqual([...ids.slice(0, 6)].sort());
+  });
+
+  it("a redraw draws the groups anew; a round robin has nothing to draw", () => {
+    const id = create({ format: "groups-knockout", playerIds: ids.slice(0, 6), groups: 2, advance: 1 });
+    const groups = () =>
+      loadTournamentView(deps, host, id)!
+        .groups.map((g) =>
+          g.rows
+            .map((r) => r.player)
+            .sort()
+            .join("+"),
+        )
+        .sort()
+        .join(" | ");
+    const seen = new Set([groups()]);
+    for (let i = 0; i < 10; i++) {
+      ok(redrawTournament(deps, host, id));
+      seen.add(groups());
+    }
+    expect(seen.size).toBeGreaterThan(1);
+    expect(redrawTournament(deps, host, create({}))).toEqual({ ok: false, reason: "forbidden" });
+  });
+
   it("starting twice opens the same match; a cancelled match frees the fixture again", () => {
     const id = create({});
     const f = loadTournamentView(deps, host, id)!.fixtures[0];

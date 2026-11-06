@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { TOURNAMENT_FORMATS, type TournamentFormat } from "@/domain/tournament";
 import { formText, formTexts } from "./form";
@@ -43,7 +44,10 @@ export async function startFixtureAction(tournamentId: string, fixtureId: string
 
 export async function redrawTournamentAction(tournamentId: string): Promise<{ ok: true } | { ok: false; reason: TournamentError }> {
   const { deps, session } = await requireSession();
-  return redrawTournament(deps, session, tournamentId);
+  const r = redrawTournament(deps, session, tournamentId);
+  // Without this the new draw is stored but the page keeps showing the old bracket or groups.
+  if (r.ok) revalidatePath(`/tournaments/${tournamentId}`);
+  return r;
 }
 
 export async function deleteTournamentAction(tournamentId: string): Promise<{ ok: false; reason: TournamentError }> {

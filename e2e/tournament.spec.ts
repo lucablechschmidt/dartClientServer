@@ -66,3 +66,33 @@ test("M8: a fixed seed list starts in the order the players were tapped, without
   await expect(semis.nth(1)).toContainText(ADMIN);
   await expect(admin.getByRole("button", { name: t.redraw })).toHaveCount(0);
 });
+
+for (const format of ["knockout", "groups-knockout"] as const) {
+  test(`M14 bug fix: „Neu auslosen“ shows a new draw right away (${format})`, async ({ admin, register, stamp }) => {
+    const [A, B, C, name] = [`A${stamp}`, `B${stamp}`, `C${stamp}`, `Draw ${stamp}`];
+    for (const p of [A, B, C]) await register(p);
+    await admin.goto("/tournaments/new");
+    await admin.getByLabel(t.name).fill(name);
+    await admin.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }).click();
+    await admin.getByRole("button", { name: t.formats[format], exact: true }).click();
+    for (const n of [ADMIN, A, B, C]) await admin.getByRole("button", { name: select(n) }).click();
+    await admin.getByRole("button", { name: t.start }).click();
+    await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));
+    const redraw = admin.getByRole("button", { name: t.redraw });
+    await expect(redraw).toBeVisible();
+    // Next keeps the left setup page hidden in the DOM: only the visible page counts.
+    const page = admin.locator("main:visible");
+    const before = await page.innerText();
+    // A fair draw may repeat the old bracket or groups; twenty repeats in a row mean the button does nothing.
+    let changed = false;
+    for (let i = 0; i < 20 && !changed; i++) {
+      await redraw.click();
+      changed = await expect
+        .poll(() => page.innerText(), { timeout: 1500 })
+        .not.toBe(before)
+        .then(() => true)
+        .catch(() => false);
+    }
+    expect(changed).toBe(true);
+  });
+}
