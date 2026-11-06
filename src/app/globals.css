@@ -131,6 +131,22 @@
   /* iOS-like curve: quick start, soft end; no springs */
   --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
 
+  /* Appear animations (theme.md §5); used only behind motion-safe: */
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-ios);
+  --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-ios);
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  /* Like an iOS action sheet: up from below the edge */
+  @keyframes sheet-in {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
   --shadow-floating: 0 10px 30px rgb(0 0 0 / 0.18); /* anything floating: choice list, confirm sheet, tab bar */
 
   /* Type sizes of the setup screens beyond the base scale */

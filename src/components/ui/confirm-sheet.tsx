@@ -15,7 +15,8 @@ type Props = {
 
 /**
  * Confirmation prompt as an in-app overlay (no browser `confirm`): text and two buttons, the
- * confirming one red. Escape and a tap on the backdrop cancel. Reusable.
+ * confirming one red. Escape and a tap on the backdrop cancel. Reusable. Appearing, the backdrop fades
+ * in and the sheet slides up like an iOS action sheet; closing is instant.
  */
 export function ConfirmSheet({ open, text, confirmLabel, cancelLabel, onConfirm, onCancel, children }: Props) {
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -28,12 +29,15 @@ export function ConfirmSheet({ open, text, confirmLabel, cancelLabel, onConfirm,
   }, [open, onCancel]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-20 flex items-end justify-center bg-scrim p-4 sm:items-center" onClick={onCancel}>
+    <div
+      className="fixed inset-0 z-20 flex items-end justify-center bg-scrim p-4 motion-safe:animate-fade-in sm:items-center"
+      onClick={onCancel}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={text}
-        className="w-full max-w-sm rounded-panel bg-card-bg p-5 text-fg shadow-floating"
+        className="w-full max-w-sm rounded-panel bg-card-bg p-5 text-fg shadow-floating motion-safe:animate-sheet-in"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="pb-4 text-center text-base">{text}</p>
