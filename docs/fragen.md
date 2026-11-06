@@ -6,6 +6,8 @@
 
 ## 1. Responsives Layout auf dem Desktop (6.11.2026)
 
+> **Zurückgestellt** am 6.11.2026 (Luca). Die Fragen bleiben stehen, bis wir es wieder aufnehmen.
+
 Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, hell, aus `e2e/desktop.spec.ts`).
 
 ### Befund
@@ -46,3 +48,42 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, hell
 3. **Breiten:** Passen schmal `max-w-xl` (576 px) und breit `max-w-5xl` (1024 px)? Default: ja.
 4. **Seitenleiste:** Bleibt es beim Verzicht auf eine Seitenleiste für den Desktop? Default: ja, die Tab-Leiste bleibt unten.
 5. **Wohin damit:** Gehört die Umsetzung als Punkt in `docs/m11-plan.md` (Komfort) oder als eigener kleiner Plan? Default: Abschnitt in M11.
+
+---
+
+## 2. Dezente Animationen wie unter iOS (6.11.2026)
+
+### Befund
+
+- Animiert ist bisher fast nichts: nur das Keypad hat `active:scale-95`.
+- Legacy hat keine eigenen Animationen. `withAnimation` steht nur im Xcode-Template `ContentView.swift`; was die App unter iOS bewegt, macht SwiftUI von selbst (Sheets, Navigation, Disclosure, Segmented Control).
+- Animationen wären also eine Ergänzung und keine Abweichung von einer Legacy-Regel. Deshalb frage ich vorher.
+
+### Grundsätze
+
+- **Kurz und ruhig:** 150–350 ms mit der iOS-Kurve (schnell an, weich aus), keine Federn, kein Wackeln.
+- **Tokens statt Einzelwerte:** `--duration-fast`, `--duration-base`, `--duration-slow` und `--ease-ios` in `globals.css`, dazu ein Abschnitt „Bewegung“ in `theme.md`.
+- **Reduzierte Bewegung:** Alles läuft nur mit `motion-safe:`. Wer „Bewegung reduzieren“ eingeschaltet hat, sieht keine Animation.
+- **Billig fürs Handy:** nur `transform` und `opacity`, keine Bibliothek. Erscheinen per CSS `@starting-style`, Aufklappen über den `grid-rows-[0fr→1fr]`-Trick, der in allen Browsern läuft.
+- **Zählen bleibt sofort:** Keine Animation verzögert eine Eingabe, einen Wechsel des Spielers oder den Sieg-Screen. Im Zählscreen gibt es nur Rückmeldung, nie Wartezeit.
+
+### Kandidaten
+
+| # | Wo | Was | Aufwand |
+|---|----|-----|---------|
+| 1 | `ConfirmSheet` (Abbrechen, Aufgeben, Löschen) | Abdunklung blendet ein, das Sheet gleitet von unten herein wie ein iOS-Action-Sheet | klein |
+| 2 | `FoldCard`, `ChoiceMenu` (Konto, Rangliste, Admin, Setup) | Chevron dreht sich, der Inhalt klappt in der Höhe auf statt zu springen | klein |
+| 3 | `PillLinks`, Optionspillen (Zeitraum, Best of, Eingabe) | Die weiße Markierung gleitet zur gewählten Option wie beim iOS-Segmented-Control | mittel |
+| 4 | Tab-Leiste | Die Markierung des aktiven Tabs blendet weich über; kein Gleiten, weil die Seite neu lädt | klein |
+| 5 | Tippbare Zeilen und Buttons (`CardLinkRow`, Spielerliste, Spielmenü) | Kurzes Abdunkeln beim Antippen wie bei iOS-Listenzeilen; dasselbe Muster wie beim Keypad, aber als Hintergrund statt Skalierung | klein |
+| 6 | Zählscreen: Dart-Felder | Ein neu eingetragener Dart „setzt sich“ (kurz von 0,9 auf 1 skaliert); der Rahmen des aktiven Spielers wechselt weich | klein |
+| 7 | Sieg- und Leg-Sieg-Screen | Inhalt blendet mit leichtem Hochschieben ein; das Erfolgs-Banner gleitet von oben herein | klein |
+| 8 | Statistik | Fortschrittsbalken („x von 21“) und die Linie im Average-Diagramm zeichnen sich beim ersten Anzeigen | mittel |
+| 9 | Seitenwechsel (Konto → Unterseite, Zurück) | Unterseite schiebt von rechts herein, Zurück nach rechts hinaus, wie die iOS-Navigation; über die View Transitions API (Next 16 experimentell, React `<ViewTransition>`) | groß, experimentell |
+
+### Fragen
+
+1. **Umfang:** Welche Kandidaten sollen umgesetzt werden? Default: 1, 2, 5, 6 und 7 (klein, sichtbar, typisch iOS); 3 und 8 danach; 9 erst, wenn die View Transitions in Next stabil sind.
+2. **Zählscreen:** Sind die Animationen aus 6 im Zählscreen gewünscht, oder soll er ganz ruhig bleiben? Default: ja, aber nur 6, und nur ohne Verzögerung.
+3. **Reduzierte Bewegung:** Reicht die Systemeinstellung, oder soll es zusätzlich einen Schalter in der App geben (wie den Theme-Schalter)? Default: nur die Systemeinstellung.
+4. **Wohin damit:** Gehört das als Abschnitt „Animationen“ in `docs/m11-plan.md` (Komfort) oder als Prompt-A-Kleinkram jetzt sofort? Default: Abschnitt in M11, ein Commit pro Kandidat.
