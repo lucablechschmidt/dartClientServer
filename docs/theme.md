@@ -16,16 +16,16 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--bg` | systemBackground | Seitenhintergrund | `#FFFFFF` | `#000000` |
 | `--fg` | `TextColor` (labelColor) | Fließtext, Zahlen, Namen | `#000000` | `#FFFFFF` |
 | `--fg-muted` | secondaryLabel | Nebeninfos (Darts, Average) | `rgb(60 60 67 / .6)` | `rgb(235 235 245 / .6)` |
-| `--frame-bg` | `FrameBackground` | Füllung der Spieler-Panels | `rgb(0 0 0 / .10)` | `rgb(255 255 255 / .90)` |
-| `--frame-fg` | `FrameForeground` | Rahmen inaktiver Panels | `#C8C8C8` | `rgb(200 200 200 / .01)` |
+| `--frame-bg` | `FrameBackground` | Füllung der Spieler-Panels | `rgb(0 0 0 / .10)` | `#1C1C1E` (bis 6.11.2026 Legacy `rgb(255 255 255 / .90)`) |
+| `--frame-fg` | `FrameForeground` | Rahmen inaktiver Panels | `#C8C8C8` | `#3A3A3C` (Legacy: `rgb(200 200 200 / .01)`, unsichtbar) |
 | `--frame-active` | systemBlue (fest `Color.blue`) | Rahmen des Spielers am Zug | `#007AFF` | `#0A84FF` |
-| `--key-bg` | `ScoreButtonsBackgroundColor` | Zahlentasten und Bull | `#000000` | `rgb(255 255 255 / .50)` |
+| `--key-bg` | `ScoreButtonsBackgroundColor` | Zahlentasten und Bull | `#000000` | `#2C2C2E` (Legacy: `rgb(255 255 255 / .50)`) |
 | `--key-fg` | `ScoreButtonsForegroundColor` | Beschriftung aller Tasten | `#FFFFFF` | `#FFFFFF` |
-| `--key-zero` | `zero` | Taste 0 | `rgb(0 0 0 / .50)` | `rgb(255 255 255 / .25)` |
+| `--key-zero` | `zero` | Taste 0 | `rgb(0 0 0 / .50)` | `#48484A` (Legacy: `rgb(255 255 255 / .25)`) |
 | `--key-double` | `double` (systemYellow) | Taste Double, Zahlentasten-Text im Double-Modus | `#FFCC00` | `#FFD60A` |
 | `--key-triple` | `triple` (systemGreen) | Taste Triple, Zahlentasten-Text im Triple-Modus | `#34C759` | `#30D158` |
 | `--key-undo` | `undo` (systemRed) | Taste Undo | `#FF3B30` | `#FF453A` |
-| `--slot-bg` | `FrameBackground` (DartScoreView, über dem Panel) | Füllung der drei Dart-Kästen | `rgb(0 0 0 / .10)` | `rgb(0 0 0 / .10)` |
+| `--slot-bg` | `FrameBackground` (DartScoreView, über dem Panel) | Füllung der drei Dart-Kästen | `rgb(0 0 0 / .10)` | `rgb(255 255 255 / .10)` |
 | `--hint-bg` | `Color.gray.opacity(0.5)` | Checkout-Hinweis-Leiste | `rgb(142 142 147 / .5)` | `rgb(142 142 147 / .5)` |
 | `--cricket-closed` | `CricketFieldClosed` (M7) | Cricket-Feld, das alle geschlossen haben (Zeile und Felder, Symbol in `--on-accent`) | `#8E8E93` | `rgb(200 200 200 / .5)` |
 | `--cricket-scoring` | – (Figma-Cricket) | Feld, das der Spieler geschlossen hat, aber nicht alle; Symbol in `--key-triple` | `--key-triple` 20 % | `--key-triple` 20 % |
@@ -48,7 +48,7 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 - Modifier aktiv (Double oder Triple): Zahlentasten `--key-bg` mit Opacity .75, Text in `--key-double` bzw. `--key-triple`; Bull im Triple-Modus bleibt weiß, im Legacy ist er ausgeblendet.
 - Dart-Plätze im Panel: Kästen (Radius 14 px) mit Rahmen 3 px in `--frame-text`, der aktuelle Platz 4 px in `--frame-active`, Text der gebusteten Aufnahme in `--key-undo`. Tasten, Panels und Checkout-Hinweis haben wie Legacy `cornerRadius(18)`.
 
-Dark-Mode-Hinweis: `--frame-bg` ist im Dark Mode zu 90 % weiß, die Panels sind dort also hell auf schwarzem Grund mit schwarzem Text. Das ist so im Legacy und wird übernommen; `--fg` innerhalb eines Panels muss im Dark Mode deshalb auf `#000000` gesetzt werden (`--frame-fg-text`). Falls dich das am Board stört, ist es ein Token-Wechsel, kein Umbau.
+Dark-Mode-Hinweis (geändert am 6.11.2026, Luca): Im Legacy war `--frame-bg` im Dark Mode zu 90 % weiß, die Panels also hell auf schwarzem Grund mit schwarzem Text, die Tasten mittelgrau; das war am Board zu hell. Jetzt nimmt der Zählscreen im Dark Mode die iOS-Dunkelgrautöne wie die Karten: Panels `#1C1C1E` mit weißem Text (`--frame-text`), Dart-Kästen Weiß 10 %, Rahmen inaktiver Panels `#3A3A3C`, Zifferntasten `#2C2C2E`, Taste 0 `#48484A`. Der Hellmodus und die farbigen Tasten bleiben wie Legacy. Prüfen über `docs/screenshots/*-dark.png` (`e2e/dark.spec.ts`).
 
 ## 2. Umschalten
 

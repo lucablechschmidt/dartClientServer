@@ -12,15 +12,16 @@
   --fg: light-dark(#000000, #ffffff);
   --fg-muted: light-dark(rgb(60 60 67 / 0.6), rgb(235 235 245 / 0.6));
 
-  --frame-bg: light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.9));
-  --frame-fg: light-dark(#c8c8c8, rgb(200 200 200 / 0.01));
-  --frame-text: light-dark(#000000, #000000);
+  /* Dark values (6.11.2026): iOS dark greys like the cards instead of the legacy near-white panels. */
+  --frame-bg: light-dark(rgb(0 0 0 / 0.1), #1c1c1e);
+  --frame-fg: light-dark(#c8c8c8, #3a3a3c);
+  --frame-text: light-dark(#000000, #ffffff);
   --frame-active: light-dark(#007aff, #0a84ff);
-  --slot-bg: rgb(0 0 0 / 0.1); /* FrameBackground once more on top of the panel (DartScoreView) */
+  --slot-bg: light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.1)); /* FrameBackground once more on top of the panel (DartScoreView) */
 
-  --key-bg: light-dark(#000000, rgb(255 255 255 / 0.5));
+  --key-bg: light-dark(#000000, #2c2c2e);
   --key-fg: #ffffff;
-  --key-zero: light-dark(rgb(0 0 0 / 0.5), rgb(255 255 255 / 0.25));
+  --key-zero: light-dark(rgb(0 0 0 / 0.5), #48484a);
   --key-double: light-dark(#ffcc00, #ffd60a);
   --key-triple: light-dark(#34c759, #30d158);
   --key-undo: light-dark(#ff3b30, #ff453a);
