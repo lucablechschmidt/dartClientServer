@@ -1,11 +1,16 @@
 import type { RoundFormat, StoredTournament } from "@/db/tournament-repository";
 import type { MatchFormat } from "@/domain/game";
-import { buildPlan, type Fixture, type Plan } from "@/domain/tournament";
+import { buildPlan, type DrawInput, type Fixture, type Plan } from "@/domain/tournament";
 import type { Deps } from "./deps";
+
+/** Format, groups and qualifiers of a stored tournament: everything the schedule needs besides the seed list. */
+export function drawInputOf(t: StoredTournament): DrawInput {
+  return { format: t.format, groups: t.groupCount, advance: t.advancePerGroup };
+}
 
 /** The schedule of a stored tournament, rebuilt by the domain from format and seed list. */
 export function planOf(t: StoredTournament): Plan {
-  return buildPlan({ format: t.format, seeds: t.seeds.map((p) => p.id), groups: t.groupCount, advance: t.advancePerGroup });
+  return buildPlan({ ...drawInputOf(t), seeds: t.seeds.map((p) => p.id) });
 }
 
 /** Best of legs/sets of a fixture: the group phase has one, every knockout round its own (m9-plan §9.4). */

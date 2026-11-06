@@ -119,6 +119,15 @@ describe("tournaments (M9)", () => {
     expect(redrawTournament(deps, host, create({}))).toEqual({ ok: false, reason: "forbidden" });
   });
 
+  it("no redraw button when only one draw is possible (a knockout of two, a single group)", () => {
+    const two = create({ format: "knockout", playerIds: ids.slice(0, 2) });
+    expect(loadTournamentView(deps, host, two)!.canRedraw).toBe(false);
+    expect(redrawTournament(deps, host, two)).toEqual({ ok: false, reason: "forbidden" });
+    const oneGroup = create({ format: "groups-knockout", playerIds: ids.slice(0, 4), groups: 1, advance: 2 });
+    expect(loadTournamentView(deps, host, oneGroup)!.canRedraw).toBe(false);
+    expect(loadTournamentView(deps, host, create({ format: "knockout", playerIds: ids.slice(0, 3) }))!.canRedraw).toBe(true);
+  });
+
   it("starting twice opens the same match; a cancelled match frees the fixture again", () => {
     const id = create({});
     const f = loadTournamentView(deps, host, id)!.fixtures[0];

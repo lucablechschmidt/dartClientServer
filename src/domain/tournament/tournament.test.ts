@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildPlan,
   draw,
+  drawKey,
+  drawVariants,
   gameCount,
   randomIntFrom,
+  redraw,
   resolve,
   standings,
   tournamentWinner,
@@ -265,5 +268,55 @@ describe("randomIntFrom (unbiased draw)", () => {
     expect(counts.size).toBe(24);
     // Expected 1000 each, standard deviation about 31: ±250 is eight of them.
     for (const n of counts.values()) expect(Math.abs(n - rounds / 24)).toBeLessThan(250);
+  });
+});
+
+describe("redraw (M14): always a different draw", () => {
+  const rng = () => {
+    let s = 7;
+    return (n: number) => (s = (s * 48271) % 2147483647) % n;
+  };
+  const ko = { format: "knockout" } as const;
+
+  it("the key ignores order: the same pairings listed differently are the same draw", () => {
+    expect(drawKey(ko, ["a", "b", "c", "d"])).toBe(drawKey(ko, ["d", "c", "b", "a"]));
+    expect(drawKey(ko, ["a", "b", "c", "d"])).not.toBe(drawKey(ko, ["a", "b", "d", "c"])); // a v c, b v d
+  });
+
+  it("only one possible draw: none (round robin, one group, a knockout of two)", () => {
+    expect(redraw({ format: "round-robin" }, players(5), rng())).toBeNull();
+    expect(redraw({ format: "groups-knockout", groups: 1, advance: 2 }, players(6), rng())).toBeNull();
+    expect(redraw(ko, players(2), rng())).toBeNull();
+    expect(drawVariants(ko, players(2))).toHaveLength(1);
+  });
+
+  it("two or three variants: the next one in turn, all of them before the first comes back", () => {
+    for (const [input, n] of [
+      [ko, 4],
+      [ko, 3],
+      [{ format: "groups-knockout", groups: 2, advance: 1 }, 4],
+    ] as const) {
+      expect(drawVariants(input, players(n))).toHaveLength(3);
+      let seeds = players(n);
+      const keys = [drawKey(input, seeds)];
+      for (let i = 0; i < 3; i++) {
+        seeds = redraw(input, seeds, rng()) ?? [];
+        keys.push(drawKey(input, seeds));
+      }
+      expect(new Set(keys.slice(0, 3)).size).toBe(3);
+      expect(keys[3]).toBe(keys[0]);
+    }
+  });
+
+  it("more variants: random, but never the current draw", () => {
+    const randomInt = rng();
+    expect(drawVariants(ko, players(5))).toBeNull();
+    let seeds = players(5);
+    for (let i = 0; i < 50; i++) {
+      const next = redraw(ko, seeds, randomInt) ?? [];
+      expect(drawKey(ko, next)).not.toBe(drawKey(ko, seeds));
+      expect([...next].sort()).toEqual(players(5));
+      seeds = next;
+    }
   });
 });

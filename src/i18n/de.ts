@@ -216,6 +216,7 @@ export const de = {
     bye: "Freilos",
     seedHint: "Die Setzliste wird ausgelost.",
     redraw: "Neu auslosen",
+    drawing: "Wird ausgelost …",
     delete: "Turnier löschen",
     deleteQuestion: "Turnier löschen? Die gespielten Matches bleiben erhalten.",
     deleteConfirm: "Löschen",

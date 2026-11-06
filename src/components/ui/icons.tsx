@@ -209,3 +209,12 @@ export function ChevronRightIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** Activity spinner: an open ring; turns with `motion-safe:animate-spin`, without motion it is a still ring. */
+export function SpinnerIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 2.5a9.5 9.5 0 1 1-9.5 9.5" />
+    </svg>
+  );
+}

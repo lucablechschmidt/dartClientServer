@@ -99,4 +99,17 @@ describe("TournamentScreen (M9)", () => {
     expect(rows[1]).toHaveTextContent("1Kim224:155.3");
     expect(rows[2]).toHaveTextContent("2Casey201:440.0");
   });
+
+  it("„Neu auslosen“ shows a spinner and fades the draw while it runs, then the button again", async () => {
+    let finish: (r: { ok: true }) => void = () => undefined;
+    const onRedraw = vi.fn(() => new Promise<{ ok: true }>((done) => (finish = done)));
+    render(<TournamentScreen view={{ ...view, canRedraw: true }} onStart={vi.fn()} {...props} onRedraw={onRedraw} />);
+    await userEvent.click(screen.getByRole("button", { name: t.redraw }));
+    const busy = screen.getByRole("button", { name: t.drawing });
+    expect(busy).toBeDisabled();
+    expect(busy.querySelector("svg")).not.toBeNull();
+    finish({ ok: true });
+    expect(await screen.findByRole("button", { name: t.redraw }, { timeout: 2000 })).toBeEnabled();
+    expect(onRedraw).toHaveBeenCalledTimes(1);
+  });
 });

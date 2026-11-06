@@ -5,7 +5,9 @@ import type { Session } from "@/domain/player";
 import { matchResult, type InputMode, type MatchFormat, type PlayerId, type Rules } from "@/domain/game";
 import {
   draw,
+  drawVariants,
   randomIntFrom,
+  redraw,
   resolve,
   standings,
   TOURNAMENT_FORMATS,
@@ -19,7 +21,7 @@ import {
 import type { Deps } from "./deps";
 import { shownName } from "./player-names";
 import { createMatch, MAX_TO_WIN, rulesSchema } from "./match-service";
-import { formatOf, planOf } from "./tournament-plan";
+import { drawInputOf, formatOf, planOf } from "./tournament-plan";
 
 const formatSchema = z.object({
   legsToWinSet: z.number().int().min(1).max(MAX_TO_WIN),
@@ -165,8 +167,8 @@ export function loadTournamentView(deps: Deps, session: Session, id: string): To
     fixtures,
     groups: groupNumbers.map((group) => ({ group, rows: standings(plan, results, group) })),
     winner: tournamentWinner(plan, results),
-    // A round robin pairs everyone with everyone: a new draw changes nothing.
-    canRedraw: t.format !== "round-robin" && t.seeding === "random" && mayManage(t, session) && matches.size === 0,
+    // Only when another draw is possible: not for a round robin, a single group or a knockout of two.
+    canRedraw: t.seeding === "random" && mayManage(t, session) && matches.size === 0 && hasOtherDraw(t),
     canDelete: mayManage(t, session),
   };
 }
@@ -196,23 +198,31 @@ export function listTournaments(deps: Deps): TournamentSummary[] {
   });
 }
 
+/** More than one possible draw (the button "Neu auslosen" is shown only then). */
+const hasOtherDraw = (t: StoredTournament) =>
+  (drawVariants(
+    drawInputOf(t),
+    t.seeds.map((p) => p.id),
+  )?.length ?? Infinity) > 1;
+
 /**
  * A new draw of the seed list, by the creator or an admin, only before the first game started: the
- * knockout gets a new bracket, groups + knockout new groups (both follow from the seed order).
+ * knockout gets a new bracket, groups + knockout new groups (both follow from the seed order). The new
+ * draw always differs: with two or three variants the next one, otherwise random (domain `redraw`).
  */
 export function redrawTournament(deps: Deps, session: Session, id: string): { ok: true } | { ok: false; reason: TournamentError } {
   const t = deps.tournaments.loadTournament(id);
   if (!t) return { ok: false, reason: "not-found" };
-  // A round robin pairs everyone with everyone, a fixed list is the creator's order: nothing to draw.
-  if (!mayManage(t, session) || t.seeding === "fixed" || t.format === "round-robin") return { ok: false, reason: "forbidden" };
+  // A fixed list is the creator's order; with only one possible draw there is nothing to draw.
+  if (!mayManage(t, session) || t.seeding === "fixed") return { ok: false, reason: "forbidden" };
   if (linkedMatches(deps, t).size > 0) return { ok: false, reason: "already-started" };
-  deps.tournaments.setSeeds(
-    id,
-    draw(
-      t.seeds.map((p) => p.id),
-      randomInt(deps),
-    ),
+  const next = redraw(
+    drawInputOf(t),
+    t.seeds.map((p) => p.id),
+    randomInt(deps),
   );
+  if (!next) return { ok: false, reason: "forbidden" };
+  deps.tournaments.setSeeds(id, next);
   return { ok: true };
 }
 
