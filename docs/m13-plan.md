@@ -1,0 +1,231 @@
+# M13-Plan – Code-Review und Konsolidierung
+
+> Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
+> Stand: erste Fassung, 6.11.2026, noch nicht umgesetzt. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
+> Luca: §0 und §6.
+
+---
+
+## 0. Was Luca tut
+
+1. §6 beantworten (Defaults gelten ohne Antwort), vor allem Frage 1 (Reihenfolge zu M11/M12) und Frage 3 (Typ-Imports über die Schichtgrenze).
+2. M13 in `docs/project.md` eintragen (Zeile in der Übersicht plus Checkliste aus §3); das durfte das Review nicht selbst tun.
+3. Nach Paket B (Performance) mit der echten Datenbank vom Pi messen, ob die Statistik-Seiten schnell genug sind (`m8-plan.md` §7).
+
+---
+
+## 1. Zusammenfassung
+
+**Gesamteindruck.** Der Code hält die in `architecture.md` §9 vereinbarte Architektur sehr konsequent ein. Die Schichtung (`domain ← db ← server ← components ← app`) ist per ESLint erzwungen und im Code nirgends unterlaufen; Komponenten greifen nie auf DB oder Server zu, Seiten reichen Server Actions als Props durch. Die Domäne ist reine Logik mit `Result`-Werten und sehr gut getestet (66 Vitest-Dateien, 15 Playwright-Specs, Coverage-Schwellen in der CI). Server-only-Code ist sauber vom Client-Bundle getrennt: `"use client"` steht nur an 30 Dateien, die es brauchen (Hooks, Formulare, Overlays); kein `process.env` in Komponenten, kein `NEXT_PUBLIC_*`, kein `any`, kein leerer `catch` ohne Kommentar. Das Theme ist tokenbasiert und per Lint abgesichert. Die Sicherheitsgrundlagen (Session-Hash, bcrypt mit Dummy-Hash, Einmal-Token in Transaktion, CSP, `requireSession` in jeder Seite und Action) sind da und passen zu §10.
+
+**Größte Risiken** (Details in §2):
+
+1. **Performance der Statistik auf dem Pi (R-01).** `listFinishedMatches` lädt jedes beendete Match einzeln (5–6 Queries pro Match plus Replay der Domäne) und wird von vier Services aufgerufen, darunter vom Sieg-Screen nach jedem Spiel. Mit ein paar hundert Spielen wird das auf dem Pi 3 B+ spürbar. Noch nicht gemessen (`m8-plan.md` §7 ist offen).
+2. **Validierungsfehler werden zu Ausnahmen (R-02).** `zod.parse` in den Services wirft bei ungültiger Nutzereingabe; die Actions casten Formularwerte mit `as`. Das verletzt die eigene Regel „Server Actions antworten mit `Result`-Werten, Ausnahmen sind Bugs“ und landet beim Nutzer als generische Fehlerseite statt als Text am Formular.
+3. **Unerwartete Serverfehler laufen am JSON-Log vorbei (R-03).** Es gibt kein `onRequestError` in `instrumentation.ts`; Ausnahmen in Seiten und Actions erscheinen nur als Next-Digest auf stderr und als `console.error` im Browser.
+4. **Kein sichtbarer Ladezustand (R-04).** Alle 14 Seiten rendern `Suspense fallback={null}`; es gibt kein `loading.tsx`. Auf dem Pi ist die Lücke kurz, am Handy im Mobilfunk nicht.
+5. **Lebenszyklus des Sync-Hooks beim Verlassen des Zählscreens (R-05).** Die Retry-Schleife von `useVisitSync` läuft nach dem Unmount weiter (Timer, `setState` auf einem nicht mehr gemounteten Hook).
+
+**Stärken, die so bleiben sollen:** `Deps`-Injektion mit `memoryDeps()`/`sqliteDeps()`; reine `permissions.ts`, im Service erzwungen; `GameMode`-Registry; Idempotenz von Commit und Undo (`undoStep`); Warteschlange im localStorage mit Tests für Netzausfall; `Result`-Typen an der Grenze Domäne → Service; Tests holen Texte aus `de`; Scripts (`ci.sh`, `smoke.sh`) statt Pipeline-Logik.
+
+---
+
+## 2. Befundliste
+
+Priorität: **hoch** = Fehlverhalten oder Risiko für Nutzer/Pi, **mittel** = verletzt eine vereinbarte Regel oder macht Wartung teurer, **niedrig** = Schönheit, Konsistenz. Aufwand: S < 2 h, M = halber Tag, L = ein Tag oder mehr. „Paket“ verweist auf §3.
+
+### 2.1 Architektur und Schichten
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-02 | Validierung / Fehlerfluss | `src/server/match-actions.ts:34–35` (Cast `as "single" \| "double" \| "triple"`), `src/server/match-service.ts:227` (`newMatchSchema.parse`), `src/server/tournament-service.ts:63`, `src/server/player-service.ts:28, 39, 54` (`playerNameSchema.parse`) | Formularwerte werden in den Actions ohne Prüfung gecastet; die Schemas sitzen in den Services und werfen (`parse`) statt `safeParse` → `Result`. Ein leerer oder 41 Zeichen langer Name, ein manipuliertes `startScore` oder ein Doppel-Submit ohne Spieler enden als `ZodError` in `error.tsx`. | `architecture.md` §9: „Server Actions antworten mit `Result`-Werten, Ausnahmen sind Bugs.“ §3: „Zod: Eingaben aus Server Actions prüfen“; `m12-plan.md` §5a: „jede Action validiert mit Zod“. Heute hält nur die HTML-Validierung (`required`, `maxLength`) das ab. | Ein Schema je Action-Eingabe (FormData → `safeParse`) am Rand der Action; Services nehmen bereits typisierte Werte oder liefern `{ ok: false, reason: "invalid-input" }`. Setup-Screens zeigen den Fehler am Formular (wie `AddRow`); Muster in `architecture.md` §12.3. | hoch | M | A |
+| R-06 | Berechtigung | `src/server/match-actions.ts:76` (`restartMatchAction`), `src/server/match-service.ts:444` (`restartMatch` ohne `Session`) | „Restart“ prüft keine Berechtigung: jede Session kann zu jedem Match ein neues mit denselben Spielern anlegen; `hostPlayerId` bleibt der alte Host. | Alle anderen Match-Mutationen laufen über `permissions.ts`; nur diese nicht. Im Heimnetz ohne Folgen, aber eine Lücke in der Regel „Objektrechte nur im Service“ (`m12-plan.md` §5a). | `restartMatch(deps, session, matchId)` mit `canCancel`-ähnlicher Regel (Host oder Admin, oder Teilnehmer), Host = Session. Test im `match-service.test.ts`. | mittel | S | A |
+| R-07 | DRY | `src/server/player-actions.ts:9` und `src/server/admin-actions.ts:27` (`touched`), `src/server/match-actions.ts:24` und `src/server/tournament-actions.ts:10` (`toWin`), `src/server/tournament-service.ts:23` und `src/server/match-service.ts:60` (`formatSchema`, einmal mit, einmal ohne Defaults), `src/app/(site)/account/stats/page.tsx:10` und `src/components/screens/stats/my-stats.tsx:24` (`RANGES`) | Vier Hilfsfunktionen bzw. Konstanten sind kopiert statt geteilt. | Kleine Kopien driften; `formatSchema` tut es schon (Defaults). | `src/server/form.ts` bekommt `bestOfToWin`; `revalidateAfterPlayers()` in ein Modul `src/server/revalidate.ts`; `formatSchema` aus `match-service` importieren; `STATS_RANGES` nach `src/domain/stats/aggregate.ts` neben `StatsRange`. | niedrig | S | D |
+| R-08 | Typen über die Schichtgrenze | `src/components/darts/use-visit-sync.ts:32` (`MatchViewLike`), `src/components/screens/tournament/tournament-screen.tsx:17` (`TournamentScreenView`), `stats/my-stats.tsx:14` (`MyStatsView`), `stats/match-detail.tsx:9`, `stats/rankings.tsx:6`, `stats/achievements.tsx:12`, `account/games-admin-section.tsx:16` (`AdminMatchRow`), `screens/invite-screen.tsx:11` (`InviteInfo`), `admin-screen.tsx:11` (`CleanupResult`, erneut in `games-admin-section.tsx:26`) | Neun „strukturelle Kopien“ von Server-View-Typen in Komponenten, weil die Lint-Regel jeden Import aus `@/server` verbietet, auch `import type`. | Die Kopien sind bewusst (Kommentar „structural, no server import“), aber sie sind Duplikate ohne Compiler-Bindung: ändert sich `MatchView`, merkt es nur die Stelle, die beides zusammenbringt (die Seite). | Entscheidung (§6 Frage 3): entweder `import type` aus `@/server` in `src/components` erlauben (`no-restricted-imports` mit `allowTypeImports`; Typen verschwinden beim Bundling, das Client-Bundle bleibt sauber) **oder** die View-Typen in ein eigenes Modul `src/server/views.ts` ohne Laufzeit-Imports legen und nur dieses freigeben. Default: `allowTypeImports` für `@/server/*`, dokumentiert in `architecture.md` §12.1. | mittel | S | D |
+| R-09 | Konsistenz | `src/app/(site)/admin/page.tsx:20–22` | Die Admin-Seite nutzt `requireSession` plus eigene Prüfung und leitet nach `/account`; `requireAdmin` (leitet nach `/`) existiert und wird von allen Admin-Actions verwendet. | Zwei Wege für dieselbe Regel. | Seite auf `requireAdmin` umstellen; wenn `/account` als Ziel gewünscht ist, `requireAdmin` dorthin umleiten. | niedrig | S | D |
+| R-10 | Toter Code | `src/server/player-actions.ts:15` (`createPlayerAction`) | Wird von keiner Seite benutzt (Spieler entstehen seit M3 nur per Einladung oder als Gast). | Toter Code wirkt wie eine Funktion, die es gibt. | Entfernen; `createPlayer` im Service bleibt für Tests und Bootstrap. | niedrig | S | D |
+| R-11 | Abhängigkeitsinversion | `src/server/auth-actions.ts:18, 24`, `src/server/invite-actions.ts:16, 24` (`Date.now()`), beide mit `productionDeps()` direkt | Login und Einlösen holen die Zeit nicht über `deps.now()`. | §9: „Zeit und IDs kommen über `clock()`/`newId()`“ (so heißt es dort; im Code heißt die Funktion `now()`). Für das Rate-Limit ist die Uhr aktuell nicht testbar. | `loginLimiter().retryAfter(ip, deps.now())`; `deps` einmal am Anfang der Action holen. | niedrig | S | D |
+
+### 2.2 React-Lifecycle, Effects und Events
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-05 | Unmount / veraltete Async-Ergebnisse | `src/components/darts/use-visit-sync.ts:150–163` (`untilAnswered`), `:67–75` (`pause`), `:180–206` (`run`) | Verlässt man den Zählscreen (Zurück, Sieg-Screen → Start), läuft die Schleife `untilAnswered` mit Backoff weiter: `setSync`/`setState` auf einem nicht mehr gemounteten Hook, Timer bleiben bis zur nächsten Antwort. Es gibt keinen Cleanup-Effect, der `generation` erhöht oder `wake` auslöst. Nur `discard` kennt das Muster. | Kategorie „Abbruch bei Unmount“ aus dem Review-Auftrag. Fachlich ist das Weiterlaufen sogar gewollt (die Aufnahme soll noch gespeichert werden), aber die Warteschlange liegt ohnehin im localStorage und wird beim nächsten Öffnen gespielt (Test „a reload during the outage …“). | Cleanup-Effect: `generation.current++; wake.current?.()`; die Warteschlange bleibt gespeichert. Test: Unmount während „unsaved“ → kein weiterer Aufruf von `onCommitVisit`, Queue noch im localStorage. | mittel | S | C |
+| R-12 | Sichtbarkeit / Ressourcen | `src/components/darts/use-match-events.ts:18` | Der `EventSource` bleibt im Hintergrund-Tab offen (Heartbeat alle 25 s vom Pi). Beim Zurückkommen wird ohnehin neu geladen (`visibilitychange` → `fire`). | Pi-Ressourcen: jede offene SSE-Verbindung ist ein Stream plus Timer. Zuschauer-Handys, die in die Tasche wandern, halten sie stundenlang. | Bei `hidden` schließen, bei `visible` neu öffnen (und `fire`). Test in `use-match-events.test.tsx` mit `document.visibilityState`-Mock. | niedrig | S | C |
+| R-13 | Vertrag der Props | `src/components/screens/scoreboard-screen.tsx:36` (`onUndoVisit: (matchId: string) => …`) gegenüber `use-visit-sync.ts:50` (`(matchId, step?) => …`) | Der Props-Typ des Screens kennt den zweiten Parameter `step` nicht; der Hook ruft ihn trotzdem mit `step` auf. Mit der echten Action geht das gut (sie nimmt `step`), ein typkonformer Test-Double würde `step` stillschweigend verlieren. | Die M6-Idempotenz (`undoStep`) ist im Typ unsichtbar. | Props-Typ auf die Signatur des Hooks angleichen. | niedrig | S | C |
+| R-14 | Effekt-Hygiene | `src/components/darts/use-visit-sync.ts:248–260` (`eslint-disable-next-line react-hooks/set-state-in-effect`) | Der Mount-Effect liest localStorage und setzt State (bewusst, kommentiert). | Akzeptabel; `useSyncExternalStore` wäre der Next-16-Weg, bringt hier aber keinen Nutzen, weil die Daten nur einmal gelesen werden. | Belassen, in §12.4 als erlaubte Ausnahme festhalten. | niedrig | – | – |
+
+Positiv geprüft, ohne Befund: alle `useEffect` haben Cleanup (`confirm-sheet.tsx`, `choice-menu.tsx`, `use-confirm-tap.ts`, `use-match-events.ts`, `use-visit-sync.ts`); `AchievementBanner` (`stats/achievements.tsx:78`) schützt mit `live`-Flag gegen veraltete Antworten; `ThemeToggle` nutzt `useSyncExternalStore`; keine abgeleiteten Werte in Effects.
+
+### 2.3 Asynchronität, Loading und Fehler
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-03 | Logging | `src/instrumentation.ts` (nur `register`), `src/app/error.tsx:10` (`console.error` im Browser) | Es gibt keinen `onRequestError`-Export. Unerwartete Fehler in Seiten, Actions und Route Handlern loggt Next mit Digest auf stderr, nicht als JSON-Zeile über `src/server/log.ts`; Pfad, Methode und Digest fehlen im Log, der Nutzer sieht nur die generische Seite. | §9 verspricht „der Server loggt sie als eine JSON-Zeile“. Next 16: `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/instrumentation.md` §`onRequestError`. | `export async function onRequestError(err, request, context)` in `instrumentation.ts` → `log.error("request.failed", err, { path: request.path, method: request.method, kind: context.routeType, digest })`. Test wie `log.test.ts` mit `setLogSink`. | hoch | S | A |
+| R-04 | Loading-Zustand | alle 14 `src/app/**/page.tsx` (`<Suspense fallback={null}>`), kein `loading.tsx` | Während `requireSession` und die SQLite-Reads laufen, ist der Inhalt leer; nur die Tab-Leiste und der Theme-Toggle stehen (statische Hülle). Beim Wechsel Konto → Statistik sieht man ein leeres Grau. Einzige Ausnahme: `match/[id]/page.tsx` mit `<div className="score-grid" />`. | Auftrag „Loading-Zustände (loading.tsx, Suspense)“; am Handy im Mobilfunk ist die Lücke sichtbar. Next 16 prerendert den Fallback (`loading.md` §Instant loading states). | Ein `ui`-Baustein `Skeleton` (Karte in `bg-fill`, Zeilen in `bg-fill-strong`, `motion-safe:animate-pulse`) und je Route-Segment ein `loading.tsx` bzw. `fallback={<Skeleton …/>}`; Eintrag auf `/dev/theme`. | mittel | M | C |
+| R-15 | Verschlucktes Ergebnis | `src/components/screens/scoreboard-screen.tsx:142` (`void onCancel(initial.id)`) | `cancelMatchAction` liefert `{ ok: false, reason }` (z. B. `forbidden`, `match-closed`); der Screen ignoriert es. Nur im Erfolgsfall leitet die Action um. Schlägt sie fehl, passiert sichtbar nichts. | „Keine verschluckten Fehler“; die Texte (`de.game.errors`) gibt es schon. | Ergebnis auswerten und über `errorText` in die Statuszeile; Test in `scoreboard`-Tests. | mittel | S | C |
+| R-16 | Pending / Doppelklick | `src/components/screens/account/invite-section.tsx:16` (`onCreateInvite().then(setInvite)`), `account/players-admin-section.tsx:31–39` (`createPasswordInvite`, `deletePlayer`), `account/guests-admin-section.tsx:21` (`promote`), `screens/tournament/tournament-screen.tsx:71–74` (`report`), `account/games-admin-section.tsx:26–32` (`remove`, `loadMore`) | Buttons, die eine Action aufrufen, sind während der Antwort nicht deaktiviert und zeigen keinen Pending-Zustand; ein zweiter Tipp sendet erneut. Bei „Einladung erzeugen“ entstehen dann zwei Token (harmlos), bei „Spielen“ im Turnier ist `startFixture` idempotent, bei „Löschen“ ist der zweite Aufruf ein `not-found`. Die Formulare mit `useActionState` (`login-screen.tsx:37`, `invite-screen.tsx:52`, `own-account-section.tsx:50`) machen es richtig. | Auftrag: „Doppelte Ausführung verhindert (Button während Pending deaktiviert)?“ | Ein Hook `useAsyncAction(fn)` in `src/components/ui/` (`pending`, `run`, `error`) oder `useTransition`; `TextButton` bekommt `pending` (deaktiviert plus `aria-busy`). Alle sieben Stellen darauf umstellen. | mittel | M | C |
+| R-17 | Fehlerseiten | `src/app/error.tsx` (einzige), kein `global-error.tsx` | Ein Fehler im Root-Layout (z. B. Theme-Script, `metadata`) zeigt Nexts Standardseite auf Englisch. `error.tsx` deckt alles unterhalb ab. | §9 nennt „`error.tsx`/`not-found.tsx` je Route-Gruppe“, tatsächlich gibt es je eine Datei im Root (reicht fachlich, der Satz ist aber falsch). | `global-error.tsx` mit `ErrorScreen` und eigenem `<html>`/`<body>`; §9 korrigieren (geschehen, siehe `architecture.md` §9 Markierung). | niedrig | S | C |
+| R-18 | Fehlertext | `src/server/invite-service.ts:75` | Ein Name, der am Schema scheitert (leer, > 40 Zeichen), wird als `name-taken` („Diesen Namen gibt es schon“) gemeldet. | Falscher Text; nur HTML `required`/`maxLength` verhindern ihn heute. | Eigener Grund `invalid-name` in `RedeemError` plus Text in `de.invite.errors`. Geht mit R-02 zusammen. | niedrig | S | A |
+| R-19 | Session-Ablauf im Spiel | `src/server/request.ts:35` (`redirect("/login")` in `requireSession`), aufgerufen aus `commitVisitAction` u. a. über `use-visit-sync.ts:154` | Läuft die Session während eines Spiels ab (1 Jahr, oder Admin-Reset), wirft `requireSession` in einer programmatisch aufgerufenen Action eine Umleitung. Laut `redirect.md` führt Next dann eine Client-Navigation aus; die Warteschlange mit der offenen Aufnahme bleibt im localStorage. Ob die Schleife in `untilAnswered` dabei sauber endet, ist nicht getestet. | Grenzfall, aber die eine Stelle, an der ein `redirect` aus einer Nicht-Formular-Action kommt. | Für JSON-Actions (`commitVisit`, `undoVisit`, `load` …) `{ ok: false, reason: "unauthenticated" }` statt `redirect`; der Hook zeigt den Text und bietet „Anmelden“. Test mit `requireSession`-Mock. | niedrig | S | C |
+
+### 2.4 Ressourcen auf dem Server (Pi)
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-01 | Performance / N+1 | `src/db/sqlite-match-repository.ts:108–120` (`listFinishedMatches` → je Match `finishedById` → `loadMatch` → `seatedPlayers`, Legs, Visits, nochmals Seats), Aufrufer: `src/server/stats-service.ts:40, 73`, `src/server/achievement-service.ts:23, 31`; ähnlich `tournament-service.ts:117` (`linkedMatches` → `loadMatch` je Paarung) und `listTournaments` | Jede Statistik-, Ranglisten-, Erfolge-Seite und **jeder Sieg-Screen** (`newAchievementsAction` → `newInMatch` → alle beendeten Matches) lädt alle beendeten Matches einzeln mit 5–6 Queries und spielt sie durch die Domäne. Bei 300 Matches sind das ~1 800 Queries plus 300 Replays pro Aufruf; auf dem Pi 3 B+ (SD-Karte, ein Kern pro Request) mehrere Sekunden. `myStats` filtert `mine` erst **nach** dem Laden aller Matches. | §5 „ressourcenschonend genug für den Pi“; `m8-plan.md` §7 und `project.md` M8 nennen die Messung als offen. Das Datenmodell (Aufnahmen als Quelle) ist richtig; es fehlt die Zugriffsschicht dazu. | 1) `listFinishedMatches(since, playerId?)`: Filter auf Spieler in SQL, Visits und Seats **batchweise** (ein `IN`-Select je Tabelle, dann in JS gruppieren) statt pro Match. 2) `newInMatch` lädt nur die Matches der Teilnehmer. 3) Danach messen (Luca, §0.3); erst wenn es nicht reicht: Aggregat-Tabelle `player_stats` als Projektion, die beim Match-Ende und Undo nachgezogen wird (bewusst zurückgestellt, §5). | hoch | M | B |
+| R-20 | Speicher | `src/server/rate-limit.ts:8` (`hits`-Map) | Einträge verfallen nur, wenn derselbe Key wieder `retryAfter` aufruft; neue IPs mit Fehlversuchen bleiben bis zum Neustart. | Im Heimnetz hinter Funnel sind es wenige IPs; über Monate dennoch ein langsam wachsender Map. M12 Teil B ändert den Key ohnehin (pro Name oder Gerät). | `fail()` räumt abgelaufene Einträge auf (ein Durchlauf, wenn die Map > 1 000 Einträge hat). Test im `rate-limit.test.ts`. | niedrig | S | B |
+| R-21 | SQLite auf SD-Karte | `src/db/client.ts:16–18` (Pragmas: WAL, foreign_keys, busy_timeout) | `synchronous` steht auf dem Default `FULL`: jeder Commit fsynct WAL **und** Datei. Mit WAL ist `NORMAL` die von SQLite empfohlene Einstellung: Haltbarkeit bleibt bei App-Absturz, nur bei Stromausfall können die letzten Transaktionen fehlen. | §5: „Die SD-Karte ist das größte Betriebsrisiko“; weniger fsyncs = weniger Verschleiß und schnellere Schreibvorgänge. E14 akzeptiert Datenverlust ausdrücklich. | `sqlite.pragma("synchronous = NORMAL")`; Entscheidung in §12.8 festhalten. | niedrig | S | B |
+| R-22 | Lebenszyklus | `src/instrumentation.ts:25` (`setInterval(run, …)` ohne globalThis-Guard), kein Shutdown-Handler | In der Entwicklung kann `register` bei HMR mehrfach laufen (mehrere Intervalle); produktiv einmal. Beim Stoppen des Containers wird die DB nicht explizit geschlossen (WAL-Checkpoint beim nächsten Start, unkritisch). | Hygiene; `matchHub` und `loginLimiter` nutzen den `globalThis`-Guard schon. | Intervall-Handle auf `globalThis` wie die anderen Singletons; `process.once("SIGTERM", () => db.close())`. | niedrig | S | B |
+| R-23 | Informationsabfluss | `src/app/api/health/route.ts:12` (`error: String(e)`) | Die öffentliche Health-Route gibt die Fehlermeldung (mit Dateipfad `/data/darts.db`) nach außen. | `/api/health` ist ohne Login erreichbar (§10). | Nur `{ ok: false }` antworten, den Fehler loggen (`log.error("health.db", e)`). | niedrig | S | A |
+| R-24 | SSE | `src/app/api/match/[id]/events/route.ts:13–14` | Jede Session darf jede Match-ID abonnieren, ohne dass das Match existieren muss; es fließen nur „change“-Pings, keine Daten. | Keine Lücke; nur zur Dokumentation: ein Abonnent pro offener Match-ID kostet einen Timer. | Belassen; in §12.8 als bewusste Grenze festhalten (Hub ist im Prozess, ein Pi). | niedrig | – | – |
+
+Positiv geprüft: SSE-Route räumt bei `abort` und `cancel` auf (`off()`, `clearInterval`, `controller.close()`); `MatchHub` entfernt leere Sets; `cleanupGuests` je Match in einer Transaktion; alle Services mit mehreren Schreibvorgängen in `deps.transaction`; `.dockerignore` schließt `data`, `.env`, `Legacy`, `docs` aus; Bundle `.next/static` 940 KB, keine Chart- oder UI-Bibliothek.
+
+### 2.5 UI, Styling, Komponenten, Barrierefreiheit
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-25 | Größe / Verantwortung | `src/components/darts/use-visit-sync.ts` (369 Zeilen), `screens/setup-shell.tsx` (263), `screens/scoreboard-screen.tsx` (252), `screens/tournament/tournament-setup.tsx` (214), `ui/choice-menu.tsx` (202), `server/match-service.ts` (457) | Über dem eigenen Richtwert (§9: ~200 Zeilen je Screen; Review-Auftrag: ~150). `useVisitSync` vereint drei Aufgaben: lokales Zählen (`throwDart`, `undo`, `playOut` …), Warteschlange mit Retry (`run`, `untilAnswered`, `push`) und Persistenz/Events. `match-service.ts` vereint Validierung, `persist`, Ansicht, Historie und sechs Mutationen. | SRP (§9); die Tests spiegeln das: `use-visit-sync.test.tsx` muss für jeden Fall den ganzen Hook hochfahren. | `useVisitSync` → `useSyncQueue` (Queue, Retry, Generation, Storage) + `useLocalScoring` (Domänenaufrufe) + dünner `useVisitSync`, der beide verbindet. `scoreboard-screen.tsx` → `scoreboard-sheets.tsx` (Confirm/Stale) und `scoreboard-permissions.ts` (`enterOk`, `undoOk` …). `setup-shell.tsx` → `setup-options.tsx` (`ScoreChoice`, `RuleTile`, `FixedRules`). `match-service.ts` → `match-persist.ts` (`persist`, `firstDiff`) und `match-history.ts` (`recentResult`, `listRecentMatches`). `choice-menu.tsx` → `choice-number-field.tsx`. | mittel | L | E |
+| R-26 | A11y: verschachtelte Interaktion | `src/components/screens/leg-victory-screen.tsx:39` (`<div role="button" tabIndex={0}>` über den ganzen Screen, darin zwei `<button>`) | Interaktive Elemente in einem Element mit `role="button"` sind nach ARIA nicht erlaubt; Screenreader lesen einen Button mit zwei Buttons. Tastatur: Enter auf dem Container geht weiter, Tab erreicht die inneren Buttons, aber der Container selbst ist ein Fokusstopp ohne sichtbaren Fokus. | Auftrag „Semantik, Fokus, Tastatur“. | Container ohne Rolle; „Tippen zum Fortfahren“ als eigener, unsichtbar großer `<button>` **hinter** den anderen (`absolute inset-0`, niedriger z-Index) oder als sichtbarer Button unten. Test: `getAllByRole("button")` hat drei klar benannte Buttons. | mittel | S | F |
+| R-27 | A11y: Listbox | `src/components/ui/choice-menu.tsx:94, 116` (`<li role="option">` mit `<button>` darin), kein Pfeiltasten-Handling, Fokus bleibt auf dem Trigger | Die Rolle `option` sitzt auf dem `li`, fokussierbar ist der Button darin; `aria-selected` steht am falschen Element, `listbox` ohne `aria-activedescendant` oder Fokus-Wanderung. Mit Maus/Touch funktioniert alles, per Tastatur/Screenreader ist es ein Menü aus Buttons. | WAI-ARIA Listbox-Muster. | Entweder ehrlich als Menü auszeichnen (`role="menu"`/`menuitemradio`, `aria-checked`) **oder** Listbox vollständig: Fokus auf das `ul`, `aria-activedescendant`, Pfeiltasten, Enter/Escape. Default: Menü, weniger Code. Test in `choice-menu.test.tsx` mit `userEvent.keyboard`. | niedrig | M | F |
+| R-28 | A11y: Dialog | `src/components/ui/confirm-sheet.tsx:24` (Fokus auf „Abbrechen“), kein Fokus-Fang, kein Rückfokus beim Schließen | Tab verlässt den Dialog in die Seite dahinter; nach dem Schließen landet der Fokus auf `body`. | Dialog-Muster. | Natives `<dialog>` mit `showModal()` (bringt Fokus-Fang, Escape und `inert` dahinter mit) oder manueller Fokus-Fang plus `previouslyFocused.focus()` im Cleanup. Default: `<dialog>`. | niedrig | S | F |
+| R-29 | A11y: Beschriftung | `src/components/ui/fold-card.tsx:26` (`aria-expanded` ohne `aria-controls`), `src/components/darts/keypad.tsx:89` (`role="group"` ohne Namen), `src/components/screens/stats/rankings.tsx:44` (`FoldCard`-Titel ist nur der Modus, Tabelle hat `aria-label`), Seiten ohne eigenen `<title>` (nur `src/app/layout.tsx:7`) | Kleinigkeiten: aufklappbare Karten ohne Verweis auf ihren Inhalt; Keypad-Gruppe ohne Namen; jede Seite heißt im Tab „Darts Scorer“. | Orientierung mit Screenreader und im Browser-Verlauf. | `useId` + `aria-controls` in `FoldCard`; `aria-label={texts.keypad}` am Keypad; `export const metadata`/`generateMetadata` je Seite mit `de.*.title` („Statistik · Darts Scorer“). | niedrig | S | F |
+| R-30 | Theme-Regel | `src/components/ui/theme-toggle.tsx:47` (`hover:text-fg`) | Einziger Hover-Zustand im Code. | `architecture.md` §8: „keine Hover-Zustände“ (Touch-Geräte). | Entfernen oder die Regel in §8 auf „nur am Theme-Toggle“ lockern. Default: entfernen. | niedrig | S | F |
+| R-31 | Breiten (bekannt) | `src/components/ui/card-list.tsx:13`, `screens/setup-shell.tsx:98, 148` (`max-w-xl` je Baustein) | Jeder Baustein begrenzt sich selbst; Überschriften und `FoldCard` nicht. Schon in `docs/fragen.md` §1 beschrieben (`PageFrame`), zurückgestellt. | Nicht doppelt bearbeiten. | Bleibt bei `fragen.md` §1; hier nur der Querverweis. | – | – | – |
+
+Positiv geprüft: kein `style={…}`, keine Ad-hoc-Werte, keine Literale im Markup (alle Texte aus `de`), Farben nur über Tokens; Formulare mit `<label>` (`Field`) oder `aria-label`; `role="alert"`/`role="status"` an Fehler- und Statuszeilen; Tabellen mit `scope`; Charts mit `sr-only`-Tabellen; Touch-Mindesthöhe `min-h-touch` überall; `aria-pressed`/`aria-current` an Auswahl und Tabs.
+
+### 2.6 Sicherheit, TypeScript, Tests, Betrieb
+
+| # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
+|---|---|---|---|---|---|---|---|---|
+| R-32 | Validierung von Action-Argumenten | `src/server/match-actions.ts:46` (`commitVisitAction(matchId, legIndex, seq, darts)`), `:66` (`undoVisitAction(matchId, step?)`), `admin-actions.ts:71` (`loadMoreMatchesAction(offset)`) | Nur `darts` läuft durch Zod (`thrownDartsSchema`); `legIndex`/`seq` werden mit `!==` gegen die erwartete Position verglichen (`NaN` → `out-of-sync`, ungefährlich), `offset` wird geklammert, `matchId`/`step`/`playerId` gehen roh an Drizzle (parametrisiert, kein SQL-Risiko). Sicherheitsrelevant ist nichts davon; es widerspricht aber dem Satz „jede Action validiert mit Zod“ in `m12-plan.md` §5a. | Ehrlichkeit der Doku; R-02 löst es mit. | Ein Schema je Action (`z.object({ matchId: z.string().uuid(), legIndex: z.number().int().min(0), … })`), `safeParse` → `invalid-input`. | niedrig | S | A |
+| R-33 | TypeScript | `src/server/match-actions.ts:31` und `tournament-actions.ts:21` (`(MODE_IDS as readonly string[]).includes(mode) ? (mode as ModeId) : …`) | Doppelte Casts statt eines Type Guards. | Sauberere Typen an der Grenze. | `isModeId(x): x is ModeId` in `src/domain/game/types.ts`, analog `isTournamentFormat`. Entfällt mit R-02 (Zod-Enum). | niedrig | S | A |
+| R-34 | Tests: Komponenten ohne Coverage-Messung | `vitest.config.mts` (`coverage.include` ohne `src/components`) | Die UI-Tests laufen, zählen aber nicht in die Schwellen; eine neue Komponente ohne Test fällt nicht auf. | §9: „Komponenten mit Testing Library nur dort, wo es Logik in der UI gibt“ – das ist bewusst; eine niedrige Schwelle (z. B. 60 %) würde Logik-Lücken trotzdem zeigen. | `src/components/**` mit eigener Schwelle (Statements 60 %) aufnehmen; Ausnahmen (`icons.tsx`) ausschließen. | niedrig | S | D |
+| R-35 | Tests: Wartezeiten | `e2e/offline.spec.ts:27` und drei weitere Stellen (`waitForLoadState("networkidle")`) | `networkidle` ist bei offenen SSE-Verbindungen und Heartbeats prinzipiell wacklig; hier scheint es zu funktionieren, weil der Heartbeat 25 s hat. | Playwright rät von `networkidle` ab. | Auf eine konkrete Erwartung warten (`data-sync="saved"` steht schon in `board.ts`). | niedrig | S | D |
+| R-36 | Doku ≠ Code | `docs/architecture.md:53` (Charts: Recharts), `:215` (`clock()`), `:218` (`error.tsx` je Route-Gruppe), `:216` (200 Zeilen); `docs/theme.md:10` (Dark-Werte unter `:root[data-theme="dark"]` und `@media`, „shadcn-Komponenten“) gegenüber `src/app/globals.css` (`light-dark()`, nur `color-scheme` je `data-theme`) | Vier Aussagen in `architecture.md` und eine in `theme.md` beschreiben einen früheren Stand. | Doku ist die Arbeitsgrundlage für neue Sessions. | `architecture.md`: im Review markiert (⚠️-Hinweise in §3, §9) und in §12 richtiggestellt. `theme.md` §1 durfte das Review nicht ändern → **zu klären** (§4). | niedrig | S | D |
+
+---
+
+## 3. Umsetzungsplan (Arbeitspakete)
+
+Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commits. Reihenfolge nach Nutzen; A und B zuerst, weil sie die Risiken 1–3 abdecken. E (Aufteilen großer Module) kommt bewusst nach C, damit die neuen Verhaltensregeln beim Schneiden gleich mit einziehen.
+
+| Paket | Inhalt | Befunde | Abhängigkeit | Aufwand |
+|---|---|---|---|---|
+| **A** Eingabevalidierung und Fehlerfluss | Schema je Action, `safeParse` → `Result`, Fehlertexte am Formular, `onRequestError`, Health-Route ohne Fehlermeldung, Restart mit Rechteprüfung | R-02, R-03, R-06, R-18, R-23, R-32, R-33 | – | M |
+| **B** Pi-Ressourcen | Batch-Laden der beendeten Matches, Spielerfilter in SQL, `newInMatch` eingegrenzt, Messung; Rate-Limit-Aufräumen, `synchronous = NORMAL`, Intervall-Guard, SIGTERM | R-01, R-20, R-21, R-22 | – | M |
+| **C** Client-Lebenszyklus und Rückmeldung | Cleanup beim Unmount, SSE im Hintergrund schließen, `useAsyncAction`/Pending an allen Buttons, Cancel-Ergebnis anzeigen, Skeleton + `loading.tsx`, `global-error.tsx`, `unauthenticated` statt Redirect in JSON-Actions, Props-Typ `onUndoVisit` | R-04, R-05, R-12, R-13, R-15, R-16, R-17, R-19 | A (für `unauthenticated`-Grund) | M–L |
+| **D** Konsolidierung und Doku | Duplikate zusammenführen, Typ-Imports (Entscheidung §6 Frage 3), `requireAdmin` in der Admin-Seite, toten Code entfernen, `deps.now()` im Rate-Limit, Komponenten-Coverage, `networkidle` ersetzen, `theme.md` §1 korrigieren | R-07, R-08, R-09, R-10, R-11, R-34, R-35, R-36 | – | S–M |
+| **E** Große Module teilen | `useVisitSync` in drei Hooks, `scoreboard-screen`, `setup-shell`, `match-service`, `choice-menu` aufteilen; Verhalten unverändert, bestehende Tests bleiben grün | R-25 | C (damit die Teile die neuen Regeln schon enthalten) | L |
+| **F** Barrierefreiheit | Leg-Sieg-Screen ohne verschachtelte Buttons, `ChoiceMenu` als Menü, `ConfirmSheet` als `<dialog>`, `aria-controls`, Keypad-Name, Seitentitel, Hover entfernen | R-26 … R-30 | – | M |
+
+### 3.1 Paket A – Eingabevalidierung und Fehlerfluss
+
+1. `src/server/form.ts`: `parseForm(schema, formData)` → `Result`; Schemas `newMatchForm`, `newTournamentForm`, `playerNameForm` neben den Actions (FormData-Felder sind Strings, die Services bekommen die geparsten Werte). `rulesSchema`, `formatSchema` bleiben in `match-service.ts`, werden von den Form-Schemas benutzt.
+2. `createMatchAction`/`createTournamentAction` geben bei Fehler `{ ok: false, reason: "invalid-input" }` zurück statt zu werfen; die Setup-Screens zeigen `de.newGame.errors["invalid-input"]` über dem Start-Button (bestehender `FormError`). Dafür `onStart` auf `Promise<{ ok: false; reason } | void>` erweitern (bei Erfolg leitet die Action um).
+3. `createGuest`, `createPlayer`, `renamePlayer`, `redeem`: `safeParse` → `invalid-name`; Texte in `de.players.errors`, `de.invite.errors`, `de.account.errors`.
+4. `restartMatch(deps, session, matchId)`: Host, Admin oder Teilnehmer; neuer Host = Session. `restartMatchAction` leitet bei `forbidden` auf `/`.
+5. `commitVisitAction`, `undoVisitAction`, `setStarterAction`, `decideWinnerAction`, `loadMoreMatchesAction`: Argument-Schema, `safeParse` → `invalid-input` (neuer `ActionError`, Text in `de.game.errors`).
+6. `instrumentation.ts`: `onRequestError` → `log.error("request.failed", …)`; `health/route.ts`: nur `{ ok: false }`, Fehler ins Log.
+7. Tests: je Action ein Fall mit ungültiger Eingabe (`match-actions` sind von der Coverage ausgenommen, also als Service-Test über `parseForm`); `instrumentation`-Test mit `setLogSink`.
+8. **Commits:** `fix(server): validate action input and answer with results instead of throwing`, `feat(server): log unexpected request errors as json lines`, `fix(match): restart only by host, admin or a player of the match`, `fix(health): do not expose the error message`.
+
+**Abnahme:** Ein manipuliertes Setup-Formular (leere Spielerliste, `startScore=abc`) zeigt den Fehlertext und keine Fehlerseite; `npm test` grün; im Log steht bei einem provozierten Fehler eine Zeile `{"level":"error","event":"request.failed","path":…}`; `curl /api/health` bei gesperrter DB liefert `{"ok":false}` ohne Pfad.
+
+### 3.2 Paket B – Pi-Ressourcen
+
+1. `MatchRepository.listFinishedMatches(since, playerId?)`: ein Select für die Match-IDs (mit `playerId` über `match_player` gefiltert), dann **je ein** Select für Seats, Legs und Visits mit `inArray` (in Blöcken von 500 IDs, SQLite-Variablenlimit), Gruppierung in JS, Replay wie bisher. Gleiche Signatur im `MemoryMatchRepository`. `repository.test.ts`: Ergebnis identisch zur alten Implementierung (Fixture mit drei Matches), `playerId`-Filter.
+2. `myStats`, `myAchievements`: `listFinishedMatches(since, me)`. `newInMatch`: nur die Matches der Teilnehmer des Spiels (ein Aufruf je Teilnehmer oder `playerIds`-Filter). `leaderboards` bleibt ohne Filter (braucht alle).
+3. `linkedMatches` (Turnier): ein `loadMatches(ids)` statt `loadMatch` je Paarung; `listTournaments` nutzt es.
+4. Messung (Luca): `time curl -s -b cookie https://…/account/stats` mit der Pi-Datenbank vor und nach; Zielwert < 500 ms bei den heutigen Daten. Ergebnis in §7 eintragen.
+5. `rate-limit.ts`: `fail()` räumt abgelaufene Einträge auf; Test. `client.ts`: `synchronous = NORMAL` (Kommentar mit Begründung E14). `instrumentation.ts`: Intervall-Handle auf `globalThis`, `SIGTERM` schließt die DB.
+6. **Commits:** `perf(db): load finished matches in batches and filter by player in sql`, `perf(stats): load only the players' matches for the victory banner`, `perf(db): synchronous=normal in wal mode`, `fix(server): bound the rate-limit map and close the database on sigterm`.
+
+**Abnahme:** `repository.test.ts` zeigt gleiche Ergebnisse; Anzahl Queries für 100 Matches ≤ 5 (Test mit einem zählenden `Db`-Wrapper oder `sqlite.prepare`-Spy); Messwerte in §7; `npm test` grün.
+
+### 3.3 Paket C – Client-Lebenszyklus und Rückmeldung
+
+1. `use-visit-sync.ts`: Cleanup-Effect (`generation++`, `wake()`); Test „unmount while unsaved: no further calls, queue still stored“.
+2. `use-match-events.ts`: bei `hidden` schließen, bei `visible` neu verbinden; Test.
+3. `src/components/ui/use-async-action.ts`: `{ pending, error, run }`; `TextButton`/`PrimaryButton` bekommen `pending` (→ `disabled`, `aria-busy`). Umstellen: `invite-section`, `players-admin-section`, `guests-admin-section`, `games-admin-section`, `tournament-screen`. Eintrag auf `/dev/theme`.
+4. `scoreboard-screen.tsx`: Ergebnis von `onCancel` auswerten; Props-Typ `onUndoVisit` mit `step?`.
+5. `src/components/ui/skeleton.tsx` + `loading.tsx` in `(site)`, `account/*`, `tournaments`, `new/[mode]`, `match/[id]/stats`; `Suspense`-Fallbacks der Seiten darauf umstellen. `global-error.tsx` mit `ErrorScreen`.
+6. `requireSession` bekommt eine Variante `sessionOrNull` für JSON-Actions; `commitVisitAction` u. a. antworten `{ ok: false, reason: "unauthenticated" }`; der Hook zeigt den Text und einen Link `/login?next=/match/<id>`.
+7. **Commits:** `fix(sync): stop the retry loop when the scoreboard unmounts`, `perf(sync): close the event stream while the tab is hidden`, `feat(ui): pending state for async buttons`, `fix(scoreboard): show why cancelling failed`, `feat(ui): loading skeletons for every page`, `feat(app): global error page`, `fix(match): unauthenticated result instead of redirect in json actions`.
+
+**Abnahme:** Playwright: Sieg-Screen → Start während „nicht gespeichert“ → kein Fehler in der Konsole, Aufnahme nach erneutem Öffnen gespeichert; Doppeltipp auf „Einladung erzeugen“ erzeugt einen Link; Seitenwechsel zeigt ein Skeleton (Screenshot in `docs/screenshots/`); abgelaufene Session im Spiel zeigt den Hinweis statt einer Umleitung mitten in der Aufnahme.
+
+### 3.4 Paket D – Konsolidierung und Doku
+
+1. Duplikate (R-07) zusammenführen; `createPlayerAction` entfernen; Admin-Seite auf `requireAdmin`; `deps.now()` im Rate-Limit.
+2. Entscheidung Frage 3 umsetzen: `eslint.config.mjs` `allowTypeImports` für `@/server/*` in `src/components/**`, die neun Kopien durch `import type` ersetzen (oder `src/server/views.ts`).
+3. `vitest.config.mts`: `src/components/**` mit Schwelle 60 %; `e2e`: `networkidle` durch Erwartungen ersetzen.
+4. `docs/theme.md` §1: Satz zu `data-theme`/`@media`/shadcn an `globals.css` angleichen (`light-dark()`, `color-scheme`); `architecture.md` §3 Charts, §9 Markierungen auflösen.
+5. **Commits:** `refactor(server): share form helpers and schemas between actions`, `chore(lint): allow type-only imports from server in components`, `test: coverage threshold for components`, `docs(theme): tokens via light-dark(), no shadcn`.
+
+**Abnahme:** `npm run lint`, `typecheck`, `test:coverage` grün; keine der neun Kopien mehr vorhanden (`grep "structural, no server import"` leer).
+
+### 3.5 Paket E – Große Module teilen
+
+1. `useSyncQueue(matchId, send, onLoad)`: Queue, Retry, Generation, Storage, Stale, `retryNow`, `discard`; Tests aus `use-visit-sync.test.tsx` übernehmen, die nur die Queue betreffen.
+2. `useLocalScoring(initialState, errorText)`: `throwDart`, `undo`, `playOut`, `chooseStarter`, `decide` als reine Domänenaufrufe mit `syncServer`-Callback.
+3. `useVisitSync` verbindet beide (≤ 100 Zeilen). `scoreboard-screen.tsx`: Rechte in `scoreboard-permissions.ts`, Sheets in `scoreboard-sheets.tsx`. `setup-shell.tsx`: Optionen nach `setup-options.tsx`. `match-service.ts`: `match-persist.ts`, `match-history.ts`. `choice-menu.tsx`: `choice-number-field.tsx`.
+4. **Commits:** je Modul `refactor(…): split … into …`, Verhalten unverändert, bestehende Tests unverändert grün.
+
+**Abnahme:** Keine Datei in `src/components` über 200 Zeilen außer `icons.tsx`; `npm test` und `./scripts/smoke.sh` grün ohne Änderung an Tests (außer Verschieben).
+
+### 3.6 Paket F – Barrierefreiheit
+
+1. `leg-victory-screen.tsx` (R-26), `choice-menu.tsx` als Menü (R-27), `confirm-sheet.tsx` als `<dialog>` (R-28), `fold-card.tsx` `aria-controls`, Keypad-Name, `metadata` je Seite (R-29), Hover entfernen (R-30).
+2. Tests: `userEvent.keyboard` für Menü und Dialog; `document.title` in `e2e/layout.spec.ts`.
+3. **Commits:** `fix(a11y): …` je Punkt.
+
+**Abnahme:** Keine Verletzung in einem Axe-Lauf über Setup, Zählscreen, Leg-Sieg, Konto (als Playwright-Schritt mit `@axe-core/playwright`, nur dafür); Tastaturbedienung des Setups ohne Maus möglich.
+
+---
+
+## 4. Zu klärende Punkte aus der Doku
+
+Beim Abgleich Doku ↔ Code aufgefallen; in `architecture.md` markiert, aber nicht gelöscht:
+
+1. `architecture.md` §3: „Charts: Recharts“ – der Code hat eigene SVGs (`AverageChart`, `Dartboard`), `CLAUDE.md` sagt „no chart library“. → In §12.6 richtiggestellt; Zeile in §3 markiert.
+2. `architecture.md` §9: „`clock()`/`newId()`“ – die Funktion heißt `now()` in `Deps`. → Markiert.
+3. `architecture.md` §9: „`error.tsx`/`not-found.tsx` je Route-Gruppe“ – es gibt je eine Datei im Root (reicht), kein `global-error.tsx` (R-17). → Markiert.
+4. `architecture.md` §9: „Ein Screen über etwa 200 Zeilen wird geteilt“ – Review-Auftrag nennt ~150; vier Dateien liegen darüber (R-25). → §12.7 legt 200 für Screens und 150 für `ui`-Bausteine fest (Frage 4).
+5. `theme.md` §1: Dark-Werte „unter `:root[data-theme="dark"]` und `@media (prefers-color-scheme: dark)`“, „shadcn-Komponenten“ – `globals.css` nutzt `light-dark()` und setzt je `data-theme` nur `color-scheme`; shadcn wurde verworfen (§3). → Paket D.
+6. `architecture.md` §3 („Zod: Eingaben aus Server Actions prüfen“) und `m12-plan.md` §5a („jede Action validiert mit Zod“) – stimmt erst nach Paket A (R-02, R-32).
+
+---
+
+## 5. Nicht übernommene Ideen und bewusst Zurückgestelltes
+
+| Idee | Warum nicht (jetzt) |
+|---|---|
+| **Aggregat-Tabelle `player_stats`** (Statistik beim Match-Ende/Undo fortschreiben) | Erst messen (Paket B §3.2.4). Das Modell „alles aus den Aufnahmen“ ist der Grund, warum Undo, gelöschte Spiele und neue Statistiken „von selbst stimmen“ (§6, M10). Eine zweite Wahrheit lohnt erst, wenn Batch-Laden nicht reicht. |
+| **Nonce-basierte CSP** statt `'unsafe-inline'` | In §10 bewusst entschieden (Partial Prerendering); unverändert. |
+| **Service Worker / Offline-Shell** | Gehört zu M12 (PWA), dort bewusst „kein Service Worker“ entschieden; `m6-plan.md` §7 hält die Idee fest. |
+| **Tanstack Query / SWR** für Server-Daten im Client | Es gibt genau einen Client-Datenfluss (Zählscreen), und der hat eine eigene, getestete Warteschlange mit Idempotenz. Eine Bibliothek würde die Offline-Logik nicht ersetzen, nur verdoppeln. |
+| **Nested Layouts mit `loading.tsx` je Tab** statt `Suspense` in der Seite | Die Seiten in `(site)` teilen ein Layout; `loading.tsx` dort würde für alle Tabs dasselbe Skeleton zeigen. Deshalb Skeleton als Baustein und `fallback` je Seite (Paket C); `loading.tsx` nur, wo eine Route ein eigenes Segment hat. |
+| **Rate-Limit pro Name** | M12 Teil B entscheidet das nach der Probe; hier nur die Map-Grenze (R-20). |
+| **Zusätzliche Match-Leserechte** (nur Teilnehmer sehen den Zählscreen) | E13 sieht ausdrücklich vor, dass andere Geräte den Stand sehen; private App. Match-Statistik ist bereits auf Teilnehmer beschränkt. |
+| **`React.memo`/`useMemo` im Zählscreen** | Keine Messung, die das rechtfertigt; `projectMatch` ist schon memoisiert, das Keypad klein. |
+| **Lighthouse-/Bundle-Budget in der CI** | Bundle ist 940 KB statisch ohne Fremdbibliotheken; ein Budget lohnt erst, wenn eine Bibliothek dazukommt (M11 Sound: keine). Als Idee in M12 notierbar. |
+| **Mehrsprachigkeit jetzt vorbereiten** (Texte als Funktionen) | README nennt das Vorgehen; erst mit zweiter Sprache. |
+
+---
+
+## 6. Offene Fragen (Defaults gelten ohne Antwort)
+
+1. **Einordnung:** M13 als eigener Meilenstein nach M12, oder Pakete A–C vor M11 ziehen? Default: A und B vor M11 (Risiken 1–3), C–F nach Lust zwischen M11-Punkten; die Nummer bleibt M13.
+2. **Validierungsfehler im Setup (R-02):** Fehlertext über dem Start-Button (Default) oder Fehlerseite in Kauf nehmen, weil die HTML-Validierung reicht? Default: Fehlertext, weil die Regel „keine Ausnahmen“ sonst nicht gilt.
+3. **Typ-Imports über die Schichtgrenze (R-08):** `import type` aus `@/server` in Komponenten erlauben (Default) oder ein `src/server/views.ts` ohne Laufzeit-Imports freigeben? Default: `allowTypeImports` für `@/server/*`, dokumentiert in §12.1.
+4. **Richtwert Dateigröße (R-25):** Screens 200 Zeilen und `ui`-Bausteine 150 (Default), oder überall 150?
+5. **Pending-Zustand (R-16):** eigener Hook `useAsyncAction` (Default) oder überall `useTransition` direkt?
+6. **`synchronous = NORMAL` (R-21):** einverstanden, dass bei Stromausfall die letzten Aufnahmen fehlen können (E14 akzeptiert mehr)? Default: ja.
+7. **Session abgelaufen im Spiel (R-19):** Hinweis mit Link (Default) oder Umleitung wie heute?
+
+## 7. Protokoll der Messungen
+
+(Paket B, wird von Luca gefüllt: Datenbankgröße, Anzahl Matches, Zeit für `/account/stats`, `/account/rankings`, Sieg-Screen vor und nach dem Batch-Laden.)
