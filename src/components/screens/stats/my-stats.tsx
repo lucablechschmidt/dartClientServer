@@ -33,7 +33,7 @@ type Props = {
 
 /**
  * The own statistics on /account/stats (M8): range pills, tiles with the figures, the average per match,
- * the field hits on a dartboard and the last
+ * the field hits on a dartboard (side by side in the wide frame, M14) and, always last, the recent
  * games with a link to the X01 match page. Only the own statistics, for everyone (m8-plan §2).
  */
 export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
@@ -70,27 +70,30 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
         <p className="px-4 text-sm text-fg-muted">{t.none}</p>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-2 rounded-panel bg-card-bg p-3">
+          <div className="grid grid-cols-3 gap-2 rounded-panel bg-card-bg p-3 lg:grid-cols-5">
             {tiles.map(([label, value]) => (
               <StatTile key={label} label={label} value={value} />
             ))}
           </div>
-          {view.history.length > 0 && (
-            <>
-              <SectionHeading>{t.history}</SectionHeading>
-              <div className="rounded-panel bg-card-bg p-3">
-                <AverageChart points={view.history} texts={t} overviewTexts={overviewTexts} now={now} />
-              </div>
-            </>
-          )}
-          {view.fieldHits.length > 0 && (
-            <>
-              <SectionHeading>{t.fieldHits}</SectionHeading>
-              <div className="rounded-panel bg-card-bg p-3">
-                <Dartboard hits={view.fieldHits} texts={t} />
-              </div>
-            </>
-          )}
+          {/* Wide frame: average and dartboard side by side; on the phone stacked. */}
+          <div className="grid gap-3 lg:grid-cols-2">
+            {view.history.length > 0 && (
+              <section className="flex min-w-0 flex-col gap-3">
+                <SectionHeading>{t.history}</SectionHeading>
+                <div className="flex-1 rounded-panel bg-card-bg p-3">
+                  <AverageChart points={view.history} texts={t} overviewTexts={overviewTexts} now={now} />
+                </div>
+              </section>
+            )}
+            {view.fieldHits.length > 0 && (
+              <section className="flex min-w-0 flex-col gap-3">
+                <SectionHeading>{t.fieldHits}</SectionHeading>
+                <div className="flex-1 rounded-panel bg-card-bg p-3">
+                  <Dartboard hits={view.fieldHits} texts={t} />
+                </div>
+              </section>
+            )}
+          </div>
           <SectionHeading>{t.recent}</SectionHeading>
           <CardList label={t.recent}>
             {view.recent.map((m) => {

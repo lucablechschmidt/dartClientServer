@@ -38,7 +38,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
 | M13 | Code-Review und Konsolidierung | geplant, eigener Meilenstein | – |
-| M14 | Styling: Desktop-Layout, dezente Animationen | in Arbeit (Teil A) | – |
+| M14 | Styling: Desktop-Layout, dezente Animationen | Teil A fertig, Teil B in Arbeit | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; erledigte liegen in `docs/archive/`.
 
@@ -316,9 +316,9 @@ Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
 Detailplan: `docs/m14-plan.md`.
 
-- [ ] Average-Diagramm mit fester Höhe und Schrift (§2.1)
-- [ ] `PageFrame` mit schmaler und breiter Spalte, Abschnitt „Breiten“ in `theme.md` (§2.2)
-- [ ] Statistik: im breiten Rahmen Diagramm und Dartscheibe nebeneinander, letzte Spiele unten (§2.3)
+- [x] Average-Diagramm mit fester Höhe und Schrift (§2.1)
+- [x] `PageFrame` mit schmaler und breiter Spalte, Abschnitt „Breiten“ in `theme.md` (§2.2)
+- [x] Statistik: im breiten Rahmen Diagramm und Dartscheibe nebeneinander, letzte Spiele unten (§2.3)
 - [ ] Bewegungs-Tokens, Abschnitt „Bewegung“ in `theme.md` (§4.2)
 - [ ] Animationen 1, 2, 5, 6, 7 (§4.3)
 - [ ] nach Abnahme am Board: Animationen 3 und 8 (§4.4)
