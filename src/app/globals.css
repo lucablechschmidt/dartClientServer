@@ -294,6 +294,28 @@
   }
 }
 
+/*
+ * Tap feedback like an iOS list row (theme.md §5): pressed, the ground darkens at once; released, it
+ * fades back. Pure feedback, it never delays the tap.
+ */
+@utility tap-feedback {
+  border-radius: var(--radius-tile);
+  transition: background-color var(--duration-base) var(--ease-ios);
+  &:active {
+    background-color: var(--fill-strong);
+    transition-duration: 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+/* A tappable row inside a card: the highlight reaches a little past the text on both sides */
+@utility tap-row {
+  width: calc(100% + 1rem);
+  margin-inline: -0.5rem;
+  padding-inline: 0.5rem;
+}
+
 /* Header row: back button, centred title, equally wide right slot (ScreenHeader) */
 @utility header-grid {
   display: grid;

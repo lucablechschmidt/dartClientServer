@@ -70,7 +70,7 @@ export function PlayerList({ players, session, texts, onAddGuest, onRename, onDe
             type="button"
             onClick={() => open(p.id)}
             aria-label={`${texts.edit}: ${p.name}`}
-            className="grid min-h-touch min-w-touch place-items-center text-fg"
+            className="grid min-h-touch min-w-touch place-items-center tap-feedback text-fg"
           >
             <WrenchIcon className="h-6 w-6" />
           </button>

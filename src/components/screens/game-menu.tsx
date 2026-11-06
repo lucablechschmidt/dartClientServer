@@ -63,11 +63,11 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
     <div className="flex flex-1 flex-col">
       <nav aria-label={texts.title} className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-fluid-xl">
         {MODES.map((mode) => (
-          <Link key={mode} href={`/new/${mode}`} className="min-h-touch px-4 py-1 text-fg">
+          <Link key={mode} href={`/new/${mode}`} className="min-h-touch tap-feedback px-4 py-1 text-fg">
             {texts.modes[mode]}
           </Link>
         ))}
-        <Link href="/tournaments" className="min-h-touch px-4 py-1 text-fg">
+        <Link href="/tournaments" className="min-h-touch tap-feedback px-4 py-1 text-fg">
           {texts.tournaments}
         </Link>
       </nav>
@@ -78,7 +78,7 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
             <CardList label={overviewTexts.title}>
               {matches.map((m) => (
                 <CardRow key={m.id}>
-                  <Link href={`/match/${m.id}`} className="flex min-h-touch w-full items-center justify-between gap-3">
+                  <Link href={`/match/${m.id}`} className="tap-row flex min-h-touch items-center justify-between gap-3 tap-feedback">
                     <span className="truncate">{m.names.join(" · ")}</span>
                     <span className="shrink-0 text-sm text-fg-muted">
                       {modePrefix(m.mode, texts)}
@@ -99,7 +99,7 @@ export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Pr
             <CardList label={overviewTexts.recent}>
               {recent.map((m) => (
                 <CardRow key={m.id}>
-                  <Link href={`/match/${m.id}`} className="flex min-h-touch w-full flex-col justify-center py-1">
+                  <Link href={`/match/${m.id}`} className="tap-row flex min-h-touch flex-col justify-center tap-feedback py-1">
                     <span className="flex items-baseline justify-between gap-3">
                       <span className="truncate">{m.names.join(" · ")}</span>
                       <span className="shrink-0 text-sm text-fg-muted">

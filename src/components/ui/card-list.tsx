@@ -57,7 +57,7 @@ export function CardRow({
 export function CardLinkRow({ href, label, detail }: { href: string; label: string; detail?: string }) {
   return (
     <li className="list-none border-b border-separator last:border-b-0">
-      <Link href={href} className="flex min-h-row w-full items-center justify-between gap-3 py-2">
+      <Link href={href} className="tap-row flex min-h-row items-center justify-between gap-3 tap-feedback py-2">
         <span className="font-medium">{label}</span>
         <span className="flex items-center gap-2 text-sm text-fg-muted">
           {detail}

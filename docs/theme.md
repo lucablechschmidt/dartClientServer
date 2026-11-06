@@ -106,4 +106,5 @@ Regeln:
 2. Nur `transform` und `opacity` (Ausnahme: das Aufklappen in der Höhe über `grid-template-rows`), keine Bibliothek, keine Federn, kein Wackeln.
 3. Erscheinen läuft als Keyframe-Animation beim Einhängen (`animate-*`, Keyframes in `globals.css`); Verschwinden ist sofort.
 4. Zählen bleibt sofort: Keine Animation verzögert eine Eingabe, einen Spielerwechsel oder einen Screen. Punktestände zählen nie hoch oder runter.
-5. Neue Dauern oder Kurven werden Tokens; `duration-300` und Ad-hoc-Kurven gibt es nicht.
+5. Tippbare Zeilen und Links nehmen `tap-feedback` (Grund dunkelt beim Drücken sofort ab und blendet beim Loslassen aus), Zeilen in Karten zusätzlich `tap-row` statt `w-full`.
+6. Neue Dauern oder Kurven werden Tokens; `duration-300` und Ad-hoc-Kurven gibt es nicht.

@@ -114,7 +114,7 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
               return (
                 <CardRow key={m.id}>
                   {m.detail ? (
-                    <Link href={`/match/${m.id}/stats`} className="flex min-h-touch w-full items-center">
+                    <Link href={`/match/${m.id}/stats`} className="tap-row flex min-h-touch items-center tap-feedback">
                       {line}
                     </Link>
                   ) : (

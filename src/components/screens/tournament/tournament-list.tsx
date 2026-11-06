@@ -30,7 +30,7 @@ export function TournamentList({ items, texts: t, back }: { items: TournamentLis
             <CardList label={t.title}>
               {items.map((item) => (
                 <CardRow key={item.id}>
-                  <Link href={`/tournaments/${item.id}`} className="flex min-h-touch w-full flex-col justify-center py-1">
+                  <Link href={`/tournaments/${item.id}`} className="tap-row flex min-h-touch flex-col justify-center tap-feedback py-1">
                     <span className="flex items-baseline justify-between gap-3">
                       <span className="truncate font-medium">{item.name}</span>
                       <span className="shrink-0 text-sm text-fg-muted">{t.formats[item.format]}</span>
