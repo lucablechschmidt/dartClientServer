@@ -81,6 +81,17 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, hell
 | 8 | Statistik | Fortschrittsbalken („x von 21“) und die Linie im Average-Diagramm zeichnen sich beim ersten Anzeigen | mittel |
 | 9 | Seitenwechsel (Konto → Unterseite, Zurück) | Unterseite schiebt von rechts herein, Zurück nach rechts hinaus, wie die iOS-Navigation; über die View Transitions API (Next 16 experimentell, React `<ViewTransition>`) | groß, experimentell |
 
+### Vorschlag
+
+- **Schritt 1:** Tokens für Dauer und Kurve in `globals.css`, Abschnitt „Bewegung“ in `theme.md`, `/dev/theme` zeigt sie.
+- **Schritt 2:** die kleinen, typisch iOS wirkenden Kandidaten 1, 2, 5, 6 und 7, je ein Commit (`style(ui): …`, `style(scoreboard): …`), mit Screenshots, wo man es im Standbild sieht.
+- **Schritt 3:** 3 und 8, wenn dir Schritt 2 am Board gefällt.
+- **Später:** 9, sobald die View Transitions in Next stabil sind; bis dahin nicht.
+- **Bewusst nicht:**
+  - Federn, Wackeln oder Konfetti.
+  - Animationen beim Zählen, die auf etwas warten lassen.
+  - Animierte Zahlen (hoch- oder runterzählende Punktstände): Sie verzögern das Ablesen am Board.
+
 ### Fragen
 
 1. **Umfang:** Welche Kandidaten sollen umgesetzt werden? Default: 1, 2, 5, 6 und 7 (klein, sichtbar, typisch iOS); 3 und 8 danach; 9 erst, wenn die View Transitions in Next stabil sind.
