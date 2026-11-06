@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // Dev only: the dev server blocks /_next/* for any hostname but localhost, so a phone on the
+  // LAN gets server-rendered pages without hydration (every onClick button is dead). List the
+  // networks the dev machine is reached from; no effect on the production build.
+  allowedDevOrigins: ["141.100.*.*", "192.168.*.*", "10.*.*.*"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
