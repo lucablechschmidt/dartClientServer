@@ -62,12 +62,12 @@ Vorgehen:
 
 ---
 
-## Stand (5.11.2026)
+## Stand (6.11.2026)
 
-- **Fertig, DoD am Board offen:** M5 X01 vollständig, M6 Robustheit (Praxistest mit Flugmodus offen), M7 Cricket, Elimination, SplitScore, M8 Statistiken (Tab Konto, Ranglisten je Modus, Match-Seite; Turnier-Setzliste ausgelost oder festgelegt), M9 Turniere. M1–M4 sind am Handy abgenommen. Dazu die Board-Änderungen vom 5.11. (Tab „Verwaltung“, Spieler/Spiele/Turniere löschen, Eingabefelder im Setup, Elimination-Hinweis, nächster Spieler ab drei).
-- **Offen:** M10 Achievements (M8 ist da), M11 Sound und Komfort, M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/m6-plan.md` §7), später vielleicht ein Meilenstein Checkout-Quote. Ebenfalls offen aus M0: Entscheidung SD oder SSD (E6).
+- **Fertig, DoD am Board offen:** M5 X01 vollständig, M6 Robustheit (Praxistest mit Flugmodus offen), M7 Cricket, Elimination, SplitScore, M8 Statistiken (Tab Konto, Ranglisten je Modus, Match-Seite; Turnier-Setzliste ausgelost oder festgelegt), M9 Turniere, M10 Achievements (Galerie im Konto, Banner auf dem Sieg-Screen). M1–M4 sind am Handy abgenommen. Dazu die Board-Änderungen vom 5.11. (Tab „Verwaltung“, Spieler/Spiele/Turniere löschen, Eingabefelder im Setup, Elimination-Hinweis, nächster Spieler ab drei).
+- **Offen:** M11 Sound und Komfort, M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/m6-plan.md` §7), später vielleicht ein Meilenstein Checkout-Quote. Ebenfalls offen aus M0: Entscheidung SD oder SSD (E6).
 - **Deploy und Push macht Luca selbst.** Was auf dem Pi läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`. Admin dort ist `darts`. Die URL steht im README.
-- **Pläne** für die offenen Meilensteine liegen in `docs/m10-plan.md` bis `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code); `docs/m8-plan.md` ist abgeglichen und umgesetzt. Erledigte Pläne wandern erst nach der DoD am Board nach `docs/archive/`.
+- **Pläne** für die offenen Meilensteine liegen in `docs/m11-plan.md` und `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code); `docs/m8-plan.md` und `docs/m10-plan.md` sind abgeglichen und umgesetzt. Erledigte Pläne wandern erst nach der DoD am Board nach `docs/archive/`.
 - **Mehrsprachigkeit** ist vorbereitet, aber noch keine Sprachwahl gebaut: erst wenn eine zweite Sprache kommt (README „Adding a language“).
 
 ## So arbeiten wir

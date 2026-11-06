@@ -34,7 +34,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M7 | Cricket, Elimination, SplitScore | fertig, DoD am Board offen | M3b |
 | M8 | Statistiken und Reporting | fertig, DoD am Board offen | M5 |
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
-| M10 | Achievements | in Arbeit (Plan überarbeitet 5.11.2026) | M8 |
+| M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
 
@@ -247,9 +247,9 @@ Detailplan: `docs/m9-plan.md`.
 
 Detailplan: `docs/m10-plan.md`.
 
-- [ ] `src/domain/achievements/`: eine Erkennerfunktion je Achievement über `MatchState` aller Modi, Fortschritt für „alle Finishes“ (21 Doppel, nur Double Out); Tests mit Positiv- und Negativfall
-- [ ] Berechnet aus den beendeten Spielen (kein Hook, Undo und gelöschte Spiele stimmen von selbst, rückwirkend ohne Lauf); nur Achievements aus Gast-Spielen werden beim Aufräumen in `player_achievement` gesichert
-- [ ] Sieg-Screen-Banner „Neu: …“, Galerie in „Meine Statistik“ (nur die eigene); keine Spalte in den Ranglisten
+- [x] `src/domain/achievements/`: eine Erkennerfunktion je Achievement über `MatchState` aller Modi, Fortschritt für „alle Finishes“ (21 Doppel, nur Double Out); Tests mit Positiv- und Negativfall
+- [x] Berechnet aus den beendeten Spielen (kein Hook, Undo und gelöschte Spiele stimmen von selbst, rückwirkend ohne Lauf); nur Achievements aus Gast-Spielen werden beim Aufräumen in `player_achievement` gesichert
+- [x] Sieg-Screen-Banner „Neu: …“, Galerie in „Meine Statistik“ (nur die eigene); keine Spalte in den Ranglisten
 
 **DoD:** 180 im Spiel zeigt das Banner und steht in der Galerie; Undo nimmt es zurück; alte Matches haben ihre 180er sofort.
 

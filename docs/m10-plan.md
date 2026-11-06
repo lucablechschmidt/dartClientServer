@@ -1,7 +1,7 @@
 # M10-Plan – Achievements
 
 > Detailplan zu `project.md` M10 (aus dem Backlog, Idee von Luca). Achievements sind Auszeichnungen, die ein Spieler einmal verdient und behält; sie werden aus den Aufnahmen erkannt, wie alles andere (Architektur §6). Test-first, jeder grüne Schritt ein Commit (`feat(achievements): …`).
-> Stand: überarbeitet am 5.11.2026 nach dem Abgleich mit dem Code (M8 rechnet alles aus den beendeten Spielen) und Lucas Antworten (§9). Erste Fassung vom 23.10.2026.
+> Stand: umgesetzt am 6.11.2026 (Schritte 1–7, §6), DoD am Board offen (§7). Plan überarbeitet am 5.11.2026 nach dem Abgleich mit dem Code und Lucas Antworten (§9), erste Fassung vom 23.10.2026. Abweichung bei der Umsetzung: der Banner lädt über eine eigene Server-Action (`newAchievementsAction`), sobald das Spiel auf dem Server gespeichert ist, statt mit der Match-Ansicht mitzukommen; die Galerie ist eine ausklappbare Karte „Erfolge“ im Konto.
 
 ---
 

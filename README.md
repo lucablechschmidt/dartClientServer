@@ -84,6 +84,10 @@ Anyone can add a guest in the game setup ("Gast hinzufügen"). Guests stay in th
 
 Konto shows **"Meine Statistik"**, only one's own (the admin too): games, wins, the X01 average (as in the old app, a bust counts as 0 points and as a visit), first nine, 180 / 140+ / 100+, highest score and finish, best leg per start score, the average per game as a line, the field hits on a dartboard and the last games. "Alles / Dieses Jahr / 30 Tage" filters by time. Below, one folding **ranking per mode** with its own Elo (1-vs-1 games only, start 1000, K 32): folded it shows one's own place and Elo, open everyone with place, Elo and games. Only finished games without guests count. An X01 game has its own page per leg (`/match/<id>/stats`), only for its players, linked from the victory screen and the last games. Details: `docs/m8-plan.md`.
 
+### Achievements
+
+Konto → "Erfolge" lists the ten achievements (180, Gone Fishing, 9-Darter, Shanghai, Gotta catch 'Em All!, First Blood, the three SplitScore ones and Done but not finished), earned ones with their time, open ones with how to get them. The victory screen shows "Neu für …" for what a game earned that no earlier game had. They are computed from the finished games like the statistics, so undo and deleted games take them back and old games count too; only those from guest games are saved before the guest games are deleted. Details: `docs/m10-plan.md`.
+
 ## Testing
 
 ```bash

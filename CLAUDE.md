@@ -82,6 +82,8 @@ Guests (E12): `player.guest_until` set = guest, listed 24 h, their matches are d
 `src/server/guest-cleanup.ts` (started from `instrumentation.ts`) after saving regular players'
 field hits to `player_field_hits`. Statistics (M8): `src/domain/stats/` (pure figures, Elo per mode),
 `src/server/stats-service.ts`, charts are own SVG (`Dartboard`, `AverageChart`), no chart library.
+Achievements (M10): `src/domain/achievements/`, `src/server/achievement-service.ts`; computed from the finished
+games, only guest-game ones are saved at clean-up (`player_achievement`).
 
 Writes: every service that writes more than once wraps them in `deps.transaction(() => …)`
 (synchronous; bcrypt before it). Service tests build deps with `memoryDeps()`; atomicity is
