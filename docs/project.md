@@ -37,6 +37,8 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
+| M13 | Code-Review und Konsolidierung | geplant, eigener Meilenstein | – |
+| M14 | Styling: Desktop-Layout, dezente Animationen | in Arbeit (Teil A) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; erledigte liegen in `docs/archive/`.
 
@@ -288,6 +290,40 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 - [ ] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen
 
 **DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E16 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
+
+---
+
+## M13 – Code-Review und Konsolidierung
+
+**Ziel:** Die Befunde aus dem Review (6.11.2026) abarbeiten, ohne Verhalten zu ändern, außer wo der Befund ein Fehler ist.
+
+Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
+
+- [ ] Paket A – Eingabevalidierung und Fehlerfluss
+- [ ] Paket B – Pi-Ressourcen, danach Messung mit der Pi-Datenbank
+- [ ] Paket C – Client-Lebenszyklus und Rückmeldung
+- [ ] Paket D – Konsolidierung und Doku
+- [ ] Paket E – Große Module teilen
+- [ ] Paket F – Barrierefreiheit
+
+**DoD:** siehe `docs/m13-plan.md` §3.
+
+---
+
+## M14 – Styling
+
+**Ziel:** Die Tab-Seiten sehen auf Tablet und Desktop aufgeräumt aus, und die App bewegt sich dezent wie unter iOS, ohne das Zählen zu verzögern.
+
+Detailplan: `docs/m14-plan.md`.
+
+- [ ] Average-Diagramm mit fester Höhe und Schrift (§2.1)
+- [ ] `PageFrame` mit schmaler und breiter Spalte, Abschnitt „Breiten“ in `theme.md` (§2.2)
+- [ ] Statistik: im breiten Rahmen Diagramm und Dartscheibe nebeneinander, letzte Spiele unten (§2.3)
+- [ ] Bewegungs-Tokens, Abschnitt „Bewegung“ in `theme.md` (§4.2)
+- [ ] Animationen 1, 2, 5, 6, 7 (§4.3)
+- [ ] nach Abnahme am Board: Animationen 3 und 8 (§4.4)
+
+**DoD:** siehe `docs/m14-plan.md` §5.
 
 ---
 

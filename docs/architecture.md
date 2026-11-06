@@ -325,7 +325,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 **Ist.** Alle Tokens stehen in `src/app/globals.css`: Farben als CSS-Variablen auf `:root` mit `light-dark()` (Dark folgt `color-scheme`; `data-theme` setzt nur `color-scheme`), eingebunden über `@theme inline` als `--color-*`, dazu `--radius-*`, `--shadow-floating`, `--text-*`, `--spacing-*` und `@utility` für wiederkehrende Layouts (`score-grid`, `header-grid`, `pt-safe` …). Komponenten verwenden ausschließlich die daraus erzeugten Klassen. Verboten und per ESLint geprüft (`eslint.config.mjs`, `better-tailwindcss/no-restricted-classes`, `react/forbid-dom-props`): `style={…}`, beliebige Werte `-[…]`, rohe Radien, `/Deckkraft`-Tönungen, rohe Schatten, `text-2xl` und größer, `white`/`black`. Texte kommen aus `src/i18n/de.ts`. Das Review fand keine Verletzung; der einzige Hover-Zustand (`theme-toggle.tsx`) widerspricht §8 und entfällt (**Ziel F**, R-30).
 
-**Neue Werte** werden Tokens in `globals.css` und bekommen eine Zeile in `theme.md` §1 bzw. §3; neue Bausteine einen Eintrag auf `/dev/theme`. Breiten (`max-w-xl` je Baustein) sind in `docs/fragen.md` §1 als `PageFrame` vorgeschlagen und zurückgestellt. Bewegung (Dauer, Kurve) ist in `docs/fragen.md` §2 vorgeschlagen.
+**Neue Werte** werden Tokens in `globals.css` und bekommen eine Zeile in `theme.md` §1 bzw. §3; neue Bausteine einen Eintrag auf `/dev/theme`. Breiten (`PageFrame`) und Bewegung (Dauer, Kurve) kommen mit M14 (`docs/m14-plan.md`) und stehen dann in `theme.md` §4 und §5.
 
 ### 12.6 Komponentenstruktur und Namen
 
