@@ -43,7 +43,7 @@ export function LegVictoryScreen({ view, names, texts, canUndo, onContinue, onUn
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onContinue();
         }}
-        className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4 pt-safe pb-safe text-fg"
+        className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4 pt-safe pb-safe text-fg motion-safe:animate-fade-in"
       >
         <p className="text-fluid-xl font-semibold">{texts.legWon.replace("{name}", winner)}</p>
         <p className="text-fluid-lg tabular-nums">{scoreLine(view, players, texts)}</p>

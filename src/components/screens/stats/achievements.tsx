@@ -85,7 +85,11 @@ export function AchievementBanner({ load, ready, texts: t }: { load: () => Promi
   }, [ready, news, load]);
   if (!news || news.length === 0) return null;
   return (
-    <section aria-label={t.title} aria-live="polite" className="flex flex-col gap-1 rounded-panel bg-accent-wash px-4 py-3">
+    <section
+      aria-label={t.title}
+      aria-live="polite"
+      className="flex flex-col gap-1 rounded-panel bg-accent-wash px-4 py-3 motion-safe:animate-drop-in"
+    >
       {news.map((n) => (
         <p key={n.playerId} className="flex items-start gap-2 text-fluid-sm">
           <MedalIcon className="size-icon shrink-0 text-accent" />

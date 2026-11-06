@@ -46,7 +46,7 @@ export function VictoryScreen({
   // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
   return (
     <div className="flex h-full flex-col overflow-y-auto">
-      <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2">
+      <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2 motion-safe:animate-rise-in">
         <div className="text-center">
           <p className="text-fluid-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
           <p className="text-fluid-sm text-fg-muted tabular-nums">

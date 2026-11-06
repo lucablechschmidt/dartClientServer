@@ -136,6 +136,8 @@
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-ios);
   --animate-pop-in: pop-in var(--duration-fast) var(--ease-ios);
   --animate-settle: settle var(--duration-fast) var(--ease-ios);
+  --animate-rise-in: rise-in var(--duration-slow) var(--ease-ios);
+  --animate-drop-in: drop-in var(--duration-slow) var(--ease-ios);
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -161,6 +163,21 @@
   @keyframes settle {
     from {
       transform: scale(0.9);
+    }
+  }
+
+  /* Victory screen content: fades in while moving up a little */
+  @keyframes rise-in {
+    from {
+      transform: translateY(0.75rem);
+      opacity: 0;
+    }
+  }
+  /* Achievement banner: comes in from above */
+  @keyframes drop-in {
+    from {
+      transform: translateY(-0.75rem);
+      opacity: 0;
     }
   }
 
