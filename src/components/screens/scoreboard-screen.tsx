@@ -22,6 +22,7 @@ import { CricketBoard } from "./cricket-board";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
 import { headerTitle, ScoreboardHeader } from "./scoreboard-header";
 import { StandardBoard } from "./standard-board";
+import { AchievementBanner, type NewAchievementsView } from "./stats/achievements";
 import { VictoryScreen } from "./victory-screen";
 
 export type { MatchViewLike };
@@ -41,6 +42,10 @@ type Props = {
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
   onCancel: (matchId: string) => Promise<unknown>;
+  /** M10: what the finished game brought each player that is new (the victory screen's banner). */
+  onLoadAchievements?: (matchId: string) => Promise<NewAchievementsView>;
+  /** M10: the achievement texts for the banner. */
+  achievementTexts?: Texts["achievements"];
 };
 
 /** Identifies one finished-leg state, so closing the leg victory screen survives re-renders but not an undo. */
@@ -63,10 +68,16 @@ export function ScoreboardScreen({
   onRestart,
   onCancel,
   tournamentHref,
+  onLoadAchievements,
+  achievementTexts,
 }: Props) {
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
+  const loadAchievements = useCallback(
+    () => (onLoadAchievements ? onLoadAchievements(initial.id) : Promise.resolve([])),
+    [onLoadAchievements, initial.id],
+  );
   const { state, sync, error, isOpen, pending, stale, throwDart, undo, playOut, chooseStarter, decide, retryNow, discard } =
     useVisitSync<Reason>({
       initial,
@@ -160,6 +171,9 @@ export function ScoreboardScreen({
               onPlayOut={playOutOk ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
               tournamentHref={tournamentHref}
+              achievements={
+                achievementTexts && <AchievementBanner load={loadAchievements} ready={sync === "saved"} texts={achievementTexts} />
+              }
               statsHref={
                 view.board.mode === "x01" && actor !== null && initial.match.players.some((p) => p.id === actor.id)
                   ? `/match/${initial.id}/stats?from=match`

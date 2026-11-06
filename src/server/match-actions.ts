@@ -15,6 +15,7 @@ import {
   type ActionError,
   type ActionResult,
 } from "./match-service";
+import { newInMatch, type NewAchievements } from "./achievement-service";
 import { log } from "./log";
 import { requireSession } from "./request";
 import { formText, formTexts } from "./form";
@@ -86,4 +87,10 @@ export async function cancelMatchAction(matchId: string): Promise<{ ok: true } |
     redirect("/");
   }
   return r;
+}
+
+/** M10: the victory screen's banner, what the finished game brought each player that is new. */
+export async function newAchievementsAction(matchId: string): Promise<NewAchievements[]> {
+  const { deps } = await requireSession();
+  return newInMatch(deps, matchId);
 }

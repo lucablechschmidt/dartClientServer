@@ -189,3 +189,14 @@ export function PlusIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** medal (M10 achievements) */
+export function MedalIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M8 3l2.5 6M16 3l-2.5 6" />
+      <circle cx="12" cy="15" r="6" />
+      <path d="M12 12l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3z" />
+    </svg>
+  );
+}

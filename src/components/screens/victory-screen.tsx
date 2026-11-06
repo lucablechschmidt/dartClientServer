@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { MatchBoardView } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 import { scoreLine } from "./leg-victory-screen";
@@ -15,12 +16,24 @@ type Props = {
   pending: boolean;
   /** M8: the X01 match page, only for the match's players. */
   statsHref?: string;
+  /** M10: the banner with newly earned achievements, below the result. */
+  achievements?: ReactNode;
 };
 
 const button = "min-h-touch w-full rounded-tile px-4 font-medium";
 
 /** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
-export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPlayOut, pending, tournamentHref, statsHref }: Props) {
+export function VictoryScreen({
+  view,
+  texts,
+  onUndoWinningDart,
+  onRestart,
+  onPlayOut,
+  pending,
+  tournamentHref,
+  statsHref,
+  achievements,
+}: Props) {
   const players = view.board.players;
   const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
@@ -53,6 +66,7 @@ export function VictoryScreen({ view, texts, onUndoWinningDart, onRestart, onPla
             <p className="text-fluid-sm tabular-nums">{texts.total.replace("{n}", String(view.board.total))}</p>
           )}
         </div>
+        {achievements}
         <ul className="flex flex-col gap-1 text-fluid-sm">
           {others.map((p) => (
             <li key={p.id} className="flex justify-between gap-2 tabular-nums">

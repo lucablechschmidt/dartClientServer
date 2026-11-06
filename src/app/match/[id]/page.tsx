@@ -10,6 +10,7 @@ import {
   setPlayOutAction,
   setStarterAction,
   decideWinnerAction,
+  newAchievementsAction,
   undoVisitAction,
 } from "@/server/match-actions";
 import { loadMatchView } from "@/server/match-service";
@@ -35,6 +36,8 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
       onLoad={loadMatchAction}
       onRestart={restartMatchAction}
       onCancel={cancelMatchAction}
+      onLoadAchievements={newAchievementsAction}
+      achievementTexts={de.achievements}
     />
   );
 }
