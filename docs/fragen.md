@@ -43,11 +43,11 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, hell
 
 ### Fragen
 
-1. **Umfang:** Was soll umgesetzt werden: nur A und B, alles (A–D) oder einzelne Punkte? Default: zuerst A und B, getrennt committet, danach C und D nach deinem Blick auf die Screenshots.
+1. **Umfang:** Was soll umgesetzt werden: nur A und B, alles (A–D) oder einzelne Punkte? Default: zuerst A und B, getrennt committet, danach C und D nach deinem Blick auf die Screenshots. Antwort: A wie beschrieben, B Handy alle untereinander im breiten rahmen average und dartscheibe nebeneinander, letztes spiele immer ganz unten, rest gut; C, D nochmal auf später verschieben keine entscheidung jetzt
 2. **Diagramm-Fix:** Soll der Fix des Average-Diagramms (Punkt 2 im Befund) vorgezogen werden, auch wenn der Rest wartet? Default: ja, er ist auch auf dem Tablet ein Fehler.
 3. **Breiten:** Passen schmal `max-w-xl` (576 px) und breit `max-w-5xl` (1024 px)? Default: ja.
 4. **Seitenleiste:** Bleibt es beim Verzicht auf eine Seitenleiste für den Desktop? Default: ja, die Tab-Leiste bleibt unten.
-5. **Wohin damit:** Gehört die Umsetzung als Punkt in `docs/m11-plan.md` (Komfort) oder als eigener kleiner Plan? Default: Abschnitt in M11.
+5. **Wohin damit:** Gehört die Umsetzung als Punkt in `docs/m11-plan.md` (Komfort) oder als eigener kleiner Plan? Default: Abschnitt in M11. Antwort: Styling als eigener Meilenstein
 
 ---
 
@@ -94,7 +94,7 @@ Grundlage sind die Screenshots `docs/screenshots/*-desktop.png` (1440×900, hell
 
 ### Fragen
 
-1. **Umfang:** Welche Kandidaten sollen umgesetzt werden? Default: 1, 2, 5, 6 und 7 (klein, sichtbar, typisch iOS); 3 und 8 danach; 9 erst, wenn die View Transitions in Next stabil sind.
+1. **Umfang:** Welche Kandidaten sollen umgesetzt werden? Default: 1, 2, 5, 6 und 7 (klein, sichtbar, typisch iOS); 3 und 8 danach; 9 erst, wenn die View Transitions in Next stabil sind. Antwort wie im Vorschlag, mit 3 und 8 erst nach abnahme am Board, 9 erstmal gar nicht
 2. **Zählscreen:** Sind die Animationen aus 6 im Zählscreen gewünscht, oder soll er ganz ruhig bleiben? Default: ja, aber nur 6, und nur ohne Verzögerung.
 3. **Reduzierte Bewegung:** Reicht die Systemeinstellung, oder soll es zusätzlich einen Schalter in der App geben (wie den Theme-Schalter)? Default: nur die Systemeinstellung.
-4. **Wohin damit:** Gehört das als Abschnitt „Animationen“ in `docs/m11-plan.md` (Komfort) oder als Prompt-A-Kleinkram jetzt sofort? Default: Abschnitt in M11, ein Commit pro Kandidat.
+4. **Wohin damit:** Gehört das als Abschnitt „Animationen“ in `docs/m11-plan.md` (Komfort) oder als Prompt-A-Kleinkram jetzt sofort? Default: Abschnitt in M11, ein Commit pro Kandidat. Antwort: Mit "Responsives Layout auf dem Desktop" in einen eigenen Meilenstein "Styling"

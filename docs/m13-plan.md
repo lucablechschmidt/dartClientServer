@@ -37,7 +37,7 @@ Priorität: **hoch** = Fehlverhalten oder Risiko für Nutzer/Pi, **mittel** = ve
 ### 2.1 Architektur und Schichten
 
 | # | Kategorie | Fundstelle | Problem | Begründung | Vorschlag | Prio | Aufwand | Paket |
-|---|---|---|---|---|---|---|---|---|
+|---|-----------|------------|---------|------------|-----------|------|---------|-------|
 | R-02 | Validierung / Fehlerfluss | `src/server/match-actions.ts:34–35` (Cast `as "single" \| "double" \| "triple"`), `src/server/match-service.ts:227` (`newMatchSchema.parse`), `src/server/tournament-service.ts:63`, `src/server/player-service.ts:28, 39, 54` (`playerNameSchema.parse`) | Formularwerte werden in den Actions ohne Prüfung gecastet; die Schemas sitzen in den Services und werfen (`parse`) statt `safeParse` → `Result`. Ein leerer oder 41 Zeichen langer Name, ein manipuliertes `startScore` oder ein Doppel-Submit ohne Spieler enden als `ZodError` in `error.tsx`. | `architecture.md` §9: „Server Actions antworten mit `Result`-Werten, Ausnahmen sind Bugs.“ §3: „Zod: Eingaben aus Server Actions prüfen“; `m12-plan.md` §5a: „jede Action validiert mit Zod“. Heute hält nur die HTML-Validierung (`required`, `maxLength`) das ab. | Ein Schema je Action-Eingabe (FormData → `safeParse`) am Rand der Action; Services nehmen bereits typisierte Werte oder liefern `{ ok: false, reason: "invalid-input" }`. Setup-Screens zeigen den Fehler am Formular (wie `AddRow`); Muster in `architecture.md` §12.3. | hoch | M | A |
 | R-06 | Berechtigung | `src/server/match-actions.ts:76` (`restartMatchAction`), `src/server/match-service.ts:444` (`restartMatch` ohne `Session`) | „Restart“ prüft keine Berechtigung: jede Session kann zu jedem Match ein neues mit denselben Spielern anlegen; `hostPlayerId` bleibt der alte Host. | Alle anderen Match-Mutationen laufen über `permissions.ts`; nur diese nicht. Im Heimnetz ohne Folgen, aber eine Lücke in der Regel „Objektrechte nur im Service“ (`m12-plan.md` §5a). | `restartMatch(deps, session, matchId)` mit `canCancel`-ähnlicher Regel (Host oder Admin, oder Teilnehmer), Host = Session. Test im `match-service.test.ts`. | mittel | S | A |
 | R-07 | DRY | `src/server/player-actions.ts:9` und `src/server/admin-actions.ts:27` (`touched`), `src/server/match-actions.ts:24` und `src/server/tournament-actions.ts:10` (`toWin`), `src/server/tournament-service.ts:23` und `src/server/match-service.ts:60` (`formatSchema`, einmal mit, einmal ohne Defaults), `src/app/(site)/account/stats/page.tsx:10` und `src/components/screens/stats/my-stats.tsx:24` (`RANGES`) | Vier Hilfsfunktionen bzw. Konstanten sind kopiert statt geteilt. | Kleine Kopien driften; `formatSchema` tut es schon (Defaults). | `src/server/form.ts` bekommt `bestOfToWin`; `revalidateAfterPlayers()` in ein Modul `src/server/revalidate.ts`; `formatSchema` aus `match-service` importieren; `STATS_RANGES` nach `src/domain/stats/aggregate.ts` neben `StatsRange`. | niedrig | S | D |
@@ -218,13 +218,13 @@ Beim Abgleich Doku ↔ Code aufgefallen; in `architecture.md` markiert, aber nic
 
 ## 6. Offene Fragen (Defaults gelten ohne Antwort)
 
-1. **Einordnung:** M13 als eigener Meilenstein nach M12, oder Pakete A–C vor M11 ziehen? Default: A und B vor M11 (Risiken 1–3), C–F nach Lust zwischen M11-Punkten; die Nummer bleibt M13.
+1. **Einordnung:** M13 als eigener Meilenstein nach M12, oder Pakete A–C vor M11 ziehen? Default: A und B vor M11 (Risiken 1–3), C–F nach Lust zwischen M11-Punkten; die Nummer bleibt M13. Antwort: M13 als eigener Meilensteil
 2. **Validierungsfehler im Setup (R-02):** Fehlertext über dem Start-Button (Default) oder Fehlerseite in Kauf nehmen, weil die HTML-Validierung reicht? Default: Fehlertext, weil die Regel „keine Ausnahmen“ sonst nicht gilt.
 3. **Typ-Imports über die Schichtgrenze (R-08):** `import type` aus `@/server` in Komponenten erlauben (Default) oder ein `src/server/views.ts` ohne Laufzeit-Imports freigeben? Default: `allowTypeImports` für `@/server/*`, dokumentiert in §12.1.
 4. **Richtwert Dateigröße (R-25):** Screens 200 Zeilen und `ui`-Bausteine 150 (Default), oder überall 150?
 5. **Pending-Zustand (R-16):** eigener Hook `useAsyncAction` (Default) oder überall `useTransition` direkt?
 6. **`synchronous = NORMAL` (R-21):** einverstanden, dass bei Stromausfall die letzten Aufnahmen fehlen können (E14 akzeptiert mehr)? Default: ja.
-7. **Session abgelaufen im Spiel (R-19):** Hinweis mit Link (Default) oder Umleitung wie heute?
+7. **Session abgelaufen im Spiel (R-19):** Hinweis mit Link (Default) oder Umleitung wie heute? Antwort Umleitung
 
 ## 7. Protokoll der Messungen
 
