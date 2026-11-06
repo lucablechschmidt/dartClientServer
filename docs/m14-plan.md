@@ -104,7 +104,7 @@ Hinweis zu M13 Paket F: Wird `ConfirmSheet` dort auf `<dialog>` umgestellt, zieh
 | 3 | `PillLinks`, Optionspillen | die Markierung gleitet zur gewählten Option (Segmented Control) |
 | 8 | Statistik | Fortschrittsbalken und Average-Linie zeichnen sich beim ersten Anzeigen |
 
-Kandidat 4 (Tab-Leiste blendet über) steht nicht in der Antwort und bleibt offen.
+Kandidat 4 (Tab-Leiste blendet weich über, kein Gleiten): von Luca am 6.11.2026 nachgereicht, umgesetzt.
 
 ---
 

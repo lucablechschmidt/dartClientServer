@@ -320,7 +320,7 @@ Detailplan: `docs/m14-plan.md`.
 - [x] `PageFrame` mit schmaler und breiter Spalte, Abschnitt „Breiten“ in `theme.md` (§2.2)
 - [x] Statistik: im breiten Rahmen Diagramm und Dartscheibe nebeneinander, letzte Spiele unten (§2.3)
 - [x] Bewegungs-Tokens, Abschnitt „Bewegung“ in `theme.md` (§4.2)
-- [x] Animationen 1, 2, 5, 6, 7 (§4.3)
+- [x] Animationen 1, 2, 4, 5, 6, 7 (§4.3)
 - [ ] nach Abnahme am Board: Animationen 3 und 8 (§4.4)
 
 **DoD:** siehe `docs/m14-plan.md` §5.

@@ -8,7 +8,8 @@ export type TabItem = { href: string; label: string; icon: ReactNode };
 
 /**
  * Port of the TabView from HomeView: pill at the bottom, active tab in the accent color. It sits below
- * the scrolling content instead of floating over it, so it never covers buttons in long lists.
+ * the scrolling content instead of floating over it, so it never covers buttons in long lists. The bar
+ * stays mounted across the tab pages, so the active tab's marking cross-fades to the new one.
  */
 export function TabBar({ items, label }: { items: TabItem[]; label: string }) {
   const pathname = usePathname();
@@ -22,7 +23,7 @@ export function TabBar({ items, label }: { items: TabItem[]; label: string }) {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-touch min-w-tab flex-col items-center justify-center gap-0.5 rounded-full px-2.5 text-xs font-semibold whitespace-nowrap ${active ? "bg-fill-strong text-accent" : "text-fg"}`}
+                className={`flex min-h-touch min-w-tab flex-col items-center justify-center gap-0.5 rounded-full px-2.5 text-xs font-semibold whitespace-nowrap motion-safe:transition-colors motion-safe:duration-base motion-safe:ease-ios ${active ? "bg-fill-strong text-accent" : "text-fg"}`}
               >
                 <span className="h-7 w-7">{item.icon}</span>
                 {item.label}
