@@ -12,6 +12,8 @@ if [ ! -f .next/standalone/server.js ]; then
   exit 1
 fi
 rm -rf "$SA" && cp -R .next/standalone "$SA" && mkdir -p "$SA/.next" && cp -R .next/static "$SA/.next/static" && cp -R public drizzle "$SA/"
+# The standalone build carries the developer's .env; Next would expand the $ in the test hash against it.
+rm -f "$SA"/.env*
 
 HASH="$(node -e "console.log(require('bcryptjs').hashSync(process.env.ADMIN_PASSWORD || 'admin-secret', 4))")"
 cd "$SA"
