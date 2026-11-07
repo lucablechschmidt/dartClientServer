@@ -1,5 +1,7 @@
-import { checkoutHint } from "../checkouts";
+import { visitCheckoutHint } from "../checkouts";
 import { slotsOf, type PlayerPanelData, type ScoreboardView } from "../game/board";
+import { visitScore } from "../game/scoring";
+import { previousVisit } from "../game/visits";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId } from "../game/types";
 import {
   checkoutOrder,
@@ -23,8 +25,10 @@ export function projectScoreboard(state: LegState, names: Record<PlayerId, strin
   const open = currentVisit(state);
   const next = isLegFinished(state) ? active : nextPlayer(state, active);
   const dartsLeft = winner ? 0 : MAX_DARTS_PER_VISIT - open.darts.length;
-  const rest = scoreOf(state, active);
-  const hint = winner ? null : checkoutHint(rest, dartsLeft);
+  // The hint follows the route suggested at the start of the visit (checkouts.ts), so it needs the rest before it.
+  const hint = winner ? null : visitCheckoutHint(scoreOf(state, active) + visitScore(open), open.darts);
+  // Playing alone, the previous visit shows faintly behind the slots to make a wrong entry easy to spot.
+  const alone = state.players.length === 1;
 
   const out = checkoutOrder(state);
   const places = state.players.length > 2 ? placements(state) : [];
@@ -39,7 +43,7 @@ export function projectScoreboard(state: LegState, names: Record<PlayerId, strin
       average: threeDartAverage(state, id),
       isActive,
       isWinner: id === winner,
-      slots: slotsOf(visit, isActive, winner !== null),
+      slots: slotsOf(visit, isActive, winner !== null, alone ? previousVisit(state, id, visit) : null),
       isBust: visit.isBust,
       placement: places.length > 0 && out.includes(id) ? places.indexOf(id) + 1 : null,
       isOut: state.players.length > 2 && out.includes(id),

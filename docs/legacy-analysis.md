@@ -54,7 +54,7 @@
 
 **Anwurf**: Button „ToStart“ im Spieler-Panel, nur solange noch kein Dart geworfen ist, und nur bei genau 2 Spielern. **Restart** setzt alles zurück und lässt den **letzten** Spieler der Reihenfolge anfangen (Anwurf wechselt).
 
-**Checkout-Hinweis** (`Checkouts.swift`): drei Tabellen Rest → Finish-Weg, für 3, 2 und 1 verbleibende Darts (z. B. 170 → „T20, T20, Bullseye“). Angezeigt wird der erste Eintrag, sobald der Rest mit den verbleibenden Darts der aktuellen Aufnahme ausmachbar ist.
+**Checkout-Hinweis** (`Checkouts.swift`): drei Tabellen Rest → Finish-Weg, für 3, 2 und 1 verbleibende Darts (z. B. 170 → „T20, T20, Bullseye“). Angezeigt wird der erste Eintrag, sobald der Rest mit den verbleibenden Darts der aktuellen Aufnahme ausmachbar ist. Abweichung im Port (7.11.2026): eine Tabelle mit dem kürzesten Weg statt drei (50 → DBull, 110 → T20 DBull), vier Einträge rechneten nicht auf (10, 53, 86, 143), und der Hinweis bleibt innerhalb einer Aufnahme auf dem begonnenen Weg.
 
 **Sieg-Screen**: „You Win! Name“, Darts des Siegers, Average (per Tipp umschaltbar zwischen 3-Dart-Average und Average pro Dart), die anderen Spieler mit Rest sortiert, Buttons „Letzten Wurf rückgängig“, „Restart Game“ (gleiche Spieler, Anwurf wechselt), zurück ins Setup.
 

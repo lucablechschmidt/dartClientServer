@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { checkoutHint } from "../checkouts";
 import { applyDart, undoDart } from "./apply";
 import { newLeg } from "../game/state";
 import { currentPlayer, dartsThrown, openVisit, scoreOf, threeDartAverage, winnerOf } from "./selectors";
@@ -280,15 +279,5 @@ describe("replay", () => {
     const rebuilt = replay(s.players, s.rules, s.visits, s.starter);
     expect(rebuilt).toEqual(s);
     for (const p of [A, B, C]) expect(scoreOf(rebuilt, p)).toBe(scoreOf(s, p));
-  });
-});
-
-describe("checkoutHint", () => {
-  it("knows 170 with three darts but not with two", () => {
-    expect(checkoutHint(170, 3)).toBe("T20, T20, Bullseye");
-    expect(checkoutHint(170, 2)).toBeNull();
-    expect(checkoutHint(40, 1)).toBe("D20");
-    expect(checkoutHint(1, 3)).toBeNull();
-    expect(checkoutHint(32, 0)).toBeNull();
   });
 });
