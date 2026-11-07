@@ -10,6 +10,7 @@ import {
   playerOnTurn,
   pointsPerVisit,
   popDart,
+  previousVisit,
   shownVisit,
   withDart,
 } from "../game/visits";
@@ -52,6 +53,7 @@ export const splitscore: GameMode = {
     const active = currentPlayer(state);
     const open = openVisit(state);
     const ranking = standings(state);
+    const alone = state.players.length === 1;
     const players = state.players.map((id): PlayerPanelData => ({
       id,
       name: names[id] ?? id,
@@ -60,7 +62,7 @@ export const splitscore: GameMode = {
       average: pointsPerVisit(state, id, open),
       isActive: id === active,
       isWinner: done && ranking[0].includes(id),
-      slots: slotsOf(shownVisit(state, id, active, open), id === active, done),
+      slots: slotsOf(shownVisit(state, id, active, open), id === active, done, alone ? previousVisit(state, id, open) : null),
       isBust: false,
       placement: null,
       isOut: false,

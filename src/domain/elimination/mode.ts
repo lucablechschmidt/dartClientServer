@@ -2,7 +2,17 @@ import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type Dart, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, nextSeat, lastOpenVisit, playerOnTurn, pointsPerVisit, popDart, shownVisit, withDart } from "../game/visits";
+import {
+  dartsOf,
+  nextSeat,
+  lastOpenVisit,
+  playerOnTurn,
+  pointsPerVisit,
+  popDart,
+  previousVisit,
+  shownVisit,
+  withDart,
+} from "../game/visits";
 import { gapAbove, isValidDart, nextElimination, scores } from "./scores";
 
 const OVERTHROWN: Dart = { field: 0, type: "overthrown" };
@@ -37,6 +47,7 @@ export const elimination: GameMode = {
     const done = s.winner !== null;
     const active = currentPlayer(state);
     const open = openVisit(state);
+    const alone = state.players.length === 1;
     const players = state.players.map((id): PlayerPanelData => {
       const visit = shownVisit(state, id, active, open);
       return {
@@ -47,7 +58,7 @@ export const elimination: GameMode = {
         average: pointsPerVisit(state, id, open),
         isActive: id === active,
         isWinner: id === s.winner,
-        slots: slotsOf(visit, id === active, done),
+        slots: slotsOf(visit, id === active, done, alone ? previousVisit(state, id, visit) : null),
         isBust: visit.isBust,
         placement: null,
         isOut: false,

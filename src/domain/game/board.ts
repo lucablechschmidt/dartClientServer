@@ -3,7 +3,8 @@ import { MAX_DARTS_PER_VISIT, type ModeId, type PlayerId, type Visit } from "./t
 
 /** Pure projection of a leg for the scoring screen, the same shape for every mode. Components get only this. */
 
-export type DartSlotView = { label: string | null; isCurrent: boolean; isOverthrown: boolean };
+/** `previous`: the dart in this slot of the player's last visit, shown faintly while the slot is empty (playing alone). */
+export type DartSlotView = { label: string | null; isCurrent: boolean; isOverthrown: boolean; previous: string | null };
 
 /** Cricket (M7): marks of one player on one field; `closed` = closed by every player. */
 export type CricketMark = { field: number; marks: number; closed: boolean };
@@ -55,21 +56,19 @@ export type ScoreboardView = {
 };
 
 /**
- * The three dart slots of a panel. `missed` marks darts that count nothing (SplitScore off the
- * target) like overthrown slots.
+ * The three dart slots of a panel. `previous` is the player's visit before `visit`; its darts show faintly in the
+ * empty slots of the player on turn, so a wrong entry is easy to spot when playing alone (M6 board test).
  */
-export function slotsOf(
-  visit: Visit,
-  isActive: boolean,
-  finished: boolean,
-  missed: (index: number) => boolean = () => false,
-): DartSlotView[] {
+export function slotsOf(visit: Visit, isActive: boolean, finished: boolean, previous: Visit | null = null): DartSlotView[] {
+  const ghost = isActive && !finished ? previous : null;
   return Array.from({ length: MAX_DARTS_PER_VISIT }, (_, i) => {
     const d = visit.darts.at(i);
+    const p = ghost?.darts.at(i);
     return {
       label: d ? dartLabel(d) : null,
       isCurrent: isActive && !finished && i === visit.darts.length,
-      isOverthrown: d?.type === "overthrown" || (d !== undefined && missed(i)),
+      isOverthrown: d?.type === "overthrown",
+      previous: !d && p ? dartLabel(p) : null,
     };
   });
 }

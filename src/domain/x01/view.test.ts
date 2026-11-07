@@ -102,3 +102,47 @@ describe("projectMatch (M5)", () => {
     expect(v.canChooseStarter).toBe(false);
   });
 });
+
+describe("previous visit behind the slots (playing alone)", () => {
+  const throwAll = (s: ReturnType<typeof newLeg>, darts: readonly Dart[]) => {
+    for (const d of darts) {
+      const r = applyDart(s, d);
+      if (r.ok) s = r.value;
+    }
+    return s;
+  };
+  const T20 = { field: 20, type: "triple" } as const;
+  const S5 = { field: 5, type: "single" } as const;
+
+  it("one player: the last visit shows faintly in the empty slots, entered darts cover it", () => {
+    const s = throwAll(newLeg(["a"], rules), [T20, S5, T20, S5]);
+    const slots = projectScoreboard(s, names).players[0].slots;
+    expect(slots.map((x) => x.label)).toEqual(["5", null, null]);
+    expect(slots.map((x) => x.previous)).toEqual([null, "5", "T20"]);
+  });
+
+  it("one player, fresh visit: all three slots show the previous visit; none before the first", () => {
+    expect(projectScoreboard(newLeg(["a"], rules), names).players[0].slots.map((x) => x.previous)).toEqual([null, null, null]);
+    const s = throwAll(newLeg(["a"], rules), [T20, S5, T20]);
+    expect(projectScoreboard(s, names).players[0].slots.map((x) => x.previous)).toEqual(["T20", "5", "T20"]);
+  });
+
+  it("two players: nothing behind the slots", () => {
+    const s = throwAll(newLeg(["a", "b"], rules), [T20, S5, T20, T20, T20, T20]);
+    for (const p of projectScoreboard(s, names).players) expect(p.slots.map((x) => x.previous)).toEqual([null, null, null]);
+  });
+
+  it("nothing once the leg is won", () => {
+    const s = throwAll(newLeg(["a"], { startScore: 100, inRule: "single", outRule: "double" }), [
+      S5,
+      S5,
+      S5,
+      T20,
+      S5,
+      { field: 10, type: "double" },
+    ]);
+    const v = projectScoreboard(s, names);
+    expect(v.winnerId).toBe("a");
+    expect(v.players[0].slots.map((x) => x.previous)).toEqual([null, null, null]);
+  });
+});

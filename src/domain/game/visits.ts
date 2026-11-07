@@ -59,6 +59,12 @@ export function shownVisit(state: LegState, player: PlayerId, active: PlayerId, 
   return state.visits.filter((v) => v.playerId === player).at(-1) ?? emptyVisit(player);
 }
 
+/** The closed visit of a player before `shown` (the one in the panel), for the faint previous visit behind the slots. */
+export function previousVisit(state: LegState, player: PlayerId, shown: Visit | null): Visit | null {
+  const own = state.visits.filter((v) => v.playerId === player);
+  return (own.at(-1) === shown ? own.at(-2) : own.at(-1)) ?? null;
+}
+
 /** All darts a player has thrown, overthrown slots included (legacy getPlayerDarts). */
 export const dartsOf = (state: LegState, player: PlayerId): number =>
   state.visits.filter((v) => v.playerId === player).reduce((n, v) => n + v.darts.length, 0);

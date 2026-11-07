@@ -190,6 +190,8 @@ Detailplan: `docs/m6-plan.md`.
 - [x] Playwright-Test für den Netz-Ausfall: Flugmodus während einer Aufnahme, danach ist alles gespeichert (`e2e/offline.spec.ts`); Warteschlange überlebt einen Reload, Hinweis nach 10 Minuten
 - [x] Playwright-Smoke-Test: Spieler anlegen → Match anlegen → Leg auschecken → Match-Ende (`e2e/`, ersetzt die Smoke-Skripte)
 - [ ] Deploy und **Praxistest am echten Board**
+  - [x] Befund 7.11.2026: Checkout-Hinweise geprüft, vier falsche Einträge (10, 53, 86, 143) korrigiert, immer der Weg mit den wenigsten Darts (50 → DBull), der Hinweis bleibt innerhalb der Aufnahme auf dem begonnenen Weg
+  - [x] Befund 7.11.2026: allein spielend steht die vorherige Aufnahme blass hinter den leeren Feldern, um Fehleingaben zu erkennen
 
 **DoD:** Ein komplettes Best-of-3-Match wird am Board gezählt. Danach wird der Flugmodus kurz ein- und wieder ausgeschaltet, und es geht nichts verloren.
 

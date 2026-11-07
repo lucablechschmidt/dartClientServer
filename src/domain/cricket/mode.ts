@@ -2,7 +2,7 @@ import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, lastOpenVisit, nextSeat, playerOnTurn, popDart, shownVisit, withDart } from "../game/visits";
+import { dartsOf, lastOpenVisit, nextSeat, playerOnTurn, popDart, previousVisit, shownVisit, withDart } from "../game/visits";
 import { closedFields, CRICKET_FIELDS, isClosedForAll, tally } from "./tally";
 
 const finished = (state: LegState) => tally(state).winner !== null;
@@ -32,6 +32,7 @@ export const cricket: GameMode = {
     const done = t.winner !== null;
     const active = currentPlayer(state);
     const open = openVisit(state);
+    const alone = state.players.length === 1;
     const players = state.players.map((id): PlayerPanelData => ({
       id,
       name: names[id] ?? id,
@@ -40,7 +41,7 @@ export const cricket: GameMode = {
       average: null,
       isActive: id === active,
       isWinner: id === t.winner,
-      slots: slotsOf(shownVisit(state, id, active, open), id === active, done),
+      slots: slotsOf(shownVisit(state, id, active, open), id === active, done, alone ? previousVisit(state, id, open) : null),
       isBust: false,
       placement: null,
       isOut: false,
