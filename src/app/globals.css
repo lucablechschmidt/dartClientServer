@@ -60,6 +60,7 @@
   --duration-fast: 150ms; /* tap feedback, a dart settling, a popup list */
   --duration-base: 250ms; /* folding, frames, fades */
   --duration-slow: 350ms; /* sheets and screens coming in */
+  --delay-skeleton: 150ms; /* loading placeholders wait this long, so fast pages do not flicker */
 
   --touch-min: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -138,6 +139,7 @@
   --animate-settle: settle var(--duration-fast) var(--ease-ios);
   --animate-rise-in: rise-in var(--duration-slow) var(--ease-ios);
   --animate-drop-in: drop-in var(--duration-slow) var(--ease-ios);
+  --animate-skeleton-in: fade-in var(--duration-base) var(--ease-ios) var(--delay-skeleton) both;
   @keyframes fade-in {
     from {
       opacity: 0;

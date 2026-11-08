@@ -11,8 +11,9 @@ type Props = {
 
 /**
  * R-04 (m13-plan.md): what a page shows while its data loads (session check and SQLite reads), instead
- * of an empty area: a heading bar and a card of rows in the page column, pulsing unless reduced motion
- * is set.
+ * of an empty area: a heading bar and a card of rows in the page column, pulsing. It fades in only
+ * after --delay-skeleton, so a page that loads quickly shows nothing instead of a flicker; with reduced
+ * motion it is there at once and does not pulse (theme.md §5).
  */
 export function Skeleton({ label, rows = 4, width = "narrow", inline = false }: Props) {
   const status = { role: "status", "aria-label": label, "aria-busy": true } as const;
@@ -27,13 +28,13 @@ export function Skeleton({ label, rows = 4, width = "narrow", inline = false }: 
   );
   if (inline)
     return (
-      <div {...status} className="flex flex-col motion-safe:animate-pulse">
-        {card}
+      <div {...status} className="flex flex-col motion-safe:animate-skeleton-in">
+        <div className="flex flex-col motion-safe:animate-pulse">{card}</div>
       </div>
     );
   return (
-    <div {...status} className="flex flex-1 flex-col px-4 pt-2 motion-safe:animate-pulse">
-      <PageFrame width={width} className="gap-3">
+    <div {...status} className="flex flex-1 flex-col px-4 pt-2 motion-safe:animate-skeleton-in">
+      <PageFrame width={width} className="gap-3 motion-safe:animate-pulse">
         <span className="h-8 w-1/2 rounded-box bg-fill-strong" />
         {card}
       </PageFrame>
