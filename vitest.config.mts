@@ -29,13 +29,17 @@ export default defineConfig({
     ],
     coverage: {
       provider: "v8",
-      include: ["src/domain/**", "src/db/**", "src/server/**"],
+      include: ["src/domain/**", "src/db/**", "src/server/**", "src/components/**"],
       exclude: [
         "**/*.test.ts",
+        "**/*.test.tsx",
+        // Static SVG paths, no logic
+        "src/components/ui/icons.tsx",
         "**/fixtures/**",
         // Thin Next.js glue (server actions, cookies, request context): covered by scripts/smoke-match.mjs
         "src/server/*-actions.ts",
         "src/server/request.ts",
+        "src/server/revalidate.ts",
         "src/server/session-cookie.ts",
         "src/server/context.ts",
         "src/server/testing.ts",
@@ -46,6 +50,9 @@ export default defineConfig({
         "src/domain/**": { statements: 90, branches: 90, functions: 90, lines: 90 },
         "src/db/**": { statements: 85, branches: 75, functions: 85, lines: 85 },
         "src/server/**": { statements: 85, branches: 80, functions: 80, lines: 85 },
+        // R-34 (m13-plan.md): UI tests only where there is logic (architecture.md §9), so a low bar
+        // that still shows a new component with logic and no test.
+        "src/components/**": { statements: 60 },
       },
     },
   },
