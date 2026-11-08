@@ -164,13 +164,20 @@ describe("match service", () => {
     expect(restartMatch(deps, sessionAdmin, "nope")).toEqual({ ok: false, reason: "not-found" });
   });
 
-  it("restart: a player of the match may and hosts the new one, an onlooker may not (R-06)", () => {
-    const { a, id } = setup();
-    const player = { playerId: a.id, name: "Casey", isAdmin: false };
+  it("restart: a player of the match may, the host stays host, an onlooker may not (R-06)", () => {
+    const a = ok(createPlayer(deps, "Casey")).player;
+    const b = ok(createPlayer(deps, "Sam")).player;
+    const host = ok(createPlayer(deps, "Board")).player;
+    const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;
+    const id = createMatch(deps, { playerIds: [a.id, b.id], rules, inputMode: "per-player", hostPlayerId: host.id });
+    const player = { playerId: b.id, name: "Sam", isAdmin: false };
     const next = ok(restartMatch(deps, player, id)).value;
-    expect(loadMatchView(deps, next)!.hostPlayerId).toBe(a.id);
+    expect(loadMatchView(deps, next)!.hostPlayerId).toBe(host.id); // guests are still entered on the board
     const onlooker = { playerId: "onlooker", name: "Onlooker", isAdmin: false };
     expect(restartMatch(deps, onlooker, id)).toEqual({ ok: false, reason: "forbidden" });
+    // without a host (data from before M4) whoever restarts hosts the new match
+    const old = createMatch(deps, { playerIds: [a.id, b.id], rules });
+    expect(loadMatchView(deps, ok(restartMatch(deps, player, old)).value)!.hostPlayerId).toBe(b.id);
   });
 
   it("a deleted player keeps their name with a mark in old matches and the history; no restart with them", () => {

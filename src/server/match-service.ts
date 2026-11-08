@@ -446,13 +446,15 @@ export type RestartError = "not-found" | "forbidden" | "player-deleted";
 
 /**
  * "Restart Game" from legacy: same players, rules and format, the starter moves on by one seat.
- * Host, admin or a player of the match (R-06); whoever restarts hosts the new match. Not with a deleted player.
+ * Host, admin or a player of the match (R-06). The host stays host, so guests are still entered on the
+ * board; only when the host is gone does whoever restarts host the new match. Not with a deleted player.
  */
 export function restartMatch(deps: Deps, session: Session, matchId: string): Result<string, RestartError> {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };
   if (!mayRestart(accessOf(m), actorOf(session))) return { ok: false, reason: "forbidden" };
   if (m.players.some((p) => p.deletedAt !== null)) return { ok: false, reason: "player-deleted" };
+  const host = m.hostPlayerId === null ? null : deps.players.findPlayerById(m.hostPlayerId);
   const id = createMatch(deps, {
     mode: m.mode,
     playerIds: m.players.map((p) => p.id),
@@ -460,7 +462,7 @@ export function restartMatch(deps: Deps, session: Session, matchId: string): Res
     format: m.format,
     starterIndex: (m.state.legs[0].starter + 1) % m.players.length,
     inputMode: m.inputMode,
-    hostPlayerId: session.playerId,
+    hostPlayerId: host?.deletedAt === null ? host.id : session.playerId,
   });
   return { ok: true, value: id };
 }
