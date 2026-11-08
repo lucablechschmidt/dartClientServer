@@ -1,15 +1,14 @@
 import { Suspense } from "react";
 import { SubPage } from "@/components/screens/account/sub-page";
 import { MyStatsSection } from "@/components/screens/stats/my-stats";
-import type { StatsRange } from "@/domain/stats/aggregate";
+import { STATS_RANGES, type StatsRange } from "@/domain/stats/aggregate";
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { myStats } from "@/server/stats-service";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Search = Promise<{ range?: string }>;
-const RANGES: readonly StatsRange[] = ["all", "year", "30d"];
-const rangeOf = (raw: string | undefined): StatsRange => RANGES.find((r) => r === raw) ?? "all";
+const rangeOf = (raw: string | undefined): StatsRange => STATS_RANGES.find((r) => r === raw) ?? "all";
 
 async function Stats({ searchParams }: { searchParams: Search }) {
   const { deps, session } = await requireSession();

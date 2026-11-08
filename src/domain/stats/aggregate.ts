@@ -6,6 +6,9 @@ export type { StatsMatch, StatsRange };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The ranges the statistics page offers, in the order of its pills. */
+export const STATS_RANGES: readonly StatsRange[] = ["all", "year", "30d"];
+
 /** First moment a range covers: none for "all", 1 January of `now`'s year, or 30 days back. */
 export function rangeStart(range: StatsRange, now: number): number | null {
   if (range === "all") return null;

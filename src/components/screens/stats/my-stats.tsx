@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/ui/form-controls";
 import { PillLinks } from "@/components/ui/pill-links";
 import { StatTile } from "@/components/ui/stat-tile";
 import type { ModeId } from "@/domain/game";
-import type { ModeRecord, StatsRange } from "@/domain/stats/aggregate";
+import { STATS_RANGES, type ModeRecord, type StatsRange } from "@/domain/stats/aggregate";
 import type { X01Stats } from "@/domain/stats/x01";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
@@ -21,7 +21,6 @@ export type MyStatsView = {
   recent: { id: string; mode: ModeId; names: string[]; finishedAt: number; place: number | null; detail: boolean }[];
 };
 
-const RANGES: readonly StatsRange[] = ["all", "year", "30d"];
 const two = (n: number) => n.toFixed(2);
 
 type Props = {
@@ -64,7 +63,7 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
     <div className="flex flex-col gap-3">
       <PillLinks
         label={t.range}
-        items={RANGES.map((r) => ({ href: `/account/stats?range=${r}`, label: t.ranges[r], current: r === view.range }))}
+        items={STATS_RANGES.map((r) => ({ href: `/account/stats?range=${r}`, label: t.ranges[r], current: r === view.range }))}
       />
       {games === 0 ? (
         <p className="px-4 text-sm text-fg-muted">{t.none}</p>

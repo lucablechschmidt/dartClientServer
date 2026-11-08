@@ -9,6 +9,7 @@ import { log } from "./log";
 import { readEnv } from "./env";
 import { createPasswordInvite, createRegisterInvite } from "./invite-service";
 import { requireAdmin } from "./request";
+import { revalidatePlayerLists } from "./revalidate";
 import { isId, offsetSchema } from "./action-input";
 
 export type InviteLink = { url: string; svg: string };
@@ -23,12 +24,6 @@ const cleanedUp = () => {
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/tournaments");
-};
-
-const touched = () => {
-  revalidatePath("/admin");
-  revalidatePath("/players");
-  revalidatePath("/new/x01");
 };
 
 export async function createRegisterInviteAction(): Promise<InviteLink> {
@@ -50,7 +45,7 @@ export async function promoteGuestAction(playerId: string): Promise<PlayerResult
   const { deps, session } = await requireAdmin();
   if (!isId(playerId)) return { ok: false, reason: "not-found" };
   const r = promoteGuest(deps, session, playerId);
-  touched();
+  revalidatePlayerLists();
   return r;
 }
 
