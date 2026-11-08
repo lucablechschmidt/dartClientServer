@@ -64,7 +64,10 @@ test("overview and cancel (M4): the running match is listed, cancelling asks fir
   await admin.getByRole("button", { name: g.cancel }).click();
   await admin.getByRole("dialog").getByRole("button", { name: g.cancelConfirm }).click();
   await admin.waitForURL((u) => u.pathname === "/");
-  await expect(admin.getByRole("link", { name: new RegExp(guest) })).toHaveCount(0);
+  // Gone from the running games; the history below lists it as cancelled.
+  await expect(running.getByRole("link", { name: new RegExp(guest) })).toHaveCount(0);
+  const recent = admin.getByRole("list", { name: de.overview.recent });
+  await expect(recent.getByRole("link", { name: new RegExp(`${guest}.*${de.overview.abandoned}`) })).toBeVisible();
 
   await admin.goto(url);
   await expect(admin.getByText(g.closed)).toBeVisible();
