@@ -1,7 +1,7 @@
 # M13-Plan – Code-Review und Konsolidierung
 
 > Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
-> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), Paket C umgesetzt (`e2ba9df` … `c2d99e7`), D–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
+> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), Paket C umgesetzt (`e2ba9df` … `c2d99e7`), Paket D umgesetzt (`1f9edad` … `6fb690b`), E und F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
 > Luca: §0 und §6.
 
 ---
@@ -174,6 +174,8 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 **Abnahme:** `npm run lint`, `typecheck`, `test:coverage` grün; keine der neun Kopien mehr vorhanden (`grep "structural, no server import"` leer).
 
 **Ergänzt (8.11.2026):** 6. `README.md`: Abschnitt Logs um `request.failed` ergänzen, Rechte von „Nochmal“ (Host, Admin, Mitspieler; Host bleibt Host) bei den Spielregeln nennen. 7. `docs/prompt.md` „Stand“ auf M13 nachziehen (A–C fertig, B ohne Messung, §8 offen). 8. `/dev/theme`: Regel „jeder `ui`-Baustein bekommt einen Eintrag“ (§9) entweder umsetzen oder streichen (Vorschlag in `fragen.md`).
+
+**Umsetzung D (8.11.2026):** Schritte 1–8. Abweichungen: 1) `bestOfToWin` entfiel, `toWin` gibt es seit Paket A nur noch einmal (`action-input.ts`). 2) `requireAdmin` leitet jetzt nach `/account` (wie die Admin-Seite vorher, e2e erwartet das), nicht nach `/`. 3) Wo ein Screen nur einen Teil einer Server-Ansicht braucht, ist der Typ ein `Pick` (`MatchViewLike`, `TournamentScreenView`, `TournamentListItem`), sonst der Server-Typ selbst; Erfolge nutzen `GalleryItem` aus der Domäne. Elf statt neun Kopien ersetzt (`InviteLink`, `TournamentListItem` kamen dazu). 4) `networkidle` ersetzt `settled(page)` in `e2e/fixtures.ts` (kein Lade-Platzhalter mehr); im Offline-Test reicht das Warten auf „gespeichert“, das `tap` schon tut. 5) Die `/dev/theme`-Regel ist als Frage in `fragen.md` (Default: streichen). Abnahme: Lint, Typecheck, `test:coverage` (494, Komponenten 82 % bei Schwelle 60 %), `test:e2e` (36) grün; `grep "structural, no server import"` leer.
 
 ### 3.5 Paket E – Große Module teilen
 
