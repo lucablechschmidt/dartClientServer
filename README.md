@@ -74,7 +74,7 @@ When starting a game you choose **"Eingabe: ein Handy"** (default: the phone tha
 
 All phones show the same score without reloading. This uses **Server-Sent Events** (SSE): each phone keeps one plain HTTP response open to `/api/match/<id>/events`, and the Pi writes a short "change" line into it whenever a visit is saved or the game is cancelled. The phone then fetches the current state. SSE only works from server to browser, which is enough here, because input already goes the other way through server actions. The browser reconnects by itself after a drop. Details: E13 in `docs/architecture.md`.
 
-The host or an admin can cancel a game. A running game older than 24 hours counts as finished.
+The host or an admin can cancel a game. A running game older than 24 hours counts as finished. "Nochmal" on the victory screen starts the same game again for the host, an admin or one of its players; the host stays host, so guests are still entered on the same phone.
 
 ### Guests
 
@@ -167,7 +167,7 @@ If something is missing, run `sudo systemctl enable --now docker tailscaled`, `d
 
 ```bash
 cd ~/darts
-docker compose logs -f app         # one JSON line per event (login, invite, cleanup, errors)
+docker compose logs -f app         # one JSON line per event (login, invite, cleanup, errors; an unexpected error in a page or action is "request.failed" with path and digest)
 docker compose logs app --no-log-prefix | grep '^{' | jq -c 'select(.level != "info")'   # warnings and errors only
 docker compose restart app
 tailscale funnel status

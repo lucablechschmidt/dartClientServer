@@ -7,7 +7,7 @@
 
 ## 1. Tokens
 
-Alle Tokens sind CSS Custom Properties auf `:root`, mit Dark-Werten unter `:root[data-theme="dark"]` und, wenn kein `data-theme` gesetzt ist, unter `@media (prefers-color-scheme: dark)`. Tailwind bindet sie als Farben ein (`bg-keypad`, `text-fg` …), damit shadcn-Komponenten und eigene Komponenten dieselbe Quelle haben.
+Alle Tokens sind CSS Custom Properties auf `:root` in `src/app/globals.css`. Jede Farbe steht einmal als `light-dark(<light>, <dark>)`; welcher Wert gilt, entscheidet `color-scheme`: ohne Wahl folgt es dem System, `data-theme="light"`/`"dark"` (Toggle) setzt nur `color-scheme`. Tailwind bindet die Variablen über `@theme inline` als Farben ein (`bg-keypad`, `text-fg` …). Es gibt nur eigene Komponenten, kein shadcn (bis 8.11.2026 stand hier ein früherer Plan mit getrennten Dark-Blöcken und shadcn).
 
 iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 
