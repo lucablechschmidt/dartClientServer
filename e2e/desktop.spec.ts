@@ -1,12 +1,12 @@
 import { de } from "@/i18n/de";
 import { addGuest, board, K, startMatch, wins } from "./board";
 import type { Page } from "@playwright/test";
-import { expect, shot, test } from "./fixtures";
+import { expect, settled, shot, test } from "./fixtures";
 
-/** Opens a page without a live stream and waits until its streamed parts are in. */
+/** Opens a page and waits until its streamed parts are in. */
 async function open(page: Page, path: string) {
   await page.goto(path);
-  await page.waitForLoadState("networkidle");
+  await settled(page);
 }
 
 test.use({ viewport: { width: 1440, height: 900 } });
@@ -54,6 +54,6 @@ test("desktop: the main screens", async ({ admin, register, stamp }) => {
   await pageA.goto("/account/stats");
   await pageA.getByRole("list", { name: de.stats.recent }).getByRole("link").first().click();
   await pageA.waitForURL(/\/match\/[^/]+\/stats$/);
-  await pageA.waitForLoadState("networkidle");
+  await settled(pageA);
   await shot(pageA, "match-stats-desktop");
 });

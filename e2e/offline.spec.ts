@@ -21,8 +21,8 @@ async function guestMatch(admin: Page, stamp: string) {
   await admin.getByRole("button", { name: de.newGame.start }).click();
   await admin.waitForURL(/\/match\//);
   const b = board(admin);
+  // tap waits until the visit is saved: the first server action has run, so its code is loaded (R-35: no networkidle)
   await b.tap("1", "1", "1");
-  await admin.waitForLoadState("networkidle");
   return b;
 }
 const scoreOfH = async (page: Page) => (await board(page).scores())[1];

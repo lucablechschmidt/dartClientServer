@@ -80,6 +80,14 @@ export async function linkPath(link: ReturnType<Page["locator"]>): Promise<strin
   return new URL((await link.getAttribute("href")) ?? "", "http://x").pathname;
 }
 
+/**
+ * The page's streamed parts are in: no loading placeholder (Skeleton, de.ui.loading) is left. A concrete
+ * signal instead of networkidle, which open SSE streams and heartbeats make unreliable (R-35).
+ */
+export async function settled(page: Page) {
+  await expect(page.getByRole("status", { name: de.ui.loading })).toHaveCount(0);
+}
+
 /** The app's alert; Next adds an empty route announcer with role="alert" that is left out. */
 export const alertOf = (page: Page) => page.locator("[role=alert]:not(#__next-route-announcer__)");
 
