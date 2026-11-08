@@ -182,9 +182,6 @@ export const de = {
     guestNamePlaceholder: "Name des Gastes",
     guestBadge: "Gast",
     guestErrors: { "name-taken": "Diesen Namen gibt es schon.", "invalid-name": "Der Name braucht 1 bis 40 Zeichen." },
-    selected: "Position {n}",
-    select: "{name} auswählen",
-    deselect: "{name} abwählen",
     modes: modeNames,
   },
   tournaments: {

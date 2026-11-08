@@ -42,7 +42,7 @@ export function ThemeToggle({ labels }: { labels: Labels }) {
     <button
       type="button"
       onClick={cycle}
-      aria-label={labels.label}
+      // the name is what it shows ("System"); the title says what it is for (WCAG 2.5.3 label in name)
       title={labels.label}
       className="min-h-touch rounded-full border border-separator px-4 text-fg-muted hover:text-fg"
     >

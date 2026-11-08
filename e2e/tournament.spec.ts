@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { board, chooseRules, K, select } from "./board";
+import { board, choice, chooseRules, K, playerRow } from "./board";
 import { ADMIN, expect, shot, test } from "./fixtures";
 
 const t = de.tournaments;
@@ -13,13 +13,13 @@ test("M9: a knockout tournament for three, one bye, back to the tournament after
   await admin.getByRole("link", { name: t.newTournament }).click();
   await admin.waitForURL(/\/tournaments\/new/);
   await admin.getByLabel(t.name).fill(name);
-  await admin.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }).click();
+  await admin.getByRole("button", { name: choice(t.format, t.formats["round-robin"]) }).click();
   await admin.getByRole("button", { name: t.formats.knockout, exact: true }).click();
   await chooseRules(admin, { startScore: 301, singleOut: true });
-  for (const n of [ADMIN, A, B]) await admin.getByRole("button", { name: select(n) }).click();
+  for (const n of [ADMIN, A, B]) await playerRow(admin, n, false).click();
   await expect(admin.getByText(t.expectedGames.replace("{n}", "2"))).toBeVisible(); // 4 bracket, one bye
   await admin.getByRole("button", { name: new RegExp(`^${de.newGame.choosePlayersTitle}`) }).click();
-  await expect(admin.getByRole("button", { name: select(A) })).toHaveCount(0);
+  await expect(playerRow(admin, A, false)).toHaveCount(0);
   await shot(admin, "tournament-setup");
   await admin.getByRole("button", { name: t.start }).click();
   await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));
@@ -51,11 +51,11 @@ test("M8: a fixed seed list starts in the order the players were tapped, without
   for (const p of [A, B, C]) await register(p);
   await admin.goto("/tournaments/new");
   await admin.getByLabel(t.name).fill(name);
-  await admin.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }).click();
+  await admin.getByRole("button", { name: choice(t.format, t.formats["round-robin"]) }).click();
   await admin.getByRole("button", { name: t.formats.knockout, exact: true }).click();
-  await admin.getByRole("button", { name: `${t.seeding}: ${t.seedings.random}` }).click();
+  await admin.getByRole("button", { name: choice(t.seeding, t.seedings.random) }).click();
   await admin.getByRole("button", { name: t.seedings.fixed }).click();
-  for (const n of [C, A, ADMIN, B]) await admin.getByRole("button", { name: select(n) }).click();
+  for (const n of [C, A, ADMIN, B]) await playerRow(admin, n, false).click();
   await admin.getByRole("button", { name: t.start }).click();
   await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));
   // seeds 1–4 = C, A, admin, B: semifinals 1 vs 4 and 2 vs 3
@@ -73,9 +73,9 @@ for (const format of ["knockout", "groups-knockout"] as const) {
     for (const p of [A, B, C]) await register(p);
     await admin.goto("/tournaments/new");
     await admin.getByLabel(t.name).fill(name);
-    await admin.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }).click();
+    await admin.getByRole("button", { name: choice(t.format, t.formats["round-robin"]) }).click();
     await admin.getByRole("button", { name: t.formats[format], exact: true }).click();
-    for (const n of [ADMIN, A, B, C]) await admin.getByRole("button", { name: select(n) }).click();
+    for (const n of [ADMIN, A, B, C]) await playerRow(admin, n, false).click();
     await admin.getByRole("button", { name: t.start }).click();
     await admin.waitForURL((u) => /^\/tournaments\/(?!new$)[^/]+$/.test(u.pathname));
     const redraw = admin.getByRole("button", { name: t.redraw });

@@ -2,10 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { de } from "@/i18n/de";
+import { choiceName, playerRow } from "@/test-utils/queries";
 import { CricketSetup, EliminationSetup, SplitScoreSetup } from "./mode-setups";
 
 const t = de.newGame;
-const choice = (label: string, value: string) => `${label}: ${value}`;
 const players = [{ id: "a", name: "Moschusochse", createdAt: 0, guestUntil: null, hasLogin: true, isAdmin: false, deletedAt: null }];
 const props = {
   players,
@@ -26,7 +26,7 @@ describe("setups per mode (M7)", () => {
         name: new RegExp([t.bestOfLegs, t.bestOfSets, t.inRule, t.outRule, t.startScore, t.targetScore].join("|")),
       }),
     ).toBeNull();
-    expect(screen.getByRole("button", { name: choice(t.inputMode, t.inputModes.single) })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: choiceName(t.inputMode, t.inputModes.single) })).toBeInTheDocument();
     const split = render(<SplitScoreSetup {...props} />).container;
     expect(value(split, "mode")).toBe("splitscore");
     expect(value(split, "startScore")).toBe("40");
@@ -38,15 +38,15 @@ describe("setups per mode (M7)", () => {
     expect(value(container, "mode")).toBe("elimination");
     expect(value(container, "outRule")).toBe("single");
     expect(value(container, "startScore")).toBe("301");
-    await user.click(screen.getByRole("button", { name: choice(t.targetScore, "301") }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.targetScore, "301") }));
     await user.click(screen.getByRole("button", { name: "501" }));
     expect(value(container, "startScore")).toBe("501");
-    await user.click(screen.getByRole("button", { name: choice(t.outRule, t.outNames.single) }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.outRule, t.outNames.single) }));
     await user.click(screen.getByRole("button", { name: t.outNames.double }));
     expect(value(container, "outRule")).toBe("double");
     // Start only with a player
     expect(screen.getByRole("button", { name: t.start })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: t.select.replace("{name}", "Moschusochse") }));
+    await user.click(playerRow("Moschusochse"));
     expect(screen.getByRole("button", { name: t.start })).toBeEnabled();
   });
 });

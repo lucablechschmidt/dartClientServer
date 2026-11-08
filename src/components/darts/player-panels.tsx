@@ -5,23 +5,15 @@ import { PlayerPanel, type PlayerPanelTexts } from "./player-panel";
 type Props = {
   players: PlayerPanelData[];
   texts: PlayerPanelTexts;
-  /** ToStart (M5): set before the first dart of a leg; tapping a panel makes that player start. */
+  /** ToStart (M5): set before the first dart of a leg; tapping a panel makes that player start. Its name is the panel's text. */
   onSelect?: (playerId: string) => void;
-  selectLabel?: string;
 };
 
 /** Port of ClassicGameInProgressView + MultiplayerView: ≤2 players large and stacked, ≥3 the active one large + a row of small ones. As in legacy, panels are as tall as their content. */
-export function PlayerPanels({ players, texts, onSelect, selectLabel = "" }: Props) {
+export function PlayerPanels({ players, texts, onSelect }: Props) {
   const tappable = (p: PlayerPanelData, panel: ReactNode) =>
     onSelect ? (
-      <button
-        key={p.id}
-        type="button"
-        onClick={() => onSelect(p.id)}
-        aria-label={`${selectLabel}: ${p.name}`}
-        aria-pressed={p.isActive}
-        className="text-left"
-      >
+      <button key={p.id} type="button" onClick={() => onSelect(p.id)} aria-pressed={p.isActive} className="text-left">
         {panel}
       </button>
     ) : (

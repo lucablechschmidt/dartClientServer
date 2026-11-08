@@ -16,6 +16,7 @@ export function LabeledValue({ label, value }: { label: string; value: string })
   return (
     <span className="flex flex-1 flex-col">
       <span className="text-xs text-fg-muted">{label}</span>
+      {/* not laid out in the flex column, but makes the text read "Einstieg Single In" (label in name) */}{" "}
       <span className="font-semibold">{value}</span>
     </span>
   );

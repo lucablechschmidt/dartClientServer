@@ -9,7 +9,7 @@ import type { Texts } from "@/i18n/de";
 
 export type PlayerPickerTexts = Pick<
   Texts["newGame"],
-  "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "guestErrors" | "selected" | "select" | "deselect"
+  "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "guestErrors"
 > & {
   save: string;
   cancel: string;
@@ -45,7 +45,6 @@ export function initials(players: Player[]): Record<string, string> {
  * with `form=`, so the picker may sit inside the start form.
  */
 export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Props) {
-  const fill = (s: string, name: string) => s.replace("{name}", name);
   const letters = initials(players);
   const addGuest = async (fd: FormData) => {
     const r = await onAddGuest(fd);
@@ -69,12 +68,7 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
           const selected = pos >= 0;
           const guest = isGuest(p);
           return (
-            <CardRow
-              key={p.id}
-              onClick={() => onToggle(p.id)}
-              pressed={selected}
-              label={fill(selected ? texts.deselect : texts.select, p.name)}
-            >
+            <CardRow key={p.id} onClick={() => onToggle(p.id)} pressed={selected}>
               <span className="flex min-w-0 items-center gap-3">
                 <span
                   className={`grid size-avatar shrink-0 place-items-center rounded-full text-xs font-semibold ${guest ? "bg-fill-strong text-fg-muted" : "bg-accent-soft text-accent"}`}
@@ -91,10 +85,7 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
                   </span>
                 )}
                 {selected ? (
-                  <span
-                    className="grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent tabular-nums"
-                    aria-label={texts.selected.replace("{n}", String(pos + 1))}
-                  >
+                  <span className="grid size-check place-items-center rounded-box bg-accent text-sm font-semibold text-on-accent tabular-nums">
                     {pos + 1}
                   </span>
                 ) : (

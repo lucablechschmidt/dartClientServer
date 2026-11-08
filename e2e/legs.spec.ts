@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest, board, deselect, K, startMatch, wins } from "./board";
+import { addGuest, board, K, panelOf, playerRow, startMatch, wins } from "./board";
 import { ADMIN, expect, shot, test } from "./fixtures";
 
 const g = de.game;
@@ -43,13 +43,13 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
   await register(B);
   await admin.goto("/new/x01");
   await addGuest(admin, H);
-  await admin.getByRole("button", { name: deselect(H) }).click();
+  await playerRow(admin, H, true).click();
   await startMatch(admin, "x01", [ADMIN, A, B, H], { startScore: 301, singleOut: true });
   const b = board(admin);
   const next = (name: string) => admin.getByText(g.nextPlayer.replace("{name}", name), { exact: true });
   const anyNext = admin.getByText(new RegExp(`^${g.nextPlayer.replace("{name}", "")}`));
 
-  await admin.getByRole("button", { name: `${g.toStart}: ${H}` }).click();
+  await panelOf(admin, H).click(); // ToStart: the panels are the buttons
   expect(await b.active()).toBe(H);
   await expect(next(ADMIN)).toBeVisible(); // 3+ players: the next one below the keypad
   await b.tap(...K.T180, ...K.MISS, ...K.MISS, ...K.MISS); // H 180, the others miss

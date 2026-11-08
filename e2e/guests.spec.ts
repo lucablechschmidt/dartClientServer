@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest, board, deselect, select } from "./board";
+import { addGuest, board, playerRow } from "./board";
 import { alertOf, expect, shot, test } from "./fixtures";
 
 const g = de.game;
@@ -14,8 +14,8 @@ test("guests (E12): created in the setup, listed for the day, cannot be removed 
   const pageA = await register(A);
   await admin.goto("/new/x01");
   await addGuest(admin, guest);
-  await expect(admin.getByRole("button", { name: deselect(guest) })).toContainText(de.newGame.guestBadge);
-  await admin.getByRole("button", { name: select(A) }).click();
+  await expect(playerRow(admin, guest, true)).toContainText(de.newGame.guestBadge);
+  await playerRow(admin, A, false).click();
   await admin.getByRole("button", { name: de.newGame.start }).click();
   await admin.waitForURL(/\/match\//);
   const b = board(admin);
@@ -24,7 +24,7 @@ test("guests (E12): created in the setup, listed for the day, cannot be removed 
   await shot(admin, "match-guest");
 
   await admin.goto("/new/x01");
-  await expect(admin.getByRole("button", { name: select(guest) })).toHaveCount(1);
+  await expect(playerRow(admin, guest, false)).toHaveCount(1);
   await admin.goto("/players");
   await expect(admin.getByRole("list", { name: p.guests }).getByText(guest, { exact: true })).toHaveCount(1);
   await expect(admin.getByRole("list", { name: p.title }).getByText(guest, { exact: true })).toHaveCount(0);

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Player } from "@/domain/player";
 import { de } from "@/i18n/de";
 import { TournamentSetup } from "./tournament-setup";
+import { choiceName, playerRow, queryPlayerRow } from "@/test-utils/queries";
 
 const t = de.tournaments;
 const n = de.newGame;
@@ -17,7 +18,6 @@ const player = (id: string, name: string): Player => ({
   deletedAt: null,
 });
 const players = [player("a", "Casey"), player("b", "Sam"), player("c", "Kim"), player("d", "Lou")];
-const select = (name: string) => n.select.replace("{name}", name);
 const choosePlayers = () => screen.getByRole("button", { name: new RegExp(`^${n.choosePlayersTitle}`) });
 
 function show(onAddGuest = vi.fn()) {
@@ -47,9 +47,9 @@ describe("TournamentSetup", () => {
     const user = userEvent.setup();
     show();
     expect(screen.queryByText(/^Voraussichtlich/)).toBeNull();
-    for (const p of players) await user.click(screen.getByRole("button", { name: select(p.name) }));
+    for (const p of players) await user.click(playerRow(p.name));
     expect(screen.getByText(t.expectedGames.replace("{n}", "6"))).toBeInTheDocument(); // round robin of four
-    await user.click(screen.getByRole("button", { name: `${t.format}: ${t.formats["round-robin"]}` }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.format, t.formats["round-robin"]) }));
     await user.click(screen.getByRole("button", { name: t.formats.knockout }));
     expect(screen.getByText(t.expectedGames.replace("{n}", "3"))).toBeInTheDocument();
   });
@@ -57,13 +57,13 @@ describe("TournamentSetup", () => {
   it("the players card folds to one line with the count; the choice still goes with the form", async () => {
     const user = userEvent.setup();
     const { container } = show();
-    await user.click(screen.getByRole("button", { name: select("Sam") }));
-    await user.click(screen.getByRole("button", { name: select("Kim") }));
+    await user.click(playerRow("Sam"));
+    await user.click(playerRow("Kim"));
     expect(choosePlayers()).toHaveAttribute("aria-expanded", "true");
     await user.click(choosePlayers());
     expect(choosePlayers()).toHaveAttribute("aria-expanded", "false");
     expect(choosePlayers()).toHaveTextContent(n.selectedCount.replace("{n}", "2"));
-    expect(screen.queryByRole("button", { name: select("Casey") })).toBeNull();
+    expect(queryPlayerRow("Casey")).toBeNull();
     const form = container.querySelector<HTMLFormElement>("form#new-match")!;
     expect(new FormData(form).getAll("playerId")).toEqual(["b", "c"]);
   });
@@ -87,7 +87,7 @@ describe("TournamentSetup", () => {
     const seeding = () => container.querySelector('input[name="seeding"]');
     expect(seeding()).toHaveValue("random");
     expect(screen.queryByText(t.seedingFixedHint)).toBeNull();
-    await user.click(screen.getByRole("button", { name: `${t.seeding}: ${t.seedings.random}` }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.seeding, t.seedings.random) }));
     await user.click(screen.getByRole("button", { name: t.seedings.fixed }));
     expect(seeding()).toHaveValue("fixed");
     expect(screen.getByText(t.seedingFixedHint)).toBeInTheDocument();

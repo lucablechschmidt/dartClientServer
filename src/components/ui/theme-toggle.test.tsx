@@ -15,7 +15,8 @@ describe("ThemeToggle", () => {
   it("cycles through the modes and writes attribute and storage", async () => {
     const user = userEvent.setup();
     render(<ThemeToggle labels={labels} />);
-    const button = screen.getByRole("button", { name: labels.label });
+    const button = screen.getByRole("button", { name: labels.system });
+    expect(button).toHaveAttribute("title", labels.label); // named by what it shows, the title says what it is for
     expect(button).toHaveTextContent(labels.system);
 
     await user.click(button);

@@ -4,10 +4,14 @@ import { de } from "@/i18n/de";
 
 const t = de.newGame;
 const g = de.game;
-/** Accessible name of a choice menu trigger ("Startpunktzahl: 501"). */
-const choice = (label: string, value: string | number) => `${label}: ${String(value)}`;
-export const select = (name: string) => t.select.replace("{name}", name);
-export const deselect = (name: string) => t.deselect.replace("{name}", name);
+/** Accessible name of a choice menu trigger: label and value as shown ("Startpunktzahl 501", WCAG 2.5.3). */
+export const choice = (label: string, value: string | number) => `${label} ${String(value)}`;
+/**
+ * A player's row in a setup or a player panel on the scoring screen: the button that shows the name
+ * (controls are named by their visible text); `pressed` narrows to selected or not.
+ */
+export const playerRow = (page: Page, name: string, pressed?: boolean) =>
+  page.getByRole("button", pressed === undefined ? {} : { pressed }).filter({ has: page.getByText(name, { exact: true }) });
 export const wins = (name: string) => g.youWin.replace("{name}", name);
 
 /** Key sequences used across the tests (names as on the keypad). */
@@ -31,7 +35,7 @@ export type MatchOptions = {
 /** Fills in the setup of a mode and starts the match; players in throwing order. */
 export async function startMatch(page: Page, mode: ModeId, players: string[], o: MatchOptions = {}) {
   await page.goto(`/new/${mode}`);
-  for (const name of players) await page.getByRole("button", { name: select(name) }).click();
+  for (const name of players) await playerRow(page, name, false).click();
   await chooseRules(page, o);
   for (let n = 1; n < (o.legs ?? 1); n += 2) await page.getByRole("button", { name: `${t.bestOfLegs} ${t.more}` }).click();
   if (o.perPlayer) {
@@ -60,7 +64,7 @@ export async function addGuest(page: Page, name: string) {
   await page.getByRole("button", { name: t.addGuest }).click();
   await page.getByPlaceholder(t.guestNamePlaceholder).fill(name);
   await page.getByPlaceholder(t.guestNamePlaceholder).press("Enter");
-  await page.getByRole("button", { name: deselect(name) }).waitFor();
+  await playerRow(page, name, true).waitFor();
 }
 
 /** The scoring screen of one device. */
@@ -89,3 +93,6 @@ export function board(page: Page) {
     status: () => page.locator("[role=status][data-sync]"),
   };
 }
+
+/** A tappable player panel on the scoring screen (ToStart); small panels (3+ players) show the first five letters of the name. */
+export const panelOf = (page: Page, name: string) => page.getByRole("button", { name: new RegExp(`^${name.slice(0, 5)}`) });

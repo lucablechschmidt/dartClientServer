@@ -34,7 +34,6 @@ export function StandardBoard({ board, texts, header, keypad, turnHint, onSelect
             players={board.players}
             texts={{ darts: texts.darts, average: texts.average, visit: texts.visit }}
             onSelect={onSelectStarter}
-            selectLabel={texts.toStart}
           />
         </div>
       }

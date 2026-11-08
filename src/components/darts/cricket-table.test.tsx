@@ -47,7 +47,7 @@ describe("CricketTable (Figma)", () => {
     const onSelect = vi.fn();
     render(<CricketTable players={players} activePlayerId="m" texts={de.game} onSelect={onSelect} />);
     expect(screen.getByRole("columnheader", { current: true })).toHaveTextContent(de.game.onTurn);
-    await user.click(screen.getByRole("button", { name: `${de.game.toStart}: Lena` }));
+    await user.click(screen.getByRole("button", { name: /Lena/ }));
     expect(onSelect).toHaveBeenCalledWith("l");
   });
 });

@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest, select } from "./board";
+import { addGuest, playerRow } from "./board";
 import { ADMIN, ADMIN_PASSWORD, alertOf, expect, inviteLink, linkPath, login, shot, test } from "./fixtures";
 
 test("security headers on every response", async ({ request }) => {
@@ -69,7 +69,7 @@ test("admin deletes players on /admin, also one who started a match: it is cance
   const pageA = await register(A);
   await pageA.goto("/new/x01");
   await addGuest(pageA, `${G1}a`);
-  await pageA.getByRole("button", { name: select(A) }).click();
+  await playerRow(pageA, A, false).click();
   await pageA.getByRole("button", { name: de.newGame.start }).click();
   await pageA.waitForURL(/\/match\//);
   const host = await register(H);

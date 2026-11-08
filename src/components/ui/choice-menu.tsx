@@ -10,7 +10,7 @@ type Props<V extends string | number> = {
   options: readonly Choice<V>[];
   value: V;
   onChange: (value: V) => void;
-  /** What is chosen (e.g. the in rule); the trigger's accessible name is "label: current". */
+  /** What is chosen (e.g. the in rule); the trigger's accessible name is "label current", both shown on screen. */
   label: string;
   /** Content of the trigger; gets the current option's label and whether the list is open. */
   children: (current: string, open: boolean) => ReactNode;
@@ -99,7 +99,8 @@ export function ChoiceMenu<V extends string | number>({
         type="button"
         aria-expanded={open}
         aria-controls={listId}
-        aria-label={`${label}: ${current}`}
+        // the visible strings only (WCAG 2.5.3 label in name): "Einstieg Single In", "Startpunktzahl 501"
+        aria-label={`${label} ${current}`}
         onClick={(e) => {
           // detail is 0 for a click from Enter or Space
           setByKeyboard(e.detail === 0);

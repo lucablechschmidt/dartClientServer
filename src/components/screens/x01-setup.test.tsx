@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
+import { choiceName, playerRow } from "@/test-utils/queries";
 import { X01Setup } from "./x01-setup";
 
 const players = [
@@ -11,8 +12,6 @@ const players = [
 ];
 const t = de.newGame;
 const commonTexts = { back: de.ui.back, save: de.players.save, cancel: de.players.cancel };
-const select = (name: string) => t.select.replace("{name}", name);
-const choice = (label: string, value: string) => `${label}: ${value}`;
 const legsMore = `${t.bestOfLegs} ${t.more}`;
 
 describe("X01Setup", () => {
@@ -29,18 +28,19 @@ describe("X01Setup", () => {
     );
     const start = screen.getByRole("button", { name: t.start });
     expect(start).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
-    await user.click(screen.getByRole("button", { name: select("Moschusochse") }));
-    expect(screen.getByLabelText(t.selected.replace("{n}", "1"))).toHaveTextContent("1");
+    await user.click(playerRow("Haflinger"));
+    await user.click(playerRow("Moschusochse"));
+    expect(playerRow("Haflinger")).toHaveTextContent("1");
+    expect(playerRow("Haflinger")).toHaveAttribute("aria-pressed", "true");
     expect(start).toBeEnabled();
     const ids = () => [...container.querySelectorAll('input[name="playerId"]')].map((i) => (i as HTMLInputElement).value);
     expect(ids()).toEqual(["b", "a"]);
-    await user.click(screen.getByRole("button", { name: t.deselect.replace("{name}", "Haflinger") }));
+    await user.click(playerRow("Haflinger"));
     expect(ids()).toEqual(["a"]);
     expect(container.querySelector('input[name="outRule"]')).toHaveValue("double");
     // E13: default is one phone, switchable to each player on their own
     expect(container.querySelector('input[name="inputMode"]')).toHaveValue("single");
-    await user.click(screen.getByRole("button", { name: choice(t.inputMode, t.inputModes.single) }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.inputMode, t.inputModes.single) }));
     await user.click(screen.getByRole("button", { name: t.inputModes["per-player"] }));
     expect(container.querySelector('input[name="inputMode"]')).toHaveValue("per-player");
   });
@@ -50,7 +50,7 @@ describe("X01Setup", () => {
     const onStart = vi.fn(() => Promise.resolve({ ok: false as const, reason: "invalid-input" as const }));
     render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={onStart} onAddGuest={vi.fn()} />);
     expect(screen.queryByRole("alert")).toBeNull();
-    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(playerRow("Haflinger"));
     await user.click(screen.getByRole("button", { name: t.start }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(t.invalidInput));
     expect(onStart).toHaveBeenCalledOnce();
@@ -61,7 +61,7 @@ describe("X01Setup", () => {
     let answer: (r: undefined) => void = () => undefined;
     const onStart = vi.fn(() => new Promise<undefined>((r) => (answer = r)));
     render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={onStart} onAddGuest={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(playerRow("Haflinger"));
     const start = screen.getByRole("button", { name: t.start });
     await user.dblClick(start);
     expect(onStart).toHaveBeenCalledOnce();
@@ -83,7 +83,7 @@ describe("X01Setup", () => {
         onAddGuest={onAddGuest}
       />,
     );
-    expect(screen.getByRole("button", { name: select("Gecko") })).toHaveTextContent(t.guestBadge);
+    expect(playerRow("Gecko")).toHaveTextContent(t.guestBadge);
     await user.click(screen.getByRole("button", { name: t.addGuest }));
     await user.type(screen.getByPlaceholderText(t.guestNamePlaceholder), "Neu{Enter}");
     await waitFor(() => expect(onAddGuest).toHaveBeenCalledTimes(1));
@@ -123,12 +123,12 @@ describe("X01Setup", () => {
       />,
     );
     const legs = () => container.querySelector('input[name="legsToWinSet"]');
-    await user.click(screen.getByRole("button", { name: select("Moschusochse") }));
-    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(playerRow("Moschusochse"));
+    await user.click(playerRow("Haflinger"));
     await user.click(screen.getByRole("button", { name: legsMore }));
     expect(legs()).toHaveValue("3"); // best of: 1, 3, 5 …
     expect(screen.getByRole("button", { name: `${t.bestOfLegs} ${t.fewer}` })).toBeEnabled();
-    await user.click(screen.getByRole("button", { name: select("Gecko") }));
+    await user.click(playerRow("Gecko"));
     expect(legs()).toHaveValue("1");
     expect(screen.getByRole("button", { name: legsMore })).toBeDisabled();
     expect(screen.getByText(t.setsLegsTwoOnly)).toBeInTheDocument();
@@ -145,16 +145,16 @@ describe("X01Setup", () => {
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
-    const trigger = screen.getByRole("button", { name: choice(t.inRule, t.inNames.single) });
+    const trigger = screen.getByRole("button", { name: choiceName(t.inRule, t.inNames.single) });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("button", { name: t.inNames.single })).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: t.inNames.double }));
     expect(screen.queryByRole("list", { name: t.inRule })).toBeNull();
     expect(container.querySelector('input[name="inRule"]')).toHaveValue("double");
-    await user.click(screen.getByRole("button", { name: choice(t.startScore, "501") }));
+    await user.click(screen.getByRole("button", { name: choiceName(t.startScore, "501") }));
     await user.click(screen.getByRole("button", { name: "301" }));
-    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(playerRow("Haflinger"));
     expect(
       screen.getByText(`${t.summaryPlayers.replace("{n}", "1")} · 301 · ${t.inNames.double} / ${t.outNames.double}`),
     ).toBeInTheDocument();
@@ -173,7 +173,7 @@ describe("X01Setup", () => {
       />,
     );
     const score = () => container.querySelector('input[name="startScore"]');
-    const open = (current: string) => user.click(screen.getByRole("button", { name: choice(t.startScore, current) }));
+    const open = (current: string) => user.click(screen.getByRole("button", { name: choiceName(t.startScore, current) }));
     await open("501");
     const entries = within(screen.getByRole("list", { name: t.startScore })).getAllByRole("listitem");
     const field = screen.getByRole("textbox", { name: t.customScore });

@@ -59,7 +59,7 @@ export function CricketTable({ players, activePlayerId, texts, onSelect }: Props
                   className={`min-w-cricket-col border-l border-separator px-1 py-1 ${isActive ? "border-t-4 border-t-accent" : "border-t-4 border-t-transparent"} ${column(p.id)}`}
                 >
                   {onSelect ? (
-                    <button type="button" onClick={() => onSelect(p.id)} aria-label={`${texts.toStart}: ${p.name}`} className="w-full">
+                    <button type="button" onClick={() => onSelect(p.id)} className="w-full">
                       {head}
                     </button>
                   ) : (
