@@ -101,13 +101,7 @@ export function ChoiceMenu<V extends string | number>({
                   className={`flex min-h-touch w-full items-center justify-between gap-6 rounded-tile px-3 text-left whitespace-nowrap ${selected ? "bg-accent-wash font-semibold" : ""}`}
                 >
                   {o.label}
-                  {selected ? (
-                    <span className="grid size-icon shrink-0 place-items-center rounded-full bg-accent text-on-accent">
-                      <CheckIcon className="size-icon-xs" />
-                    </span>
-                  ) : (
-                    <span className="size-icon shrink-0 rounded-full border-icon border-separator" />
-                  )}
+                  <ChoiceMark selected={selected} />
                 </button>
               </li>
             );
@@ -142,65 +136,13 @@ export function LabeledValue({ label, value }: { label: string; value: string })
   );
 }
 
-/**
- * Last entry of a number menu: a field for an own number (digits only), within min and max. Enter
- * takes it and closes the list; leaving the field after typing takes it, too.
- */
-export function ChoiceNumberField({
-  label,
-  value,
-  selected,
-  min,
-  max,
-  onChange,
-  close,
-}: {
-  label: string;
-  value: number;
-  selected: boolean;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-  close: () => void;
-}) {
-  const [draft, setDraft] = useState(selected ? String(value) : "");
-  const [dirty, setDirty] = useState(false);
-  const take = () => {
-    const typed = draft.replace(/\D/g, "");
-    if (!dirty || typed === "") return false;
-    const n = Math.min(Math.max(Number(typed), min), max);
-    setDraft(String(n));
-    setDirty(false);
-    onChange(n);
-    return true;
-  };
-  return (
-    <span className={`flex min-h-touch items-center gap-3 rounded-tile px-3 ${selected ? "bg-accent-wash" : ""}`}>
-      <input
-        type="text"
-        inputMode="numeric"
-        aria-label={label}
-        placeholder={label}
-        value={draft}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          setDirty(true);
-        }}
-        onBlur={() => void take()}
-        onKeyDown={(e) => {
-          if (e.key !== "Enter") return;
-          e.preventDefault();
-          if (take() || !dirty) close();
-        }}
-        className="w-full min-w-0 bg-transparent font-semibold tabular-nums placeholder:font-normal placeholder:text-fg-muted"
-      />
-      {selected ? (
-        <span className="grid size-icon shrink-0 place-items-center rounded-full bg-accent text-on-accent">
-          <CheckIcon className="size-icon-xs" />
-        </span>
-      ) : (
-        <span className="size-icon shrink-0 rounded-full border-icon border-separator" />
-      )}
+/** The mark at the end of a choice: a filled check when chosen, an empty circle otherwise. */
+export function ChoiceMark({ selected }: { selected: boolean }) {
+  return selected ? (
+    <span className="grid size-icon shrink-0 place-items-center rounded-full bg-accent text-on-accent">
+      <CheckIcon className="size-icon-xs" />
     </span>
+  ) : (
+    <span className="size-icon shrink-0 rounded-full border-icon border-separator" />
   );
 }
