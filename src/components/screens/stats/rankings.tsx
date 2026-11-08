@@ -1,10 +1,9 @@
 import { FoldCard } from "@/components/ui/fold-card";
-import type { ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
+import type { ModeRanking } from "@/server/stats-service";
 
-type RankingRowView = { player: string; name: string; place: number; elo: number; games: number; wins: number };
-/** What the page gets from the server's leaderboards (structural, no server import). */
-export type ModeRankingView = { mode: ModeId; rows: RankingRowView[]; own: RankingRowView | null };
+/** One ranking per mode as the server builds it. */
+export type ModeRankingView = ModeRanking;
 
 /**
  * The rankings per mode on /account/rankings (M8): a folded card each, showing only the own place and

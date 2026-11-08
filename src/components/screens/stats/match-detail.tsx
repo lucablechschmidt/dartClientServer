@@ -2,16 +2,10 @@ import { BackButton } from "@/components/ui/back-button";
 import { PageFrame } from "@/components/ui/page-frame";
 import { SectionHeading } from "@/components/ui/form-controls";
 import type { Texts } from "@/i18n/de";
+import type { MatchDetail } from "@/server/stats-service";
 
-type DetailVisit = { darts: string[]; points: number; bust: boolean; rest: number };
-/** What the page gets from the server's matchDetail (structural, no server import). */
-export type MatchDetailView = {
-  id: string;
-  finishedAt: number | null;
-  startScore: number;
-  players: { id: string; name: string }[];
-  legs: { setNo: number; legNo: number; winner: string | null; rows: { player: string; visits: DetailVisit[]; average: number }[] }[];
-};
+/** The server's match page view. */
+export type MatchDetailView = MatchDetail;
 
 /**
  * X01 match page (M8): per leg one column per player with every visit (darts, points, rest after it),

@@ -1,14 +1,12 @@
 import { GroupedSection } from "@/components/ui/card-list";
 import { isGuest, type Player, type PlayerResult, type Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
-import { GamesAdminSection, type AdminMatchPage } from "./account/games-admin-section";
+import { GamesAdminSection, type AdminMatchPage, type CleanupResult } from "./account/games-admin-section";
 import { GuestsAdminSection } from "./account/guests-admin-section";
 import { InviteSection } from "./account/invite-section";
 import { PlayersAdminSection } from "./account/players-admin-section";
 import type { InviteLink } from "./account/types";
 import type { TournamentListItem } from "./tournament/tournament-list";
-
-type CleanupResult = { ok: true } | { ok: false; reason: keyof Texts["account"]["admin"]["cleanup"]["errors"] };
 
 type Props = {
   session: Session;

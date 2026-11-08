@@ -12,19 +12,12 @@ import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
 import type { TournamentListItem } from "../tournament/tournament-list";
 import type { AccountTexts } from "./types";
+import type { AdminMatchItem, CleanupError } from "@/server/cleanup-service";
 
-/** A game in the admin list (structural copy of the server's AdminMatchItem). */
-export type AdminMatchRow = {
-  id: string;
-  mode: ModeId;
-  names: string[];
-  status: "running" | "finished" | "abandoned";
-  startedAt: number;
-  isTournament: boolean;
-};
+/** A game in the admin list. */
+export type AdminMatchRow = AdminMatchItem;
 export type AdminMatchPage = { items: AdminMatchRow[]; hasMore: boolean };
-type CleanupError = keyof AccountTexts["admin"]["cleanup"]["errors"];
-type CleanupResult = { ok: true } | { ok: false; reason: CleanupError };
+export type CleanupResult = { ok: true } | { ok: false; reason: CleanupError };
 
 type Props = {
   tournaments: TournamentListItem[];

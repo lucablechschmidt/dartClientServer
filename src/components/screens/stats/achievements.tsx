@@ -5,14 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { CardList } from "@/components/ui/card-list";
 import { DisclosureChevron } from "@/components/ui/choice-menu";
 import { MedalIcon } from "@/components/ui/icons";
-import type { Progress, ProgressStep } from "@/domain/achievements/gallery";
-import type { AchievementKey } from "@/domain/achievements/types";
+import type { GalleryItem, Progress, ProgressStep } from "@/domain/achievements/gallery";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
+import type { NewAchievements } from "@/server/achievement-service";
 
-/** What the page gets from the server's myAchievements (structural, no server import). */
-export type AchievementItem = { key: AchievementKey; earnedAt: number | null; progress?: Progress };
-export type NewAchievementsView = { playerId: string; name: string; keys: AchievementKey[] }[];
+/** One achievement of the gallery (domain) and what a finished game brought each player (server). */
+export type AchievementItem = GalleryItem;
+export type NewAchievementsView = NewAchievements[];
 
 type Texts10 = Texts["achievements"];
 

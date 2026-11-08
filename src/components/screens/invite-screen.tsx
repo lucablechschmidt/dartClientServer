@@ -6,8 +6,9 @@ import { Field, FormError, PrimaryButton, TextInput } from "@/components/ui/form
 import { ScreenHeader } from "@/components/ui/screen-header";
 import type { InviteFormState } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
+import type { InviteInfo } from "@/server/invite-service";
 
-export type InviteInfo = { kind: "register" } | { kind: "password"; playerName: string; reset: boolean };
+export type { InviteInfo };
 
 type Props = {
   info: InviteInfo | null;

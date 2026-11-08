@@ -3,10 +3,10 @@ import { CardList, CardRow } from "@/components/ui/card-list";
 import { BackButton } from "@/components/ui/back-button";
 import { PageFrame } from "@/components/ui/page-frame";
 import { SectionHeading } from "@/components/ui/form-controls";
-import type { TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
+import type { TournamentSummary } from "@/server/tournament-service";
 
-export type TournamentListItem = { id: string; name: string; format: TournamentFormat; players: string[]; winner: string | null };
+export type TournamentListItem = Pick<TournamentSummary, "id" | "name" | "format" | "players" | "winner">;
 
 /** All tournaments, newest first, with format, players and the winner or "running" (M9). */
 export function TournamentList({ items, texts: t, back }: { items: TournamentListItem[]; texts: Texts["tournaments"]; back: string }) {

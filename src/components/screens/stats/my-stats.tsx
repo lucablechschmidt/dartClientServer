@@ -4,22 +4,14 @@ import { CardList, CardRow } from "@/components/ui/card-list";
 import { SectionHeading } from "@/components/ui/form-controls";
 import { PillLinks } from "@/components/ui/pill-links";
 import { StatTile } from "@/components/ui/stat-tile";
-import type { ModeId } from "@/domain/game";
-import { STATS_RANGES, type ModeRecord, type StatsRange } from "@/domain/stats/aggregate";
-import type { X01Stats } from "@/domain/stats/x01";
+import { STATS_RANGES } from "@/domain/stats/aggregate";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
 import { AverageChart } from "./average-chart";
+import type { MyStats } from "@/server/stats-service";
 
-/** What the page gets from the server's myStats (structural, no server import). */
-export type MyStatsView = {
-  range: StatsRange;
-  records: Partial<Record<ModeId, ModeRecord>>;
-  x01: X01Stats;
-  history: { matchId: string; finishedAt: number; average: number }[];
-  fieldHits: [number, number][];
-  recent: { id: string; mode: ModeId; names: string[]; finishedAt: number; place: number | null; detail: boolean }[];
-};
+/** The server's statistics view. */
+export type MyStatsView = MyStats;
 
 const two = (n: number) => n.toFixed(2);
 

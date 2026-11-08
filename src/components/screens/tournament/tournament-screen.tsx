@@ -10,30 +10,19 @@ import { FormError, SectionHeading, TextButton } from "@/components/ui/form-cont
 import { SpinnerIcon } from "@/components/ui/icons";
 import { useAsyncAction } from "@/components/ui/use-async-action";
 import type { PlayerId } from "@/domain/game";
-import type { ResolvedFixture, StandingRow, TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
 import { knockoutRoundLabel } from "./rounds";
 import { StandingsTable } from "./standings-table";
+import type { TournamentError, TournamentFixture, TournamentView } from "@/server/tournament-service";
 
-/** What the page needs from the server's TournamentView (structural, no server import). */
-export type TournamentScreenView = {
-  id: string;
-  name: string;
-  format: TournamentFormat;
-  players: { id: PlayerId; name: string }[];
-  fixtures: (ResolvedFixture & {
-    matchId: string | null;
-    matchStatus: "running" | "finished" | "abandoned" | null;
-    legs: [number, number] | null;
-    walkover: boolean;
-  })[];
-  groups: { group: number; rows: StandingRow[] }[];
-  winner: PlayerId | null;
-  canRedraw: boolean;
-  canDelete: boolean;
+/** The part of the server's tournament view the screen uses (R-08: bound to the server type, not a copy). */
+export type TournamentScreenView = Pick<
+  TournamentView,
+  "id" | "name" | "format" | "players" | "groups" | "winner" | "canRedraw" | "canDelete"
+> & {
+  fixtures: Omit<TournamentFixture, "format">[];
 };
 
-type TournamentError = keyof Texts["tournaments"]["errors"];
 type Props = {
   view: TournamentScreenView;
   texts: Texts["tournaments"];

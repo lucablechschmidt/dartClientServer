@@ -15,31 +15,17 @@ import {
   startPlayOut,
   undoMatchDart,
   undoStep,
-  type Actor,
   type Dart,
-  type MatchAccess,
-  type MatchFormat,
   type MatchState,
   type PlayerId,
-  type Rules,
 } from "@/domain/game";
 import { reapply, restoreOpenVisit, storeOpenVisit } from "./open-visit-storage";
 import { dequeue, emptyQueue, enqueue, isStale, pendingVisits, restoreQueue, storeQueue, type Queue, type QueueItem } from "./sync-queue";
 import { useMatchEvents } from "./use-match-events";
+import type { MatchView } from "@/server/match-service";
 
-/** What the scoreboard needs from the server's MatchView (structural, no server import). */
-export type MatchViewLike = {
-  id: string;
-  rules: Rules;
-  format: MatchFormat;
-  state: MatchState;
-  names: Record<PlayerId, string>;
-  match: MatchAccess;
-  actor: Actor | null;
-  access: { isOpen: boolean; canEnter: boolean; canUndo: boolean; canCancel: boolean };
-  /** M9: tournament fixtures offer declaring the winner after a leg. */
-  isTournament: boolean;
-};
+/** The part of the server's MatchView the scoreboard uses (R-08: bound to the server type). */
+export type MatchViewLike = Pick<MatchView, "id" | "rules" | "format" | "state" | "names" | "match" | "actor" | "access" | "isTournament">;
 export type ActionReply<Reason extends string> = { ok: true; view: MatchViewLike } | { ok: false; reason: Reason };
 export type SyncStatus = "saved" | "saving" | "unsaved";
 
