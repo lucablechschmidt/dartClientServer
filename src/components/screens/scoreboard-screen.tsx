@@ -5,6 +5,7 @@ import { Keypad } from "@/components/darts/keypad";
 import { ScoreGrid } from "@/components/darts/score-grid";
 import { useVisitSync, type ActionReply as Reply, type MatchViewLike } from "@/components/darts/use-visit-sync";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 import {
   currentLeg,
   matchCurrentPlayer,
@@ -33,7 +34,8 @@ type Props = {
   initial: MatchViewLike;
   texts: Texts["game"];
   onCommitVisit: (matchId: string, legIndex: number, seq: number, darts: Dart[]) => Promise<ActionReply>;
-  onUndoVisit: (matchId: string) => Promise<ActionReply>;
+  /** `step` names the stored step to take back, so sending it twice undoes once (M6). */
+  onUndoVisit: (matchId: string, step?: string) => Promise<ActionReply>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
@@ -41,7 +43,8 @@ type Props = {
   tournamentHref?: string;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
-  onCancel: (matchId: string) => Promise<unknown>;
+  /** Redirects home on success; answers only when cancelling is not possible. */
+  onCancel: (matchId: string) => Promise<{ ok: true } | { ok: false; reason: Reason }>;
   /** M10: what the finished game brought each player that is new (the victory screen's banner). */
   onLoadAchievements?: (matchId: string) => Promise<NewAchievementsView>;
   /** M10: the achievement texts for the banner. */
@@ -74,6 +77,8 @@ export function ScoreboardScreen({
   const [asking, setAsking] = useState<"cancel" | "resign" | null>(null);
   const [closedLeg, setClosedLeg] = useState<string | null>(null);
   const errorText = useCallback((reason: Reason) => texts.errors[reason], [texts.errors]);
+  // R-15: a refused cancel (not the host any more, match already closed) says why in the status line.
+  const cancel = useAsyncAction(onCancel);
   const loadAchievements = useCallback(
     () => (onLoadAchievements ? onLoadAchievements(initial.id) : Promise.resolve([])),
     [onLoadAchievements, initial.id],
@@ -96,7 +101,8 @@ export function ScoreboardScreen({
   const playerIds = state.players;
   const rules = scoreLine(view, playerIds, texts) ?? headerTitle(state.mode, initial.rules, texts);
   const unsaved = pending > 1 ? texts.unsavedVisits.replace("{n}", String(pending)) : pending === 1 ? texts.unsavedVisit : texts.unsaved;
-  const status = error ?? (sync === "unsaved" ? unsaved : sync === "saving" ? texts.saving : " ");
+  const shownError = error ?? (cancel.error ? texts.errors[cancel.error] : null);
+  const status = shownError ?? (sync === "unsaved" ? unsaved : sync === "saving" ? texts.saving : " ");
 
   // E13: keypad and undo only when this device is currently allowed; the server checks anyway.
   const actor = initial.actor;
@@ -124,7 +130,7 @@ export function ScoreboardScreen({
       title={rules}
       status={status}
       sync={sync}
-      hasError={error !== null}
+      hasError={shownError !== null}
       onRetry={retryNow}
       onCancel={initial.access.canCancel && isOpen ? () => setAsking("cancel") : null}
       texts={texts}
@@ -139,7 +145,7 @@ export function ScoreboardScreen({
       cancelLabel={texts.cancelBack}
       onConfirm={() => {
         if (asking === "resign") playOut(false);
-        else void onCancel(initial.id);
+        else cancel.run(initial.id);
         setAsking(null);
       }}
       onCancel={() => setAsking(null)}
