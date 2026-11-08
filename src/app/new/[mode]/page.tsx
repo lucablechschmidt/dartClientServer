@@ -8,6 +8,7 @@ import { createMatchAction } from "@/server/match-actions";
 import { createGuestAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SETUPS = { x01: X01Setup, cricket: CricketSetup, elimination: EliminationSetup, splitscore: SplitScoreSetup };
 
@@ -31,7 +32,7 @@ async function Setup({ params }: { params: Promise<{ mode: string }> }) {
 export default function NewMatchPage({ params }: { params: Promise<{ mode: string }> }) {
   return (
     <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Setup params={params} />
       </Suspense>
     </main>

@@ -4,6 +4,7 @@ import { de } from "@/i18n/de";
 import { createGuestAction, deletePlayerAction, renamePlayerAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Players() {
   const { deps, session } = await requireSession();
@@ -24,7 +25,7 @@ export default function PlayersPage() {
   return (
     <main className="flex flex-1 flex-col">
       <h1 className="sr-only">{de.players.title}</h1>
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Players />
       </Suspense>
     </main>

@@ -309,6 +309,7 @@ export const de = {
   ui: {
     back: "Zurück",
     close: "Schließen",
+    loading: "Lädt …",
   },
   errorPage: {
     title: "Da ist etwas schiefgegangen.",

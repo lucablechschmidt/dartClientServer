@@ -5,6 +5,7 @@ import type { StatsRange } from "@/domain/stats/aggregate";
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { myStats } from "@/server/stats-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Search = Promise<{ range?: string }>;
 const RANGES: readonly StatsRange[] = ["all", "year", "30d"];
@@ -21,7 +22,7 @@ export default function StatsPage({ searchParams }: { searchParams: Search }) {
   return (
     <main className="flex flex-1 flex-col">
       <SubPage title={de.account.pages.stats} back={de.ui.back} width="wide">
-        <Suspense fallback={null}>
+        <Suspense fallback={<Skeleton label={de.ui.loading} inline />}>
           <Stats searchParams={searchParams} />
         </Suspense>
       </SubPage>

@@ -4,6 +4,7 @@ import { de } from "@/i18n/de";
 import { changePasswordAction, renameSelfAction } from "@/server/account-actions";
 import { logoutAction } from "@/server/auth-actions";
 import { requireSession } from "@/server/request";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Account() {
   const { session } = await requireSession();
@@ -23,7 +24,7 @@ export default function AccountPage() {
   return (
     <main className="flex flex-1 flex-col">
       <h1 className="sr-only">{de.account.title}</h1>
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Account />
       </Suspense>
     </main>

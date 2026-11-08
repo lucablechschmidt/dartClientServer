@@ -4,6 +4,7 @@ import { MatchDetailScreen } from "@/components/screens/stats/match-detail";
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { matchDetail } from "@/server/stats-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ from?: string }>;
@@ -28,7 +29,7 @@ async function Detail({ params, searchParams }: { params: Params; searchParams: 
 export default function MatchStatsPage({ params, searchParams }: { params: Params; searchParams: Search }) {
   return (
     <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} width="wide" />}>
         <Detail params={params} searchParams={searchParams} />
       </Suspense>
     </main>

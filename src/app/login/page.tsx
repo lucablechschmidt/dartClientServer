@@ -4,6 +4,7 @@ import { LoginScreen } from "@/components/screens/login-screen";
 import { de } from "@/i18n/de";
 import { loginAction } from "@/server/auth-actions";
 import { currentSession } from "@/server/request";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { searchParams: Promise<{ next?: string }> };
 
@@ -17,7 +18,7 @@ async function Login({ searchParams }: Props) {
 export default function LoginPage(props: Props) {
   return (
     <main className="flex min-h-dvh flex-col pt-safe pb-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} rows={2} />}>
         <Login {...props} />
       </Suspense>
     </main>

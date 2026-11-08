@@ -15,6 +15,7 @@ import { deletePlayerAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
 import { listTournaments } from "@/server/tournament-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Admin() {
   const { deps, session } = await requireSession();
@@ -45,7 +46,7 @@ export default function AdminPage() {
   return (
     <main className="flex flex-1 flex-col">
       <h1 className="sr-only">{de.nav.admin}</h1>
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Admin />
       </Suspense>
     </main>

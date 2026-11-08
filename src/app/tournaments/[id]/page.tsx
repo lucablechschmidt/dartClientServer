@@ -5,6 +5,7 @@ import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { deleteTournamentAction, redrawTournamentAction, startFixtureAction } from "@/server/tournament-actions";
 import { loadTournamentView } from "@/server/tournament-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Tournament({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,7 +28,7 @@ async function Tournament({ params }: { params: Promise<{ id: string }> }) {
 export default function TournamentPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe pb-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Tournament params={params} />
       </Suspense>
     </main>

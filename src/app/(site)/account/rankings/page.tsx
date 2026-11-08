@@ -4,6 +4,7 @@ import { RankingsSection } from "@/components/screens/stats/rankings";
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { leaderboards } from "@/server/stats-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Rankings() {
   const { deps, session } = await requireSession();
@@ -15,7 +16,7 @@ export default function RankingsPage() {
   return (
     <main className="flex flex-1 flex-col">
       <SubPage title={de.account.pages.rankings} back={de.ui.back} width="wide">
-        <Suspense fallback={null}>
+        <Suspense fallback={<Skeleton label={de.ui.loading} inline />}>
           <Rankings />
         </Suspense>
       </SubPage>

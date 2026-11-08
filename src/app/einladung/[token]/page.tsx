@@ -4,6 +4,7 @@ import { de } from "@/i18n/de";
 import { redeemInviteAction } from "@/server/invite-actions";
 import { inviteInfo } from "@/server/invite-service";
 import { requestDeps } from "@/server/request";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { params: Promise<{ token: string }> };
 
@@ -17,7 +18,7 @@ async function Invite({ params }: Props) {
 export default function InvitePage(props: Props) {
   return (
     <main className="flex min-h-dvh flex-col pt-safe pb-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} rows={3} />}>
         <Invite {...props} />
       </Suspense>
     </main>

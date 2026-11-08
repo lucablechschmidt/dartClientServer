@@ -5,6 +5,7 @@ import { createGuestAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
 import { createTournamentAction } from "@/server/tournament-actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function Setup() {
   const { deps } = await requireSession();
@@ -24,7 +25,7 @@ async function Setup() {
 export default function NewTournamentPage() {
   return (
     <main className="flex min-h-dvh flex-col bg-bg-grouped pt-safe">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <Setup />
       </Suspense>
     </main>

@@ -3,6 +3,7 @@ import { TournamentList } from "@/components/screens/tournament/tournament-list"
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { listTournaments } from "@/server/tournament-service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function List() {
   const { deps } = await requireSession();
@@ -13,7 +14,7 @@ async function List() {
 export default function TournamentsPage() {
   return (
     <main className="flex flex-1 flex-col">
-      <Suspense fallback={null}>
+      <Suspense fallback={<Skeleton label={de.ui.loading} />}>
         <List />
       </Suspense>
     </main>
