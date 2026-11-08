@@ -12,16 +12,17 @@ import { formText } from "./form";
 /** Redeem an invite (reachable without a session). On success, logged in on the home page. */
 export async function redeemInviteAction(token: string, _prev: InviteFormState, formData: FormData): Promise<InviteFormState> {
   const ip = await clientIp();
+  const deps = productionDeps();
   const limiter = loginLimiter();
-  if (limiter.retryAfter(ip, Date.now()) > 0) return { error: "too-many-attempts" };
-  const r = await redeem(productionDeps(), token, {
+  if (limiter.retryAfter(ip, deps.now()) > 0) return { error: "too-many-attempts" };
+  const r = await redeem(deps, token, {
     name: formData.has("name") ? formText(formData, "name") : undefined,
     password: formText(formData, "password"),
     passwordRepeat: formText(formData, "passwordRepeat"),
   });
   if (!r.ok) {
     // Only token guessing counts against the limit, typos in the form do not.
-    if (r.reason === "invalid-token") limiter.fail(ip, Date.now());
+    if (r.reason === "invalid-token") limiter.fail(ip, deps.now());
     return { error: r.reason };
   }
   limiter.reset(ip);

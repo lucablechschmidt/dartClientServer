@@ -14,14 +14,15 @@ const safeNext = (s: string) => (s.startsWith("/") && !s.startsWith("//") ? s : 
 
 export async function loginAction(_prev: LoginFormState, formData: FormData): Promise<LoginFormState> {
   const ip = await clientIp();
+  const deps = productionDeps();
   const limiter = loginLimiter();
-  if (limiter.retryAfter(ip, Date.now()) > 0) {
+  if (limiter.retryAfter(ip, deps.now()) > 0) {
     log.warn("login.blocked", { ip });
     return { error: "too-many-attempts" };
   }
-  const r = await login(productionDeps(), formText(formData, "name"), formText(formData, "password"));
+  const r = await login(deps, formText(formData, "name"), formText(formData, "password"));
   if (!r.ok) {
-    limiter.fail(ip, Date.now());
+    limiter.fail(ip, deps.now());
     log.info("login.failed", { ip });
     return { error: r.reason };
   }
