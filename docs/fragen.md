@@ -34,4 +34,23 @@
 
 ---
 
+## Kontrast von Grau und Akzent (8.11.2026, M13 Paket F)
+
+**Befund:** Der Axe-Lauf (`e2e/a11y.spec.ts`) misst bei kleiner Schrift zu wenig Kontrast; WCAG AA verlangt 4,5:1 (große Schrift 3:1).
+
+| Stelle | Farbe auf Grund | Kontrast |
+|---|---|---|
+| sekundäres Grau `--fg-muted` hell (iOS secondaryLabel, 60 %): Untertitel, Labels „Einstieg“, „Best of Legs“, Abschnittsüberschriften, Zusammenfassung unter „Spiel starten“, „Tippen, um weiterzuspielen“, Theme-Toggle | #85858b auf #f2f2f7, #8a8a8e auf #fff | 3,28 / 3,43 |
+| aktiver Tab hell | #007aff auf #dbdbdf | 2,9 |
+| aktiver Tab dunkel | #0a84ff auf #313133 | 3,55 |
+| Akzent als kleiner Text hell (z. B. „Gast hinzufügen“) | #007aff auf #fff | 4,01 |
+
+Dunkel ist das Grau ausreichend. Die Farben stammen aus Legacy/iOS (`theme.md` §1); iOS selbst nimmt bei „Kontrast erhöhen“ dunklere Varianten.
+
+**Optionen:** (a) So lassen wie in Legacy/iOS; der Axe-Test lässt `color-contrast` dauerhaft aus (in `architecture.md` begründen). (b) Nur hell nachdunkeln: `--fg-muted` auf etwa 76 % statt 60 % (≈ #6c6c70, ≈ 4,9:1 auf #f2f2f7), Akzent-Text und aktiver Tab auf das iOS-Blau für „Kontrast erhöhen“ (#0040dd); dunkel den aktiven Tab etwas heller. Sichtbar für alle: Nebentexte werden dunkler, das Blau kräftiger. (c) Wie (b), aber nur bei `prefers-contrast: more` (wie iOS); für alle anderen bleibt es, der Axe-Test prüft dann mit dieser Einstellung.
+
+**Frage:** Welche Option? Default ohne Antwort: (a) bis zur Entscheidung; ich würde (c) empfehlen, weil es niemandem etwas wegnimmt. Vor (b) zeige ich Screenshots vorher/nachher.
+
+---
+
 Zuletzt beantwortet (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/m14-plan.md`.

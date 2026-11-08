@@ -37,7 +37,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
-| M13 | Code-Review und Konsolidierung | in Arbeit: A, C, D, E fertig; B im Code fertig (Messung offen); F offen | – |
+| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B), Fragen in `fragen.md` (synchronous, Kontrast, /dev/theme) | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; erledigte liegen in `docs/archive/`.
@@ -308,7 +308,8 @@ Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 - [x] Paket C – Client-Lebenszyklus und Rückmeldung (dazu: Start-Button im Setup gesperrt, Lade-Platzhalter erst nach 150 ms)
 - [x] Paket D – Konsolidierung und Doku
 - [x] Paket E – nur wiederverwendbare Bausteine teilen: `choice-menu.tsx` (§6 Frage 4)
-- [ ] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende
+- [x] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende (Axe-Lauf ohne Befund außer Kontrast)
+- [ ] Paket F – Kontrast von Grau und Akzent entscheiden (`docs/fragen.md`)
 
 **DoD:** siehe `docs/m13-plan.md` §3.
 
