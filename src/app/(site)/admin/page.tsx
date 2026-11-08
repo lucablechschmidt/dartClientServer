@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminScreen } from "@/components/screens/admin-screen";
 import { de } from "@/i18n/de";
@@ -13,14 +12,14 @@ import {
 import { listAllMatches } from "@/server/cleanup-service";
 import { deletePlayerAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
-import { requireSession } from "@/server/request";
+import { requireAdmin } from "@/server/request";
 import { listTournaments } from "@/server/tournament-service";
 import { Skeleton } from "@/components/ui/skeleton";
 
 async function Admin() {
-  const { deps, session } = await requireSession();
+  const { deps, session } = await requireAdmin();
   const matches = listAllMatches(deps, session, 0);
-  if (!session.isAdmin || !matches.ok) redirect("/account");
+  if (!matches.ok) throw new Error("admin session refused by listAllMatches");
   return (
     <AdminScreen
       session={session}

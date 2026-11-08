@@ -38,6 +38,6 @@ export async function requireSession(): Promise<{ deps: Deps; session: Session; 
 
 export async function requireAdmin(): Promise<{ deps: Deps; session: Session; token: string }> {
   const ctx = await requireSession();
-  if (!ctx.session.isAdmin) redirect("/");
+  if (!ctx.session.isAdmin) redirect("/account"); // the tab "Verwaltung" is not there, the account tab is its neighbour
   return ctx;
 }
