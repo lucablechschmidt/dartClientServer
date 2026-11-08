@@ -1,7 +1,7 @@
 # M13-Plan – Code-Review und Konsolidierung
 
 > Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
-> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), C–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
+> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), Paket C umgesetzt (`e2ba9df` … `c2d99e7`), D–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
 > Luca: §0 und §6.
 
 ---
@@ -160,6 +160,8 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 7. **Commits:** `fix(sync): stop the retry loop when the scoreboard unmounts`, `perf(sync): close the event stream while the tab is hidden`, `feat(ui): pending state for async buttons`, `fix(scoreboard): show why cancelling failed`, `feat(ui): loading skeletons for every page`, `feat(app): global error page`, `test(sync): a redirect from a json action ends the retry loop`.
 
 **Abnahme:** Playwright: Sieg-Screen → Start während „nicht gespeichert“ → kein Fehler in der Konsole, Aufnahme nach erneutem Öffnen gespeichert; Doppeltipp auf „Einladung erzeugen“ erzeugt einen Link; Seitenwechsel zeigt ein Skeleton (Screenshot in `docs/screenshots/`); abgelaufene Session im Spiel leitet auf `/login` um, die offene Aufnahme bleibt in der Warteschlange.
+
+**Umsetzung (8.11.2026):** Schritte 1–5 wie geplant, Schritt 6 nur als Test (§6 Frage 7). Abweichungen: 1) `useAsyncAction` liefert neben `pending`, `error`, `run` auch `running` und `rowButton(id)`, weil fünf der Stellen Listen sind (nur die Zeile, deren Aufruf läuft, zeigt `aria-busy`; alle Zeilen sind solange gesperrt). Auch „Turnier löschen“ läuft darüber. 2) Kein Eintrag auf `/dev/theme`: die Seite ist eine Token- und Zählscreen-Galerie ohne Baustein-Einträge (Regel aus `architecture.md` §9 dort nirgends umgesetzt; offen für Paket D). 3) Kein `loading.tsx`, nur `fallback` je Seite (§5); kein Screenshot des Skeletons, weil er lokal nur Millisekunden steht. 4) `error.tsx` und `global-error.tsx` nutzen `retry()` statt `reset()` (Next 16 empfiehlt `retry`, lädt neu). 5) Ein e2e-Test (`guests.spec.ts`, Abbrechen) suchte den Gast auf der ganzen Startseite und lief nur, weil der Inhalt nach der Umleitung kurz leer war; seit Abbrechen in einer Transition läuft, prüft er die Liste „Laufende Spiele“ und den Verlaufseintrag. Abnahme: Unit-/UI-Tests (Unmount, Redirect, Sichtbarkeit, Doppeltipp, Abbruch-Grund, Skeleton), `npm test` (493) und `test:e2e` (36) grün.
 
 ### 3.4 Paket D – Konsolidierung und Doku
 

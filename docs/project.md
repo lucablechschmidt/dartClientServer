@@ -303,7 +303,7 @@ Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
 - [x] Paket A – Eingabevalidierung und Fehlerfluss
 - [ ] Paket B – Pi-Ressourcen, danach Messung mit der Pi-Datenbank (Code fertig 8.11.2026; offen: Messung §7, `synchronous` §8)
-- [ ] Paket C – Client-Lebenszyklus und Rückmeldung
+- [x] Paket C – Client-Lebenszyklus und Rückmeldung
 - [ ] Paket D – Konsolidierung und Doku
 - [ ] Paket E – Große Module teilen
 - [ ] Paket F – Barrierefreiheit
