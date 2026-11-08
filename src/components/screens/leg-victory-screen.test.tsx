@@ -27,6 +27,19 @@ describe("LegVictoryScreen (M5 plan §9.3)", () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
     expect(onUndo).not.toHaveBeenCalled();
   });
+  it("three named buttons, none nested in another; Enter on 'tap to continue' continues (R-26)", async () => {
+    const user = userEvent.setup();
+    const onContinue = vi.fn();
+    render(
+      <LegVictoryScreen view={won} names={names} texts={de.game} canUndo onContinue={onContinue} onUndo={vi.fn()} onDecide={vi.fn()} />,
+    );
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.map((b) => b.textContent)).toEqual([de.game.tapToContinue, de.game.undoLastDart, de.game.decideWinner]);
+    for (const b of buttons) expect(b.parentElement?.closest("button, [role=button]")).toBeNull();
+    screen.getByRole("button", { name: de.game.tapToContinue }).focus();
+    await user.keyboard("{Enter}");
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
   it("the undo button takes the dart back without continuing", async () => {
     const user = userEvent.setup();
     const onContinue = vi.fn();

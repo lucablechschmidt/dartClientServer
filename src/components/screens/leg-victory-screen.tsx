@@ -25,7 +25,9 @@ export function scoreLine(view: MatchBoardView, players: PlayerId[], texts: { le
 
 /**
  * Port of LegVictoryView (M5 plan §9.3): a leg is over, the match is not. A tap anywhere goes on to
- * the next leg; only the undo button takes the last dart back instead.
+ * the next leg; only the undo button takes the last dart back instead. For keyboard and screen
+ * readers the "tap to continue" line is the button that continues (R-26: no buttons nested in an
+ * element with role="button"); it looks like the plain line it was.
  */
 export function LegVictoryScreen({ view, names, texts, canUndo, onContinue, onUndo, onDecide }: Props) {
   const winner = view.legWinnerId ? names[view.legWinnerId] : "";
@@ -35,19 +37,23 @@ export function LegVictoryScreen({ view, names, texts, canUndo, onContinue, onUn
   const pick = chosen ?? leader(view, players);
   return (
     <>
+      {/* The whole screen takes the tap (pointer only); keyboard and screen readers use the button below. */}
       <div
-        role="button"
-        tabIndex={0}
-        aria-label={texts.tapToContinue}
         onClick={onContinue}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") onContinue();
-        }}
         className="fixed inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-bg px-4 pt-safe pb-safe text-fg motion-safe:animate-fade-in"
       >
         <p className="text-fluid-xl font-semibold">{texts.legWon.replace("{name}", winner)}</p>
         <p className="text-fluid-lg tabular-nums">{scoreLine(view, players, texts)}</p>
-        <p className="text-fluid-sm text-fg-muted">{texts.tapToContinue}</p>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onContinue();
+          }}
+          className="text-fluid-sm text-fg-muted"
+        >
+          {texts.tapToContinue}
+        </button>
         <button
           type="button"
           disabled={!canUndo}
