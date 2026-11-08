@@ -140,7 +140,7 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 2. `myStats`, `myAchievements`: `listFinishedMatches(since, me)`. `newInMatch`: nur die Matches der Teilnehmer des Spiels (ein Aufruf je Teilnehmer oder `playerIds`-Filter). `leaderboards` bleibt ohne Filter (braucht alle).
 3. `linkedMatches` (Turnier): ein `loadMatches(ids)` statt `loadMatch` je Paarung; `listTournaments` nutzt es.
 4. Messung (Luca): `time curl -s -b cookie https://…/account/stats` mit der Pi-Datenbank vor und nach; Zielwert < 500 ms bei den heutigen Daten. Ergebnis in §7 eintragen.
-5. `rate-limit.ts`: `fail()` räumt abgelaufene Einträge auf; Test. `client.ts`: `synchronous = NORMAL` (Kommentar mit Begründung E14). `instrumentation.ts`: Intervall-Handle auf `globalThis`, `SIGTERM` schließt die DB.
+5. `rate-limit.ts`: `fail()` räumt abgelaufene Einträge auf; Test. `client.ts`: `synchronous = NORMAL` nur, wenn §8 Frage 1 mit Ja beantwortet ist. `instrumentation.ts`: Intervall-Handle auf `globalThis`, `SIGTERM` schließt die DB.
 6. **Commits:** `perf(db): load finished matches in batches and filter by player in sql`, `perf(stats): load only the players' matches for the victory banner`, `perf(db): synchronous=normal in wal mode`, `fix(server): bound the rate-limit map and close the database on sigterm`.
 
 **Abnahme:** `repository.test.ts` zeigt gleiche Ergebnisse; Anzahl Queries für 100 Matches ≤ 5 (Test mit einem zählenden `Db`-Wrapper oder `sqlite.prepare`-Spy); Messwerte in §7; `npm test` grün.
@@ -152,10 +152,10 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 3. `src/components/ui/use-async-action.ts`: `{ pending, error, run }`; `TextButton`/`PrimaryButton` bekommen `pending` (→ `disabled`, `aria-busy`). Umstellen: `invite-section`, `players-admin-section`, `guests-admin-section`, `games-admin-section`, `tournament-screen`. Eintrag auf `/dev/theme`.
 4. `scoreboard-screen.tsx`: Ergebnis von `onCancel` auswerten; Props-Typ `onUndoVisit` mit `step?`.
 5. `src/components/ui/skeleton.tsx` + `loading.tsx` in `(site)`, `account/*`, `tournaments`, `new/[mode]`, `match/[id]/stats`; `Suspense`-Fallbacks der Seiten darauf umstellen. `global-error.tsx` mit `ErrorScreen`.
-6. `requireSession` bekommt eine Variante `sessionOrNull` für JSON-Actions; `commitVisitAction` u. a. antworten `{ ok: false, reason: "unauthenticated" }`; der Hook zeigt den Text und einen Link `/login?next=/match/<id>`.
-7. **Commits:** `fix(sync): stop the retry loop when the scoreboard unmounts`, `perf(sync): close the event stream while the tab is hidden`, `feat(ui): pending state for async buttons`, `fix(scoreboard): show why cancelling failed`, `feat(ui): loading skeletons for every page`, `feat(app): global error page`, `fix(match): unauthenticated result instead of redirect in json actions`.
+6. ~~`unauthenticated` statt Redirect in JSON-Actions~~ entfällt (§6 Frage 7: Umleitung bleibt). Stattdessen nur ein Test: Redirect aus `commitVisitAction` während „nicht gespeichert“ beendet die Schleife in `untilAnswered`, die Aufnahme bleibt in der Warteschlange.
+7. **Commits:** `fix(sync): stop the retry loop when the scoreboard unmounts`, `perf(sync): close the event stream while the tab is hidden`, `feat(ui): pending state for async buttons`, `fix(scoreboard): show why cancelling failed`, `feat(ui): loading skeletons for every page`, `feat(app): global error page`, `test(sync): a redirect from a json action ends the retry loop`.
 
-**Abnahme:** Playwright: Sieg-Screen → Start während „nicht gespeichert“ → kein Fehler in der Konsole, Aufnahme nach erneutem Öffnen gespeichert; Doppeltipp auf „Einladung erzeugen“ erzeugt einen Link; Seitenwechsel zeigt ein Skeleton (Screenshot in `docs/screenshots/`); abgelaufene Session im Spiel zeigt den Hinweis statt einer Umleitung mitten in der Aufnahme.
+**Abnahme:** Playwright: Sieg-Screen → Start während „nicht gespeichert“ → kein Fehler in der Konsole, Aufnahme nach erneutem Öffnen gespeichert; Doppeltipp auf „Einladung erzeugen“ erzeugt einen Link; Seitenwechsel zeigt ein Skeleton (Screenshot in `docs/screenshots/`); abgelaufene Session im Spiel leitet auf `/login` um, die offene Aufnahme bleibt in der Warteschlange.
 
 ### 3.4 Paket D – Konsolidierung und Doku
 
@@ -219,13 +219,17 @@ Beim Abgleich Doku ↔ Code aufgefallen; in `architecture.md` markiert, aber nic
 ## 6. Offene Fragen (Defaults gelten ohne Antwort)
 
 1. **Einordnung:** M13 als eigener Meilenstein nach M12, oder Pakete A–C vor M11 ziehen? Default: A und B vor M11 (Risiken 1–3), C–F nach Lust zwischen M11-Punkten; die Nummer bleibt M13. Antwort: M13 als eigener Meilensteil
-2. **Validierungsfehler im Setup (R-02):** Fehlertext über dem Start-Button (Default) oder Fehlerseite in Kauf nehmen, weil die HTML-Validierung reicht? Default: Fehlertext, weil die Regel „keine Ausnahmen“ sonst nicht gilt.
-3. **Typ-Imports über die Schichtgrenze (R-08):** `import type` aus `@/server` in Komponenten erlauben (Default) oder ein `src/server/views.ts` ohne Laufzeit-Imports freigeben? Default: `allowTypeImports` für `@/server/*`, dokumentiert in §12.1.
-4. **Richtwert Dateigröße (R-25):** Screens 200 Zeilen und `ui`-Bausteine 150 (Default), oder überall 150?
-5. **Pending-Zustand (R-16):** eigener Hook `useAsyncAction` (Default) oder überall `useTransition` direkt?
-6. **`synchronous = NORMAL` (R-21):** einverstanden, dass bei Stromausfall die letzten Aufnahmen fehlen können (E14 akzeptiert mehr)? Default: ja.
+2. **Validierungsfehler im Setup (R-02):** Fehlertext über dem Start-Button (Default) oder Fehlerseite in Kauf nehmen, weil die HTML-Validierung reicht? Default: Fehlertext, weil die Regel „keine Ausnahmen“ sonst nicht gilt. Antwort: Default, Fehlertext am Formular
+3. **Typ-Imports über die Schichtgrenze (R-08):** `import type` aus `@/server` in Komponenten erlauben (Default) oder ein `src/server/views.ts` ohne Laufzeit-Imports freigeben? Default: `allowTypeImports` für `@/server/*`, dokumentiert in §12.1. Antwort: Default, `import type` erlauben
+4. **Richtwert Dateigröße (R-25):** Screens 200 Zeilen und `ui`-Bausteine 150 (Default), oder überall 150? Antwort: nur wiederverwendbare Bausteine teilen (`ui`, Richtwert 150), Screens, Hooks und Services vorerst nicht; Paket E schrumpft auf `choice-menu.tsx`.
+5. **Pending-Zustand (R-16):** eigener Hook `useAsyncAction` (Default) oder überall `useTransition` direkt? Antwort: Wrapper `useAsyncAction`, intern mit `useTransition` (wertet das `Result` aus und liefert `pending`, `error`, `run`).
+6. **`synchronous = NORMAL` (R-21):** einverstanden, dass bei Stromausfall die letzten Aufnahmen fehlen können (E14 akzeptiert mehr)? Default: ja. Antwort: zurückgestellt, siehe §8.
 7. **Session abgelaufen im Spiel (R-19):** Hinweis mit Link (Default) oder Umleitung wie heute? Antwort Umleitung
 
 ## 7. Protokoll der Messungen
 
-(Paket B, wird von Luca gefüllt: Datenbankgröße, Anzahl Matches, Zeit für `/account/stats`, `/account/rankings`, Sieg-Screen vor und nach dem Batch-Laden.)
+(Paket B: zuerst lokal mit synthetischen Daten, etwa 300 beendete Matches, vor und nach dem Batch-Laden; die Messung mit der Pi-Datenbank trägt Luca später nach. Je Lauf: Datenbankgröße, Anzahl Matches, Zeit für `/account/stats`, `/account/rankings`, Sieg-Screen.)
+
+## 8. Zurückgestellte Fragen
+
+1. **`synchronous = NORMAL` (R-21, vorher §6 Frage 6):** Weniger fsyncs auf der SD-Karte (weniger Verschleiß, schnellere Commits); bei App-Absturz geht nichts verloren, bei Stromausfall können die letzten Transaktionen fehlen (Datenbank bleibt konsistent, offene Aufnahmen liegen meist noch in der Warteschlange auf dem Handy). Alternative: `FULL` behalten. Luca denkt darüber nach; bis dahin bleibt `FULL`, Paket B setzt den Pragma nicht.
