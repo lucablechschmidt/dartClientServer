@@ -5,7 +5,8 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import * as schema from "./schema";
 
-export type Db = BetterSQLite3Database<typeof schema>;
+/** The Drizzle database with its better-sqlite3 connection (`$client`, for closing and in tests for counting queries). */
+export type Db = BetterSQLite3Database<typeof schema> & { $client: Database.Database };
 
 const MIGRATIONS = resolve(process.cwd(), "drizzle");
 
@@ -27,4 +28,10 @@ const globalForDb = globalThis as unknown as { __dartsDb?: Db };
 export function getDb(): Db {
   globalForDb.__dartsDb ??= openDatabase(process.env.DATABASE_PATH ?? "./data/darts.db");
   return globalForDb.__dartsDb;
+}
+
+/** Closes the process's connection (on exit: checkpoints the WAL into the database file, R-22). */
+export function closeDb(): void {
+  globalForDb.__dartsDb?.$client.close();
+  globalForDb.__dartsDb = undefined;
 }

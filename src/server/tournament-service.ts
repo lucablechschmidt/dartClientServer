@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { MatchStatus } from "@/db/repository";
+import type { LoadedMatch, MatchStatus } from "@/db/repository";
 import type { RoundFormat, StoredTournament, TournamentSeeding } from "@/db/tournament-repository";
 import type { Session } from "@/domain/player";
 import { matchResult, type InputMode, type MatchFormat, type PlayerId, type Rules } from "@/domain/game";
@@ -114,13 +114,20 @@ export type TournamentView = {
   canDelete: boolean;
 };
 
-function linkedMatches(deps: Deps, t: StoredTournament) {
+/** The tournament's games by fixture, cancelled ones left out; `loaded` when the caller already has them (R-01). */
+function linkedMatches(deps: Deps, t: StoredTournament, loaded = loadLinked(deps, [t])) {
   return new Map(
     t.links.flatMap((l) => {
-      const m = deps.matches.loadMatch(l.matchId);
+      const m = loaded.get(l.matchId);
       return m && m.status !== "abandoned" ? [[l.fixtureId, m] as const] : [];
     }),
   );
+}
+
+/** Every game of the given tournaments in one batch. */
+function loadLinked(deps: Deps, ts: StoredTournament[]): Map<string, LoadedMatch> {
+  const ids = ts.flatMap((t) => t.links.map((l) => l.matchId));
+  return new Map(deps.matches.loadMatches(ids).map((m) => [m.id, m]));
 }
 
 /** Results of the finished games plus the walkovers against deleted players (m9-plan §1). */
@@ -184,8 +191,10 @@ export type TournamentSummary = {
 
 /** The tournament list, newest first, with the winner's name once decided. */
 export function listTournaments(deps: Deps): TournamentSummary[] {
-  return deps.tournaments.listTournaments().map((t) => {
-    const winnerId = tournamentWinner(planOf(t), resultsOf(t, linkedMatches(deps, t)));
+  const all = deps.tournaments.listTournaments();
+  const loaded = loadLinked(deps, all);
+  return all.map((t) => {
+    const winnerId = tournamentWinner(planOf(t), resultsOf(t, linkedMatches(deps, t, loaded)));
     const winner = t.seeds.find((p) => p.id === winnerId);
     return {
       id: t.id,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { applyDart, newLeg, winnerOf, type Visit } from "@/domain/game";
 import { scoreOf } from "@/domain/x01";
 import { openDatabase } from "./client";
@@ -190,6 +190,39 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(m2).toMatchObject({ finishedAt: 300, placements: { p1: 1, p2: 2 } });
     expect(m2.state.legs[0].visits).toEqual([v]);
     expect(m2.players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
+  });
+
+  it("finished matches of some players only (R-01), and several matches at once", () => {
+    const repo = make();
+    seed(repo); // m1: p1, p2, running
+    repo.players.createPlayer({ id: "p3", name: "Kim", createdAt: 3, guestUntil: null });
+    const finished = (id: string, playerIds: string[], at: number) => {
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds,
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt: 1,
+      });
+      repo.matches.setMatchStatus(id, "finished", at);
+    };
+    finished("a", ["p1", "p2"], 10);
+    finished("b", ["p2", "p3"], 20);
+    finished("c", ["p3", "p1"], 30);
+    const ids = (ms: { id: string }[]) => ms.map((m) => m.id);
+    expect(ids(repo.matches.listFinishedMatches(null, ["p1"]))).toEqual(["a", "c"]);
+    expect(ids(repo.matches.listFinishedMatches(null, ["p1", "p3"]))).toEqual(["a", "b", "c"]);
+    expect(ids(repo.matches.listFinishedMatches(15, ["p2"]))).toEqual(["b"]);
+    expect(repo.matches.listFinishedMatches(null, [])).toEqual([]);
+    expect(repo.matches.listFinishedMatches(null, ["p3"])[1].players.map((p) => p.name)).toEqual(["Kim", "Casey"]);
+    expect(ids(repo.matches.loadMatches(["c", "nope", "m1"])).sort()).toEqual(["c", "m1"]);
+    expect(repo.matches.loadMatches(["m1"])[0]).toEqual(repo.matches.loadMatch("m1"));
+    expect(repo.matches.loadMatches([])).toEqual([]);
   });
 
   it("open matches of a player: running ones they sit in or host", () => {
@@ -583,5 +616,67 @@ describe("visit mapping", () => {
     const slots = visitToSlots(v);
     expect(slots).toEqual({ d1Field: 25, d1Type: "double", d2Field: null, d2Type: null, d3Field: null, d3Type: null, isBust: false });
     expect(rowToVisit({ id: "x", legId: "l", playerId: "p", seq: 0, createdAt: 0, ...slots })).toEqual(v);
+  });
+});
+
+describe("batch loading on SQLite (R-01)", () => {
+  it("finished matches cost a fixed number of queries, however many there are", () => {
+    const db = openDatabase(":memory:");
+    const players = new SqlitePlayerRepository(db);
+    const repo = new SqliteMatchRepository(db);
+    players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
+    players.createPlayer({ id: "p2", name: "Sam", createdAt: 2, guestUntil: null });
+    const visit: Visit = { playerId: "p1", darts: [{ field: 20, type: "triple" }], isBust: false };
+    for (let i = 0; i < 120; i++) {
+      const id = `m${i}`;
+      repo.createMatch({
+        mode: "x01",
+        id,
+        legId: `${id}-l`,
+        rules,
+        playerIds: ["p1", "p2"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt: i,
+      });
+      repo.syncVisits(`${id}-l`, [visit, { ...visit, playerId: "p2" }], 0, nextId, i);
+      repo.setMatchStatus(id, "finished", 1000 + i);
+    }
+    const prepare = vi.spyOn(db.$client, "prepare");
+    const all = repo.listFinishedMatches(null);
+    expect(all).toHaveLength(120);
+    expect(all[119].state.legs[0].visits).toHaveLength(2);
+    expect(prepare.mock.calls.length).toBeLessThanOrEqual(5);
+    prepare.mockClear();
+    expect(repo.listFinishedMatches(null, ["p2"])).toHaveLength(120);
+    expect(prepare.mock.calls.length).toBeLessThanOrEqual(5);
+    prepare.mockClear();
+    expect(repo.loadMatches(all.map((m) => m.id))).toHaveLength(120);
+    expect(prepare.mock.calls.length).toBeLessThanOrEqual(5);
+  });
+
+  it("more ids than one chunk still load every match", () => {
+    const db = openDatabase(":memory:");
+    const players = new SqlitePlayerRepository(db);
+    const repo = new SqliteMatchRepository(db);
+    players.createPlayer({ id: "p1", name: "Casey", createdAt: 1, guestUntil: null });
+    for (let i = 0; i < 1100; i++) {
+      repo.createMatch({
+        mode: "x01",
+        id: `m${i}`,
+        legId: `m${i}-l`,
+        rules,
+        playerIds: ["p1"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt: i,
+      });
+    }
+    const ids = Array.from({ length: 1100 }, (_, i) => `m${i}`);
+    expect(repo.loadMatches(ids)).toHaveLength(1100);
   });
 });

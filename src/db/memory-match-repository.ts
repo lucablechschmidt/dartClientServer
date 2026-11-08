@@ -37,9 +37,10 @@ export class MemoryMatchRepository implements MatchRepository {
     // Like ON DELETE CASCADE on tournament_match: the fixture is open again.
     for (const t of this.store.tournaments.values()) t.links = t.links.filter((l) => l.matchId !== matchId);
   }
-  listFinishedMatches(since: number | null): FinishedMatch[] {
+  listFinishedMatches(since: number | null, playerIds?: readonly PlayerId[]): FinishedMatch[] {
     return [...this.store.matches.values()]
       .filter((m) => m.status === "finished" && (since === null || (m.finishedAt ?? 0) >= since))
+      .filter((m) => playerIds === undefined || m.playerIds.some((id) => playerIds.includes(id)))
       .sort((a, b) => (a.finishedAt ?? 0) - (b.finishedAt ?? 0))
       .flatMap((m) => {
         const f = this.finishedById(m.id);
@@ -123,6 +124,12 @@ export class MemoryMatchRepository implements MatchRepository {
         legWinners: m.legs.map((l) => l.winnerPlayerId),
         placements: { ...m.placements },
       }));
+  }
+  loadMatches(matchIds: readonly string[]): LoadedMatch[] {
+    return matchIds.flatMap((id) => {
+      const m = this.loadMatch(id);
+      return m ? [m] : [];
+    });
   }
   loadMatch(matchId: string): LoadedMatch | null {
     const m = this.store.matches.get(matchId);

@@ -18,6 +18,24 @@ import { legs, matchPlayers, matches, players, visits } from "./schema";
 import { toPlayer } from "./sqlite-player-repository";
 import { rowToVisit, visitToSlots } from "./visit-mapping";
 
+type MatchRow = typeof matches.$inferSelect;
+
+/** SQLite allows 32766 variables per statement; 500 ids per IN keeps statements small. */
+const CHUNK = 500;
+const chunked = <T>(xs: readonly T[]): T[][] =>
+  Array.from({ length: Math.ceil(xs.length / CHUNK) }, (_, i) => xs.slice(i * CHUNK, (i + 1) * CHUNK));
+
+function groupBy<T>(xs: T[], key: (x: T) => string): Map<string, T[]> {
+  const out = new Map<string, T[]>();
+  for (const x of xs) {
+    const k = key(x);
+    const list = out.get(k);
+    if (list) list.push(x);
+    else out.set(k, [x]);
+  }
+  return out;
+}
+
 /** Matches, legs and visits (SQLite). */
 export class SqliteMatchRepository implements MatchRepository {
   constructor(private readonly db: Db) {}
@@ -105,25 +123,104 @@ export class SqliteMatchRepository implements MatchRepository {
       .all()
       .map((m) => ({ id: m.id, mode: m.mode, players: this.seatedPlayers(m.id), inputMode: m.inputMode, startedAt: m.startedAt }));
   }
-  listFinishedMatches(since: number | null): FinishedMatch[] {
-    const finished = and(eq(matches.status, "finished"), since === null ? undefined : gte(matches.finishedAt, since));
-    return this.db
-      .select({ id: matches.id })
+  listFinishedMatches(since: number | null, playerIds?: readonly PlayerId[]): FinishedMatch[] {
+    const seatedAny =
+      playerIds === undefined
+        ? undefined
+        : inArray(
+            matches.id,
+            this.db
+              .select({ id: matchPlayers.matchId })
+              .from(matchPlayers)
+              .where(inArray(matchPlayers.playerId, [...playerIds])),
+          );
+    const rows = this.db
+      .select()
       .from(matches)
-      .where(finished)
+      .where(and(eq(matches.status, "finished"), since === null ? undefined : gte(matches.finishedAt, since), seatedAny))
       .orderBy(asc(matches.finishedAt))
-      .all()
-      .flatMap(({ id }) => {
-        const m = this.finishedById(id);
-        return m ? [m] : [];
-      });
+      .all();
+    return this.hydrate(rows).map(({ match, placements }) => ({ ...match, placements }));
+  }
+  loadMatches(matchIds: readonly string[]): LoadedMatch[] {
+    const rows = chunked(matchIds).flatMap((ids) => this.db.select().from(matches).where(inArray(matches.id, ids)).all());
+    return this.hydrate(rows).map(({ match }) => match);
   }
   /** A finished match with its places; null for any other status. */
   private finishedById(id: string): FinishedMatch | null {
-    const m = this.loadMatch(id);
-    if (m?.status !== "finished") return null;
-    const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, id)).all();
-    return { ...m, placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])) };
+    const row = this.db.select().from(matches).where(eq(matches.id, id)).get();
+    if (row?.status !== "finished") return null;
+    const loaded = this.hydrate([row]).at(0);
+    return loaded ? { ...loaded.match, placements: loaded.placements } : null;
+  }
+  /**
+   * R-01 (m13-plan.md): seats, legs and visits of many matches in one select per table (in chunks of
+   * CHUNK ids for SQLite's variable limit), grouped in JS, then replayed; the order of `rows` is kept.
+   * A match without legs is left out, as in loadMatch.
+   */
+  private hydrate(rows: MatchRow[]): { match: LoadedMatch; placements: Record<PlayerId, number | null> }[] {
+    if (rows.length === 0) return [];
+    const ids = rows.map((r) => r.id);
+    const seats = groupBy(
+      chunked(ids).flatMap((c) =>
+        this.db
+          .select({ player: players, matchId: matchPlayers.matchId, placement: matchPlayers.placement })
+          .from(matchPlayers)
+          .innerJoin(players, eq(players.id, matchPlayers.playerId))
+          .where(inArray(matchPlayers.matchId, c))
+          .orderBy(asc(matchPlayers.matchId), asc(matchPlayers.seat))
+          .all(),
+      ),
+      (r) => r.matchId,
+    );
+    const legRows = groupBy(
+      chunked(ids).flatMap((c) =>
+        this.db.select().from(legs).where(inArray(legs.matchId, c)).orderBy(asc(legs.matchId), asc(legs.setNo), asc(legs.legNo)).all(),
+      ),
+      (l) => l.matchId,
+    );
+    const visitRows = groupBy(
+      chunked(ids).flatMap((c) =>
+        this.db
+          .select({ visit: visits })
+          .from(visits)
+          .innerJoin(legs, eq(legs.id, visits.legId))
+          .where(inArray(legs.matchId, c))
+          .orderBy(asc(visits.legId), asc(visits.seq))
+          .all()
+          .map((r) => r.visit),
+      ),
+      (v) => v.legId,
+    );
+    return rows.flatMap((match) => {
+      const legsOf = legRows.get(match.id) ?? [];
+      if (legsOf.length === 0) return [];
+      const seated = seats.get(match.id) ?? [];
+      const playerIds = seated.map((r) => r.player.id);
+      const rules = { startScore: match.startScore, inRule: match.inRule, outRule: match.outRule };
+      const format = { legsToWinSet: match.legsToWinSet, setsToWinMatch: match.setsToWinMatch };
+      const stored = legsOf.map((l) => ({
+        starter: Math.max(0, playerIds.indexOf(l.starterPlayerId)),
+        visits: (visitRows.get(l.id) ?? []).map(rowToVisit),
+        playOut: l.playOut,
+      }));
+      const loaded: LoadedMatch = {
+        id: match.id,
+        mode: match.mode,
+        rules,
+        status: match.status,
+        players: seated.map((r) => toPlayer(r.player)),
+        inputMode: match.inputMode,
+        hostPlayerId: match.hostPlayerId,
+        startedAt: match.startedAt,
+        finishedAt: match.finishedAt,
+        isTournament: match.isTournament,
+        format,
+        legs: legsOf.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
+        state: replayMatch(playerIds, rules, format, stored, 0, match.mode, match.decidedWinnerId),
+      };
+      return [{ match: loaded, placements: Object.fromEntries(seated.map((r) => [r.player.id, r.placement])) }];
+    });
   }
   listMatches(limit: number, offset: number): MatchSummary[] {
     return this.db
@@ -185,45 +282,8 @@ export class SqliteMatchRepository implements MatchRepository {
       });
   }
   loadMatch(matchId: string): LoadedMatch | null {
-    const match = this.db.select().from(matches).where(eq(matches.id, matchId)).get();
-    if (!match) return null;
-    const seated = this.seatedPlayers(matchId);
-    const legRows = this.db.select().from(legs).where(eq(legs.matchId, matchId)).orderBy(asc(legs.setNo), asc(legs.legNo)).all();
-    if (legRows.length === 0) return null;
-    const visitRows = this.db
-      .select()
-      .from(visits)
-      .where(
-        inArray(
-          visits.legId,
-          legRows.map((l) => l.id),
-        ),
-      )
-      .orderBy(asc(visits.seq))
-      .all();
-    const rules = { startScore: match.startScore, inRule: match.inRule, outRule: match.outRule };
-    const format = { legsToWinSet: match.legsToWinSet, setsToWinMatch: match.setsToWinMatch };
-    const playerIds = seated.map((p) => p.id);
-    const stored = legRows.map((l) => ({
-      starter: Math.max(0, playerIds.indexOf(l.starterPlayerId)),
-      visits: visitRows.filter((v) => v.legId === l.id).map(rowToVisit),
-      playOut: l.playOut,
-    }));
-    return {
-      id: match.id,
-      mode: match.mode,
-      rules,
-      status: match.status,
-      players: seated,
-      inputMode: match.inputMode,
-      hostPlayerId: match.hostPlayerId,
-      startedAt: match.startedAt,
-      finishedAt: match.finishedAt,
-      isTournament: match.isTournament,
-      format,
-      legs: legRows.map((l) => ({ id: l.id, setNo: l.setNo, legNo: l.legNo, winnerPlayerId: l.winnerPlayerId })),
-      state: replayMatch(playerIds, rules, format, stored, 0, match.mode, match.decidedWinnerId),
-    };
+    const row = this.db.select().from(matches).where(eq(matches.id, matchId)).get();
+    return row ? (this.hydrate([row]).at(0)?.match ?? null) : null;
   }
   syncVisits(legId: string, all: Visit[], fromSeq: number, ids: () => string, now: number): void {
     this.db.transaction((tx) => {

@@ -34,6 +34,7 @@ export function isTournamentMatchLocked(deps: Deps, matchId: string): boolean {
   if (!fixture) return false;
   const dependsOnIt = (f: Fixture) =>
     [f.a, f.b].some((s) => (s.kind === "winner" && s.fixture === fixture.id) || (s.kind === "group" && s.group === fixture.group));
-  const started = new Set(t.links.filter((l) => deps.matches.loadMatch(l.matchId)?.status !== "abandoned").map((l) => l.fixtureId));
+  const status = new Map(deps.matches.loadMatches(t.links.map((l) => l.matchId)).map((m) => [m.id, m.status]));
+  const started = new Set(t.links.filter((l) => status.get(l.matchId) !== "abandoned").map((l) => l.fixtureId));
   return plan.fixtures.some((f) => dependsOnIt(f) && started.has(f.id));
 }

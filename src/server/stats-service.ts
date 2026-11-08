@@ -37,7 +37,7 @@ export type MyStats = {
 /** The session's own statistics; nobody sees anybody else's (m8-plan §2). */
 export function myStats(deps: Deps, session: Session, range: StatsRange): MyStats {
   const me = session.playerId;
-  const mine = deps.matches.listFinishedMatches(rangeStart(range, deps.now())).filter((m) => m.players.some((p) => p.id === me));
+  const mine = deps.matches.listFinishedMatches(rangeStart(range, deps.now()), [me]);
   const counted = mine.filter((m) => !isGuestMatch(m));
   const x01 = counted.filter((m) => m.mode === "x01");
   const fromVisits = fieldHits(mine.flatMap((m) => m.state.legs.flatMap((l) => l.visits.filter((v) => v.playerId === me))));
