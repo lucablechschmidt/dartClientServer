@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { ErrorLine, SectionHeading, TextButton } from "@/components/ui/form-controls";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 import { useConfirmTap } from "@/components/ui/use-confirm-tap";
 import type { Player, PlayerError, PlayerResult, Session } from "@/domain/player";
 import { InviteLinkView } from "./invite-link-view";
@@ -25,16 +26,15 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
   const confirm = useConfirmTap();
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
   const [passwordInvite, setPasswordInvite] = useState<{ playerId: string; link: InviteLink } | null>(null);
-  const report = (id: string, r: PlayerResult) => setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason }));
-  const createPasswordInvite = async (id: string) => {
-    const link = await onCreatePasswordInvite(id);
-    setPasswordInvite(link ? { playerId: id, link } : null);
-  };
-  const deletePlayer = async (id: string) => {
-    const fd = new FormData();
-    fd.set("id", id);
-    report(id, await onDeletePlayer(fd));
-  };
+  const passwordLink = useAsyncAction(onCreatePasswordInvite, (link, id) => setPasswordInvite(link ? { playerId: id, link } : null));
+  const remove = useAsyncAction(
+    (id: string) => {
+      const fd = new FormData();
+      fd.set("id", id);
+      return onDeletePlayer(fd);
+    },
+    (r, id) => setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason })),
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -50,11 +50,16 @@ export function PlayersAdminSection({ session, players, texts, onCreatePasswordI
                 {p.isAdmin && <span className="shrink-0 text-sm text-fg-muted">{t.adminBadge}</span>}
               </div>
               <div className="flex flex-wrap gap-x-3">
-                <TextButton flush onClick={() => void createPasswordInvite(p.id)}>
+                <TextButton flush {...passwordLink.rowButton(p.id)} onClick={() => passwordLink.run(p.id)}>
                   {p.hasLogin ? t.resetPassword : t.createLogin}
                 </TextButton>
                 {!protectedPlayer && (
-                  <TextButton flush tone="danger" onClick={() => confirm.tap(`player:${p.id}`, () => void deletePlayer(p.id))}>
+                  <TextButton
+                    flush
+                    tone="danger"
+                    {...remove.rowButton(p.id)}
+                    onClick={() => confirm.tap(`player:${p.id}`, () => remove.run(p.id))}
+                  >
                     {confirm.label(`player:${p.id}`, t.deletePlayer, t.confirm)}
                   </TextButton>
                 )}

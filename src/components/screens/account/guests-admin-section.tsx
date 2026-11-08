@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { ErrorLine, SectionHeading, TextButton } from "@/components/ui/form-controls";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 import type { Player, PlayerError, PlayerResult } from "@/domain/player";
 import type { AccountTexts } from "./types";
 
@@ -17,12 +18,9 @@ export function GuestsAdminSection({
   onPromoteGuest: (playerId: string) => Promise<PlayerResult>;
 }) {
   const [errors, setErrors] = useState<Record<string, PlayerError | undefined>>({});
+  const promote = useAsyncAction(onPromoteGuest, (r, id) => setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason })));
   if (guests.length === 0) return null;
   const t = texts.admin;
-  const promote = async (id: string) => {
-    const r = await onPromoteGuest(id);
-    setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason }));
-  };
   return (
     <div className="flex flex-col gap-2">
       <SectionHeading>{t.guests}</SectionHeading>
@@ -31,7 +29,9 @@ export function GuestsAdminSection({
           <CardRow key={p.id} className="flex-col items-stretch">
             <div className="flex items-center justify-between gap-2">
               <span className="truncate text-fluid-lg">{p.name}</span>
-              <TextButton onClick={() => void promote(p.id)}>{t.promoteGuest}</TextButton>
+              <TextButton {...promote.rowButton(p.id)} onClick={() => promote.run(p.id)}>
+                {t.promoteGuest}
+              </TextButton>
             </div>
             <ErrorLine error={errors[p.id]} texts={texts.errors} />
           </CardRow>

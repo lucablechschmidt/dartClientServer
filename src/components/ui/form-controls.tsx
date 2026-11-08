@@ -19,29 +19,53 @@ export function TextInput({ inline = false, className = "", ...props }: TextInpu
 
 const tones = { accent: "text-accent", danger: "text-key-undo", muted: "text-fg-muted" } as const;
 
-type TextButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  tone?: keyof typeof tones;
-  /** No horizontal padding, for buttons in a wrapping row of actions. */
-  flush?: boolean;
-};
+/** While its action runs (useAsyncAction): disabled and announced as busy (R-16). */
+type Pending = { pending?: boolean };
+const pendingProps = (pending: boolean, disabled: boolean | undefined) => ({
+  disabled: pending || disabled,
+  "aria-busy": pending || undefined,
+});
+
+type TextButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  Pending & {
+    tone?: keyof typeof tones;
+    /** No horizontal padding, for buttons in a wrapping row of actions. */
+    flush?: boolean;
+  };
 
 /** Text-only button (save, cancel, delete …). Defaults to type="button". */
-export function TextButton({ tone = "accent", flush = false, type = "button", className = "", ...props }: TextButtonProps) {
+export function TextButton({
+  tone = "accent",
+  flush = false,
+  type = "button",
+  pending = false,
+  disabled,
+  className = "",
+  ...props
+}: TextButtonProps) {
   return (
     <button
       type={type}
       {...props}
+      {...pendingProps(pending, disabled)}
       className={`min-h-touch shrink-0 ${flush ? "" : "px-2"} font-medium disabled:opacity-50 ${tones[tone]} ${className}`}
     />
   );
 }
 
 /** The one filled button of a screen (log in, join, try again). */
-export function PrimaryButton({ type = "submit", className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function PrimaryButton({
+  type = "submit",
+  pending = false,
+  disabled,
+  className = "",
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & Pending) {
   return (
     <button
       type={type}
       {...props}
+      {...pendingProps(pending, disabled)}
       className={`min-h-touch w-full rounded-box bg-accent font-semibold text-on-accent disabled:opacity-50 ${className}`}
     />
   );

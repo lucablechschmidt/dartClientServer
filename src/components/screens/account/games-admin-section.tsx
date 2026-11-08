@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { FoldCard } from "@/components/ui/fold-card";
 import { ErrorLine, SectionHeading, TextButton } from "@/components/ui/form-controls";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 import { useConfirmTap } from "@/components/ui/use-confirm-tap";
 import type { ModeId } from "@/domain/game";
 import type { TournamentFormat } from "@/domain/tournament";
@@ -64,19 +65,19 @@ export function GamesAdminSection({
   const shownTournaments = tournaments.filter((x) => !gone.has(x.id));
   const shownMatches = [...matches.items, ...extra.items].filter((m) => !gone.has(m.id));
 
-  const remove = async (id: string, action: Promise<CleanupResult>, afterwards?: () => void) => {
-    const r = await action;
+  const removed = (r: CleanupResult, id: string) => {
     setErrors((e) => ({ ...e, [id]: r.ok ? undefined : r.reason }));
-    if (!r.ok) return;
-    setGone((g) => new Set(g).add(id));
-    afterwards?.();
+    if (r.ok) setGone((g) => new Set(g).add(id));
   };
-  const loadMore = async () => {
-    const page = await onLoadMore(shownMatches.length);
-    setExtra((x) => ({ items: [...x.items, ...page.items], hasMore: page.hasMore }));
-  };
-  const deleteButton = (key: string, label: string, run: () => void) => (
-    <TextButton flush tone="danger" onClick={() => confirm.tap(key, run)}>
+  const removeMatch = useAsyncAction(onDeleteMatch, removed);
+  // Its games go too; the page reloads them from the server, so drop the extra pages.
+  const removeTournament = useAsyncAction(onDeleteTournament, (r, id) => {
+    removed(r, id);
+    if (r.ok) setExtra({ items: [], hasMore: matches.hasMore });
+  });
+  const more = useAsyncAction(onLoadMore, (page) => setExtra((x) => ({ items: [...x.items, ...page.items], hasMore: page.hasMore })));
+  const deleteButton = (id: string, key: string, label: string, action: typeof removeMatch) => (
+    <TextButton flush tone="danger" {...action.rowButton(id)} onClick={() => confirm.tap(key, () => action.run(id))}>
       {confirm.label(key, label, texts.admin.confirm)}
     </TextButton>
   );
@@ -95,12 +96,7 @@ export function GamesAdminSection({
             </span>
             <span className="truncate text-sm text-fg-muted">{x.players.join(" · ")}</span>
             <span className="flex items-baseline gap-2">
-              {/* Its games go too; the page reloads them from the server, so drop the extra pages. */}
-              {deleteButton(
-                `t:${x.id}`,
-                t.deleteTournament,
-                () => void remove(x.id, onDeleteTournament(x.id), () => setExtra({ items: [], hasMore: matches.hasMore })),
-              )}
+              {deleteButton(x.id, `t:${x.id}`, t.deleteTournament, removeTournament)}
               <span className="text-xs text-fg-muted">{t.deleteTournamentHint}</span>
             </span>
             <ErrorLine error={errors[x.id]} texts={t.errors} />
@@ -123,12 +119,16 @@ export function GamesAdminSection({
                 .filter(Boolean)
                 .join(" · ")}
             </span>
-            <span className="flex">{deleteButton(`m:${m.id}`, t.deleteMatch, () => void remove(m.id, onDeleteMatch(m.id)))}</span>
+            <span className="flex">{deleteButton(m.id, `m:${m.id}`, t.deleteMatch, removeMatch)}</span>
             <ErrorLine error={errors[m.id]} texts={t.errors} />
           </CardRow>
         ))}
       </CardList>
-      {extra.hasMore && <TextButton onClick={() => void loadMore()}>{t.more}</TextButton>}
+      {extra.hasMore && (
+        <TextButton pending={more.pending} onClick={() => more.run(shownMatches.length)}>
+          {t.more}
+        </TextButton>
+      )}
     </FoldCard>
   );
 }

@@ -8,6 +8,7 @@ import { CardList, CardRow } from "@/components/ui/card-list";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { FormError, SectionHeading, TextButton } from "@/components/ui/form-controls";
 import { SpinnerIcon } from "@/components/ui/icons";
+import { useAsyncAction } from "@/components/ui/use-async-action";
 import type { PlayerId } from "@/domain/game";
 import type { ResolvedFixture, StandingRow, TournamentFormat } from "@/domain/tournament";
 import type { Texts } from "@/i18n/de";
@@ -73,15 +74,16 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
       fixtures: view.fixtures.filter((f) => f.phase === "knockout" && f.round === i + 1),
     })),
   ];
-  const report = async (action: Promise<{ ok: boolean; reason?: TournamentError }>) => {
-    const r = await action;
-    setError(r.ok ? null : (r.reason ?? null));
-  };
+  const report = (r: { ok: boolean; reason?: TournamentError }) => setError(r.ok ? null : (r.reason ?? null));
+  // Start and delete redirect on success; until the new page is there the buttons stay busy (R-16).
+  const start = useAsyncAction(onStart, report);
+  const remove = useAsyncAction(onDelete, report);
   /** The draw is quick; the spinner stays a moment so a new draw is noticed even when it looks alike. */
   const redraw = async () => {
     setDrawing(true);
     try {
-      await Promise.all([report(onRedraw()), new Promise((done) => setTimeout(done, MIN_DRAWING_MS))]);
+      const [r] = await Promise.all([onRedraw(), new Promise((done) => setTimeout(done, MIN_DRAWING_MS))]);
+      report(r);
     } finally {
       setDrawing(false);
     }
@@ -137,7 +139,7 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
                         {name(f.b, f.status === "bye")}
                       </span>
                     </span>
-                    <FixtureAction fixture={f} texts={t} onStart={() => void report(onStart(f.id))} />
+                    <FixtureAction fixture={f} texts={t} button={start.rowButton(f.id)} onStart={() => start.run(f.id)} />
                   </CardRow>
                 ))}
               </CardList>
@@ -145,7 +147,7 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
           ))}
         </div>
         {view.canDelete && (
-          <TextButton tone="danger" onClick={() => setDeleting(true)}>
+          <TextButton tone="danger" pending={remove.pending} onClick={() => setDeleting(true)}>
             {t.delete}
           </TextButton>
         )}
@@ -156,7 +158,7 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
           cancelLabel={t.cancel}
           onConfirm={() => {
             setDeleting(false);
-            void report(onDelete());
+            remove.run();
           }}
           onCancel={() => setDeleting(false)}
         />
@@ -169,10 +171,13 @@ export function TournamentScreen({ view, texts: t, back, onStart, onRedraw, onDe
 function FixtureAction({
   fixture: f,
   texts: t,
+  button,
   onStart,
 }: {
   fixture: TournamentScreenView["fixtures"][number];
   texts: Texts["tournaments"];
+  /** Busy while this fixture's game is being started, disabled while another one is. */
+  button: { pending: boolean; disabled: boolean };
   onStart: () => void;
 }) {
   if (f.status === "done" && f.walkover) return <span className="shrink-0 text-sm text-fg-muted">{t.walkover}</span>;
@@ -186,5 +191,9 @@ function FixtureAction({
       </Link>
     );
   }
-  return <TextButton onClick={onStart}>{t.play}</TextButton>;
+  return (
+    <TextButton {...button} onClick={onStart}>
+      {t.play}
+    </TextButton>
+  );
 }
