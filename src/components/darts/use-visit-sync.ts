@@ -241,6 +241,17 @@ export function useVisitSync<Reason extends string>({
     runRef.current = run;
   }, [run]);
 
+  // R-05 (m13-plan.md): leaving the scoreboard ends the retry loop (no more calls, timers or state
+  // updates); what is still waiting stays in localStorage and is played when the match opens again.
+  useEffect(
+    () => () => {
+      generation.current++;
+      wake.current?.();
+      running.current = false;
+    },
+    [],
+  );
+
   // After mount (not during server rendering): a stored queue brings back the state the device
   // showed and is played; otherwise this device's open visit is restored on top of the server state.
   // localStorage exists only in the browser, hence a deliberate setState in the effect (once per match).

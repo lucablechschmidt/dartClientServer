@@ -87,6 +87,41 @@ describe("useVisitSync queue (M6)", () => {
     expect(closedVisits(result.current.state)).toBe(1);
   });
 
+  it("leaving the scoreboard while unsaved stops the retries; the queue stays stored (R-05)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const { fake, options } = server();
+      fake.down = true;
+      const { result, unmount } = renderHook(() => useVisitSync({ initial: view(state0), ...options }));
+      throwThree(result);
+      await waitFor(() => expect(result.current.sync).toBe("unsaved"));
+      const calls = options.onCommitVisit.mock.calls.length;
+      unmount();
+      fake.down = false;
+      await act(() => vi.advanceTimersByTimeAsync(60_000));
+      expect(options.onCommitVisit.mock.calls.length).toBe(calls);
+      expect(options.onLoad).not.toHaveBeenCalled();
+      expect(localStorage.getItem(`darts:queue:${MATCH}`)).toContain('"kind":"commit"');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("a redirect thrown by a call (session expired, R-19) ends the loop like an outage; the queue stays stored", async () => {
+    const { options } = server();
+    const redirect = Object.assign(new Error("NEXT_REDIRECT"), { digest: "NEXT_REDIRECT;replace;/login;307;" });
+    options.onCommitVisit.mockImplementation(() => Promise.reject(redirect));
+    const { result, unmount } = renderHook(() => useVisitSync({ initial: view(state0), ...options }));
+    throwThree(result);
+    await waitFor(() => expect(result.current.sync).toBe("unsaved"));
+    // Next navigates to /login: the scoreboard unmounts, nothing is lost or sent again
+    unmount();
+    const calls = options.onCommitVisit.mock.calls.length;
+    await new Promise((r) => setTimeout(r, 1200));
+    expect(options.onCommitVisit.mock.calls.length).toBe(calls);
+    expect(localStorage.getItem(`darts:queue:${MATCH}`)).toContain('"kind":"commit"');
+  });
+
   it("a reload during the outage brings back the shown state and plays the stored queue", async () => {
     const { fake, options } = server();
     fake.down = true;
