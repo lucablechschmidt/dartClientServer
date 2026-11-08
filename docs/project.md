@@ -301,7 +301,7 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
-- [ ] Paket A – Eingabevalidierung und Fehlerfluss
+- [x] Paket A – Eingabevalidierung und Fehlerfluss
 - [ ] Paket B – Pi-Ressourcen, danach Messung mit der Pi-Datenbank
 - [ ] Paket C – Client-Lebenszyklus und Rückmeldung
 - [ ] Paket D – Konsolidierung und Doku

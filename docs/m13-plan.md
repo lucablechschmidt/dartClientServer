@@ -1,7 +1,7 @@
 # M13-Plan – Code-Review und Konsolidierung
 
 > Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
-> Stand: erste Fassung, 6.11.2026, noch nicht umgesetzt. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
+> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), B–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
 > Luca: §0 und §6.
 
 ---
@@ -133,6 +133,8 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 8. **Commits:** `fix(server): validate action input and answer with results instead of throwing`, `feat(server): log unexpected request errors as json lines`, `fix(match): restart only by host, admin or a player of the match`, `fix(health): do not expose the error message`.
 
 **Abnahme:** Ein manipuliertes Setup-Formular (leere Spielerliste, `startScore=abc`) zeigt den Fehlertext und keine Fehlerseite; `npm test` grün; im Log steht bei einem provozierten Fehler eine Zeile `{"level":"error","event":"request.failed","path":…}`; `curl /api/health` bei gesperrter DB liefert `{"ok":false}` ohne Pfad.
+
+**Umsetzung (8.11.2026):** Wie geplant, mit drei Abweichungen. 1) Schemas und Formular-Aufbau liegen in `src/server/action-input.ts` (testbar, die Actions sind von der Coverage ausgenommen), nicht neben den Actions. 2) Eine ungültige ID wird als `not-found` beantwortet (sie kann nicht existieren), `invalid-input` nur für Position, Undo-Schritt, Play-out-Flag und Spieler-ID im Zählscreen. 3) `createMatch`/`createTournament` behalten ihr werfendes `parse` für Aufrufer im Server (Restart, Turnierpaarung); `architecture.md` §12.3 nennt das als Ausnahme. Abnahme: Unit- und UI-Tests für die Formulare, `request-error.test.ts` für die Logzeile, `npm test` und `test:e2e` grün; `curl /api/health` bei gesperrter DB nicht von Hand geprüft.
 
 ### 3.2 Paket B – Pi-Ressourcen
 
