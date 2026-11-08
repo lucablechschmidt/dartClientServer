@@ -20,7 +20,7 @@ const stored = (deps: Deps, player: PlayerId): FactSource[] =>
 /** The session's gallery: every achievement, earned with its date or open, progress for all-finishes. */
 export function myAchievements(deps: Deps, session: Session): GalleryItem[] {
   const me = session.playerId;
-  const games = deps.matches.listFinishedMatches(null).filter((m) => m.players.some((p) => p.id === me));
+  const games = deps.matches.listFinishedMatches(null, [me]);
   return gallery([...games.map((m) => factSource(m, me)), ...stored(deps, me)]);
 }
 
@@ -28,7 +28,13 @@ export type NewAchievements = { playerId: PlayerId; name: string; keys: Achievem
 
 /** The victory screen's banner: per regular player what this finished game brought that no earlier one had. */
 export function newInMatch(deps: Deps, matchId: string): NewAchievements[] {
-  const all = deps.matches.listFinishedMatches(null);
+  const loaded = deps.matches.loadMatch(matchId);
+  if (loaded?.status !== "finished") return [];
+  // Only the games of this match's players (R-01), not every finished game.
+  const all = deps.matches.listFinishedMatches(
+    null,
+    loaded.players.map((p) => p.id),
+  );
   const match = all.find((m) => m.id === matchId);
   if (!match) return [];
   return match.players.flatMap((p) => {
