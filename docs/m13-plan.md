@@ -91,7 +91,7 @@ Positiv geprüft: SSE-Route räumt bei `abort` und `cancel` auf (`off()`, `clear
 | R-27 | A11y: Listbox | `src/components/ui/choice-menu.tsx:94, 116` (`<li role="option">` mit `<button>` darin), kein Pfeiltasten-Handling, Fokus bleibt auf dem Trigger | Die Rolle `option` sitzt auf dem `li`, fokussierbar ist der Button darin; `aria-selected` steht am falschen Element, `listbox` ohne `aria-activedescendant` oder Fokus-Wanderung. Mit Maus/Touch funktioniert alles, per Tastatur/Screenreader ist es ein Menü aus Buttons. | WAI-ARIA Listbox-Muster. | Entweder ehrlich als Menü auszeichnen (`role="menu"`/`menuitemradio`, `aria-checked`) **oder** Listbox vollständig: Fokus auf das `ul`, `aria-activedescendant`, Pfeiltasten, Enter/Escape. Default: Menü, weniger Code. Test in `choice-menu.test.tsx` mit `userEvent.keyboard`. | niedrig | M | F |
 | R-28 | A11y: Dialog | `src/components/ui/confirm-sheet.tsx:24` (Fokus auf „Abbrechen“), kein Fokus-Fang, kein Rückfokus beim Schließen | Tab verlässt den Dialog in die Seite dahinter; nach dem Schließen landet der Fokus auf `body`. | Dialog-Muster. | Natives `<dialog>` mit `showModal()` (bringt Fokus-Fang, Escape und `inert` dahinter mit) oder manueller Fokus-Fang plus `previouslyFocused.focus()` im Cleanup. Default: `<dialog>`. | niedrig | S | F |
 | R-29 | A11y: Beschriftung | `src/components/ui/fold-card.tsx:26` (`aria-expanded` ohne `aria-controls`), `src/components/darts/keypad.tsx:89` (`role="group"` ohne Namen), `src/components/screens/stats/rankings.tsx:44` (`FoldCard`-Titel ist nur der Modus, Tabelle hat `aria-label`), Seiten ohne eigenen `<title>` (nur `src/app/layout.tsx:7`) | Kleinigkeiten: aufklappbare Karten ohne Verweis auf ihren Inhalt; Keypad-Gruppe ohne Namen; jede Seite heißt im Tab „Darts Scorer“. | Orientierung mit Screenreader und im Browser-Verlauf. | `useId` + `aria-controls` in `FoldCard`; `aria-label={texts.keypad}` am Keypad; `export const metadata`/`generateMetadata` je Seite mit `de.*.title` („Statistik · Darts Scorer“). | niedrig | S | F |
-| R-30 | Theme-Regel | `src/components/ui/theme-toggle.tsx:47` (`hover:text-fg`) | Einziger Hover-Zustand im Code. | `architecture.md` §8: „keine Hover-Zustände“ (Touch-Geräte). | Entfernen oder die Regel in §8 auf „nur am Theme-Toggle“ lockern. Default: entfernen. | niedrig | S | F |
+| R-30 ~~(entfällt, 8.11.2026: Hover bleibt als Zusatz am Desktop, Regel in `architecture.md` §8 gelockert)~~ | Theme-Regel | `src/components/ui/theme-toggle.tsx:47` (`hover:text-fg`) | Einziger Hover-Zustand im Code. | `architecture.md` §8: „keine Hover-Zustände“ (Touch-Geräte). | Entfernen oder die Regel in §8 auf „nur am Theme-Toggle“ lockern. Default: entfernen. | niedrig | S | F |
 | R-31 | Breiten (bekannt) | `src/components/ui/card-list.tsx:13`, `screens/setup-shell.tsx:98, 148` (`max-w-xl` je Baustein) | Jeder Baustein begrenzt sich selbst; Überschriften und `FoldCard` nicht. Wird mit `PageFrame` in `docs/m14-plan.md` §2.2 behoben. | Nicht doppelt bearbeiten. | Kommt mit M14; hier nur der Querverweis. | – | – | – |
 
 Positiv geprüft: kein `style={…}`, keine Ad-hoc-Werte, keine Literale im Markup (alle Texte aus `de`), Farben nur über Tokens; Formulare mit `<label>` (`Field`) oder `aria-label`; `role="alert"`/`role="status"` an Fehler- und Statuszeilen; Tabellen mit `scope`; Charts mit `sr-only`-Tabellen; Touch-Mindesthöhe `min-h-touch` überall; `aria-pressed`/`aria-current` an Auswahl und Tabs.
@@ -119,7 +119,7 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 | **C** Client-Lebenszyklus und Rückmeldung | Cleanup beim Unmount, SSE im Hintergrund schließen, `useAsyncAction`/Pending an allen Buttons, Cancel-Ergebnis anzeigen, Skeleton + `loading.tsx`, `global-error.tsx`, `unauthenticated` statt Redirect in JSON-Actions, Props-Typ `onUndoVisit` | R-04, R-05, R-12, R-13, R-15, R-16, R-17, R-19 | A (für `unauthenticated`-Grund) | M–L |
 | **D** Konsolidierung und Doku | Duplikate zusammenführen, Typ-Imports (Entscheidung §6 Frage 3), `requireAdmin` in der Admin-Seite, toten Code entfernen, `deps.now()` im Rate-Limit, Komponenten-Coverage, `networkidle` ersetzen, `theme.md` §1 korrigieren | R-07, R-08, R-09, R-10, R-11, R-34, R-35, R-36 | – | S–M |
 | **E** Große Module teilen | `useVisitSync` in drei Hooks, `scoreboard-screen`, `setup-shell`, `match-service`, `choice-menu` aufteilen; Verhalten unverändert, bestehende Tests bleiben grün | R-25 | C (damit die Teile die neuen Regeln schon enthalten) | L |
-| **F** Barrierefreiheit | Leg-Sieg-Screen ohne verschachtelte Buttons, `ChoiceMenu` als Menü, `ConfirmSheet` als `<dialog>`, `aria-controls`, Keypad-Name, Seitentitel, Hover entfernen | R-26 … R-30 | – | M |
+| **F** Barrierefreiheit | Leg-Sieg-Screen ohne verschachtelte Buttons, `ChoiceMenu` als Menü, `ConfirmSheet` als `<dialog>`, `aria-controls`, Keypad-Name, Seitentitel | R-26 … R-29 | – | M |
 
 ### 3.1 Paket A – Eingabevalidierung und Fehlerfluss
 
@@ -173,6 +173,8 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 
 **Abnahme:** `npm run lint`, `typecheck`, `test:coverage` grün; keine der neun Kopien mehr vorhanden (`grep "structural, no server import"` leer).
 
+**Ergänzt (8.11.2026):** 6. `README.md`: Abschnitt Logs um `request.failed` ergänzen, Rechte von „Nochmal“ (Host, Admin, Mitspieler; Host bleibt Host) bei den Spielregeln nennen. 7. `docs/prompt.md` „Stand“ auf M13 nachziehen (A–C fertig, B ohne Messung, §8 offen). 8. `/dev/theme`: Regel „jeder `ui`-Baustein bekommt einen Eintrag“ (§9) entweder umsetzen oder streichen (Vorschlag in `fragen.md`).
+
 ### 3.5 Paket E – Große Module teilen
 
 1. `useSyncQueue(matchId, send, onLoad)`: Queue, Retry, Generation, Storage, Stale, `retryNow`, `discard`; Tests aus `use-visit-sync.test.tsx` übernehmen, die nur die Queue betreffen.
@@ -184,7 +186,9 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 
 ### 3.6 Paket F – Barrierefreiheit
 
-1. `leg-victory-screen.tsx` (R-26), `choice-menu.tsx` als Menü (R-27), `confirm-sheet.tsx` als `<dialog>` (R-28), `fold-card.tsx` `aria-controls`, Keypad-Name, `metadata` je Seite (R-29), Hover entfernen (R-30).
+**Bedingung (Luca, 8.11.2026):** Barrierefreiheit darf nicht auf Kosten der UX für Sehende gehen. Jeder Punkt wird vorher daran gemessen; was Aussehen oder Bedienung für Sehende ändert, wird vorgeschlagen statt umgesetzt. Konkret: der Leg-Sieg-Screen bleibt „irgendwo tippen zum Fortfahren“ (R-26); `ChoiceMenu` ändert nur Rollen und Tastatur, nicht das Aussehen (R-27); `ConfirmSheet` wird nur dann `<dialog>`, wenn Aussehen, Scrim und Einblenden gleich bleiben, sonst Fokus-Fang von Hand (R-28); `aria-controls`, Keypad-Name, Seitentitel sind unsichtbar (R-29).
+
+1. `leg-victory-screen.tsx` (R-26), `choice-menu.tsx` als Menü (R-27), `confirm-sheet.tsx` als `<dialog>` (R-28), `fold-card.tsx` `aria-controls`, Keypad-Name, `metadata` je Seite (R-29). R-30 entfällt (Hover bleibt).
 2. Tests: `userEvent.keyboard` für Menü und Dialog; `document.title` in `e2e/layout.spec.ts`.
 3. **Commits:** `fix(a11y): …` je Punkt.
 
