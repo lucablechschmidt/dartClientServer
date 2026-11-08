@@ -9,7 +9,14 @@ export class RateLimiter {
   constructor(
     private readonly windowMs: number,
     private readonly max: number,
+    /** R-20 (m13-plan.md): from this many keys on, `fail` drops the expired ones first, so the map stays bounded. */
+    private readonly sweepAt = 1000,
   ) {}
+
+  /** Keys currently tracked (tests). */
+  get size(): number {
+    return this.hits.size;
+  }
 
   /** Milliseconds the client still has to wait, or 0. */
   retryAfter(key: string, now: number): number {
@@ -23,6 +30,7 @@ export class RateLimiter {
   }
 
   fail(key: string, now: number): void {
+    if (this.hits.size >= this.sweepAt) this.sweep(now);
     const h = this.hits.get(key);
     if (!h || now - h.windowStart >= this.windowMs) this.hits.set(key, { count: 1, windowStart: now });
     else h.count++;
@@ -30,6 +38,10 @@ export class RateLimiter {
 
   reset(key: string): void {
     this.hits.delete(key);
+  }
+
+  private sweep(now: number): void {
+    for (const [key, h] of this.hits) if (now - h.windowStart >= this.windowMs) this.hits.delete(key);
   }
 }
 

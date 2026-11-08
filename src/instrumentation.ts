@@ -3,7 +3,7 @@ import type { Instrumentation } from "next";
 /** Runs once at server start: opens the DB, applies migrations, creates the admin (M3) and starts the daily cleanup (E12, sessions). */
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { getDb } = await import("@/db/client");
+    const { closeDb, getDb } = await import("@/db/client");
     getDb();
     const { productionDeps } = await import("@/server/context");
     const { cleanupGuests, CLEANUP_INTERVAL_MS } = await import("@/server/guest-cleanup");
@@ -24,7 +24,15 @@ export async function register() {
       }
     };
     run();
-    setInterval(run, CLEANUP_INTERVAL_MS).unref();
+    // R-22 (m13-plan.md): register can run again on hot reload in development; one timer and one exit hook per process.
+    // Next exits on SIGTERM itself (process.exit), so closing on "exit" covers `docker compose stop` without holding it up.
+    const g = globalThis as unknown as { __dartsCleanupTimer?: ReturnType<typeof setInterval>; __dartsCloseOnExit?: boolean };
+    if (g.__dartsCleanupTimer) clearInterval(g.__dartsCleanupTimer);
+    g.__dartsCleanupTimer = setInterval(run, CLEANUP_INTERVAL_MS).unref();
+    if (!g.__dartsCloseOnExit) {
+      process.once("exit", closeDb);
+      g.__dartsCloseOnExit = true;
+    }
   }
 }
 
