@@ -1,7 +1,7 @@
 # M13-Plan – Code-Review und Konsolidierung
 
 > Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
-> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), B–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
+> Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), C–F offen. Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
 > Luca: §0 und §6.
 
 ---
@@ -146,6 +146,8 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 6. **Commits:** `perf(db): load finished matches in batches and filter by player in sql`, `perf(stats): load only the players' matches for the victory banner`, `perf(db): synchronous=normal in wal mode`, `fix(server): bound the rate-limit map and close the database on sigterm`.
 
 **Abnahme:** `repository.test.ts` zeigt gleiche Ergebnisse; Anzahl Queries für 100 Matches ≤ 5 (Test mit einem zählenden `Db`-Wrapper oder `sqlite.prepare`-Spy); Messwerte in §7; `npm test` grün.
+
+**Umsetzung (8.11.2026):** Schritte 1–3 und 5 ohne `synchronous` (§8). Abweichungen: 1) Visits werden über einen Join auf `leg` je Block Match-IDs geladen, nicht je Block Leg-IDs; so bleiben es vier Abfragen, egal wie viele Legs. `loadMatch` nutzt denselben Weg. 2) Statt eines `SIGTERM`-Listeners schließt ein `exit`-Hook die Datenbank: Next registriert selbst `SIGTERM` und ruft `process.exit`; ein eigener Listener hätte nichts gebracht und ohne Next das Beenden verhindert. 3) `newInMatch` lädt erst das Match und dann `listFinishedMatches(null, Spieler des Matches)`. Abnahme: Zähltest ≤ 5 Abfragen für 120 Matches (vorher > 1 je Match), `npm test` und `test:e2e` grün. **Offen:** Messung (§7, später), `listOpenMatches`/`listRecentMatches` laden noch je Match (kurze Listen, nicht im Plan).
 
 ### 3.3 Paket C – Client-Lebenszyklus und Rückmeldung
 

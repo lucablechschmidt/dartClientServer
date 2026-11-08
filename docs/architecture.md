@@ -293,7 +293,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 **Nach Schreibvorgängen** leitet eine Action um (`redirect`, bei Formularen), liefert den neuen Stand als `Result` (Zählscreen) oder ruft `revalidatePath` für die betroffenen Seiten (Spieler, Admin). Live-Änderungen anderer Geräte kommen per SSE-Ping, der Client lädt dann über `loadMatchAction` nach.
 
-**Ziel (B):** Lese-Methoden der Repositories laden Mengen **batchweise** (ein Select je Tabelle mit `inArray`, Gruppierung in JS), nie in Schleifen pro Datensatz; Filter (Spieler, Zeitraum) gehören in die SQL-Abfrage, nicht ins JS danach (R-01). Jede neue Liste bekommt dafür einen Test, der die Query-Anzahl zählt.
+**Regel (Ist seit Paket B für beendete Matches und Turnierspiele):** Lese-Methoden der Repositories laden Mengen **batchweise** (ein Select je Tabelle mit `inArray`, Gruppierung in JS), nie in Schleifen pro Datensatz; Filter (Spieler, Zeitraum) gehören in die SQL-Abfrage, nicht ins JS danach (R-01). Jede neue Liste bekommt dafür einen Test, der die Query-Anzahl zählt (Muster: `vi.spyOn(db.$client, "prepare")` in `repository.test.ts`). **Noch pro Datensatz:** `listOpenMatches`, `listMatches` und `listRecentMatches` (Spieler bzw. Sitze je Match); die Listen sind auf 20 bzw. wenige Einträge begrenzt.
 
 ### 12.3 Validierung, Fehler und Rückmeldung
 
@@ -353,4 +353,4 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 **Bewusste Grenzen (Ist):** jede Session darf jede Match-ID abonnieren (nur Pings, keine Daten, R-24); `/api/health` ist öffentlich; das Rate-Limit vertraut `X-Forwarded-For` von Caddy (M12 Teil B prüft das).
 
-**Ziel (B):** Listen laden batchweise (12.2); `PRAGMA synchronous = NORMAL` nur nach Entscheidung (`m13-plan.md` §8, R-21); Rate-Limit-Map wird beim Eintragen aufgeräumt (R-20); Intervall-Handle auf `globalThis`, `SIGTERM` schließt die Datenbank (R-22); `/api/health` antwortet seit Paket A ohne Fehlermeldung und loggt sie (R-23). Nach Paket B misst Luca die Statistik-Seiten mit der Pi-Datenbank (`m13-plan.md` §7); eine Aggregat-Tabelle kommt nur, wenn das nicht reicht (`m13-plan.md` §5).
+**Ist (B):** Beendete Matches und Turnierspiele laden batchweise (12.2); die Rate-Limit-Map räumt ab 1 000 Einträgen abgelaufene auf (R-20); das Aufräum-Intervall liegt auf `globalThis`, die Datenbank wird beim Prozessende geschlossen (`exit`-Hook; Next beendet sich bei `SIGTERM` selbst, R-22). **Offen:** `PRAGMA synchronous = NORMAL` nur nach Entscheidung (`m13-plan.md` §8, R-21); `/api/health` antwortet seit Paket A ohne Fehlermeldung und loggt sie (R-23). Nach Paket B misst Luca die Statistik-Seiten mit der Pi-Datenbank (`m13-plan.md` §7); eine Aggregat-Tabelle kommt nur, wenn das nicht reicht (`m13-plan.md` §5).
