@@ -1,22 +1,24 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { PlayerPicker } from "@/components/darts/player-picker";
 import { FoldCard } from "@/components/ui/fold-card";
 import { BackButton } from "@/components/ui/back-button";
 import { PageFrame, pageColumn } from "@/components/ui/page-frame";
 import { ChoiceMenu, ChoiceNumberField, DisclosureChevron, LabeledValue, type Choice } from "@/components/ui/choice-menu";
+import { FormError } from "@/components/ui/form-controls";
 import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
-import type { Player } from "@/domain/player";
-import type { ModeId } from "@/domain/game";
+import type { GuestResult, Player } from "@/domain/player";
+import type { InvalidInput, ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
 
 export type SetupProps = {
   players: Player[];
   texts: Texts["newGame"];
   commonTexts: { back: string; save: string; cancel: string };
-  onStart: (formData: FormData) => Promise<void>;
-  onAddGuest: (formData: FormData) => Promise<{ ok: true; id: string } | { ok: false; reason: "name-taken" }>;
+  /** Redirects to the new match or tournament; answers only when the server rejects the form. */
+  onStart: (formData: FormData) => Promise<InvalidInput | undefined>;
+  onAddGuest: (formData: FormData) => Promise<GuestResult>;
 };
 
 type Props = SetupProps & {
@@ -75,6 +77,10 @@ export function SetupShell({
 }: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
+  const [error, start] = useActionState(
+    async (_prev: string | null, fd: FormData) => ((await onStart(fd)) ? texts.invalidInput : null),
+    null,
+  );
   const toggle = (id: string) => setOrder((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
   const inputModes: Choice<"single" | "per-player">[] = [
     { value: "single", label: texts.inputModes.single },
@@ -102,7 +108,7 @@ export function SetupShell({
           <p className="text-sm text-fg-muted">{heading?.subtitle ?? texts.modes[mode]}</p>
         </div>
 
-        <form id={FORM_ID} action={onStart} className="flex flex-col gap-3">
+        <form id={FORM_ID} action={start} className="flex flex-col gap-3">
           <input type="hidden" name="mode" value={mode} />
           {order.map((id) => (
             <input key={id} type="hidden" name="playerId" value={id} />
@@ -147,6 +153,7 @@ export function SetupShell({
 
       <div className="sticky bottom-0 bg-bg-grouped pt-3 pb-safe-min">
         <div className={pageColumn()}>
+          {error && <FormError centered>{error}</FormError>}
           <button
             type="submit"
             form={FORM_ID}

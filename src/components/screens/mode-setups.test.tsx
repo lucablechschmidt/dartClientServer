@@ -11,7 +11,7 @@ const props = {
   players,
   texts: t,
   commonTexts: { back: de.ui.back, save: de.players.save, cancel: de.players.cancel },
-  onStart: () => Promise.resolve(),
+  onStart: () => Promise.resolve(undefined),
   onAddGuest: () => Promise.resolve({ ok: true as const, id: "x" }),
 };
 const value = (c: HTMLElement, name: string) => c.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;

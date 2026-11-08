@@ -9,7 +9,7 @@ export function listPlayers(deps: Deps): Player[] {
   return deps.players.listPlayers(deps.now());
 }
 
-type CreateResult = { ok: true; player: Player } | { ok: false; reason: "name-taken" };
+type CreateResult = { ok: true; player: Player } | { ok: false; reason: "name-taken" | "invalid-name" };
 
 /** Names are unique across all players (case-insensitive), guests included; `exceptId` when renaming. */
 function nameTaken(deps: Deps, name: string, exceptId?: string): boolean {
@@ -25,7 +25,9 @@ function created(deps: Deps, id: string): Player {
 }
 
 export function createPlayer(deps: Deps, rawName: string): CreateResult {
-  const name = playerNameSchema.parse(rawName);
+  const parsed = playerNameSchema.safeParse(rawName);
+  if (!parsed.success) return { ok: false, reason: "invalid-name" };
+  const name = parsed.data;
   return deps.transaction((): CreateResult => {
     if (nameTaken(deps, name)) return { ok: false, reason: "name-taken" };
     const player: NewPlayer = { id: deps.newId(), name, createdAt: deps.now(), guestUntil: null };
@@ -36,7 +38,9 @@ export function createPlayer(deps: Deps, rawName: string): CreateResult {
 
 /** E12: guest for tonight; visible in the setup screens for 24 h, then cleaned up together with their matches. */
 export function createGuest(deps: Deps, rawName: string): CreateResult {
-  const name = playerNameSchema.parse(rawName);
+  const parsed = playerNameSchema.safeParse(rawName);
+  if (!parsed.success) return { ok: false, reason: "invalid-name" };
+  const name = parsed.data;
   return deps.transaction((): CreateResult => {
     if (nameTaken(deps, name)) return { ok: false, reason: "name-taken" };
     const now = deps.now();
@@ -51,7 +55,9 @@ export function renamePlayer(deps: Deps, session: Session, id: string, rawName: 
   const player = deps.players.findPlayerById(id);
   if (!player) return { ok: false, reason: "not-found" };
   if (!session.isAdmin && session.playerId !== id && !isGuest(player)) return { ok: false, reason: "forbidden" };
-  const name = playerNameSchema.parse(rawName);
+  const parsed = playerNameSchema.safeParse(rawName);
+  if (!parsed.success) return { ok: false, reason: "invalid-name" };
+  const name = parsed.data;
   return deps.transaction((): PlayerResult => {
     if (nameTaken(deps, name, id)) return { ok: false, reason: "name-taken" };
     deps.players.renamePlayer(id, name);

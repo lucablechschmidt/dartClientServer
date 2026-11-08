@@ -53,6 +53,8 @@ export type LegState = {
 };
 
 export type Result<T, E extends string> = { ok: true; value: T } | { ok: false; reason: E };
+/** A form or action argument failed its schema (m13-plan.md R-02); the action answers instead of throwing. */
+export type InvalidInput = { ok: false; reason: "invalid-input" };
 
 export type ApplyError = "leg-finished" | "invalid-dart";
 export type UndoError = "nothing-to-undo";

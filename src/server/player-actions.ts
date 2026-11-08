@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { PlayerResult } from "@/domain/player";
+import type { GuestResult, PlayerResult } from "@/domain/player";
 import { createGuest, createPlayer, deletePlayer, renamePlayer } from "./player-service";
 import { requireSession } from "./request";
 import { formText } from "./form";
+import { isId } from "./action-input";
 
 const touched = () => {
   revalidatePath("/admin");
@@ -21,13 +22,15 @@ export async function createPlayerAction(formData: FormData): Promise<PlayerResu
 
 export async function renamePlayerAction(formData: FormData): Promise<PlayerResult> {
   const { deps, session } = await requireSession();
-  const r = renamePlayer(deps, session, formText(formData, "id"), formText(formData, "name"));
+  const id = formText(formData, "id");
+  if (!isId(id)) return { ok: false, reason: "not-found" };
+  const r = renamePlayer(deps, session, id, formText(formData, "name"));
   touched();
   return r;
 }
 
 /** E12: guest for the evening; returns the id so the setup can select them right away. */
-export async function createGuestAction(formData: FormData): Promise<{ ok: true; id: string } | { ok: false; reason: "name-taken" }> {
+export async function createGuestAction(formData: FormData): Promise<GuestResult> {
   const { deps } = await requireSession();
   const r = createGuest(deps, formText(formData, "name"));
   touched();
@@ -36,7 +39,9 @@ export async function createGuestAction(formData: FormData): Promise<{ ok: true;
 
 export async function deletePlayerAction(formData: FormData): Promise<PlayerResult> {
   const { deps, session } = await requireSession();
-  const result = deletePlayer(deps, session, formText(formData, "id"));
+  const id = formText(formData, "id");
+  if (!isId(id)) return { ok: false, reason: "not-found" };
+  const result = deletePlayer(deps, session, id);
   touched();
   return result;
 }

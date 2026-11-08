@@ -23,7 +23,7 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={() => Promise.resolve()}
+        onStart={() => Promise.resolve(undefined)}
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
@@ -45,11 +45,28 @@ describe("X01Setup", () => {
     expect(container.querySelector('input[name="inputMode"]')).toHaveValue("per-player");
   });
 
+  it("shows why the server rejected the form above the start button (R-02)", async () => {
+    const user = userEvent.setup();
+    const onStart = vi.fn(() => Promise.resolve({ ok: false as const, reason: "invalid-input" as const }));
+    render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={onStart} onAddGuest={vi.fn()} />);
+    expect(screen.queryByRole("alert")).toBeNull();
+    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    await user.click(screen.getByRole("button", { name: t.start }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(t.invalidInput));
+    expect(onStart).toHaveBeenCalledOnce();
+  });
+
   it("marks guests and selects a newly added guest right away", async () => {
     const user = userEvent.setup();
     const onAddGuest = vi.fn((fd: FormData) => Promise.resolve({ ok: true as const, id: `guest-${fd.get("name") as string}` }));
     const { container } = render(
-      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={() => Promise.resolve()} onAddGuest={onAddGuest} />,
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={() => Promise.resolve(undefined)}
+        onAddGuest={onAddGuest}
+      />,
     );
     expect(screen.getByRole("button", { name: select("Gecko") })).toHaveTextContent(t.guestBadge);
     await user.click(screen.getByRole("button", { name: t.addGuest }));
@@ -69,13 +86,13 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={() => Promise.resolve()}
+        onStart={() => Promise.resolve(undefined)}
         onAddGuest={() => Promise.resolve({ ok: false as const, reason: "name-taken" as const })}
       />,
     );
     await user.click(screen.getByRole("button", { name: t.addGuest }));
     await user.type(screen.getByPlaceholderText(t.guestNamePlaceholder), "Haflinger{Enter}");
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(t.nameTaken));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(t.guestErrors["name-taken"]));
     expect(screen.getByPlaceholderText(t.guestNamePlaceholder)).toBeInTheDocument();
   });
 
@@ -86,7 +103,7 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={() => Promise.resolve()}
+        onStart={() => Promise.resolve(undefined)}
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
@@ -109,7 +126,7 @@ describe("X01Setup", () => {
         players={players}
         texts={de.newGame}
         commonTexts={commonTexts}
-        onStart={() => Promise.resolve()}
+        onStart={() => Promise.resolve(undefined)}
         onAddGuest={() => Promise.resolve({ ok: true as const, id: "x" })}
       />,
     );
@@ -132,7 +149,13 @@ describe("X01Setup", () => {
   it("start score: the last entry of the menu is a field for an own number, 2 to 1001", async () => {
     const user = userEvent.setup();
     const { container } = render(
-      <X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={() => Promise.resolve()} onAddGuest={vi.fn()} />,
+      <X01Setup
+        players={players}
+        texts={de.newGame}
+        commonTexts={commonTexts}
+        onStart={() => Promise.resolve(undefined)}
+        onAddGuest={vi.fn()}
+      />,
     );
     const score = () => container.querySelector('input[name="startScore"]');
     const open = (current: string) => user.click(screen.getByRole("button", { name: choice(t.startScore, current) }));

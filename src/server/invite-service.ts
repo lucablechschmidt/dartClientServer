@@ -72,7 +72,7 @@ export async function redeem(
   let name: string | null = null;
   if (invite.kind === "register") {
     const parsed = playerNameSchema.safeParse(input.name ?? "");
-    if (!parsed.success) return { ok: false, reason: "name-taken" };
+    if (!parsed.success) return { ok: false, reason: "invalid-name" };
     name = parsed.data;
     const conflict = nameConflict(deps, name);
     if (conflict) return { ok: false, reason: conflict };

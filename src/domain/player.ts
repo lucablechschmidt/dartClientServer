@@ -40,12 +40,15 @@ export const isGuest = (player: Pick<Player, "guestUntil">): boolean => player.g
 export const isListed = (player: Pick<Player, "guestUntil">, now: number): boolean => player.guestUntil === null || player.guestUntil > now;
 
 /** Error on create/rename/delete; names are unique across all players (case-insensitive), guests included. */
-export type PlayerError = "name-taken" | "player-in-match" | "forbidden" | "not-found";
+export type PlayerError = "name-taken" | "invalid-name" | "player-in-match" | "forbidden" | "not-found";
 export type PlayerResult = { ok: true } | { ok: false; reason: PlayerError };
+/** Adding a guest from a setup or the players tab; the id lets the setup select them right away. */
+export type GuestResult = { ok: true; id: string } | { ok: false; reason: "name-taken" | "invalid-name" };
 
 /** State of the login form (useActionState); lives here so server and UI share it. */
 export type LoginFormState = { error: "invalid-credentials" | "too-many-attempts" | null };
 
-export type RedeemError = "invalid-token" | "name-taken" | "name-without-login" | "password-too-short" | "password-mismatch";
+export type RedeemError =
+  "invalid-token" | "name-taken" | "invalid-name" | "name-without-login" | "password-too-short" | "password-mismatch";
 export type InviteFormState = { error: RedeemError | "too-many-attempts" | null };
 export type PasswordFormState = { error: "invalid-credentials" | "password-too-short" | "password-mismatch" | null; saved: boolean };

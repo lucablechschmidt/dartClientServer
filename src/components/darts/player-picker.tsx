@@ -4,12 +4,12 @@ import Link from "next/link";
 import { AddRow } from "@/components/ui/add-row";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { PersonIcon, PersonPlusIcon } from "@/components/ui/icons";
-import { isGuest, type Player } from "@/domain/player";
+import { isGuest, type GuestResult, type Player } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
 
 export type PlayerPickerTexts = Pick<
   Texts["newGame"],
-  "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "nameTaken" | "selected" | "select" | "deselect"
+  "choosePlayers" | "noPlayers" | "addGuest" | "guestNamePlaceholder" | "guestBadge" | "guestErrors" | "selected" | "select" | "deselect"
 > & {
   save: string;
   cancel: string;
@@ -21,7 +21,7 @@ type Props = {
   order: string[];
   onToggle: (id: string) => void;
   /** E12: creates a guest and returns its id; the picker selects it immediately. */
-  onAddGuest: (formData: FormData) => Promise<{ ok: true; id: string } | { ok: false; reason: "name-taken" }>;
+  onAddGuest: (formData: FormData) => Promise<GuestResult>;
   texts: PlayerPickerTexts;
 };
 
@@ -49,7 +49,7 @@ export function PlayerPicker({ players, order, onToggle, onAddGuest, texts }: Pr
   const letters = initials(players);
   const addGuest = async (fd: FormData) => {
     const r = await onAddGuest(fd);
-    if (!r.ok) return texts.nameTaken;
+    if (!r.ok) return texts.guestErrors[r.reason];
     onToggle(r.id);
     return null;
   };

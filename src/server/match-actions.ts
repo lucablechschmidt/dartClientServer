@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { MODE_IDS, type Dart, type ModeId } from "@/domain/game";
+import type { Dart, InvalidInput } from "@/domain/game";
 import {
   cancelMatch,
   commitVisit,
@@ -18,69 +18,68 @@ import {
 import { newInMatch, type NewAchievements } from "./achievement-service";
 import { log } from "./log";
 import { requireSession } from "./request";
-import { formText, formTexts } from "./form";
+import { invalidInput, isId, newMatchFromForm, undoStepSchema, visitPositionSchema } from "./action-input";
 
-/** The pills offer "best of" 1/3/5 (legacy labels); stored is how many are needed to win. */
-const toWin = (bestOf: string) => Math.ceil((Number(bestOf) || 1) / 2);
+const notFound = { ok: false, reason: "not-found" } as const;
 
-export async function createMatchAction(formData: FormData): Promise<void> {
+export async function createMatchAction(formData: FormData): Promise<InvalidInput> {
   const { deps, session } = await requireSession();
-  const mode = formText(formData, "mode", "x01");
-  const id = createMatch(deps, {
-    mode: (MODE_IDS as readonly string[]).includes(mode) ? (mode as ModeId) : "x01",
-    playerIds: formTexts(formData, "playerId"),
-    rules: {
-      startScore: Number(formText(formData, "startScore")),
-      inRule: formText(formData, "inRule") as "single" | "double" | "triple",
-      outRule: formText(formData, "outRule") as "single" | "double" | "triple",
-    },
-    format: { legsToWinSet: toWin(formText(formData, "legsToWinSet")), setsToWinMatch: toWin(formText(formData, "setsToWinMatch")) },
-    starterIndex: 0,
-    inputMode: formText(formData, "inputMode") === "per-player" ? "per-player" : "single",
-    hostPlayerId: session.playerId,
-  });
+  const input = newMatchFromForm(formData, session.playerId);
+  if (!input.ok) return input;
+  const id = createMatch(deps, input.value);
   redirect(`/match/${id}`);
 }
 
 export async function commitVisitAction(matchId: string, legIndex: number, seq: number, darts: Dart[]): Promise<ActionResult> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (!visitPositionSchema.safeParse({ legIndex, seq }).success) return invalidInput;
   return commitVisit(deps, session, matchId, legIndex, seq, darts);
 }
 
 export async function setPlayOutAction(matchId: string, playOut: boolean): Promise<ActionResult> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (typeof playOut !== "boolean") return invalidInput;
   return setPlayOut(deps, session, matchId, playOut);
 }
 
 export async function decideWinnerAction(matchId: string, playerId: string): Promise<ActionResult> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (!isId(playerId)) return invalidInput;
   return decideWinner(deps, session, matchId, playerId);
 }
 
 export async function setStarterAction(matchId: string, playerId: string): Promise<ActionResult> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (!isId(playerId)) return invalidInput;
   return setStarter(deps, session, matchId, playerId);
 }
 
 export async function undoVisitAction(matchId: string, step?: string): Promise<ActionResult> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (!undoStepSchema.safeParse(step).success) return invalidInput;
   return undoVisit(deps, session, matchId, step);
 }
 
 export async function loadMatchAction(matchId: string): Promise<ActionResult> {
   const { deps, session } = await requireSession();
-  const view = loadMatchView(deps, matchId, session);
-  return view ? { ok: true, view } : { ok: false, reason: "not-found" };
+  const view = isId(matchId) ? loadMatchView(deps, matchId, session) : null;
+  return view ? { ok: true, view } : notFound;
 }
 
 export async function restartMatchAction(matchId: string): Promise<void> {
   const { deps, session } = await requireSession();
-  const r = restartMatch(deps, session, matchId);
+  const r = isId(matchId) ? restartMatch(deps, session, matchId) : notFound;
   redirect(r.ok ? `/match/${r.value}` : "/");
 }
 
 export async function cancelMatchAction(matchId: string): Promise<{ ok: true } | { ok: false; reason: ActionError }> {
   const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
   const r = cancelMatch(deps, session, matchId);
   if (r.ok) {
     log.info("match.cancelled", { match: matchId, by: session.name });
@@ -92,5 +91,5 @@ export async function cancelMatchAction(matchId: string): Promise<{ ok: true } |
 /** M10: the victory screen's banner, what the finished game brought each player that is new. */
 export async function newAchievementsAction(matchId: string): Promise<NewAchievements[]> {
   const { deps } = await requireSession();
-  return newInMatch(deps, matchId);
+  return isId(matchId) ? newInMatch(deps, matchId) : [];
 }

@@ -30,6 +30,15 @@ describe("player service: unique names", () => {
     expect(renamePlayer(deps, admin, guest.id, "gast")).toEqual({ ok: true }); // own name, different case
     expect(listPlayers(deps).map((p) => p.name)).toEqual(["Luca", "gast"]);
   });
+
+  it("an empty or too long name is an answer, not an exception (R-02)", () => {
+    const guest = ok(createGuest(deps, "Gast")).player;
+    expect(createPlayer(deps, "   ")).toEqual({ ok: false, reason: "invalid-name" });
+    expect(createGuest(deps, "x".repeat(41))).toEqual({ ok: false, reason: "invalid-name" });
+    expect(renamePlayer(deps, admin, guest.id, "")).toEqual({ ok: false, reason: "invalid-name" });
+    expect(listPlayers(deps).map((p) => p.name)).toEqual(["Gast"]);
+  });
+
   it("rename rights: self and guests for everyone, everything for the admin", () => {
     const a = ok(createPlayer(deps, "A")).player;
     const b = ok(createPlayer(deps, "B")).player;

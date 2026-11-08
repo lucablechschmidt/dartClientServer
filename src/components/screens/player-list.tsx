@@ -5,14 +5,14 @@ import { AddRow } from "@/components/ui/add-row";
 import { CardList, CardRow, GroupedSection } from "@/components/ui/card-list";
 import { ErrorLine, SectionHeading, TextButton, TextInput } from "@/components/ui/form-controls";
 import { WrenchIcon } from "@/components/ui/icons";
-import { isGuest, type Player, type PlayerError, type PlayerResult, type Session } from "@/domain/player";
+import { isGuest, type GuestResult, type Player, type PlayerError, type PlayerResult, type Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
 
 type Props = {
   players: Player[];
   session: Session;
   texts: Texts["players"];
-  onAddGuest: (formData: FormData) => Promise<{ ok: true; id: string } | { ok: false; reason: "name-taken" }>;
+  onAddGuest: (formData: FormData) => Promise<GuestResult>;
   onRename: (formData: FormData) => Promise<PlayerResult>;
   onDelete: (formData: FormData) => Promise<PlayerResult>;
 };

@@ -48,6 +48,7 @@ describe("invite: register (case A, C, D, E)", () => {
   it("C: the name of a player with login is rejected and the token stays valid", async () => {
     const token = createRegisterInvite(deps);
     expect(await redeem(deps, token, { name: "luca", ...pw })).toEqual({ ok: false, reason: "name-taken" });
+    expect(await redeem(deps, token, { name: "  ", ...pw })).toEqual({ ok: false, reason: "invalid-name" });
     expect(inviteInfo(deps, token)).not.toBeNull();
   });
 

@@ -111,7 +111,8 @@ export type ActionError =
   | "leg-started"
   | "no-play-out"
   | "not-between-legs"
-  | "tournament-moved-on";
+  | "tournament-moved-on"
+  | "invalid-input";
 export type ActionResult = { ok: true; view: MatchView } | { ok: false; reason: ActionError };
 
 export const dartSchema = z
