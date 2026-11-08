@@ -37,7 +37,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
-| M13 | Code-Review und Konsolidierung | geplant, eigener Meilenstein | – |
+| M13 | Code-Review und Konsolidierung | in Arbeit: A, C, D fertig; B im Code fertig (Messung offen); E, F offen | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; erledigte liegen in `docs/archive/`.
@@ -223,7 +223,7 @@ Detailplan: `docs/m8-plan.md`.
 - [x] **Ranglisten je Modus** im Tab Konto als ausklappbare Karten (zugeklappt: eigener Platz und Elo; aufgeklappt: Platz, Name, Elo, Spiele)
 - [x] Match-Detailansicht mit Statistik pro Leg (nur Teilnehmer)
 - [x] Turnier-Setzliste: ausgelost oder vom Ersteller festgelegt (ohne Elo)
-- [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (m8-plan §7)
+- [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (m8-plan §7). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `m13-plan.md` §7.
 - Später, eigener Meilenstein: **Checkout-Quote** (Checkouts ÷ Checkout-Darts), aus M8 herausgenommen am 5.11.2026
 
 **DoD:** Die Berichte zeigen für reale Daten aus M6 korrekte Werte (mit einem von Hand nachgerechneten Match gegengeprüft).
@@ -301,12 +301,14 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
-- [x] Paket A – Eingabevalidierung und Fehlerfluss
-- [ ] Paket B – Pi-Ressourcen, danach Messung mit der Pi-Datenbank (Code fertig 8.11.2026; offen: Messung §7, `synchronous` §8)
-- [x] Paket C – Client-Lebenszyklus und Rückmeldung
+- [x] Paket A – Eingabevalidierung und Fehlerfluss (dazu: beim Restart bleibt der Host Host)
+- [x] Paket B – Pi-Ressourcen im Code: beendete Matches gebündelt laden, Spielerfilter in SQL, Rate-Limit-Map begrenzt, Datenbank beim Prozessende schließen
+- [ ] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`m13-plan.md` §7)
+- [ ] Paket B – `synchronous = NORMAL` entscheiden (`docs/fragen.md`)
+- [x] Paket C – Client-Lebenszyklus und Rückmeldung (dazu: Start-Button im Setup gesperrt, Lade-Platzhalter erst nach 150 ms)
 - [x] Paket D – Konsolidierung und Doku
-- [ ] Paket E – Große Module teilen
-- [ ] Paket F – Barrierefreiheit
+- [ ] Paket E – nur wiederverwendbare Bausteine teilen: `choice-menu.tsx` (§6 Frage 4)
+- [ ] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende
 
 **DoD:** siehe `docs/m13-plan.md` §3.
 

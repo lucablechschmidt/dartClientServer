@@ -24,4 +24,14 @@
 
 ---
 
-Zuletzt beantwortet (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/m14-plan.md`.
+## SQLite `synchronous = NORMAL` statt `FULL` (8.11.2026, M13 R-21)
+
+**Befund:** SQLite läuft im WAL-Modus mit dem Default `synchronous = FULL`: jede gespeicherte Aufnahme wartet auf die Bestätigung der SD-Karte für die WAL-Datei, beim Checkpoint auch für die Datenbankdatei. Für WAL empfiehlt SQLite `NORMAL`. Die SD-Karte ist laut `architecture.md` §5 das größte Betriebsrisiko.
+
+**Optionen:** (a) `NORMAL`: weniger Sync-Vorgänge, weniger Verschleiß, schnellere Commits. Stürzt die App ab (Container-Neustart, Node-Fehler), geht nichts verloren. Fällt der Strom aus, können die letzten Transaktionen vor dem Ausfall fehlen, meist Sekunden; die Datenbank bleibt konsistent. Was fehlt, liegt bei einem offenen Spiel meist noch in der Warteschlange des Handys und wird beim nächsten Öffnen gesendet. (b) `FULL` behalten: jede bestätigte Aufnahme übersteht auch einen Stromausfall, um den Preis von mehr Schreiblast.
+
+**Frage:** Welche Option? Default ohne Antwort: (b), bis du entschieden hast (zurückgestellt am 8.11.2026). Bei (a) wird die Entscheidung ein neuer Eintrag in `architecture.md` §11, weil sie E14 berührt.
+
+---
+
+Zuletzt beantwortet (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/m14-plan.md`.
