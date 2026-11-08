@@ -78,6 +78,11 @@ export function canPlayOut(state: MatchState, match: MatchAccess, actor: Actor, 
   return isEditable(match, now) && mayPlayOut(state, match, actor);
 }
 
+/** "Restart Game" after the end (R-06): host, admin or anyone who played; the restarter becomes the new host. */
+export function mayRestart(match: MatchAccess, actor: Actor): boolean {
+  return actor.isAdmin || isHost(match, actor) || match.players.some((p) => p.id === actor.id);
+}
+
 /** Cancel: host or admin, only while the match is open. */
 export function canCancel(match: MatchAccess, actor: Actor, now: number): boolean {
   return isOpen(match, now) && (actor.isAdmin || actor.id === match.hostPlayerId);

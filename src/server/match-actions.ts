@@ -74,9 +74,9 @@ export async function loadMatchAction(matchId: string): Promise<ActionResult> {
 }
 
 export async function restartMatchAction(matchId: string): Promise<void> {
-  const { deps } = await requireSession();
-  const id = restartMatch(deps, matchId);
-  redirect(id ? `/match/${id}` : "/");
+  const { deps, session } = await requireSession();
+  const r = restartMatch(deps, session, matchId);
+  redirect(r.ok ? `/match/${r.value}` : "/");
 }
 
 export async function cancelMatchAction(matchId: string): Promise<{ ok: true } | { ok: false; reason: ActionError }> {

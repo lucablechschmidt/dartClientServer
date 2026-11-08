@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { startPlayOut } from "./modes";
 import { applyMatchDart, currentLeg, newMatch, type MatchState } from "./match";
-import { canCancel, canEnter, canPlayOut, canUndo, isOpen, maySetStarter, MATCH_OPEN_MS, type MatchAccess } from "./permissions";
+import {
+  canCancel,
+  canEnter,
+  canPlayOut,
+  canUndo,
+  isOpen,
+  mayRestart,
+  maySetStarter,
+  MATCH_OPEN_MS,
+  type MatchAccess,
+} from "./permissions";
 import type { Dart } from "./types";
 
 const rules = { startScore: 501, inRule: "single", outRule: "double" } as const;
@@ -135,6 +145,13 @@ describe("legs and play-out (M5)", () => {
     expect(canPlayOut(legAfter(1), m, host, now)).toBe(false); // places not fixed
   });
 
+  it("restart: host, admin or a player of the match, not an onlooker", () => {
+    expect(mayRestart(base, host)).toBe(true);
+    expect(mayRestart(base, admin)).toBe(true);
+    expect(mayRestart(base, b)).toBe(true);
+    expect(mayRestart(base, { id: "onlooker", isAdmin: false })).toBe(false);
+    expect(mayRestart({ ...base, hostPlayerId: null }, { id: "onlooker", isAdmin: false })).toBe(false);
+  });
   it("choosing the starter: host or admin", () => {
     expect(maySetStarter(base, host)).toBe(true);
     expect(maySetStarter(base, admin)).toBe(true);

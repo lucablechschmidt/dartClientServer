@@ -157,11 +157,20 @@ describe("match service", () => {
 
   it("restart keeps players and rules and rotates the starter", () => {
     const { id, b } = setup(401);
-    const next = restartMatch(deps, id)!;
+    const next = ok(restartMatch(deps, sessionAdmin, id)).value;
     const v = loadMatchView(deps, next)!;
     expect(v.rules.startScore).toBe(401);
     expect(v.board.activePlayerId).toBe(b.id);
-    expect(restartMatch(deps, "nope")).toBeNull();
+    expect(restartMatch(deps, sessionAdmin, "nope")).toEqual({ ok: false, reason: "not-found" });
+  });
+
+  it("restart: a player of the match may and hosts the new one, an onlooker may not (R-06)", () => {
+    const { a, id } = setup();
+    const player = { playerId: a.id, name: "Casey", isAdmin: false };
+    const next = ok(restartMatch(deps, player, id)).value;
+    expect(loadMatchView(deps, next)!.hostPlayerId).toBe(a.id);
+    const onlooker = { playerId: "onlooker", name: "Onlooker", isAdmin: false };
+    expect(restartMatch(deps, onlooker, id)).toEqual({ ok: false, reason: "forbidden" });
   });
 
   it("a deleted player keeps their name with a mark in old matches and the history; no restart with them", () => {
@@ -171,7 +180,7 @@ describe("match service", () => {
     const shown = de.players.deletedName.replace("{name}", "Casey");
     expect(loadMatchView(deps, id)!.board.players.map((p) => p.name)).toEqual([shown, "Sam"]);
     expect(listRecentMatches(deps).find((m) => m.id === id)?.names).toEqual([shown, "Sam"]);
-    expect(restartMatch(deps, id)).toBeNull();
+    expect(restartMatch(deps, admin, id)).toEqual({ ok: false, reason: "player-deleted" });
   });
 });
 
@@ -405,7 +414,7 @@ describe("legs, sets and places (M5)", () => {
   it("restart keeps the format", () => {
     const [a, b] = players("Casey", "Sam");
     const id = createMatch(deps, { playerIds: [a, b], rules: short, format: { legsToWinSet: 2, setsToWinMatch: 2 } });
-    expect(loadMatchView(deps, restartMatch(deps, id)!)!.format).toEqual({ legsToWinSet: 2, setsToWinMatch: 2 });
+    expect(loadMatchView(deps, ok(restartMatch(deps, sessionAdmin, id)).value)!.format).toEqual({ legsToWinSet: 2, setsToWinMatch: 2 });
   });
 });
 
@@ -466,7 +475,7 @@ describe("other game modes through the server (M7)", () => {
   it("cricket: restart keeps the mode", () => {
     const [a, b] = players("Casey", "Sam");
     const id = createMatch(deps, { mode: "cricket", playerIds: [a, b], rules: { startScore: 0, inRule: "single", outRule: "single" } });
-    expect(loadMatchView(deps, restartMatch(deps, id)!)!.state.mode).toBe("cricket");
+    expect(loadMatchView(deps, ok(restartMatch(deps, sessionAdmin, id)).value)!.state.mode).toBe("cricket");
     expect(loadMatchView(deps, id)!.board.players[0].marks).toHaveLength(7);
   });
 });
