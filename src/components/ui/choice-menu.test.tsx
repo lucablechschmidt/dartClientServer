@@ -30,10 +30,11 @@ describe("ChoiceMenu", () => {
     const user = userEvent.setup();
     const { container } = render(<Demo />);
     await user.click(screen.getByRole("button", { name: "Wahl: Alpha" }));
-    expect(screen.getByRole("option", { name: "Alpha" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("option", { name: "Beta" })).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByRole("button", { name: "Alpha" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Beta" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Alpha" })).not.toHaveFocus(); // a tap leaves focus where it is
     await user.click(screen.getByRole("button", { name: "Beta" }));
-    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("list", { name: "Wahl" })).toBeNull();
     expect(container.querySelector('input[name="pick"]')).toHaveValue("b");
     expect(screen.getByRole("button", { name: "Wahl: Beta" })).toHaveAttribute("aria-expanded", "false");
   });
@@ -42,9 +43,32 @@ describe("ChoiceMenu", () => {
     render(<Demo />);
     await user.click(screen.getByRole("button", { name: "Wahl: Alpha" }));
     await user.click(screen.getByRole("button", { name: "draußen" }));
-    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("list", { name: "Wahl" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Wahl: Alpha" }));
     await user.keyboard("{Escape}");
-    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("list", { name: "Wahl" })).toBeNull();
+  });
+  it("keyboard (R-27): Enter opens on the chosen option, Tab moves on, Escape returns to the trigger, tabbing out closes", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Demo />);
+    const trigger = screen.getByRole("button", { name: "Wahl: Alpha" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Alpha" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Beta" })).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(container.querySelector('input[name="pick"]')).toHaveValue("b");
+    const again = screen.getByRole("button", { name: "Wahl: Beta" });
+    expect(again).toHaveFocus(); // chosen from the keyboard: focus back on the trigger
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Beta" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("list", { name: "Wahl" })).toBeNull();
+    expect(again).toHaveFocus();
+    await user.keyboard("{Enter}");
+    await user.tab(); // from Beta (last) out to the next button
+    expect(screen.queryByRole("list", { name: "Wahl" })).toBeNull();
+    expect(screen.getByRole("button", { name: "draußen" })).toHaveFocus();
   });
 });

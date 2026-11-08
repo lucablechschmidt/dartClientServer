@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChoiceMark } from "./choice-menu";
+import { ChoiceMark } from "./choice-parts";
 
 /**
  * Last entry of a number menu: a field for an own number (digits only), within min and max. Enter

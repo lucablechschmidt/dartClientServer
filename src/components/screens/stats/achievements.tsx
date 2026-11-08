@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CardList } from "@/components/ui/card-list";
-import { DisclosureChevron } from "@/components/ui/choice-menu";
+import { DisclosureChevron } from "@/components/ui/choice-parts";
 import { MedalIcon } from "@/components/ui/icons";
 import type { GalleryItem, Progress, ProgressStep } from "@/domain/achievements/gallery";
 import type { Texts } from "@/i18n/de";

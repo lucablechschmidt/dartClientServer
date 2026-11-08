@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
@@ -148,9 +148,9 @@ describe("X01Setup", () => {
     const trigger = screen.getByRole("button", { name: choice(t.inRule, t.inNames.single) });
     await user.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("option", { name: t.inNames.single })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: t.inNames.single })).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: t.inNames.double }));
-    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("list", { name: t.inRule })).toBeNull();
     expect(container.querySelector('input[name="inRule"]')).toHaveValue("double");
     await user.click(screen.getByRole("button", { name: choice(t.startScore, "501") }));
     await user.click(screen.getByRole("button", { name: "301" }));
@@ -175,15 +175,16 @@ describe("X01Setup", () => {
     const score = () => container.querySelector('input[name="startScore"]');
     const open = (current: string) => user.click(screen.getByRole("button", { name: choice(t.startScore, current) }));
     await open("501");
-    const options = screen.getAllByRole("option");
+    const entries = within(screen.getByRole("list", { name: t.startScore })).getAllByRole("listitem");
     const field = screen.getByRole("textbox", { name: t.customScore });
-    expect(options.at(-1)).toContainElement(field);
+    expect(entries.at(-1)).toContainElement(field);
     await user.type(field, "7a01{Enter}");
     expect(score()).toHaveValue("701");
-    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("list", { name: t.startScore })).toBeNull();
     await open("701");
     expect(screen.getByRole("textbox", { name: t.customScore })).toHaveValue("701");
-    expect(screen.getAllByRole("option").at(-1)).toHaveAttribute("aria-selected", "true");
+    // an own number: none of the fixed scores is marked
+    for (const s of ["501", "401", "301"]) expect(screen.getByRole("button", { name: s })).toHaveAttribute("aria-pressed", "false");
     await user.clear(screen.getByRole("textbox", { name: t.customScore }));
     await user.type(screen.getByRole("textbox", { name: t.customScore }), "5000");
     await user.click(document.body); // tapping outside takes the number, too

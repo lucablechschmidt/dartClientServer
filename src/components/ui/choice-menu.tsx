@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { CheckIcon, ChevronDownIcon } from "./icons";
+import { ChoiceMark } from "./choice-parts";
 
 export type Choice<V extends string | number> = { value: V; label: string };
 
@@ -30,6 +30,11 @@ type Props<V extends string | number> = {
  * Setup choice (Figma design): a trigger that opens a floating list below it, the chosen option
  * with a filled check, the others with an empty circle. Tapping an option, outside or Escape
  * closes it. The value is also kept in a hidden input so a form submits it.
+ *
+ * Semantics (R-27): a disclosure, not a listbox, because the list may hold a text field (own score):
+ * the trigger has aria-expanded/aria-controls, the options are buttons with aria-pressed. Opened
+ * from the keyboard, focus moves to the chosen option; Escape closes and returns to the trigger,
+ * tabbing out closes. Opened by a tap, focus stays where it is (no phone keyboard popping up).
  */
 export function ChoiceMenu<V extends string | number>({
   name,
@@ -44,8 +49,12 @@ export function ChoiceMenu<V extends string | number>({
   last,
 }: Props<V>) {
   const [open, setOpen] = useState(false);
+  /** Opened with Enter or Space: move focus into the list once it is there. */
+  const [byKeyboard, setByKeyboard] = useState(false);
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const list = useRef<HTMLUListElement>(null);
   const chosen = options.find((o) => o.value === value);
   const current = chosen?.label ?? String(value);
 
@@ -58,45 +67,67 @@ export function ChoiceMenu<V extends string | number>({
       setOpen(false);
     };
     const outside = (e: PointerEvent) => !root.current?.contains(e.target as Node) && close();
-    const escape = (e: KeyboardEvent) => e.key === "Escape" && close();
+    const escape = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      close();
+      trigger.current?.focus();
+    };
+    /** Tabbing out closes; a blur to nowhere (the phone keyboard's "done") keeps it open. */
+    const leave = (e: FocusEvent) => e.relatedTarget instanceof Node && !root.current?.contains(e.relatedTarget) && setOpen(false);
+    const node = root.current;
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
+    node?.addEventListener("focusout", leave);
     return () => {
       document.removeEventListener("pointerdown", outside);
       document.removeEventListener("keydown", escape);
+      node?.removeEventListener("focusout", leave);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !byKeyboard) return;
+    const items = list.current?.querySelectorAll<HTMLElement>("button, input");
+    (list.current?.querySelector<HTMLElement>("[aria-pressed=true]") ?? items?.[0])?.focus();
+  }, [open, byKeyboard]);
 
   return (
     <div ref={root} className="relative">
       <input type="hidden" name={name} value={value} />
       <button
+        ref={trigger}
         type="button"
-        aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
         aria-label={`${label}: ${current}`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          // detail is 0 for a click from Enter or Space
+          setByKeyboard(e.detail === 0);
+          setOpen((o) => !o);
+        }}
         className={`w-full text-left ${className} ${open ? openClassName : ""}`}
       >
         {children(current, open)}
       </button>
       {open && (
         <ul
+          ref={list}
           id={listId}
-          role="listbox"
           aria-label={label}
           className={`absolute top-full z-30 mt-2 flex min-w-full origin-top flex-col gap-1 rounded-panel bg-card-bg p-1.5 text-fg shadow-floating motion-safe:animate-pop-in ${align === "end" ? "right-0" : "left-0"}`}
         >
           {options.map((o) => {
             const selected = o.value === value;
             return (
-              <li key={o.value} role="option" aria-selected={selected}>
+              <li key={o.value}>
                 <button
                   type="button"
-                  onClick={() => {
+                  aria-pressed={selected}
+                  onClick={(e) => {
                     onChange(o.value);
                     setOpen(false);
+                    // chosen from the keyboard: back to the trigger instead of losing focus with the list
+                    if (e.detail === 0) trigger.current?.focus();
                   }}
                   className={`flex min-h-touch w-full items-center justify-between gap-6 rounded-tile px-3 text-left whitespace-nowrap ${selected ? "bg-accent-wash font-semibold" : ""}`}
                 >
@@ -106,43 +137,9 @@ export function ChoiceMenu<V extends string | number>({
               </li>
             );
           })}
-          {last && (
-            <li role="option" aria-selected={!chosen}>
-              {last({ selected: !chosen, close: () => setOpen(false) })}
-            </li>
-          )}
+          {last && <li>{last({ selected: !chosen, close: () => setOpen(false) })}</li>}
         </ul>
       )}
     </div>
-  );
-}
-
-/** The chevron of a choice trigger; points up while the list is open and turns there. */
-export function DisclosureChevron({ open }: { open: boolean }) {
-  return (
-    <ChevronDownIcon
-      className={`size-icon-sm shrink-0 motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-ios ${open ? "rotate-180" : ""}`}
-    />
-  );
-}
-
-/** Small label above the chosen value, the content of most choice triggers (in rule / Single In). */
-export function LabeledValue({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="flex flex-1 flex-col">
-      <span className="text-xs text-fg-muted">{label}</span>
-      <span className="font-semibold">{value}</span>
-    </span>
-  );
-}
-
-/** The mark at the end of a choice: a filled check when chosen, an empty circle otherwise. */
-export function ChoiceMark({ selected }: { selected: boolean }) {
-  return selected ? (
-    <span className="grid size-icon shrink-0 place-items-center rounded-full bg-accent text-on-accent">
-      <CheckIcon className="size-icon-xs" />
-    </span>
-  ) : (
-    <span className="size-icon shrink-0 rounded-full border-icon border-separator" />
   );
 }

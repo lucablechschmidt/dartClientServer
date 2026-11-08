@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { DisclosureChevron } from "./choice-menu";
+import { DisclosureChevron } from "./choice-parts";
 
 /**
  * A card that folds to one line: title left, a short summary (e.g. "3 ausgewählt") and the chevron
