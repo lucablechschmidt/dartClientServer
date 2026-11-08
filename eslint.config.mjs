@@ -10,15 +10,17 @@ import betterTailwind from "eslint-plugin-better-tailwindcss";
  *   domain  ←  db  ←  server  ←  components  ←  app
  * Each block below lists what a layer must NOT import.
  */
-const forbid = (files, layers, message) => ({
+/** `typesFrom`: layers whose types (import type, erased at build) may be used, never their code (R-08). */
+const forbid = (files, layers, message, typesFrom = []) => ({
   files,
   rules: {
-    "no-restricted-imports": [
+    "@typescript-eslint/no-restricted-imports": [
       "error",
       {
         patterns: layers.map((layer) => ({
           group: [`@/${layer}`, `@/${layer}/*`, `**/src/${layer}/*`],
           message,
+          allowTypeImports: typesFrom.includes(layer),
         })),
       },
     ],
@@ -65,7 +67,12 @@ const eslintConfig = defineConfig([
   forbid(["src/domain/**"], ["db", "server", "components", "app", "i18n"], "src/domain is pure: no DB, server, UI or i18n imports."),
   forbid(["src/db/**"], ["server", "components", "app"], "src/db may only import from src/domain."),
   forbid(["src/server/**"], ["components", "app"], "src/server may not import UI."),
-  forbid(["src/components/**"], ["db", "server", "app"], "Components get data and actions via props, never from db/server/app."),
+  forbid(
+    ["src/components/**"],
+    ["db", "server", "app"],
+    "Components get data and actions via props, never from db/server/app (types from server are fine: import type).",
+    ["server"],
+  ),
   {
     // Theme only (docs/theme.md): colours, sizes and spacing come from tokens in globals.css, never inline.
     files: ["src/**/*.tsx"],
