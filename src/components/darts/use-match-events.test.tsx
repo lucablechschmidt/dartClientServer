@@ -28,25 +28,54 @@ beforeEach(() => {
   FakeEventSource.instances = [];
   vi.stubGlobal("EventSource", FakeEventSource);
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  visibility("visible", false);
+});
+
+function visibility(state: DocumentVisibilityState, dispatch = true) {
+  Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
+  if (dispatch) document.dispatchEvent(new Event("visibilitychange"));
+}
 
 describe("useMatchEvents", () => {
-  it("subscribes to the match stream, fires on change and on tab visibility, closes on unmount", () => {
+  it("subscribes to the match stream, fires on change and on every (re)connect, closes on unmount", () => {
     const onChange = vi.fn();
     const { unmount } = renderHook(() => useMatchEvents("m1", onChange));
     const source = FakeEventSource.instances[0];
     expect(source.url).toBe("/api/match/m1/events");
     source.emit("change");
     expect(onChange).toHaveBeenCalledTimes(1);
-    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true });
-    document.dispatchEvent(new Event("visibilitychange"));
-    expect(onChange).toHaveBeenCalledTimes(2);
     source.emit("open"); // (re)connected: changes made meanwhile sent no event
-    expect(onChange).toHaveBeenCalledTimes(3);
+    expect(onChange).toHaveBeenCalledTimes(2);
     unmount();
     expect(source.closed).toBe(true);
     source.emit("change");
-    expect(onChange).toHaveBeenCalledTimes(3);
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("closes the stream while the tab is hidden and reconnects when it is visible again (R-12)", () => {
+    const onChange = vi.fn();
+    renderHook(() => useMatchEvents("m1", onChange));
+    const first = FakeEventSource.instances[0];
+    visibility("hidden");
+    expect(first.closed).toBe(true);
+    first.emit("change");
+    expect(onChange).not.toHaveBeenCalled();
+    visibility("hidden"); // no second close, no new stream
+    expect(FakeEventSource.instances).toHaveLength(1);
+    visibility("visible");
+    expect(FakeEventSource.instances).toHaveLength(2);
+    FakeEventSource.instances[1].emit("open"); // the reconnect brings the current state
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("a tab opened in the background connects only once it is shown", () => {
+    visibility("hidden", false);
+    renderHook(() => useMatchEvents("m1", () => {}));
+    expect(FakeEventSource.instances).toHaveLength(0);
+    visibility("visible");
+    expect(FakeEventSource.instances).toHaveLength(1);
   });
   it("does nothing when disabled", () => {
     renderHook(() => useMatchEvents("m1", () => {}, false));
