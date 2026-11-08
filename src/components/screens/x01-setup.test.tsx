@@ -56,6 +56,21 @@ describe("X01Setup", () => {
     expect(onStart).toHaveBeenCalledOnce();
   });
 
+  it("the start button is busy until the server answers; a double tap starts one match", async () => {
+    const user = userEvent.setup();
+    let answer: (r: undefined) => void = () => undefined;
+    const onStart = vi.fn(() => new Promise<undefined>((r) => (answer = r)));
+    render(<X01Setup players={players} texts={de.newGame} commonTexts={commonTexts} onStart={onStart} onAddGuest={vi.fn()} />);
+    await user.click(screen.getByRole("button", { name: select("Haflinger") }));
+    const start = screen.getByRole("button", { name: t.start });
+    await user.dblClick(start);
+    expect(onStart).toHaveBeenCalledOnce();
+    expect(start).toBeDisabled();
+    expect(start).toHaveAttribute("aria-busy", "true");
+    answer(undefined);
+    await waitFor(() => expect(start).toBeEnabled());
+  });
+
   it("marks guests and selects a newly added guest right away", async () => {
     const user = userEvent.setup();
     const onAddGuest = vi.fn((fd: FormData) => Promise.resolve({ ok: true as const, id: `guest-${fd.get("name") as string}` }));

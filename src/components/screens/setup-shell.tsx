@@ -77,7 +77,8 @@ export function SetupShell({
 }: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
-  const [error, start] = useActionState(
+  // `starting` until the new match is shown (the action redirects): a second tap creates no second match.
+  const [error, start, starting] = useActionState(
     async (_prev: string | null, fd: FormData) => ((await onStart(fd)) ? texts.invalidInput : null),
     null,
   );
@@ -157,7 +158,8 @@ export function SetupShell({
           <button
             type="submit"
             form={FORM_ID}
-            disabled={!canStart(order.length)}
+            disabled={!canStart(order.length) || starting}
+            aria-busy={starting || undefined}
             className="flex min-h-cta w-full items-center justify-between rounded-panel bg-accent px-5 text-lg font-bold text-on-accent disabled:opacity-40"
           >
             {startLabel ?? texts.start}
