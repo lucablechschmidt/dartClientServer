@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PlayerList } from "@/components/screens/player-list";
 import { de } from "@/i18n/de";
@@ -5,6 +6,8 @@ import { createGuestAction, deletePlayerAction, renamePlayerAction } from "@/ser
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.players.title };
 
 async function Players() {
   const { deps, session } = await requireSession();

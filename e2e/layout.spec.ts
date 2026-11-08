@@ -35,3 +35,18 @@ test("the scoring screen fits without scrolling in five viewports, light and dar
     }
   }
 });
+
+test("every page names itself in the browser tab (R-29)", async ({ admin }) => {
+  const app = de.app.title;
+  for (const [path, title] of [
+    ["/", de.gameMenu.title],
+    ["/players", de.players.title],
+    ["/account", de.account.title],
+    ["/account/stats", de.account.pages.stats],
+    ["/tournaments", de.tournaments.title],
+    ["/new/x01", de.newGame.title],
+  ] as const) {
+    await admin.goto(path);
+    await expect(admin).toHaveTitle(`${title} · ${app}`);
+  }
+});

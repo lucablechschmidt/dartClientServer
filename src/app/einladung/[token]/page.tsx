@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { InviteScreen } from "@/components/screens/invite-screen";
 import { de } from "@/i18n/de";
@@ -5,6 +6,8 @@ import { redeemInviteAction } from "@/server/invite-actions";
 import { inviteInfo } from "@/server/invite-service";
 import { requestDeps } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.invite.title };
 
 type Props = { params: Promise<{ token: string }> };
 

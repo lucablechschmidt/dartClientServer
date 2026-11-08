@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoginScreen } from "@/components/screens/login-screen";
@@ -5,6 +6,8 @@ import { de } from "@/i18n/de";
 import { loginAction } from "@/server/auth-actions";
 import { currentSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.auth.title };
 
 type Props = { searchParams: Promise<{ next?: string }> };
 

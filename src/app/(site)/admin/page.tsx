@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AdminScreen } from "@/components/screens/admin-screen";
 import { de } from "@/i18n/de";
@@ -15,6 +16,8 @@ import { listPlayers } from "@/server/player-service";
 import { requireAdmin } from "@/server/request";
 import { listTournaments } from "@/server/tournament-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.nav.admin };
 
 async function Admin() {
   const { deps, session } = await requireAdmin();

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { MatchDetailScreen } from "@/components/screens/stats/match-detail";
@@ -5,6 +6,8 @@ import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { matchDetail } from "@/server/stats-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.stats.detail.title };
 
 type Params = Promise<{ id: string }>;
 type Search = Promise<{ from?: string }>;

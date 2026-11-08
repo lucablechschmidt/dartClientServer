@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SubPage } from "@/components/screens/account/sub-page";
 import { AchievementsSection } from "@/components/screens/stats/achievements";
@@ -5,6 +6,8 @@ import { de } from "@/i18n/de";
 import { myAchievements } from "@/server/achievement-service";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.account.pages.achievements };
 
 async function Achievements() {
   const { deps, session } = await requireSession();

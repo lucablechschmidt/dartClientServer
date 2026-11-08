@@ -213,7 +213,7 @@ export function ScoreboardScreen({
 
   const keypad = (
     <Keypad
-      texts={{ bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple }}
+      texts={{ keypad: texts.keypad, bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple }}
       canThrow={enterOk}
       canUndo={undoOk}
       onDart={throwDart}

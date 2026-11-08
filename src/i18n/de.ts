@@ -320,6 +320,8 @@ export const de = {
     notFoundText: "Das Spiel oder die Seite gibt es nicht (mehr).",
   },
   game: {
+    title: "Spiel",
+    keypad: "Tastenfeld",
     visit: "Aufnahme",
     darts: "Darts",
     average: "Ø",

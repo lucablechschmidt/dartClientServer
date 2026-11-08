@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { TournamentSetup } from "@/components/screens/tournament/tournament-setup";
 import { de } from "@/i18n/de";
@@ -6,6 +7,8 @@ import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
 import { createTournamentAction } from "@/server/tournament-actions";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.tournaments.newTournament };
 
 async function Setup() {
   const { deps } = await requireSession();

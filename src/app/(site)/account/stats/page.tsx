@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SubPage } from "@/components/screens/account/sub-page";
 import { MyStatsSection } from "@/components/screens/stats/my-stats";
@@ -6,6 +7,8 @@ import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { myStats } from "@/server/stats-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.account.pages.stats };
 
 type Search = Promise<{ range?: string }>;
 const rangeOf = (raw: string | undefined): StatsRange => STATS_RANGES.find((r) => r === raw) ?? "all";

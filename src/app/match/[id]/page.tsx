@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ScoreboardScreen } from "@/components/screens/scoreboard-screen";
@@ -16,6 +17,8 @@ import {
 import { loadMatchView } from "@/server/match-service";
 import { tournamentOfMatch } from "@/server/tournament-service";
 import { requireSession } from "@/server/request";
+
+export const metadata: Metadata = { title: de.game.title };
 
 async function Match({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

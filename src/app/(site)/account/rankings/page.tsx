@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SubPage } from "@/components/screens/account/sub-page";
 import { RankingsSection } from "@/components/screens/stats/rankings";
@@ -5,6 +6,8 @@ import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { leaderboards } from "@/server/stats-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.account.pages.rankings };
 
 async function Rankings() {
   const { deps, session } = await requireSession();

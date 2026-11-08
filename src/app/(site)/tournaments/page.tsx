@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { TournamentList } from "@/components/screens/tournament/tournament-list";
 import { de } from "@/i18n/de";
 import { requireSession } from "@/server/request";
 import { listTournaments } from "@/server/tournament-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.tournaments.title };
 
 async function List() {
   const { deps } = await requireSession();

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { TournamentScreen } from "@/components/screens/tournament/tournament-screen";
@@ -6,6 +7,8 @@ import { requireSession } from "@/server/request";
 import { deleteTournamentAction, redrawTournamentAction, startFixtureAction } from "@/server/tournament-actions";
 import { loadTournamentView } from "@/server/tournament-service";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.tournaments.title };
 
 async function Tournament({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

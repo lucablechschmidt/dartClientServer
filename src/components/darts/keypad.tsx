@@ -13,7 +13,8 @@ import {
   type KeypadState,
 } from "./keypad-logic";
 
-export type KeypadTexts = { bull: string; undo: string; double: string; triple: string };
+/** `keypad` names the group of keys for screen readers (R-29). */
+export type KeypadTexts = { keypad: string; bull: string; undo: string; double: string; triple: string };
 
 type Props = {
   onDart: (dart: Dart) => void;
@@ -86,7 +87,7 @@ export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canU
   };
 
   return (
-    <div className={`grid h-full gap-keypad-gap ${GRID[layout]}`} role="group">
+    <div className={`grid h-full gap-keypad-gap ${GRID[layout]}`} role="group" aria-label={texts.keypad}>
       {KEYPAD_LAYOUTS[layout].flatMap((row, _, rows) => {
         const longest = Math.max(...rows.map((r) => r.length));
         return row.map((key, i) => {

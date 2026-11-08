@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GameMenu } from "@/components/screens/game-menu";
 import { de } from "@/i18n/de";
@@ -5,6 +6,8 @@ import { listOpenMatches, listRecentMatches } from "@/server/match-service";
 import { shownName } from "@/server/player-names";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.gameMenu.title };
 
 async function Menu() {
   const { deps } = await requireSession();

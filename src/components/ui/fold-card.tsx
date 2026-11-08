@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { DisclosureChevron } from "./choice-parts";
 
 /**
@@ -19,11 +19,13 @@ export function FoldCard({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const contentId = useId();
   return (
     <div className="flex flex-col gap-3">
       <button
         type="button"
         aria-expanded={open}
+        aria-controls={contentId}
         onClick={() => setOpen((o) => !o)}
         className="flex min-h-touch items-center justify-between gap-3 rounded-panel bg-card-bg px-4 py-3 text-left"
       >
@@ -34,7 +36,7 @@ export function FoldCard({
         </span>
       </button>
       {open && (
-        <div className="motion-safe:animate-unfold">
+        <div id={contentId} className="motion-safe:animate-unfold">
           <div className="flex flex-col gap-3">{children}</div>
         </div>
       )}

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AccountScreen } from "@/components/screens/account-screen";
 import { de } from "@/i18n/de";
@@ -5,6 +6,8 @@ import { changePasswordAction, renameSelfAction } from "@/server/account-actions
 import { logoutAction } from "@/server/auth-actions";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.account.title };
 
 async function Account() {
   const { session } = await requireSession();

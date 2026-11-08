@@ -5,7 +5,8 @@ import { de } from "@/i18n/de";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: de.app.title,
+  // Each page sets its own title (R-29): "Statistik · Darts Scorer".
+  title: { default: de.app.title, template: `%s · ${de.app.title}` },
   description: de.app.description,
 };
 

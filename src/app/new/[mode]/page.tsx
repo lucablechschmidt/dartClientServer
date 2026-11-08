@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CricketSetup, EliminationSetup, SplitScoreSetup } from "@/components/screens/mode-setups";
@@ -9,6 +10,8 @@ import { createGuestAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata: Metadata = { title: de.newGame.title };
 
 const SETUPS = { x01: X01Setup, cricket: CricketSetup, elimination: EliminationSetup, splitscore: SplitScoreSetup };
 

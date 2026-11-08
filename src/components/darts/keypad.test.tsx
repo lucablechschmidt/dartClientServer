@@ -11,6 +11,7 @@ describe("Keypad", () => {
     const user = userEvent.setup();
     const onDart = vi.fn();
     render(<Keypad onDart={onDart} onUndo={() => {}} texts={texts} />);
+    expect(screen.getByRole("group", { name: texts.keypad })).toBeInTheDocument(); // R-29
     await user.click(screen.getByRole("button", { name: texts.triple }));
     expect(screen.getByRole("button", { name: texts.triple })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: texts.bull })).toBeDisabled();
