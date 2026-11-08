@@ -1,3 +1,5 @@
+import type { Instrumentation } from "next";
+
 /** Runs once at server start: opens the DB, applies migrations, creates the admin (M3) and starts the daily cleanup (E12, sessions). */
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
@@ -25,3 +27,9 @@ export async function register() {
     setInterval(run, CLEANUP_INTERVAL_MS).unref();
   }
 }
+
+/** Unexpected errors in pages, actions and route handlers as one JSON line (m13-plan.md R-03). */
+export const onRequestError: Instrumentation.onRequestError = async (err, request, context) => {
+  const { logRequestError } = await import("@/server/request-error");
+  logRequestError(err, request, context);
+};
