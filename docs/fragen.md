@@ -11,7 +11,7 @@
 **Optionen:** (a) so lassen wie im Legacy, (b) bei Triple-out keinen Hinweis zeigen, (c) Wege für Single- und Triple-out berechnen.
 
 **Frage:** Welche Option? Default ohne Antwort: (a), die Regeln werden am Board kaum gespielt.
-
+Antwort: Wege in single-Out anzwigen wie für double-out. Für tripple-out nur die einfachen wege anzeigen (ein dart) -> 3: T1; 12: T4
 ---
 
 ## `/dev/theme` als Baustein-Galerie (8.11.2026, M13 Paket D)
@@ -50,6 +50,7 @@ Dunkel ist das Grau ausreichend. Die Farben stammen aus Legacy/iOS (`theme.md` �
 **Optionen:** (a) So lassen wie in Legacy/iOS; der Axe-Test lässt `color-contrast` dauerhaft aus (in `architecture.md` begründen). (b) Nur hell nachdunkeln: `--fg-muted` auf etwa 76 % statt 60 % (≈ #6c6c70, ≈ 4,9:1 auf #f2f2f7), Akzent-Text und aktiver Tab auf das iOS-Blau für „Kontrast erhöhen“ (#0040dd); dunkel den aktiven Tab etwas heller. Sichtbar für alle: Nebentexte werden dunkler, das Blau kräftiger. (c) Wie (b), aber nur bei `prefers-contrast: more` (wie iOS); für alle anderen bleibt es, der Axe-Test prüft dann mit dieser Einstellung.
 
 **Frage:** Welche Option? Default ohne Antwort: (a) bis zur Entscheidung; ich würde (c) empfehlen, weil es niemandem etwas wegnimmt. Vor (b) zeige ich Screenshots vorher/nachher.
+Antwort: c
 
 ---
 
