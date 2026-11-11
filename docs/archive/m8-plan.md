@@ -1,5 +1,6 @@
 # M8-Plan – Statistiken und Reporting
 
+> **Archiviert am 11.11.2026:** im Code umgesetzt; die offene Abnahme am Board steht in `docs/test-pi.md`.
 > Detailplan zu `project.md` M8. Alles leitet sich aus den gespeicherten Aufnahmen ab (Architektur §6), plus `player_field_hits` aus aufgeräumten Gast-Matches (E12). Gast-Matches zählen in keiner Rangliste und nicht für Elo. Test-first in `src/domain/stats/`, jeder grüne Schritt ein Commit (`feat(stats): …`).
 > **Geändert am 6.11.2026 (Luca):** Konto zeigt oben die Kontodaten, darunter drei Zeilen zu eigenen Seiten `/account/rankings`, `/account/stats`, `/account/achievements` statt allem auf einer Seite.
 > Stand: umgesetzt am 5.11.2026 (Schritte 1–10, §6), DoD am Board offen (§8); Performance auf dem Pi noch nicht gemessen (§7). Plan überarbeitet am 5.11.2026 nach dem Abgleich mit dem Code und Lucas Antworten (§9), erste Fassung vom 23.10.2026.

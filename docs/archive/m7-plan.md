@@ -1,5 +1,6 @@
 # M7-Plan – Cricket, Elimination, SplitScore
 
+> **Archiviert am 11.11.2026:** im Code umgesetzt; die offene Abnahme am Board steht in `docs/test-pi.md`.
 > Detailplan zu `project.md` M7. Regeln aus `legacy-analysis.md` §4–6 und den Swift-Klassen `CricketGame`, `Field`, `EliminationGame`, `Elimination`, `SplitScoreGame`. Jeder Modus ist ein eigenes Domänenmodul hinter derselben Schnittstelle; Server, Zählscreen, Rechte und Netzprotokoll bleiben, nur Panels, Hinweiszeile und Setup bekommen Varianten. Test-first, jeder grüne Schritt ein Commit.
 > Stand: Fragen in §9 am 29.10.2026 beantwortet (1, 2, 5) bzw. Default (3, 4). M6 wird zunächst übersprungen; die Playwright-Tests aus §7 kommen deshalb als Erweiterung von `scripts/smoke-match.mjs`. §2–§7 umgesetzt am 29.10.2026 (Schnittstelle in `src/domain/game/`, je Modus über 97 % Abdeckung, Smoke-Test mit jedem Modus bis zum Sieg inklusive Undo). Offen: Deploy und DoD am Board.
 > Luca: §0.

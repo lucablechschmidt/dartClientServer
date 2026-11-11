@@ -27,7 +27,7 @@ Vorgehen:
 - UI nur mit Tokens und Bausteinen aus src/components/ui/, Texte in src/i18n/de.ts.
 - Ein Commit pro Punkt (Conventional Commits, englisch). Am Ende lint, typecheck, npm test und
   ./scripts/smoke.sh; bei sichtbaren Änderungen die Screenshots mit committen.
-- Was vom Board kommt und nicht sofort gemacht wird: in docs/m6-plan.md §7 (Beobachtungen) oder
+- Was vom Board kommt und nicht sofort gemacht wird: in docs/test-pi.md (Beobachtungen vom Board) oder
   als Punkt in docs/m11-plan.md („Kleinkram vom Board“) eintragen.
 - Nicht pushen und nicht deployen, das mache ich selbst. Zum Schluss eine kurze Liste: was erledigt
   ist, was offen ist, was ich am Board noch einmal prüfen soll.
@@ -65,10 +65,10 @@ Vorgehen:
 ## Stand (8.11.2026)
 
 - **Fertig, DoD am Board offen:** M5 X01 vollständig, M6 Robustheit (Praxistest mit Flugmodus offen), M7 Cricket, Elimination, SplitScore, M8 Statistiken (Tab Konto, Ranglisten je Modus, Match-Seite; Turnier-Setzliste ausgelost oder festgelegt), M9 Turniere, M10 Achievements (Galerie im Konto, Banner auf dem Sieg-Screen). M1–M4 sind am Handy abgenommen. Dazu die Board-Änderungen vom 5.11. (Tab „Verwaltung“, Spieler/Spiele/Turniere löschen, Eingabefelder im Setup, Elimination-Hinweis, nächster Spieler ab drei).
-- **M13 Code-Review und Konsolidierung** (`docs/m13-plan.md`): Pakete A (Eingabevalidierung, Fehler-Log, Restart-Rechte), C (Lebenszyklus der Hooks, Pending-Buttons, Lade-Platzhalter, globale Fehlerseite) und D (Duplikate, `import type` aus `@/server` in Komponenten, Komponenten-Coverage, Doku) sind umgesetzt; B (Statistik-Matches gebündelt laden) im Code fertig, die Messung (§7) und `synchronous = NORMAL` (Frage in `docs/fragen.md`) sind offen; E (`choice-menu` geteilt) und F (Barrierefreiheit ohne Nachteil für Sehende, Axe-Lauf in `e2e/a11y.spec.ts`) sind fertig. Offene Fragen in `docs/fragen.md`: Kontrast, `/dev/theme`, `synchronous`, Checkout-Hinweis. M14 Styling wartet auf die Abnahme am Board.
-- **Offen:** M11 Sound und Komfort, M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/m6-plan.md` §7), später vielleicht ein Meilenstein Checkout-Quote. Ebenfalls offen aus M0: Entscheidung SD oder SSD (E6).
+- **M13 Code-Review und Konsolidierung** (`docs/archive/m13-plan.md`): Pakete A (Eingabevalidierung, Fehler-Log, Restart-Rechte), C (Lebenszyklus der Hooks, Pending-Buttons, Lade-Platzhalter, globale Fehlerseite) und D (Duplikate, `import type` aus `@/server` in Komponenten, Komponenten-Coverage, Doku) sind umgesetzt; B (Statistik-Matches gebündelt laden) im Code fertig, die Messung (§7) und `synchronous = NORMAL` (Frage in `docs/fragen.md`) sind offen; E (`choice-menu` geteilt) und F (Barrierefreiheit ohne Nachteil für Sehende, Axe-Lauf in `e2e/a11y.spec.ts`) sind fertig. Offene Fragen in `docs/fragen.md`: Kontrast, `/dev/theme`, `synchronous`, Checkout-Hinweis. M14 Styling wartet auf die Abnahme am Board.
+- **Offen:** M11 Sound und Komfort, M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/test-pi.md` Beobachtungen), später vielleicht ein Meilenstein Checkout-Quote. Ebenfalls offen aus M0: Entscheidung SD oder SSD (E6).
 - **Deploy und Push macht Luca selbst.** Was auf dem Pi läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`. Admin dort ist `darts`. Die URL steht im README.
-- **Pläne** für die offenen Meilensteine liegen in `docs/m11-plan.md` und `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code); `docs/m8-plan.md` und `docs/m10-plan.md` sind abgeglichen und umgesetzt. Erledigte Pläne wandern erst nach der DoD am Board nach `docs/archive/`.
+- **Pläne** für die offenen Meilensteine liegen in `docs/m11-plan.md` und `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code); `docs/archive/m8-plan.md` und `docs/archive/m10-plan.md` sind abgeglichen und umgesetzt. Umgesetzte Pläne liegen in `docs/archive/` (seit 11.11.2026 auch M5–M10, M13, M14); ihre offene Abnahme am Board steht gesammelt in `docs/test-pi.md`.
 - **Mehrsprachigkeit** ist vorbereitet, aber noch keine Sprachwahl gebaut: erst wenn eine zweite Sprache kommt (README „Adding a language“).
 
 ## So arbeiten wir

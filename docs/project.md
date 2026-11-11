@@ -40,7 +40,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B), Fragen in `fragen.md` (synchronous, Kontrast, /dev/theme) | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
-Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; erledigte liegen in `docs/archive/`.
+Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `docs/archive/`, ihre noch offene Abnahme am Board sammelt `docs/test-pi.md`.
 
 ---
 
@@ -166,7 +166,7 @@ Detailplan: `docs/archive/m4-plan.md`.
 
 ## M5 – X01 vollständig
 
-Detailplan: `docs/m5-plan.md`.
+Detailplan: `docs/archive/m5-plan.md`.
 
 **Ziel:** Alle X01-Regeln aus Legacy plus das, was Legacy nur angefangen hat, als getestetes reines TypeScript.
 
@@ -176,13 +176,13 @@ Detailplan: `docs/m5-plan.md`.
 - [x] Undo über Leg-, Set- und Match-Grenzen
 - [x] Historie: beendete und abgebrochene Matches (Spielübersicht und Abbrechen: M4)
 
-**DoD:** `npm test` ist grün, die Abdeckung von `src/domain` liegt über 90 %, mindestens 30 Regel-Testfälle; ein Best-of-3-Legs-Match und ein 4-Spieler-Spiel mit Platzierungen laufen durch.
+**DoD:** `npm test` ist grün, die Abdeckung von `src/domain` liegt über 90 %, mindestens 30 Regel-Testfälle; ein Best-of-3-Legs-Match und ein 4-Spieler-Spiel mit Platzierungen laufen durch. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
 ## M6 – Robustheit am Board
 
-Detailplan: `docs/m6-plan.md`.
+Detailplan: `docs/archive/m6-plan.md`.
 
 **Ziel:** Ein echtes Match komplett am Board zählen, auch bei wackligem Netz.
 
@@ -193,13 +193,13 @@ Detailplan: `docs/m6-plan.md`.
   - [x] Befund 7.11.2026: Checkout-Hinweise geprüft, vier falsche Einträge (10, 53, 86, 143) korrigiert, immer der Weg mit den wenigsten Darts (50 → DBull), der Hinweis bleibt innerhalb der Aufnahme auf dem begonnenen Weg
   - [x] Befund 7.11.2026: allein spielend steht die vorherige Aufnahme blass hinter den leeren Feldern, um Fehleingaben zu erkennen
 
-**DoD:** Ein komplettes Best-of-3-Match wird am Board gezählt. Danach wird der Flugmodus kurz ein- und wieder ausgeschaltet, und es geht nichts verloren.
+**DoD:** Ein komplettes Best-of-3-Match wird am Board gezählt. Danach wird der Flugmodus kurz ein- und wieder ausgeschaltet, und es geht nichts verloren. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
 ## M7 – Cricket, Elimination, SplitScore
 
-Detailplan: `docs/m7-plan.md`.
+Detailplan: `docs/archive/m7-plan.md`.
 
 **Ziel:** Die drei übrigen Legacy-Modi, je ein Domänenmodul und ein Screen (Regeln: `legacy-analysis.md` §4–6).
 
@@ -208,13 +208,13 @@ Detailplan: `docs/m7-plan.md`.
 - [x] `src/domain/splitscore/` mit Tests: Zielfeld-Reihenfolge, Halbieren, Replay
 - [x] Setup-Screens und Panel-Varianten (Cricket-Marks, „nächste Elimination“, aktuelles Zielfeld)
 
-**DoD:** Jeder Modus wird einmal am Board durchgespielt; Undo stimmt in allen dreien.
+**DoD:** Jeder Modus wird einmal am Board durchgespielt; Undo stimmt in allen dreien. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
 ## M8 – Statistiken und Reporting
 
-Detailplan: `docs/m8-plan.md`.
+Detailplan: `docs/archive/m8-plan.md`.
 
 **Ziel:** Die Auswertungen, für die es die App gibt.
 
@@ -223,10 +223,10 @@ Detailplan: `docs/m8-plan.md`.
 - [x] **Ranglisten je Modus** im Tab Konto als ausklappbare Karten (zugeklappt: eigener Platz und Elo; aufgeklappt: Platz, Name, Elo, Spiele)
 - [x] Match-Detailansicht mit Statistik pro Leg (nur Teilnehmer)
 - [x] Turnier-Setzliste: ausgelost oder vom Ersteller festgelegt (ohne Elo)
-- [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (m8-plan §7). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `m13-plan.md` §7.
+- [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (`docs/test-pi.md` Messungen). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `docs/test-pi.md`.
 - Später, eigener Meilenstein: **Checkout-Quote** (Checkouts ÷ Checkout-Darts), aus M8 herausgenommen am 5.11.2026
 
-**DoD:** Die Berichte zeigen für reale Daten aus M6 korrekte Werte (mit einem von Hand nachgerechneten Match gegengeprüft).
+**DoD:** Die Berichte zeigen für reale Daten aus M6 korrekte Werte (mit einem von Hand nachgerechneten Match gegengeprüft). Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
@@ -234,14 +234,14 @@ Detailplan: `docs/m8-plan.md`.
 
 **Ziel:** Ein Abend als Turnier, immer 1 vs 1: Jeder gegen jeden, K.-o.-Baum oder Gruppen + K.-o., Setzliste ausgelost (Elo-Vorschlag kommt mit M8), jedes Turnierspiel ist ein normales X01-Match.
 
-Detailplan: `docs/m9-plan.md`.
+Detailplan: `docs/archive/m9-plan.md`.
 
 - [x] `src/domain/tournament/`: Round Robin (Berger-Tabelle statt des Legacy-Generators, Freilos bei ungerader Zahl), K.-o.-Baum mit Freilosen nach Setzliste, Gruppen + K.-o., Tabelle mit Tie-Breaks; Tests
 - [x] Schema `tournament`, `tournament_player`, `tournament_round_format`, `tournament_match`; Match entsteht beim Start des Spiels (`is_tournament`)
 - [x] Seiten `/tournaments`, `/tournaments/new`, `/tournaments/[id]` (Spielplan, Tabelle oder Baum, „Spielen“, Sieger)
 - [x] Match-Ende trägt den Sieger ein und öffnet die nächste Runde; Undo vom Sieg-Screen, solange das nächste Spiel des Siegers nicht begonnen hat; „Sieger festlegen“ nach einem Leg
 
-**DoD:** Round Robin zu viert komplett über die App, Tabelle stimmt mit der Handrechnung; K.-o. zu sechst mit Freilosen bis zum Finale.
+**DoD:** Round Robin zu viert komplett über die App, Tabelle stimmt mit der Handrechnung; K.-o. zu sechst mit Freilosen bis zum Finale. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
@@ -249,13 +249,13 @@ Detailplan: `docs/m9-plan.md`.
 
 **Ziel:** Auszeichnungen, die ein Spieler einmal verdient und behält, erkannt aus den Aufnahmen: 180, 170-Checkout („Gone Fishing“), mit jedem Doppel ein Leg gewonnen, SplitScore mit 1 Punkt beendet, SplitScore ohne Halbierung (auch mit genau 175), Elimination als Erster einen Mitspieler genullt („First Blood“), 9-Darter, Shanghai, Cricket alle Felder zu ohne Punkte und trotzdem gewonnen.
 
-Detailplan: `docs/m10-plan.md`.
+Detailplan: `docs/archive/m10-plan.md`.
 
 - [x] `src/domain/achievements/`: eine Erkennerfunktion je Achievement über `MatchState` aller Modi, Fortschritt für „alle Finishes“ (21 Doppel, nur Double Out); Tests mit Positiv- und Negativfall
 - [x] Berechnet aus den beendeten Spielen (kein Hook, Undo und gelöschte Spiele stimmen von selbst, rückwirkend ohne Lauf); nur Achievements aus Gast-Spielen werden beim Aufräumen in `player_achievement` gesichert
 - [x] Sieg-Screen-Banner „Neu: …“, Galerie in „Meine Statistik“ (nur die eigene); keine Spalte in den Ranglisten
 
-**DoD:** 180 im Spiel zeigt das Banner und steht in der Galerie; Undo nimmt es zurück; alte Matches haben ihre 180er sofort.
+**DoD:** 180 im Spiel zeigt das Banner und steht in der Galerie; Undo nimmt es zurück; alte Matches haben ihre 180er sofort. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
@@ -299,11 +299,11 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 **Ziel:** Die Befunde aus dem Review (6.11.2026) abarbeiten, ohne Verhalten zu ändern, außer wo der Befund ein Fehler ist.
 
-Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
+Detailplan: `docs/archive/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
 - [x] Paket A – Eingabevalidierung und Fehlerfluss (dazu: beim Restart bleibt der Host Host)
 - [x] Paket B – Pi-Ressourcen im Code: beendete Matches gebündelt laden, Spielerfilter in SQL, Rate-Limit-Map begrenzt, Datenbank beim Prozessende schließen
-- [ ] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`m13-plan.md` §7)
+- [ ] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`docs/test-pi.md` Messungen)
 - [ ] Paket B – `synchronous = NORMAL` entscheiden (`docs/fragen.md`)
 - [x] Paket C – Client-Lebenszyklus und Rückmeldung (dazu: Start-Button im Setup gesperrt, Lade-Platzhalter erst nach 150 ms)
 - [x] Paket D – Konsolidierung und Doku
@@ -311,7 +311,7 @@ Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 - [x] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende (Axe-Lauf ohne Befund außer Kontrast)
 - [ ] Paket F – Kontrast von Grau und Akzent entscheiden (`docs/fragen.md`)
 
-**DoD:** siehe `docs/m13-plan.md` §3.
+**DoD:** siehe `docs/archive/m13-plan.md` §3. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 
@@ -319,7 +319,7 @@ Detailplan: `docs/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
 **Ziel:** Die Tab-Seiten sehen auf Tablet und Desktop aufgeräumt aus, und die App bewegt sich dezent wie unter iOS, ohne das Zählen zu verzögern.
 
-Detailplan: `docs/m14-plan.md`.
+Detailplan: `docs/archive/m14-plan.md`.
 
 - [x] Average-Diagramm mit fester Höhe und Schrift (§2.1)
 - [x] `PageFrame` mit schmaler und breiter Spalte, Abschnitt „Breiten“ in `theme.md` (§2.2)
@@ -328,7 +328,7 @@ Detailplan: `docs/m14-plan.md`.
 - [x] Animationen 1, 2, 4, 5, 6, 7 (§4.3)
 - [ ] nach Abnahme am Board: Animationen 3 und 8 (§4.4)
 
-**DoD:** siehe `docs/m14-plan.md` §5.
+**DoD:** siehe `docs/archive/m14-plan.md` §5. Abnahme am Board: `docs/test-pi.md`.
 
 ---
 

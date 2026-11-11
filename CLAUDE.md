@@ -13,6 +13,7 @@ and is the end user. Read the docs before touching anything:
 - `docs/project.md`: milestones M0–M12 in execution order, with checklists and DoD (old numbers mapped at the top); tick items off
 - `docs/legacy-analysis.md`: the Swift rules, screens and stats the port must match
 - `docs/m*-plan.md`: step-by-step plan per milestone (every milestone gets one before code), finished plans move to `docs/archive/`; numbered in execution order: M4 devices → M5 X01 complete → M6 robustness → M7 other modes → M8 statistics → M9 tournaments → M10 achievements → M11 sound, comfort → M12 operations incl. ingress/Caddy check (deliberately last)
+- `docs/test-pi.md`: open board acceptance (DoD on the Pi) of milestones whose plans are already archived; tick items off there
 - `docs/theme.md`: color tokens (light/dark) from the legacy assets and the layout rules
 - `Legacy/Screenshots/`: photos of the Swift app; the web screens are built to match these
 

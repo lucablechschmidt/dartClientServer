@@ -1,5 +1,6 @@
 # M6-Plan – Robustheit am Board
 
+> **Archiviert am 11.11.2026:** im Code umgesetzt; die offene Abnahme am Board steht in `docs/test-pi.md`.
 > Detailplan zu `project.md` M6. Der erste Punkt (lokales Zählen, Warteschlange mit Retry, offene Aufnahme im localStorage) ist seit M1 erledigt. Übrig sind die Tests, die beweisen, dass nichts verloren geht, der Umbau der Smoke-Skripte zu echten Playwright-Tests, und der Praxistest. Kommt nach M5, weil die Tests dann das vollständige X01 abdecken.
 > Stand: erste Fassung 23.10.2026; am 30.10.2026 an den Code nach M5, M7 und M9 angepasst (§2a) und Frage 1 aus §8 eingearbeitet; §3–§5 umgesetzt am 31.10./1.11.2026 (Warteschlange im localStorage, Wiederholung ohne Doppelwirkung, 26 Playwright-Tests in `e2e/`, davon 7 zu Netzausfällen). Offen: §6 Praxistest am Board.
 > Luca: §0 und §8.

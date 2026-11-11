@@ -1,5 +1,6 @@
 # M13-Plan – Code-Review und Konsolidierung
 
+> **Archiviert am 11.11.2026:** im Code umgesetzt; die offene Abnahme am Board steht in `docs/test-pi.md`.
 > Detailplan zu einem neuen Meilenstein „Code-Review und Konsolidierung“. Grundlage ist ein vollständiges Review des Codes (Stand Commit `095a108`, 6.11.2026) gegen `architecture.md` §9/§10, `theme.md` §3 und die Next.js-16-Konventionen (`node_modules/next/dist/docs/`). Ergebnis sind eine Befundliste (§2) mit Fundstellen und ein Umsetzungsplan in Arbeitspaketen (§3), die einzeln umsetzbar und testbar sind. **Kein Code wurde geändert**, nur dieses Dokument und `architecture.md` §12 (Ziel-Architektur).
 > Stand: 8.11.2026, Paket A umgesetzt (`c426c48`, `85c3e5b`, `08e3473`, `0ec5035`), Paket B im Code umgesetzt (`257b5b0`, `44befd4`, `08dd0e3`; Messung und R-21 offen), Paket C umgesetzt (`e2ba9df` … `c2d99e7`), Paket D umgesetzt (`1f9edad` … `6fb690b`), Paket E umgesetzt (`9930ee3`, nur `choice-menu`), Paket F umgesetzt (`8feedb9` … `80d358a`; Kontrast als Frage offen). Die Nummer M13 ist die nächste freie; die Pakete sind unabhängig von M11 und M12 und können vorgezogen werden (§6, Frage 1).
 > Luca: §0 und §6.

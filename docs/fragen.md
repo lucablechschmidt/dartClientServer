@@ -54,4 +54,4 @@ Antwort: c
 
 ---
 
-Zuletzt beantwortet (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/m14-plan.md`.
+Zuletzt beantwortet (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/archive/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/archive/m14-plan.md`.

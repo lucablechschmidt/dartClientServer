@@ -91,14 +91,14 @@ Regeln:
 
 ## 5. Bewegung
 
-Legacy hat keine eigenen Animationen; was unter iOS ruhig gleitet, macht SwiftUI selbst (Sheets, Disclosure). Die Web-App ergänzt das sparsam (M14, `docs/m14-plan.md` §4).
+Legacy hat keine eigenen Animationen; was unter iOS ruhig gleitet, macht SwiftUI selbst (Sheets, Disclosure). Die Web-App ergänzt das sparsam (M14, `docs/archive/m14-plan.md` §4).
 
 | Token | Klasse | Wert | Verwendung |
 |---|---|---|---|
 | `--duration-fast` | `duration-fast` | 150 ms | Tipp-Rückmeldung, Dart setzt sich, Auswahlliste |
 | `--duration-base` | `duration-base` | 250 ms | Aufklappen, Rahmenwechsel, Einblenden |
 | `--duration-slow` | `duration-slow` | 350 ms | Sheet und Sieg-Screen kommen herein |
-| `--delay-skeleton` | (in `animate-skeleton-in`) | 150 ms | Lade-Platzhalter warten so lange, bevor sie einblenden; schnelle Seiten flackern nicht (`m13-plan.md` R-04) |
+| `--delay-skeleton` | (in `animate-skeleton-in`) | 150 ms | Lade-Platzhalter warten so lange, bevor sie einblenden; schnelle Seiten flackern nicht (`archive/m13-plan.md` R-04) |
 | `--ease-ios` | `ease-ios` | `cubic-bezier(0.32, 0.72, 0, 1)` | alle Übergänge: schnell an, weich aus |
 
 Regeln:
