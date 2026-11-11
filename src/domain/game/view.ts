@@ -1,6 +1,7 @@
 import { placeNumbers, type ScoreboardView } from "./board";
 import { currentLeg, matchScore, matchStatus, matchWinner, nextStarter, type MatchProgress, type MatchState } from "./match";
 import { projectBoard, remainingPlayer, standings, winnerOf } from "./modes";
+import { matchTotals, type PlayerMatchTotals } from "./result";
 import { newLeg } from "./state";
 import type { PlayerId } from "./types";
 
@@ -23,6 +24,8 @@ export type MatchBoardView = {
   playOut: boolean;
   /** No dart thrown yet in the displayed leg: the starter may still be chosen (ToStart). */
   canChooseStarter: boolean;
+  /** Once the match is over: legs, sets, darts, average and highest visit over every leg (victory screen). */
+  totals: Record<PlayerId, PlayerMatchTotals> | null;
 };
 
 /** Place groups of the match: by the last leg, except X01 with 2 players, where the match winner is first. */
@@ -59,5 +62,6 @@ export function projectMatch(m: MatchState, names: Record<PlayerId, string>, upc
     lastPlayerId: remainingPlayer(finished),
     playOut: finished.playOut,
     canChooseStarter: progress !== "finished" && leg.visits.length === 0,
+    totals: progress === "finished" ? matchTotals(m) : null,
   };
 }

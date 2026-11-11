@@ -18,9 +18,10 @@ import {
   type MatchState,
 } from "./match";
 import { replayMatch } from "./replay";
-import { matchResult } from "./result";
+import { matchResult, matchTotals } from "./result";
 import { applyDart, currentPlayer, isLegFinished, startPlayOut } from "./modes";
 import { newLeg } from "./state";
+import { projectMatch } from "./view";
 import type { Dart, LegState, Rules } from "./types";
 
 const [A, B, C] = ["a", "b", "c"];
@@ -294,5 +295,28 @@ describe("matchResult (M9)", () => {
     expect(r.legs).toEqual({ [A]: 2, [B]: 0 });
     // A: two visits of D20 (40 each); B: one missed visit in leg 2 (B started it)
     expect(r.averages).toEqual({ [A]: 40, [B]: 0 });
+  });
+});
+
+describe("matchTotals (victory screen)", () => {
+  it("legs and sets won, darts, average and highest visit over every leg", () => {
+    const m = winLeg(winLeg(newMatch([A, B], rules, { legsToWinSet: 1, setsToWinMatch: 2 }), A), A);
+    const t = matchTotals(m);
+    // leg 1: A D20; leg 2 (B starts): B misses, A D20
+    expect(t[A]).toEqual({ legs: 2, sets: 2, darts: 2, average: 40, highest: 40 });
+    expect(t[B]).toEqual({ legs: 0, sets: 0, darts: 3, average: 0, highest: 0 });
+  });
+
+  it("a bust counts 0 for the highest visit and as a visit for the average", () => {
+    const m = play(newMatch([A, B], { ...rules, startScore: 60 }, bestOf3), S(20), S(20), S(20), ...MISS);
+    const bust = play(newMatch([A, B], { ...rules, startScore: 30 }, bestOf3), S(20), S(20));
+    expect(matchTotals(m)[A]).toMatchObject({ legs: 1, darts: 3, average: 60, highest: 60 });
+    expect(matchTotals(bust)[A]).toMatchObject({ darts: 3, average: 0, highest: 0 });
+  });
+
+  it("is only in the view once the match is over", () => {
+    const m = newMatch([A, B], rules, bestOf3);
+    expect(projectMatch(m, { [A]: "A", [B]: "B" }).totals).toBeNull();
+    expect(projectMatch(winLeg(winLeg(m, A), A), { [A]: "A", [B]: "B" }).totals?.[A].legs).toBe(2);
   });
 });

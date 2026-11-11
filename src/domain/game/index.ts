@@ -10,4 +10,4 @@ export * from "./match";
 export { replay, replayMatch, type StoredLeg } from "./replay";
 export * from "./permissions";
 export * from "./view";
-export { matchResult, type MatchResult } from "./result";
+export { matchResult, matchTotals, type MatchResult, type PlayerMatchTotals } from "./result";
