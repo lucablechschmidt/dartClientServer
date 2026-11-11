@@ -73,6 +73,8 @@ export const cricket: GameMode = {
       winnerId: t.winner,
       dartsLeft: done ? 0 : MAX_DARTS_PER_VISIT - (open?.darts.length ?? 0),
       hint: null,
+      // a field everyone has closed scores nobody anything: its key is off (adaptive keypad, 11.11.2026)
+      liveKeys: { fields: CRICKET_FIELDS.filter((f) => !isClosedForAll(t, state.players, f)), rings: ["single", "double", "triple"] },
       canUndo: state.visits.length > 0,
       ranking: standings(state).flat(),
       nextPlayerId: done ? undefined : nextSeat(state.players, active),

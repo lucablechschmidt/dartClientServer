@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Dart } from "@/domain/game";
+import type { Dart, LiveKeys } from "@/domain/game";
 import {
   initialKeypadState,
   isKeyHidden,
+  isKeyLive,
   KEYPAD_LAYOUTS,
   keyId,
   pressKey,
@@ -26,8 +27,10 @@ type Props = {
   canThrow?: boolean;
   canUndo?: boolean;
   texts: KeypadTexts;
-  /** "full": legacy 5 × 5; "cricket": 0, 15–20, Bull (Figma). */
+  /** "full": legacy 5 × 5; "cricket": X, 15–20, Bull (Figma). */
   layout?: KeypadLayout;
+  /** Adaptive keypad (11.11.2026): keys whose dart cannot count are off (Cricket: closed by all; SplitScore: off target). */
+  live?: LiveKeys;
 };
 
 /**
@@ -85,7 +88,17 @@ function keyClasses(key: KeypadKey, state: KeypadState): string {
 }
 
 /** Port of ScoreInputView: 5 rows, modifier toggles, undo. Emits finished darts via callback. */
-export function Keypad({ onDart, onUndo, onMissRest, disabled = false, canThrow = true, canUndo = true, texts, layout = "full" }: Props) {
+export function Keypad({
+  onDart,
+  onUndo,
+  onMissRest,
+  disabled = false,
+  canThrow = true,
+  canUndo = true,
+  texts,
+  layout = "full",
+  live,
+}: Props) {
   const [state, setState] = useState<KeypadState>(initialKeypadState);
 
   const press = (key: KeypadKey) => {
@@ -109,7 +122,7 @@ export function Keypad({ onDart, onUndo, onMissRest, disabled = false, canThrow 
               key={keyId(key)}
               type="button"
               onClick={() => press(key)}
-              disabled={disabled || hidden || (isUndo ? !canUndo : !canThrow)}
+              disabled={disabled || hidden || (isUndo ? !canUndo : !canThrow || !isKeyLive(key, state, live))}
               aria-pressed={key.kind === "double" || key.kind === "triple" ? state.modifier === key.kind : undefined}
               className={`col-span-2 ${offset} ${keyClasses(key, state)} ${hidden ? "invisible" : ""}`}
             >

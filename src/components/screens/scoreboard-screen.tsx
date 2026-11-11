@@ -243,6 +243,7 @@ export function ScoreboardScreen({
       onUndo={undoAndReopen}
       onMissRest={() => throwDarts(Array.from({ length: board.dartsLeft }, () => MISS))}
       layout={board.mode === "cricket" ? "cricket" : "full"}
+      live={board.liveKeys}
     />
   );
 

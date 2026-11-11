@@ -149,6 +149,16 @@ describe("cricket (M7, legacy §4)", () => {
     expect(again).toEqual(s);
   });
 
+  describe("cricket: adaptive keypad (11.11.2026)", () => {
+    it("a field closed by everyone is off; closed by one player only it stays on", () => {
+      const live = (state: LegState) => cricket.board(state, {}).liveKeys?.fields;
+      expect(live(leg())).toEqual([15, 16, 17, 18, 19, 20, 25]);
+      const aClosed20 = play(leg(), T(20), ...[S(0), S(0)]);
+      expect(live(aClosed20)).toContain(20);
+      expect(live(play(aClosed20, T(20)))).toEqual([15, 16, 17, 18, 19, 25]);
+    });
+  });
+
   describe("cricket: the X key (11.11.2026)", () => {
     it("misses at the end of a visit go back with one undo, the darts before stay", () => {
       const s = play(leg(), T(20), S(0), S(0)); // T20, then X for the last two

@@ -14,7 +14,7 @@ import {
   shownVisit,
   withDart,
 } from "../game/visits";
-import { hitsTarget, rounds, targetOfVisit, TARGETS } from "./rounds";
+import { hitsTarget, liveKeysOf, rounds, targetOfVisit, TARGETS } from "./rounds";
 
 const OVERTHROWN: Dart = { field: 0, type: "overthrown" };
 
@@ -74,6 +74,7 @@ export const splitscore: GameMode = {
       winnerId: done ? ranking[0][0] : null,
       dartsLeft: done ? 0 : MAX_DARTS_PER_VISIT - (open?.darts.length ?? 0),
       hint: r.target && !done ? { kind: "target", target: r.target } : null,
+      liveKeys: r.target && !done ? liveKeysOf(r.target) : undefined,
       canUndo: state.visits.length > 0,
       ranking: ranking.flat(),
       total: Object.values(r.points).reduce((sum, p) => sum + p, 0),

@@ -1,4 +1,5 @@
 import { dartScore } from "../game/scoring";
+import type { LiveKeys } from "../game/board";
 import { MAX_DARTS_PER_VISIT, type Dart, type LegState, type PlayerId } from "../game/types";
 
 /** Port of SplitScoreGame (legacy-analysis.md §6): one round per target, nine rounds. */
@@ -39,4 +40,20 @@ export function rounds(state: LegState): Rounds {
   const last = state.visits.at(-1);
   const next = last && last.darts.length < MAX_DARTS_PER_VISIT ? state.visits.length - 1 : state.visits.length;
   return { points, target: targetOfVisit(state, next) };
+}
+
+const NUMBERS = Array.from({ length: 20 }, (_, i) => i + 1);
+
+/** Adaptive keypad (11.11.2026): the darts that hit `target`; every other key is off. */
+export function liveKeysOf(target: Target): LiveKeys {
+  switch (target) {
+    case "double":
+      return { fields: [...NUMBERS, 25], rings: ["double"] };
+    case "triple":
+      return { fields: NUMBERS, rings: ["triple"] };
+    case "bull":
+      return { fields: [25], rings: ["single", "double"] };
+    default:
+      return { fields: [Number(target)], rings: ["single", "double", "triple"] };
+  }
 }

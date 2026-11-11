@@ -1,4 +1,4 @@
-import type { Dart } from "@/domain/game";
+import type { Dart, LiveKeys } from "@/domain/game";
 
 /** Port of InputButtons + ButtonsView: Double/Triple are modifiers for the next number tap. */
 
@@ -51,6 +51,30 @@ export function keyId(key: KeypadKey): string {
 /** Legacy: there is no triple bull; the Bull button is hidden while Triple is active. */
 export function isKeyHidden(state: KeypadState, key: KeypadKey): boolean {
   return key.kind === "bull" && state.modifier === "triple";
+}
+
+const RING = { none: "single", double: "double", triple: "triple" } as const;
+
+/**
+ * Adaptive keypad (11.11.2026): can a dart from this key still count? A number or Bull needs its field
+ * and the ring of the active modifier (SplitScore's double round: numbers only with Double); Double and
+ * Triple need a ring that can count on some live field (no triple bull). Misses and undo always work.
+ */
+export function isKeyLive(key: KeypadKey, state: KeypadState, live: LiveKeys | undefined): boolean {
+  if (!live) return true;
+  switch (key.kind) {
+    case "number":
+      return key.value === 0 || (live.fields.includes(key.value) && live.rings.includes(RING[state.modifier]));
+    case "bull":
+      return live.fields.includes(25) && live.rings.includes(RING[state.modifier]);
+    case "double":
+      return live.rings.includes("double") && live.fields.length > 0;
+    case "triple":
+      return live.rings.includes("triple") && live.fields.some((f) => f >= 1 && f <= 20);
+    case "undo":
+    case "miss":
+      return true;
+  }
 }
 
 export function pressKey(state: KeypadState, key: KeypadKey): KeypadOutput {

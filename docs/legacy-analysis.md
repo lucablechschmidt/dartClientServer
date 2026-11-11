@@ -126,6 +126,7 @@ Nichts wird über das Spiel hinaus gespeichert. Alles in `project.md` M8 (First-
 Werden im Port **nicht** übernommen:
 
 - Sets und Legs sind im Setup wählbar, aber nicht implementiert (Leg-Wechsel, Set-Wechsel, Match-Ende fehlen). → M5.
+- Adaptives Tastenfeld (11.11.2026): Tasten, deren Dart nichts mehr zählen kann, sind gesperrt. Cricket: Felder, die alle geschlossen haben (wie in der Tabelle durchgestrichen); SplitScore: alles, was das Ziel der Runde nicht trifft (Doppel-Runde: Zahlen erst mit Double, Triple-Runde: erst mit Triple). Fehlwurf (0, X) und Undo gehen immer. Die Domäne liefert dafür `ScoreboardView.liveKeys`, das Tastenfeld prüft mit `isKeyLive`.
 - Cricket-Tastenfeld (11.11.2026): statt der 0 eine Taste **X**, die die restlichen Darts der Aufnahme mit Fehlwürfen füllt; Undo nimmt die Fehlwürfe am Ende einer Aufnahme auf einmal zurück (wie beim Bust in X01). Im Cricket gibt es eine 0 nur noch über X (`src/domain/cricket/mode.ts`).
 - `Leg.getAverage` hat Integer-Division und einen Off-by-one; wird durch die Statistik-Domäne ersetzt.
 - `Game.removeDartThrow` prüft „darf Undo“ über `dart.darts.count > 1` statt `> 0`; der Port prüft schlicht, ob irgendein Dart existiert.

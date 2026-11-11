@@ -39,6 +39,13 @@ export type BoardHint =
   /** SplitScore: the current target. */
   | { kind: "target"; target: string };
 
+/**
+ * Adaptive keypad (11.11.2026): the fields and rings a dart can still count on. Absent means every key;
+ * a miss (0, Cricket's X) is always allowed. Cricket: the fields not closed by everyone; SplitScore: what
+ * hits the round's target.
+ */
+export type LiveKeys = { fields: readonly number[]; rings: readonly ("single" | "double" | "triple")[] };
+
 export type ScoreboardView = {
   mode: ModeId;
   players: PlayerPanelData[];
@@ -53,6 +60,8 @@ export type ScoreboardView = {
   total?: number;
   /** Cricket (Figma): who throws after the current visit, shown below the keypad. */
   nextPlayerId?: PlayerId;
+  /** Adaptive keypad: only these darts can still count (Cricket, SplitScore). */
+  liveKeys?: LiveKeys;
 };
 
 /**

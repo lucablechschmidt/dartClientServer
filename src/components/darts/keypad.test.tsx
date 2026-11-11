@@ -83,4 +83,14 @@ describe("Keypad", () => {
     expect(onDart).not.toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "0" })).toBeNull();
   });
+  it("adaptive keypad: dead keys are disabled, a modifier can bring them back (SplitScore double round)", async () => {
+    const user = userEvent.setup();
+    const live = { fields: [...Array.from({ length: 20 }, (_, i) => i + 1), 25], rings: ["double"] as const };
+    render(<Keypad onDart={() => {}} onUndo={() => {}} texts={texts} live={live} />);
+    expect(screen.getByRole("button", { name: "16" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "0" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: texts.triple })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: texts.double }));
+    expect(screen.getByRole("button", { name: "16" })).toBeEnabled();
+  });
 });

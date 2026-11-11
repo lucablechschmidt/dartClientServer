@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialKeypadState, isKeyHidden, pressKey, type KeypadState } from "./keypad-logic";
+import { initialKeypadState, isKeyHidden, isKeyLive, pressKey, type KeypadKey, type KeypadState } from "./keypad-logic";
 
 const s = (modifier: KeypadState["modifier"]): KeypadState => ({ modifier });
 
@@ -37,5 +37,33 @@ describe("pressKey", () => {
   });
   it("undo clears the modifier and signals undo", () => {
     expect(pressKey(s("double"), { kind: "undo" })).toEqual({ state: initialKeypadState, undo: true });
+  });
+});
+
+describe("isKeyLive (adaptive keypad, 11.11.2026)", () => {
+  const n = (value: number): KeypadKey => ({ kind: "number", value });
+  const all = ["single", "double", "triple"] as const;
+  it("without limits every key is on", () => {
+    expect(isKeyLive(n(7), initialKeypadState, undefined)).toBe(true);
+  });
+  it("Cricket with 20 closed by everyone: 20 off, 19 on, misses and undo always on", () => {
+    const live = { fields: [15, 16, 17, 18, 19, 25], rings: all };
+    expect(isKeyLive(n(20), s("triple"), live)).toBe(false);
+    expect(isKeyLive(n(19), s("none"), live)).toBe(true);
+    expect(isKeyLive(n(0), s("none"), live)).toBe(true);
+    expect(isKeyLive({ kind: "miss" }, s("none"), live)).toBe(true);
+    expect(isKeyLive({ kind: "undo" }, s("none"), live)).toBe(true);
+  });
+  it("only Bull left: Triple off (no triple bull), Double on", () => {
+    const live = { fields: [25], rings: all };
+    expect(isKeyLive({ kind: "triple" }, s("none"), live)).toBe(false);
+    expect(isKeyLive({ kind: "double" }, s("none"), live)).toBe(true);
+  });
+  it("SplitScore double round: numbers and Bull only with Double; Triple off", () => {
+    const live = { fields: [...Array.from({ length: 20 }, (_, i) => i + 1), 25], rings: ["double"] as const };
+    expect(isKeyLive(n(16), s("none"), live)).toBe(false);
+    expect(isKeyLive(n(16), s("double"), live)).toBe(true);
+    expect(isKeyLive({ kind: "bull" }, s("double"), live)).toBe(true);
+    expect(isKeyLive({ kind: "triple" }, s("none"), live)).toBe(false);
   });
 });

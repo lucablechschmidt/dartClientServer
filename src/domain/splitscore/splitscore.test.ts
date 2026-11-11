@@ -129,3 +129,20 @@ describe("splitscore (M7, legacy §6)", () => {
     expect(next(play(s, ...MISS, ...MISS))).toBe(A);
   });
 });
+
+describe("splitscore: adaptive keypad (11.11.2026)", () => {
+  const live = (state: LegState) => splitscore.board(state, {}).liveKeys;
+  it("follows the round's target: 15, any double, any triple, bull; nothing once the game is over", () => {
+    let s = leg([A]);
+    expect(live(s)).toEqual({ fields: [15], rings: ["single", "double", "triple"] });
+    s = play(s, ...MISS, ...MISS); // rounds 15 and 16
+    expect(live(s)?.rings).toEqual(["double"]);
+    expect(live(s)?.fields).toContain(25); // double bull is a double
+    s = play(s, ...MISS, ...MISS, ...MISS); // double, 17, 18
+    expect(live(s)?.rings).toEqual(["triple"]);
+    expect(live(s)?.fields).not.toContain(25);
+    s = play(s, ...MISS, ...MISS, ...MISS); // triple, 19, 20
+    expect(live(s)).toEqual({ fields: [25], rings: ["single", "double"] });
+    expect(live(play(s, ...MISS))).toBeUndefined();
+  });
+});
