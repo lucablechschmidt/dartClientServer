@@ -1,6 +1,6 @@
 /**
  * Theme logic without React, so it is testable and used the same way by the inline script
- * (before the first paint) and by the toggle.
+ * (before the first paint) and by the picker.
  */
 export const THEME_STORAGE_KEY = "theme";
 export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
@@ -23,11 +23,6 @@ export function readPreference(storage: Pick<Storage, "getItem"> | null): ThemeP
 export function resolveTheme(preference: ThemePreference, systemDark: boolean): ResolvedTheme {
   if (preference === "system") return systemDark ? "dark" : "light";
   return preference;
-}
-
-export function nextPreference(current: ThemePreference): ThemePreference {
-  const i = THEME_PREFERENCES.indexOf(current);
-  return THEME_PREFERENCES[(i + 1) % THEME_PREFERENCES.length];
 }
 
 /** Sets data-theme only for an explicit choice; "system" removes the attribute (CSS then uses prefers-color-scheme). */

@@ -1,5 +1,5 @@
 import { ScoreGrid } from "@/components/darts/score-grid";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemePicker } from "@/components/ui/theme-picker";
 import { de } from "@/i18n/de";
 
 const TOKENS = [
@@ -97,7 +97,7 @@ export default function ThemeGallery() {
       header={
         <div className="flex items-center justify-between px-3 py-2">
           <span className="text-fluid-sm text-fg-muted">/dev/theme</span>
-          <ThemeToggle labels={{ label: de.theme.label, system: de.theme.system, light: de.theme.light, dark: de.theme.dark }} />
+          <ThemePicker labels={de.theme} />
         </div>
       }
       panels={

@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { GameControllerIcon, PersonCircleIcon, PersonIcon, WrenchIcon } from "@/components/ui/icons";
 import { TabBar, type TabItem } from "@/components/ui/tab-bar";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { de } from "@/i18n/de";
 import { currentSession } from "@/server/request";
 
@@ -23,12 +22,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex h-dvh flex-col pt-safe">
       {/* Only this area scrolls; the tab bar stays below it. */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        <div className="flex justify-end px-3 pt-2">
-          <ThemeToggle labels={{ label: de.theme.label, system: de.theme.system, light: de.theme.light, dark: de.theme.dark }} />
-        </div>
-        {children}
-      </div>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
       <Suspense fallback={<TabBar label={de.nav.main} items={TABS} />}>
         <MainTabs />
       </Suspense>

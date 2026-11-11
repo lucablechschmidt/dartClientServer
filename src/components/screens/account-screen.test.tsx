@@ -8,7 +8,7 @@ const show = () =>
   render(
     <AccountScreen
       session={{ playerId: "a", name: "Casey", isAdmin: false }}
-      texts={{ account: de.account, auth: de.auth, players: de.players }}
+      texts={{ account: de.account, auth: de.auth, players: de.players, theme: de.theme }}
       onRename={vi.fn()}
       onChangePassword={vi.fn()}
       onLogout={vi.fn()}
@@ -43,5 +43,11 @@ describe("AccountScreen", () => {
     ]);
     const profile = screen.getByRole("button", { name: new RegExp(`^${de.account.profile}`) });
     expect(profile.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("the appearance is chosen here: System, Light, Dark", () => {
+    show();
+    const group = within(screen.getByRole("group", { name: de.theme.label }));
+    expect(group.getAllByRole("button").map((b) => b.textContent)).toEqual([de.theme.system, de.theme.light, de.theme.dark]);
   });
 });

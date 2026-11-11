@@ -14,7 +14,7 @@ async function Account() {
   return (
     <AccountScreen
       session={session}
-      texts={{ account: de.account, auth: de.auth, players: de.players }}
+      texts={{ account: de.account, auth: de.auth, players: de.players, theme: de.theme }}
       onRename={renameSelfAction}
       onChangePassword={changePasswordAction}
       onLogout={logoutAction}

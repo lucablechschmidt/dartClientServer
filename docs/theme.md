@@ -53,7 +53,7 @@ Dark-Mode-Hinweis (geändert am 6.11.2026, Luca): Im Legacy war `--frame-bg` im 
 ## 2. Umschalten
 
 - Default: Systemeinstellung (`prefers-color-scheme`).
-- Override per Toggle in der Kopfzeile, gespeichert in `localStorage` (`theme = light | dark | system`), gesetzt als `data-theme` auf `<html>` durch ein Inline-Script vor dem ersten Paint (kein Flackern). Kein Server-Roundtrip, kein Cookie.
+- Override im Konto-Tab unter „Darstellung“ (`ThemePicker`, System · Hell · Dunkel; seit 11.11.2026 nur dort, keine Kopfzeilen-Umschaltung mehr), gespeichert in `localStorage` (`theme = light | dark | system`), gesetzt als `data-theme` auf `<html>` durch ein Inline-Script vor dem ersten Paint (kein Flackern). Kein Server-Roundtrip, kein Cookie.
 - `color-scheme: light dark` auf `:root`, damit Formulare und Scrollbars mitgehen.
 
 ## 3. Layout: warum Legacy nicht skaliert und was die Web-App anders macht

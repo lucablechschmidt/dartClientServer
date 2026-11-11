@@ -1,5 +1,7 @@
 import { CardLinkRow, CardList, GroupedSection } from "@/components/ui/card-list";
 import { FoldCard } from "@/components/ui/fold-card";
+import { SectionHeading } from "@/components/ui/form-controls";
+import { ThemePicker } from "@/components/ui/theme-picker";
 import type { PasswordFormState, PlayerResult, Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
 import { OwnAccountSection } from "./account/own-account-section";
@@ -9,7 +11,7 @@ export type { InviteLink };
 
 type Props = {
   session: Session;
-  texts: { account: Texts["account"]; auth: Texts["auth"]; players: Texts["players"] };
+  texts: { account: Texts["account"]; auth: Texts["auth"]; players: Texts["players"]; theme: Texts["theme"] };
   onRename: (formData: FormData) => Promise<PlayerResult>;
   onChangePassword: (prev: PasswordFormState, formData: FormData) => Promise<PasswordFormState>;
   onLogout: () => Promise<void>;
@@ -17,7 +19,8 @@ type Props = {
 
 /**
  * Account tab, the same for everyone: a folded "Profil" card (own name, password, logout), then the rows to the rankings, the
- * own statistics and the own achievements (each a page of its own). The admin tools are in the admin tab.
+ * own statistics and the own achievements (each a page of its own), last the appearance (System, Light, Dark; only
+ * here). The admin tools are in the admin tab.
  */
 export function AccountScreen({ session, texts, onRename, onChangePassword, onLogout }: Props) {
   const p = texts.account.pages;
@@ -31,6 +34,10 @@ export function AccountScreen({ session, texts, onRename, onChangePassword, onLo
         <CardLinkRow href="/account/stats" label={p.stats} />
         <CardLinkRow href="/account/achievements" label={p.achievements} />
       </CardList>
+      <section className="flex flex-col gap-2">
+        <SectionHeading>{texts.theme.label}</SectionHeading>
+        <ThemePicker labels={texts.theme} />
+      </section>
     </GroupedSection>
   );
 }
