@@ -1,8 +1,11 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import type { MatchBoardView } from "@/domain/game";
+import { CardList, DetailRow } from "@/components/ui/card-list";
+import { Button, ButtonLink, PrimaryButton } from "@/components/ui/form-controls";
+import { UndoIcon } from "@/components/ui/icons";
+import { StatPair, type Figure } from "@/components/ui/stat-pair";
+import { VersusCard, type VersusRow } from "@/components/ui/versus-card";
+import type { MatchBoardView, PlayerPanelData } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
-import { scoreLine } from "./leg-victory-screen";
 
 type Props = {
   view: MatchBoardView;
@@ -16,13 +19,19 @@ type Props = {
   pending: boolean;
   /** M8: the X01 match page, only for the match's players. */
   statsHref?: string;
-  /** M10: the banner with newly earned achievements, below the result. */
+  /** M10: the banner with newly earned achievements, at the top. */
   achievements?: ReactNode;
 };
 
-const button = "min-h-touch w-full rounded-tile px-4 font-medium";
+type T = Texts["game"];
+const two = (n: number) => n.toFixed(2);
+const fill = (text: string, n: number | string) => text.replace("{n}", String(n));
 
-/** Port of ClassicGameVictoryView; M5: result in legs/sets, with 3+ players the table of places. */
+/**
+ * Port of ClassicGameVictoryView (design `Design/VictoryScreen*.png`): "Sieger" and the name, then
+ * X01 1 vs 1 a comparison over every leg, otherwise the winner's figures and a card with everyone
+ * else; below, the actions. The screen never scrolls: the banner and the player card do.
+ */
 export function VictoryScreen({
   view,
   texts,
@@ -37,77 +46,150 @@ export function VictoryScreen({
   const players = view.board.players;
   const winner = players.find((p) => p.id === view.matchWinnerId);
   if (!winner) return null;
-  const byId = (id: string) => players.filter((p) => p.id === id);
-  const places = view.ranking.length > 2;
-  const scoreLabel = view.board.mode === "x01" ? texts.rest : texts.points;
-  const avg = (a: number | null) => (a === null ? "" : ` · ${texts.average} ${a.toFixed(2)}`);
-  const others = view.ranking.filter((id) => id !== winner.id).flatMap(byId);
-  const last = view.lastPlayerId ? (byId(view.lastPlayerId).at(0) ?? null) : null;
-  // my-auto centers while it fits and scrolls instead of overlapping the header when it does not.
+  const others = view.ranking.filter((id) => id !== winner.id).flatMap((id) => players.filter((p) => p.id === id));
+  const totals = view.board.mode === "x01" && players.length === 2 && others.length === 1 ? view.totals : null;
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
-      <div className="mx-auto my-auto flex w-full max-w-md flex-col gap-6 px-4 py-2 motion-safe:animate-rise-in">
-        <div className="text-center">
-          <p className="text-fluid-xl font-semibold">{texts.youWin.replace("{name}", winner.name)}</p>
-          <p className="text-fluid-sm text-fg-muted tabular-nums">
-            🎯 {winner.darts}
-            {avg(winner.average)}
-          </p>
-          {view.score && (
-            <p className="text-fluid-sm tabular-nums">
-              {scoreLine(
-                view,
-                players.map((p) => p.id),
-                texts,
-              )}
-            </p>
-          )}
-          {view.board.total !== undefined && (
-            <p className="text-fluid-sm tabular-nums">{texts.total.replace("{n}", String(view.board.total))}</p>
-          )}
+    <div className="flex h-full flex-col gap-4 px-4 pb-4">
+      {achievements && <div className="mx-auto max-h-banner w-full max-w-md shrink-0 overflow-y-auto">{achievements}</div>}
+      <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col justify-center gap-5 motion-safe:animate-rise-in">
+        <div className="flex shrink-0 flex-col items-center gap-1 text-center">
+          <p className="text-xs font-semibold tracking-widest text-accent uppercase">{texts.winner}</p>
+          <h1 className="text-fluid-xl font-bold tracking-tight wrap-anywhere">{winner.name}</h1>
         </div>
-        {achievements}
-        <ul className="flex flex-col gap-1 text-fluid-sm">
-          {others.map((p) => (
-            <li key={p.id} className="flex justify-between gap-2 tabular-nums">
-              <span>{places ? `${view.places[p.id]}. ${p.name}` : p.name}</span>
-              <span>
-                {p.isOut ? `🎯 ${p.darts}` : `${scoreLabel} ${p.score}`}
-                {avg(p.average)}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <div className="flex flex-col gap-2">
-          <button type="button" onClick={onUndoWinningDart} disabled={pending} className={`${button} border border-frame-fg`}>
-            {texts.undoWinningDart}
-          </button>
-          {onPlayOut && last && !view.playOut && (
-            <button type="button" onClick={onPlayOut} disabled={pending} className={`${button} border border-frame-fg`}>
-              {texts.playOut.replace("{name}", last.name)}
-            </button>
-          )}
+        {totals ? (
+          <Versus view={view} totals={totals} winner={winner} other={others[0]} texts={texts} />
+        ) : (
+          <Standings view={view} winner={winner} others={others} texts={texts} />
+        )}
+        <div className="flex shrink-0 flex-col gap-2">
           {tournamentHref ? (
-            <Link href={tournamentHref} className={`${button} inline-flex items-center justify-center bg-accent text-on-accent`}>
+            <ButtonLink href={tournamentHref} variant="primary">
               {texts.toTournament}
-            </Link>
+            </ButtonLink>
           ) : (
             <form action={onRestart}>
-              <button type="submit" disabled={pending} className={`${button} bg-accent text-on-accent`}>
-                {texts.restart}
-              </button>
+              <PrimaryButton disabled={pending}>{texts.restart}</PrimaryButton>
             </form>
           )}
-          {statsHref && (
-            <Link href={statsHref} className={`${button} inline-flex items-center justify-center border border-frame-fg`}>
-              {texts.matchStats}
-            </Link>
+          {onPlayOut && view.lastPlayerId && !view.playOut && (
+            <Button variant="outline" onClick={onPlayOut} disabled={pending}>
+              {texts.playOut}
+            </Button>
           )}
-          <Link href="/" className={`${button} inline-flex items-center justify-center text-fg-muted`}>
+          <div className="flex gap-2">
+            <Button onClick={onUndoWinningDart} disabled={pending}>
+              <UndoIcon className="size-icon-xs shrink-0" />
+              {texts.undoWinningDart}
+            </Button>
+            {statsHref && <ButtonLink href={statsHref}>{texts.matchStats}</ButtonLink>}
+          </div>
+          <ButtonLink href="/" variant="quiet">
             {texts.home}
-          </Link>
+          </ButtonLink>
         </div>
       </div>
     </div>
   );
+}
+
+/** X01 1 vs 1: sets or legs big, then legs (with sets), darts (single leg), average and highest visit over the match. */
+function Versus({
+  view,
+  totals,
+  winner,
+  other,
+  texts,
+}: {
+  view: MatchBoardView;
+  totals: NonNullable<MatchBoardView["totals"]>;
+  winner: PlayerPanelData;
+  other: PlayerPanelData;
+  texts: T;
+}) {
+  const [w, o] = [totals[winner.id], totals[other.id]];
+  const row = (label: string, pick: (t: typeof w) => string | number): VersusRow => ({
+    label,
+    left: String(pick(w)),
+    right: String(pick(o)),
+  });
+  const sets = Boolean(view.score?.sets);
+  const headline = view.score ? (sets ? row(texts.sets, (t) => t.sets) : row(texts.legs, (t) => t.legs)) : undefined;
+  const rows = [
+    ...(sets ? [row(texts.legs, (t) => t.legs)] : []),
+    ...(view.score ? [] : [row(texts.darts, (t) => t.darts)]),
+    row(texts.perVisit, (t) => two(t.average)),
+    row(texts.highestVisit, (t) => t.highest),
+  ];
+  return (
+    <div className="shrink-0">
+      <VersusCard label={texts.result} left={winner.name} right={other.name} headline={headline} rows={rows} />
+    </div>
+  );
+}
+
+/** Every mode except X01 1 vs 1: the winner's figures, everyone else in place order, SplitScore the sum of all. */
+function Standings({
+  view,
+  winner,
+  others,
+  texts,
+}: {
+  view: MatchBoardView;
+  winner: PlayerPanelData;
+  others: PlayerPanelData[];
+  texts: T;
+}) {
+  const mode = view.board.mode;
+  const places = view.ranking.length > 2;
+  const darts: Figure = { label: texts.darts, value: String(winner.darts) };
+  const average: Figure | null = winner.average === null ? null : { label: texts.perVisit, value: two(winner.average) };
+  const figures: [Figure] | [Figure, Figure] =
+    mode === "splitscore" && average
+      ? [{ label: texts.points, value: String(winner.score) }, average]
+      : average
+        ? [darts, average]
+        : [darts];
+  return (
+    <>
+      <div className="shrink-0">
+        <StatPair figures={figures} />
+      </div>
+      {others.length > 0 && (
+        <CardList label={texts.result} tone="fill" className="min-h-0 overflow-y-auto">
+          {others.map((p) => (
+            <DetailRow
+              key={p.id}
+              lead={places ? view.places[p.id] : undefined}
+              title={p.name}
+              detail={detailOf(p, mode, texts)}
+              value={valueOf(p, mode, texts)}
+            />
+          ))}
+        </CardList>
+      )}
+      {view.board.total !== undefined && (
+        <CardList tone="fill" className="shrink-0">
+          <DetailRow title={texts.totalPoints} value={String(view.board.total)} />
+        </CardList>
+      )}
+    </>
+  );
+}
+
+/** The muted line under a name: darts and average; SplitScore only the average (everyone throws 27); Cricket the open fields. */
+function detailOf(p: PlayerPanelData, mode: MatchBoardView["board"]["mode"], texts: T): string {
+  const darts = fill(texts.dartCount, p.darts);
+  const average = p.average === null ? null : fill(texts.averageOf, two(p.average));
+  if (mode === "splitscore") return average ?? "";
+  if (mode === "cricket") {
+    const open = (p.marks ?? []).filter((m) => m.marks < 3).map((m) => (m.field === 25 ? texts.bull : String(m.field)));
+    return open.length > 0 ? `${darts} · ${texts.openFields.replace("{fields}", open.join(" "))}` : darts;
+  }
+  return average ? `${darts} · ${average}` : darts;
+}
+
+/** On the right: X01 the rest or "checked out", every other mode the points. */
+function valueOf(p: PlayerPanelData, mode: MatchBoardView["board"]["mode"], texts: T): string {
+  if (mode !== "x01") return fill(texts.pointsOf, p.score);
+  return p.isOut ? texts.checkedOut : fill(texts.restOf, p.score);
 }

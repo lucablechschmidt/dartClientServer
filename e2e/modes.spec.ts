@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { board, K, startMatch, wins } from "./board";
+import { board, K, resultRow, startMatch, winner } from "./board";
 import { ADMIN, expect, shot, test } from "./fixtures";
 
 const g = de.game;
@@ -24,7 +24,11 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(admin.getByText(g.nextPlayer.replace("{name}", B))).toHaveCount(1);
     await expect(b.key("1")).toHaveCount(0);
     await b.tap(g.double, g.bull, g.bull, "20");
-    await expect(admin.getByText(wins(A))).toBeVisible();
+    await expect(winner(admin, A)).toBeVisible();
+    // the loser: darts and the fields still open, the points on the right
+    await expect(resultRow(admin, B)).toContainText(g.openFields.replace("{fields}", ""));
+    await expect(resultRow(admin, B)).toContainText(g.pointsOf.replace("{n}", "0"));
+    await shot(admin, "victory-cricket");
   });
 
   test("cricket with three: closed by everyone struck through, scoring field marked (screenshot)", async ({ admin }) => {
@@ -53,7 +57,7 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(admin.getByText(g.hints.gap.replace("{n}", "185"))).toBeVisible(); // B 15: 185 is out of reach
     await b.tap(...K.MISS);
     await b.tap(g.triple, "20", g.triple, "13", g.double, "1"); // 260, 299, 301
-    await expect(admin.getByText(wins(A))).toBeVisible();
+    await expect(winner(admin, A)).toBeVisible();
   });
 
   test("splitscore: the target moves on each round, a miss halves, the sum on the victory screen", async ({ admin }) => {
@@ -69,9 +73,10 @@ test.describe("M7 modes, each once to the end with an undo", () => {
       await b.tap(...K.MISS);
       if (i === 2) await shot(admin, "match-splitscore");
     }
-    await expect(admin.getByText(wins(A))).toBeVisible();
-    await expect(admin.getByText(`${g.points} 1 ·`)).toHaveCount(1); // B halved nine times
-    await expect(admin.getByText(new RegExp(`^${g.total.replace("{n}", "\\d+")}$`))).toHaveCount(1);
+    await expect(winner(admin, A)).toBeVisible();
+    await expect(resultRow(admin, B)).toContainText(g.pointsOf.replace("{n}", "1")); // B halved nine times
+    await expect(admin.getByRole("listitem").filter({ hasText: g.totalPoints })).toHaveCount(1);
+    await shot(admin, "victory-splitscore");
 
     await admin.goto("/");
     await expect(

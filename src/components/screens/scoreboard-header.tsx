@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BackButton } from "@/components/ui/back-button";
 import { XmarkCircleIcon } from "@/components/ui/icons";
 import { ScreenHeader } from "@/components/ui/screen-header";
@@ -21,21 +22,24 @@ type Props = {
   onRetry?: () => void;
   /** Host or admin of an open match get the cancel button instead of the way back (M4). */
   onCancel: (() => void) | null;
+  /** Victory screen: the same cross for everyone, straight to the start page without asking. */
+  home?: boolean;
   texts: Texts["game"];
 };
 
+const iconButton = "grid min-h-touch min-w-touch place-items-center text-fg";
+
 /** Header row of the scoring screen: cancel or back, the rules or the legs/sets score, the sync status. */
-export function ScoreboardHeader({ title, status, sync, hasError, onRetry, onCancel, texts }: Props) {
+export function ScoreboardHeader({ title, status, sync, hasError, onRetry, onCancel, home = false, texts }: Props) {
   return (
     <ScreenHeader
       left={
-        onCancel ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            aria-label={texts.cancel}
-            className="grid min-h-touch min-w-touch place-items-center text-fg"
-          >
+        home ? (
+          <Link href="/" aria-label={texts.home} className={iconButton}>
+            <XmarkCircleIcon className="h-8 w-8" />
+          </Link>
+        ) : onCancel ? (
+          <button type="button" onClick={onCancel} aria-label={texts.cancel} className={iconButton}>
             <XmarkCircleIcon className="h-8 w-8" />
           </button>
         ) : (

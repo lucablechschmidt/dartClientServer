@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { board, K, startMatch, wins } from "./board";
+import { board, K, startMatch, winner } from "./board";
 import { expect, shot, test } from "./fixtures";
 
 const s = de.stats;
@@ -12,10 +12,10 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
 
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.T180, ...K.MISS, ...K.OUT121); // A: 180, 121 out
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
-  await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121); // B wins, A misses twice
-  await expect(admin.getByText(wins(B))).toBeVisible();
+  await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121); // B winner, A misses twice
+  await expect(winner(admin, B)).toBeVisible();
   const second = admin.url();
   await expect(admin.getByRole("link", { name: de.game.matchStats })).toHaveCount(0); // the admin did not play
 
@@ -43,7 +43,7 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
   await shot(pageA, "account");
   await pageA.getByRole("link", { name: pages.rankings }).click();
   await pageA.waitForURL((u) => u.pathname === "/account/rankings");
-  // rankings: A wins first (1016 / 984), then B as the outsider gains more than 16 (A 998.5, B 1001.5);
+  // rankings: A winner first (1016 / 984), then B as the outsider gains more than 16 (A 998.5, B 1001.5);
   // folded only the own place and Elo
   const x01 = pageA.getByRole("button", { name: new RegExp(`^${s.modes.x01}`) });
   // the place depends on what the other tests played in the shared database, the Elo does not

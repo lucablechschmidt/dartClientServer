@@ -12,7 +12,11 @@ export const choice = (label: string, value: string | number) => `${label} ${Str
  */
 export const playerRow = (page: Page, name: string, pressed?: boolean) =>
   page.getByRole("button", pressed === undefined ? {} : { pressed }).filter({ has: page.getByText(name, { exact: true }) });
-export const wins = (name: string) => g.youWin.replace("{name}", name);
+/** The victory screen names the winner as its heading ("Sieger" above it). */
+export const winner = (page: Page, name: string) => page.getByRole("heading", { name, exact: true });
+/** A player's row in the result card of the victory screen (place, name, darts, rest or points). */
+export const resultRow = (page: Page, name: string) =>
+  page.getByRole("list", { name: g.result }).getByRole("listitem").filter({ hasText: name });
 
 /** Key sequences used across the tests (names as on the keypad). */
 export const K = {

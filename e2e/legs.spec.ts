@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest, board, K, panelOf, playerRow, startMatch, wins } from "./board";
+import { addGuest, board, K, panelOf, playerRow, resultRow, startMatch, winner } from "./board";
 import { ADMIN, expect, shot, test } from "./fixtures";
 
 const g = de.game;
@@ -28,10 +28,19 @@ test("best of 3 legs (M5): leg victory screen, the throw alternates, undo across
   await expect(admin.getByText(g.legWon.replace("{name}", A))).toBeVisible();
   await admin.getByText(g.tapToContinue).click();
   await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121);
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
   await expect(admin.getByText(legsScore("2:0")).first()).toBeVisible();
+  // 1 vs 1: the comparison over both legs, legs big, no darts row (more than one leg)
+  const result = admin.getByRole("table", { name: g.result });
+  await expect(result.getByRole("row").filter({ has: admin.getByRole("rowheader", { name: new RegExp(g.legs, "i") }) })).toHaveText(
+    /^2.*0$/i,
+  );
+  await expect(result.getByRole("rowheader", { name: g.perVisit })).toHaveCount(1);
+  await expect(result.getByRole("rowheader", { name: g.highestVisit })).toHaveCount(1);
+  await expect(result.getByRole("rowheader", { name: g.darts, exact: true })).toHaveCount(0);
+  await shot(admin, "victory-legs");
   await admin.reload();
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
 
   await admin.goto("/");
   await expect(admin.getByRole("list", { name: de.overview.recent }).getByText(`${A} ${legsScore("2:0")}`)).toHaveCount(1);
@@ -60,19 +69,20 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
   await b.tap(...K.MISS, ...K.OUT121); // admin miss, A out: place 2
   await expect(next(ADMIN)).toBeVisible(); // B is up, H and A are out
   await b.tap(...K.OUT121); // B out: place 3, the admin is last
-  await expect(admin.getByText(wins(H))).toBeVisible();
-  await expect(admin.getByText(`3. ${B}`)).toHaveCount(1);
-  await expect(admin.getByText(`4. ${ADMIN}`)).toHaveCount(1);
+  await expect(winner(admin, H)).toBeVisible();
+  await expect(resultRow(admin, A)).toHaveText(new RegExp(`^2${A}.*${g.checkedOut}$`));
+  await expect(resultRow(admin, B)).toHaveText(new RegExp(`^3${B}.*${g.checkedOut}$`));
+  await expect(resultRow(admin, ADMIN)).toHaveText(new RegExp(`^4${ADMIN}.*${g.restOf.replace("{n}", "\\d+")}$`));
   await shot(admin, "match-places");
 
-  await admin.getByRole("button", { name: g.playOut.replace("{name}", ADMIN) }).click();
+  await admin.getByRole("button", { name: g.playOut }).click();
   await b.key("0").waitFor();
   await expect(anyNext).toHaveCount(0); // the last player plays out alone
   await b.tap(...K.MISS);
   await admin.getByRole("button", { name: g.resign }).click();
   await admin.getByRole("dialog").getByRole("button", { name: g.resign }).click();
-  await expect(admin.getByText(wins(H))).toBeVisible();
-  await expect(admin.getByText(`4. ${ADMIN}`)).toHaveCount(1);
+  await expect(winner(admin, H)).toBeVisible();
+  await expect(resultRow(admin, ADMIN)).toHaveText(new RegExp(`^4${ADMIN}`));
 
   await admin.goto("/");
   const history = admin.getByRole("list", { name: de.overview.recent });

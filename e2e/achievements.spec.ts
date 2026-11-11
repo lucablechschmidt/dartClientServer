@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { board, K, startMatch, wins } from "./board";
+import { board, K, startMatch, winner } from "./board";
 import { expect, shot, test } from "./fixtures";
 
 const a = de.achievements;
@@ -24,13 +24,13 @@ test("M10: a 180 shows the banner and lands in the gallery; undo takes it away; 
 
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.T180, ...K.MISS, ...K.OUT121);
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
   await expect(banner).toContainText(a.items["180"].name);
   await shot(admin, "victory-achievement");
   await expect(await gallery180()).toContainText(a.earned.replace("{when}", de.overview.justNow));
 
   await admin.getByRole("button", { name: g.undoWinningDart }).click();
-  await expect(admin.getByText(wins(A))).toHaveCount(0);
+  await expect(winner(admin, A)).toHaveCount(0);
   // open again once the undo is stored: the game is running
   await expect(async () => expect(await gallery180()).toContainText(a.items["180"].how, { timeout: 1000 })).toPass();
   await b.tap("1");
@@ -46,7 +46,7 @@ test("M10: a 180 shows the banner and lands in the gallery; undo takes it away; 
 
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.T180, ...K.MISS, ...K.OUT121);
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
   // the banner loads after the game is saved; give it the time it took above, then it must still be absent
   await admin.waitForTimeout(1500);
   await expect(banner).toHaveCount(0);

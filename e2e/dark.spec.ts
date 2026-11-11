@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { addGuest, board, K, startMatch, wins } from "./board";
+import { addGuest, board, K, startMatch, winner } from "./board";
 import type { Page } from "@playwright/test";
 import { expect, settled, shot, test } from "./fixtures";
 
@@ -26,12 +26,12 @@ test("dark mode: the main screens", async ({ admin, register, stamp }) => {
   await b.tap(...K.T180);
   await shot(admin, "match-dark");
   await b.tap(...K.MISS, ...K.OUT121);
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
   await shot(admin, "victory-dark");
   // the same second game as in stats.spec.ts, so account-stats and account-stats-dark show the same figures
   await startMatch(admin, "x01", [A, B], { startScore: 301, singleOut: true });
   await b.tap(...K.MISS, ...K.T180, ...K.MISS, ...K.OUT121);
-  await expect(admin.getByText(wins(B))).toBeVisible();
+  await expect(winner(admin, B)).toBeVisible();
 
   await open(admin, "/");
   await shot(admin, "overview-dark");

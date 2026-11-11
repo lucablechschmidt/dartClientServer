@@ -1,5 +1,5 @@
 import { de } from "@/i18n/de";
-import { board, startMatch, wins } from "./board";
+import { board, startMatch, winner } from "./board";
 import { expect, shot, test } from "./fixtures";
 
 const g = de.game;
@@ -32,14 +32,18 @@ test("x01: 180, bust, undo across the player switch, reload, checkout, undo of t
 
   await b.tap("0", "0"); // B finishes the visit
   await b.tap(g.triple, "20", g.triple, "11", g.double, "14"); // 121 out
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
+  // a single leg: no legs headline, the darts as a row of the comparison
+  const result = admin.getByRole("table", { name: g.result });
+  await expect(result.getByRole("rowheader", { name: g.darts, exact: true })).toHaveCount(1);
+  await expect(result.getByRole("rowheader", { name: g.legs })).toHaveCount(0);
   await shot(admin, "match-victory");
 
   await admin.getByRole("button", { name: g.undoWinningDart }).click();
   await b.key(g.undo).waitFor();
   expect((await b.scores())[0]).toBe("28");
   await b.tap(g.double, "14");
-  await expect(admin.getByText(wins(A))).toBeVisible();
+  await expect(winner(admin, A)).toBeVisible();
 
   await admin.getByRole("button", { name: g.restart }).click();
   await admin.waitForURL((u) => u.toString() !== url && u.pathname.startsWith("/match/"));

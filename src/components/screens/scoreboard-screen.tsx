@@ -133,6 +133,7 @@ export function ScoreboardScreen({
       hasError={shownError !== null}
       onRetry={retryNow}
       onCancel={initial.access.canCancel && isOpen ? () => setAsking("cancel") : null}
+      home={view.progress === "finished"}
       texts={texts}
     />
   );
