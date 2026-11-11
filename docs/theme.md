@@ -48,6 +48,8 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 - Modifier aktiv (Double oder Triple): Zahlentasten `--key-bg` mit Opacity .75, Text in `--key-double` bzw. `--key-triple`; Bull im Triple-Modus bleibt weiß, im Legacy ist er ausgeblendet.
 - Dart-Plätze im Panel: Kästen (Radius 14 px) mit Rahmen 3 px in `--frame-text`, der aktuelle Platz 4 px in `--frame-active`, Text der gebusteten Aufnahme in `--key-undo`. Tasten, Panels und Checkout-Hinweis haben wie Legacy `cornerRadius(18)`.
 
+**Kontrast erhöhen** (`prefers-contrast: more`, Luca 11.11.2026, wie iOS): `--fg-muted` hell 78 % statt 60 %, dunkel 75 %; `--frame-active` und damit `--accent` im iOS-Blau für erhöhten Kontrast (`#0040DD` / `#409CFF`). Alle anderen sehen die Legacy-Farben. Damit erreicht kleiner grauer und blauer Text WCAG AA (4,5:1); `e2e/a11y.spec.ts` prüft den Kontrast mit dieser Einstellung. Offen (`docs/fragen.md`): weiße Schrift auf Double, Triple, Undo-Rot und der grauen Hinweis-Leiste.
+
 Dark-Mode-Hinweis (geändert am 6.11.2026, Luca): Im Legacy war `--frame-bg` im Dark Mode zu 90 % weiß, die Panels also hell auf schwarzem Grund mit schwarzem Text, die Tasten mittelgrau; das war am Board zu hell. Jetzt nimmt der Zählscreen im Dark Mode die iOS-Dunkelgrautöne wie die Karten: Panels `#1C1C1E` mit weißem Text (`--frame-text`), Dart-Kästen Weiß 10 %, Rahmen inaktiver Panels `#3A3A3C`, Zifferntasten `#2C2C2E`, Taste 0 `#48484A`. Der Hellmodus und die farbigen Tasten bleiben wie Legacy. Prüfen über `docs/screenshots/*-dark.png` (`e2e/dark.spec.ts`).
 
 ## 2. Umschalten

@@ -14,16 +14,6 @@
 
 ---
 
-## Checkout-Hinweis bei Single-out und Triple-out (7.11.2026)
-
-**Befund:** Die Finish-Tabelle (`src/domain/checkouts.ts`) nimmt wie im Legacy Double-out an und wird unabhängig von der Out-Regel gezeigt. Bei Single-out sind die Wege gültig, aber nicht die kürzesten (19 Rest mit einem Dart bekommt keinen Hinweis). Bei Triple-out sind sie falsch (D20 beendet das Leg nicht).
-
-**Optionen:** (a) so lassen wie im Legacy, (b) bei Triple-out keinen Hinweis zeigen, (c) Wege für Single- und Triple-out berechnen.
-
-**Frage:** Welche Option? Default ohne Antwort: (a), die Regeln werden am Board kaum gespielt.
-Antwort: Wege in single-Out anzwigen wie für double-out. Für tripple-out nur die einfachen wege anzeigen (ein dart) -> 3: T1; 12: T4
----
-
 ## `/dev/theme` als Baustein-Galerie (8.11.2026, M13 Paket D)
 
 **Befund:** `architecture.md` §9 verlangt seit M1: „Jeder neue `ui`-Baustein bekommt einen Eintrag auf `/dev/theme` (ersetzt Storybook).“ Umgesetzt wurde das nie: `/dev/theme` zeigt Tokens und einen Zählscreen, keinen der heute 20 Bausteine (`ChoiceMenu`, `Stepper`, `FoldCard`, `Skeleton`, Buttons mit `pending` …). Schon in `m11-plan.md` §4 notiert. Das Aussehen prüfen heute die Screenshots aus `smoke.sh` (hell, dunkel, Desktop), das Verhalten die UI-Tests.
@@ -42,26 +32,29 @@ Antwort: Wege in single-Out anzwigen wie für double-out. Für tripple-out nur d
 
 **Frage:** Welche Option? Default ohne Antwort: (b), bis du entschieden hast (zurückgestellt am 8.11.2026). Bei (a) wird die Entscheidung ein neuer Eintrag in `architecture.md` §11, weil sie E14 berührt.
 
+**Antwort:** weiter zurückgestellt (11.11.2026): beim Eingeben gab es bisher keine Geschwindigkeitsprobleme, `FULL` bleibt.
+
 ---
 
-## Kontrast von Grau und Akzent (8.11.2026, M13 Paket F)
+## Kontrast der Tastenfarben und der Hinweis-Leiste (11.11.2026)
 
-**Befund:** Der Axe-Lauf (`e2e/a11y.spec.ts`) misst bei kleiner Schrift zu wenig Kontrast; WCAG AA verlangt 4,5:1 (große Schrift 3:1).
+**Befund:** Seit „Kontrast erhöhen“ (Option c, umgesetzt) prüft der Axe-Lauf den Kontrast mit `prefers-contrast: more`. Grau und Blau bestehen; vier Legacy-Farben mit weißer Schrift nicht (WCAG AA verlangt 4,5:1, große Schrift 3:1):
 
-| Stelle | Farbe auf Grund | Kontrast |
+| Stelle | Farbe | Kontrast |
 |---|---|---|
-| sekundäres Grau `--fg-muted` hell (iOS secondaryLabel, 60 %): Untertitel, Labels „Einstieg“, „Best of Legs“, Abschnittsüberschriften, Zusammenfassung unter „Spiel starten“, „Tippen, um weiterzuspielen“, Theme-Toggle | #85858b auf #f2f2f7, #8a8a8e auf #fff | 3,28 / 3,43 |
-| aktiver Tab hell | #007aff auf #dbdbdf | 2,9 |
-| aktiver Tab dunkel | #0a84ff auf #313133 | 3,55 |
-| Akzent als kleiner Text hell (z. B. „Gast hinzufügen“) | #007aff auf #fff | 4,01 |
+| Taste Double | weiß auf `#FFCC00` (dunkel `#FFD60A`) | 1,5 |
+| Taste Triple | weiß auf `#34C759` (dunkel `#30D158`) | 2,2 |
+| Undo-Taste, „Spiel Abbrechen“ | weiß auf `#FF3B30` (dunkel `#FF453A`) | 3,6 |
+| Checkout-/Ziel-Hinweis | weiß auf Grau 50 % über Weiß | etwa 1,7 |
 
-Dunkel ist das Grau ausreichend. Die Farben stammen aus Legacy/iOS (`theme.md` §1); iOS selbst nimmt bei „Kontrast erhöhen“ dunklere Varianten.
+Der Test lässt diese vier Stellen bis zur Entscheidung aus (`e2e/a11y.spec.ts`).
 
-**Optionen:** (a) So lassen wie in Legacy/iOS; der Axe-Test lässt `color-contrast` dauerhaft aus (in `architecture.md` begründen). (b) Nur hell nachdunkeln: `--fg-muted` auf etwa 76 % statt 60 % (≈ #6c6c70, ≈ 4,9:1 auf #f2f2f7), Akzent-Text und aktiver Tab auf das iOS-Blau für „Kontrast erhöhen“ (#0040dd); dunkel den aktiven Tab etwas heller. Sichtbar für alle: Nebentexte werden dunkler, das Blau kräftiger. (c) Wie (b), aber nur bei `prefers-contrast: more` (wie iOS); für alle anderen bleibt es, der Axe-Test prüft dann mit dieser Einstellung.
+**Optionen:** (a) so lassen, die Farben sind Legacy und am Board gut erkennbar; Ausnahme in `theme.md` begründen. (b) Nur bei „Kontrast erhöhen“: schwarze Schrift auf Double und Triple (wie iOS bei gelben Flächen), Rot `#D70015` (iOS-Rot für erhöhten Kontrast), Hinweis-Leiste dunkelgrau (`#636366`). (c) Wie (b), aber für alle.
 
-**Frage:** Welche Option? Default ohne Antwort: (a) bis zur Entscheidung; ich würde (c) empfehlen, weil es niemandem etwas wegnimmt. Vor (b) zeige ich Screenshots vorher/nachher.
-Antwort: c
+**Frage:** Welche Option? Default ohne Antwort: (a). Ich würde (b) empfehlen, passend zu deiner Entscheidung beim Grau.
+
+**Antwort:** zurückgestellt (11.11.2026), die Farben bleiben vorerst.
 
 ---
 
-Zuletzt beantwortet (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/archive/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/archive/m14-plan.md`.
+Zuletzt beantwortet (11.11.2026): Checkout-Hinweis je Out-Regel, jetzt `architecture.md` (Abschnitt `checkouts.ts`); Kontrast von Grau und Akzent (Option c), jetzt `theme.md` §1. Davor (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/archive/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/archive/m14-plan.md`.

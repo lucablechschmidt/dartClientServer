@@ -69,6 +69,18 @@
   --safe-left: env(safe-area-inset-left, 0px);
 }
 
+/*
+ * "Increase contrast" in the system settings (prefers-contrast: more), as iOS does it: secondary text
+ * darker, the accent in iOS's high-contrast blue. Everyone else keeps the legacy colours (Luca 11.11.2026,
+ * docs/theme.md §1). Values reach WCAG AA (4.5:1) for small text on white and the grouped grey.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --fg-muted: light-dark(rgb(60 60 67 / 0.78), rgb(235 235 245 / 0.75));
+    --frame-active: light-dark(#0040dd, #409cff);
+  }
+}
+
 :root[data-theme="light"] {
   color-scheme: light;
 }

@@ -8,13 +8,19 @@ const g = de.game;
 
 /**
  * WCAG 2.1 A/AA rules of axe-core; every violation is listed by rule and element when the test fails.
- * color-contrast is left out until the open question on the muted grey and the avatar tints is answered
- * (docs/fragen.md, 8.11.2026): fixing it changes colours everyone sees.
+ * Contrast is checked with "increase contrast" on (prefers-contrast: more): only then the app darkens
+ * the muted grey and the accent, like iOS (Luca 11.11.2026, option c in docs/fragen.md). Left out until
+ * decided (docs/fragen.md, 11.11.2026): white on the Double/Triple keys, on undo red and on the grey hint bar (legacy colours).
  */
 async function noViolations(page: Page, where: string) {
+  // no animations either: a list fading in would be measured half transparent
+  await page.emulateMedia({ contrast: "more", reducedMotion: "reduce" });
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-    .disableRules(["color-contrast"])
+    .exclude(".bg-key-double")
+    .exclude(".bg-key-triple")
+    .exclude(".bg-key-undo")
+    .exclude('[data-slot="hint"]')
     .analyze();
   const found = violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
   expect(found, where).toEqual([]);
