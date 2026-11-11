@@ -1,8 +1,9 @@
 import { dartLabel, dartScore } from "./game/scoring";
-import { MAX_DARTS_PER_VISIT, type Dart } from "./game/types";
+import { MAX_DARTS_PER_VISIT, type Dart, type OutRule } from "./game/types";
 
 /**
- * Checkout routes, double-out. Ported from Legacy/Dart/Classes/ClassicGame/Checkouts.swift, then checked
+ * Checkout routes, double-out (single-out shows the same routes, triple-out only one-dart finishes: Luca
+ * 11.11.2026, docs/fragen.md). Ported from Legacy/Dart/Classes/ClassicGame/Checkouts.swift, then checked
  * at the board (7.11.2026, M6 practice test): one table instead of three, because a rest is always
  * finished with the fewest darts (50 is Bull, not 10 D20; 110 is T20 Bull), and four legacy entries
  * did not add up (10, 53, 86, 143). A route is written as thrown: setup darts first, the double last.
@@ -211,13 +212,22 @@ export function checkoutHint(rest: number, dartsLeft: number): string | null {
 
 const sameDart = (a: Dart, b: Dart): boolean => a.field === b.field && a.type === b.type;
 
+/** Triple-out: only the finish with one dart, a triple of 1–20 (3: T1, 12: T4, 60: T20); longer routes are not shown. */
+function tripleFinish(rest: number): string | null {
+  return rest % 3 === 0 && rest >= 3 && rest <= 60 ? dartLabel({ field: rest / 3, type: "triple" }) : null;
+}
+
 /**
  * Hint during a visit: the route suggested at its start is kept as long as the darts thrown hit one
  * of its setup darts (in any order), so the hint never jumps to a different route halfway. A dart
  * off the route starts afresh from the new rest. `rest` is the rest before the visit, `thrown` the
- * darts of the visit so far.
+ * darts of the visit so far. Single-out uses the double-out routes, triple-out only `tripleFinish`.
  */
-export function visitCheckoutHint(rest: number, thrown: readonly Dart[]): string | null {
+export function visitCheckoutHint(rest: number, thrown: readonly Dart[], outRule: OutRule = "double"): string | null {
+  if (outRule === "triple") {
+    const now = rest - thrown.reduce((n, d) => n + dartScore(d), 0);
+    return thrown.length < MAX_DARTS_PER_VISIT ? tripleFinish(now) : null;
+  }
   let left = MAX_DARTS_PER_VISIT;
   let route = routeFor(rest, left);
   for (const dart of thrown) {

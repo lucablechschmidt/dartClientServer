@@ -26,7 +26,7 @@ export function projectScoreboard(state: LegState, names: Record<PlayerId, strin
   const next = isLegFinished(state) ? active : nextPlayer(state, active);
   const dartsLeft = winner ? 0 : MAX_DARTS_PER_VISIT - open.darts.length;
   // The hint follows the route suggested at the start of the visit (checkouts.ts), so it needs the rest before it.
-  const hint = winner ? null : visitCheckoutHint(scoreOf(state, active) + visitScore(open), open.darts);
+  const hint = winner ? null : visitCheckoutHint(scoreOf(state, active) + visitScore(open), open.darts, state.rules.outRule);
   // Playing alone, the previous visit shows faintly behind the slots to make a wrong entry easy to spot.
   const alone = state.players.length === 1;
 

@@ -83,3 +83,24 @@ describe("visitCheckoutHint", () => {
     expect(visitCheckoutHint(169, [])).toBeNull();
   });
 });
+
+describe("checkout hint per out rule (Luca, 11.11.2026)", () => {
+  it("single out shows the double-out routes", () => {
+    expect(visitCheckoutHint(170, [], "single")).toBe("T20, T20, DBull");
+    expect(visitCheckoutHint(40, [], "single")).toBe("D20");
+  });
+  it("triple out shows only a one-dart finish: a triple of 1–20", () => {
+    expect(visitCheckoutHint(3, [], "triple")).toBe("T1");
+    expect(visitCheckoutHint(12, [], "triple")).toBe("T4");
+    expect(visitCheckoutHint(60, [], "triple")).toBe("T20");
+    expect(visitCheckoutHint(40, [], "triple")).toBeNull();
+    expect(visitCheckoutHint(63, [], "triple")).toBeNull();
+    expect(visitCheckoutHint(170, [], "triple")).toBeNull();
+  });
+  it("triple out follows the darts of the visit and stops after the third", () => {
+    const S = (field: number): Dart => ({ field, type: "single" });
+    expect(visitCheckoutHint(70, [S(10)], "triple")).toBe("T20");
+    expect(visitCheckoutHint(70, [S(5), S(5)], "triple")).toBe("T20");
+    expect(visitCheckoutHint(75, [S(5), S(5), S(5)], "triple")).toBeNull();
+  });
+});

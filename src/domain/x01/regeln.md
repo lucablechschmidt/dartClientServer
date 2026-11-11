@@ -22,7 +22,7 @@ Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 
 
 ### Checkout-Hinweis
 
-Ist der Rest mit den Darts der Aufnahme noch auszumachen, zeigt die App einen Weg mit möglichst wenigen Darts, z. B. 170: T20 T20 DBull.
+Ist der Rest mit den Darts der Aufnahme noch auszumachen, zeigt die App einen Weg mit möglichst wenigen Darts, z. B. 170: T20 T20 DBull. Bei Single Out sind es dieselben Wege wie bei Double Out; bei Triple Out nur ein Finish mit einem Dart (12: T4).
 
 ### Legs, Sets und Platzierungen
 
