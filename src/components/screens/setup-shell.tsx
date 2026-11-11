@@ -107,21 +107,23 @@ export function SetupShell({
   return (
     <div className="flex flex-1 flex-col bg-bg-grouped px-4 text-fg">
       <PageFrame className="flex-1 gap-4 pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex">
           <BackButton href={backHref} label={commonTexts.back} />
-          {/* The rules of the mode; not on the tournament setup (it has its own heading). */}
-          {!heading && (
-            <Popover
-              label={texts.rules}
-              icon={<InfoIcon className="h-8 w-8" />}
-              title={texts.rulesTitle.replace("{mode}", texts.modes[mode])}
-            >
-              {rules ?? <p className="text-fg-muted">{texts.rulesSoon}</p>}
-            </Popover>
-          )}
         </div>
         <div>
-          <h1 className="text-title font-bold tracking-tight">{heading?.subtitle ?? texts.modes[mode]}</h1>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-title font-bold tracking-tight">{heading?.subtitle ?? texts.modes[mode]}</h1>
+            {/* The rules of the mode, level with the title; not on the tournament setup (it has its own heading). */}
+            {!heading && (
+              <Popover
+                label={texts.rules}
+                icon={<InfoIcon className="h-8 w-8" />}
+                title={texts.rulesTitle.replace("{mode}", texts.modes[mode])}
+              >
+                {rules ?? <p className="text-fg-muted">{texts.rulesSoon}</p>}
+              </Popover>
+            )}
+          </div>
           <p className="text-sm text-fg-muted">{heading?.title ?? texts.title}</p>
         </div>
 

@@ -44,12 +44,13 @@ export function Popover({
         <section
           id={panelId}
           aria-labelledby={titleId}
-          className="absolute top-full right-0 z-30 mt-1 flex max-h-popover-h w-popover origin-top-right flex-col gap-2 overflow-y-auto rounded-panel bg-card-bg p-4 text-fg shadow-floating motion-safe:animate-pop-in"
+          className="absolute top-full right-0 z-30 mt-1 flex max-h-popover-h w-popover origin-top-right flex-col gap-2 rounded-panel bg-card-bg p-4 text-fg shadow-floating motion-safe:animate-pop-in"
         >
-          <h2 id={titleId} className="font-semibold">
+          <h2 id={titleId} className="shrink-0 font-semibold">
             {title}
           </h2>
-          <div className="text-sm">{children}</div>
+          {/* only the text scrolls: the title stays, and the padding keeps a clean bottom edge */}
+          <div className="min-h-0 overflow-y-auto text-sm">{children}</div>
         </section>
       )}
     </div>
