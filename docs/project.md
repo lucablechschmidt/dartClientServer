@@ -37,7 +37,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
-| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B), Fragen in `fragen.md` (synchronous, Kontrast, /dev/theme) | – |
+| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` und Tastenfarben-Kontrast zurückgestellt (`fragen.md`) | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `docs/archive/`, ihre noch offene Abnahme am Board sammelt `docs/test-pi.md`.

@@ -4,26 +4,6 @@
 
 ---
 
-## Spielregeln im Setup abnehmen (11.11.2026)
-
-**Befund:** Für jeden Modus liegt ein Entwurf der Regeln als Markdown neben der Domäne: `src/domain/x01/regeln.md`, `src/domain/cricket/regeln.md`, `src/domain/elimination/regeln.md`, `src/domain/splitscore/regeln.md`. Grundlage sind der Code des Ports und `legacy-analysis.md` §3–6 (inklusive der Abweichungen vom Legacy: Platzierungen ab drei Spielern, Fehlwurf nie Bust, Anwurf bei jeder Spielerzahl). Aufbau je Datei: ein einleitender Absatz, dann `###`-Abschnitte mit Listen, ohne eigene Überschrift (die steht im Pop-over: „Regeln: X01“). Der Kommentar in der ersten Zeile wird nicht angezeigt. Im Setup gibt es schon den Info-Button oben rechts; er zeigt bis zur Abnahme „Regeln folgen“. Der X01-Text nennt den Checkout-Hinweis allgemein; bei Triple Out ist er heute falsch (Frage unten).
-
-**Optionen für die Anzeige:** (a) eine kleine Markdown-Bibliothek (`react-markdown`, neue Abhängigkeit), (b) ein eigener Mini-Renderer für genau das, was die Dateien nutzen (Absätze, `###`, Listen, **fett**), ohne Abhängigkeit, mit Test.
-
-**Frage:** Texte bitte direkt in den Dateien bearbeiten und hier „abgenommen“ eintragen. Welche Option für die Anzeige? Default ohne Antwort: (b).
-
----
-
-## `/dev/theme` als Baustein-Galerie (8.11.2026, M13 Paket D)
-
-**Befund:** `architecture.md` §9 verlangt seit M1: „Jeder neue `ui`-Baustein bekommt einen Eintrag auf `/dev/theme` (ersetzt Storybook).“ Umgesetzt wurde das nie: `/dev/theme` zeigt Tokens und einen Zählscreen, keinen der heute 20 Bausteine (`ChoiceMenu`, `Stepper`, `FoldCard`, `Skeleton`, Buttons mit `pending` …). Schon in `m11-plan.md` §4 notiert. Das Aussehen prüfen heute die Screenshots aus `smoke.sh` (hell, dunkel, Desktop), das Verhalten die UI-Tests.
-
-**Optionen:** (a) Galerie bauen: jeder Baustein in seinen Zuständen, hell und dunkel, auf `/dev/theme` (etwa ein halber Tag, danach Pflege bei jedem neuen Baustein). (b) Regel streichen: Screenshots und UI-Tests reichen; `/dev/theme` bleibt Token-Seite. (c) Nur die Bausteine mit Zuständen, die kein Screen zeigt (Fehler, Pending, Skeleton), auf die Seite.
-
-**Frage:** Welche Option? Default ohne Antwort: (b), weil die Regel in sechs Meilensteinen nie gebraucht wurde und die Screenshots die echten Screens zeigen.
-
----
-
 ## SQLite `synchronous = NORMAL` statt `FULL` (8.11.2026, M13 R-21)
 
 **Befund:** SQLite läuft im WAL-Modus mit dem Default `synchronous = FULL`: jede gespeicherte Aufnahme wartet auf die Bestätigung der SD-Karte für die WAL-Datei, beim Checkpoint auch für die Datenbankdatei. Für WAL empfiehlt SQLite `NORMAL`. Die SD-Karte ist laut `architecture.md` §5 das größte Betriebsrisiko.
@@ -57,4 +37,4 @@ Der Test lässt diese vier Stellen bis zur Entscheidung aus (`e2e/a11y.spec.ts`)
 
 ---
 
-Zuletzt beantwortet (11.11.2026): Checkout-Hinweis je Out-Regel, jetzt `architecture.md` (Abschnitt `checkouts.ts`); Kontrast von Grau und Akzent (Option c), jetzt `theme.md` §1. Davor (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/archive/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/archive/m14-plan.md`.
+Zuletzt beantwortet (11.11.2026): Spielregeln je Modus werden in der jetzigen Form angezeigt und laufend in `src/domain/<mode>/regeln.md` bearbeitet (jeder Build nimmt den aktuellen Stand; eine Datei, deren erste Zeile mit `<!-- Entwurf` beginnt, bleibt ausgeblendet), Anzeige mit `react-markdown` auf dem Server; `/dev/theme`-Regel gestrichen (`architecture.md` §9); Checkout-Hinweis je Out-Regel, jetzt `architecture.md` (Abschnitt `checkouts.ts`); Kontrast von Grau und Akzent (Option c), jetzt `theme.md` §1. Davor (8.11.2026): Code-Review M13 (Einordnung, Fehlertext im Setup, `import type` aus dem Server, Dateigröße nur für `ui`-Bausteine, `useAsyncAction`, Umleitung bei abgelaufener Session, Host bleibt beim Restart, Hover bleibt), jetzt `docs/archive/m13-plan.md` §6 und §3. Davor (6.11.2026): Desktop-Layout und Animationen, jetzt `docs/archive/m14-plan.md`.
