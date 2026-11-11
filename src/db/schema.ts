@@ -61,7 +61,12 @@ export const playerFieldHits = sqliteTable(
       .notNull()
       .references(() => players.id, { onDelete: "cascade" }),
     field: integer("field").notNull(),
+    /** Weighted hits (single 1, double 2, triple 3); before 11.11.2026 the only column. */
     hits: integer("hits").notNull(),
+    /** The split by ring (11.11.2026); older rows have 0 here and their hits count as unsplit. */
+    singles: integer("singles").notNull().default(0),
+    doubles: integer("doubles").notNull().default(0),
+    triples: integer("triples").notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.playerId, t.field] })],
 );

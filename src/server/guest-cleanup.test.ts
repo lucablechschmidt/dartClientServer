@@ -50,11 +50,11 @@ describe("cleanupGuests (E12)", () => {
     expect(loadMatchView(deps, regularMatch)).not.toBeNull();
     expect(listPlayers(deps).map((p) => p.name)).toEqual(["Casey", "Sam"]);
     expect(deps.store.players.has(guest.id)).toBe(false);
-    // Casey: T20 S20 T5 → 4×20, 3×5; second visit S20 S20 T20 → +5×20
+    // Casey: T20 S20 T5, second visit S20 S20 T20 → 20: three singles, two triples (weighted 9); 5: one triple
     expect(deps.players.fieldHitsOf(casey.id)).toEqual(
       new Map([
-        [20, 9],
-        [5, 3],
+        [20, { single: 3, double: 0, triple: 2, unsplit: 0 }],
+        [5, { single: 0, double: 0, triple: 1, unsplit: 0 }],
       ]),
     );
     expect(deps.players.fieldHitsOf(sam.id)).toEqual(new Map());
@@ -73,7 +73,7 @@ describe("cleanupGuests (E12)", () => {
     expect(commitVisit(deps, sessionAdmin, id, 0, 2, [T(20), T(20)]).ok).toBe(true); // 61 → 1 = Bust
     clock += GUEST_LIFETIME_MS;
     cleanupGuests(deps);
-    expect(deps.players.fieldHitsOf(casey.id)).toEqual(new Map([[20, 9]]));
+    expect(deps.players.fieldHitsOf(casey.id)).toEqual(new Map([[20, { single: 0, double: 0, triple: 3, unsplit: 0 }]]));
   });
 
   it("M10: achievements the regular player earned in a finished guest match are saved first; a running one brings none", () => {

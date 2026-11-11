@@ -1,5 +1,5 @@
 import { isListed } from "@/domain/player";
-import { addFieldHits, type FieldHits } from "@/domain/stats/field-hits";
+import { addFieldHits, hitsOf, type FieldCount, type FieldHits } from "@/domain/stats/field-hits";
 import type { PlayerId } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredPlayer } from "./memory-store";
 import type { NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
@@ -84,8 +84,8 @@ export class MemoryPlayerRepository implements PlayerRepository {
     if (p) Object.assign(p, { deletedAt: now, passwordHash: null, hasLogin: false });
   }
   addFieldHits(playerId: PlayerId, hits: FieldHits): void {
-    const positive = new Map([...hits].filter(([, n]) => n > 0));
-    this.store.fieldHits.set(playerId, addFieldHits(this.store.fieldHits.get(playerId) ?? new Map<number, number>(), positive));
+    const positive = new Map([...hits].filter(([, c]) => hitsOf(c) > 0));
+    this.store.fieldHits.set(playerId, addFieldHits(this.store.fieldHits.get(playerId) ?? new Map<number, FieldCount>(), positive));
   }
   addAchievements(playerId: PlayerId, facts: readonly string[], earnedAt: number): void {
     const own = this.store.achievements.get(playerId) ?? new Map<string, number>();

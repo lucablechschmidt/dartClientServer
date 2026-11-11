@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Visit } from "@/domain/game";
+import { hitsOf } from "@/domain/stats/field-hits";
 import type { Session } from "@/domain/player";
 import { de } from "@/i18n/de";
 import type { Deps } from "./deps";
@@ -74,18 +75,19 @@ describe.each([
     const m = duel(d, "a", "b", NOW - 10 * DAY);
     duel(d, "a", "b", NOW - 5 * DAY, "cricket");
     duel(d, "g", "a", NOW - DAY); // guest match: only field hits
-    d.players.addFieldHits("a", new Map([[5, 3]]));
+    d.players.addFieldHits("a", new Map([[5, { single: 0, double: 0, triple: 1, unsplit: 0 }]]));
     const s = myStats(d, as("a"), "all");
     expect(s.records).toEqual({ x01: { games: 1, wins: 1 }, cricket: { games: 1, wins: 1 } });
     expect(s.x01).toMatchObject({ visits: 2, average: (180 + 121) / 2, count180: 1, highestFinish: 121, bestLeg: { 301: 6 } });
     expect(s.history).toEqual([{ matchId: m, finishedAt: NOW - 10 * DAY, average: 150.5 }]);
-    expect(new Map(s.fieldHits)).toEqual(
+    expect(new Map(s.fieldHits.map(([f, c]) => [f, hitsOf(c)]))).toEqual(
       new Map([
         [20, 15],
         [1, 1],
         [5, 3],
       ]),
     ); // the guest match's a missed
+    expect(new Map(s.fieldHits).get(5)).toEqual({ single: 0, double: 0, triple: 1, unsplit: 0 });
     expect(s.recent.map((r) => [r.mode, r.place, r.detail])).toEqual([
       ["x01", 2, true],
       ["cricket", 1, false],
@@ -98,7 +100,7 @@ describe.each([
     const d = setup();
     duel(d, "a", "b", NOW - 40 * DAY);
     duel(d, "a", "b", NOW - 10 * DAY);
-    d.players.addFieldHits("a", new Map([[5, 3]]));
+    d.players.addFieldHits("a", new Map([[5, { single: 0, double: 0, triple: 1, unsplit: 0 }]]));
     const s = myStats(d, as("a"), "30d");
     expect(s.records).toEqual({ x01: { games: 1, wins: 1 } });
     expect(new Map(s.fieldHits).get(5)).toBeUndefined();

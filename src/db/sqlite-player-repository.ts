@@ -1,5 +1,5 @@
 import { and, asc, eq, gt, isNotNull, isNull, lte, notInArray, or, sql } from "drizzle-orm";
-import type { FieldHits } from "@/domain/stats/field-hits";
+import { hitsOf, type FieldHits } from "@/domain/stats/field-hits";
 import type { PlayerId } from "@/domain/game";
 import type { Db } from "./client";
 import type { NewPlayer, Player, PlayerCredentials, PlayerRepository } from "./repository";
@@ -88,14 +88,21 @@ export class SqlitePlayerRepository implements PlayerRepository {
     this.db.update(players).set({ deletedAt: now, passwordHash: null }).where(eq(players.id, id)).run();
   }
   addFieldHits(playerId: PlayerId, hits: FieldHits): void {
-    const rows = [...hits].filter(([, n]) => n > 0).map(([field, n]) => ({ playerId, field, hits: n }));
+    const rows = [...hits]
+      .filter(([, c]) => hitsOf(c) > 0)
+      .map(([field, c]) => ({ playerId, field, hits: hitsOf(c), singles: c.single, doubles: c.double, triples: c.triple }));
     if (rows.length === 0) return;
     this.db
       .insert(playerFieldHits)
       .values(rows)
       .onConflictDoUpdate({
         target: [playerFieldHits.playerId, playerFieldHits.field],
-        set: { hits: sql`${playerFieldHits.hits} + excluded.hits` },
+        set: {
+          hits: sql`${playerFieldHits.hits} + excluded.hits`,
+          singles: sql`${playerFieldHits.singles} + excluded.singles`,
+          doubles: sql`${playerFieldHits.doubles} + excluded.doubles`,
+          triples: sql`${playerFieldHits.triples} + excluded.triples`,
+        },
       })
       .run();
   }
@@ -119,7 +126,13 @@ export class SqlitePlayerRepository implements PlayerRepository {
   }
   fieldHitsOf(playerId: PlayerId): FieldHits {
     const rows = this.db.select().from(playerFieldHits).where(eq(playerFieldHits.playerId, playerId)).all();
-    return new Map(rows.map((r) => [r.field, r.hits]));
+    // weighted hits beyond the split are the ones saved before the split existed
+    return new Map(
+      rows.map((r) => {
+        const split = { single: r.singles, double: r.doubles, triple: r.triples, unsplit: 0 };
+        return [r.field, { ...split, unsplit: Math.max(0, r.hits - hitsOf(split)) }];
+      }),
+    );
   }
   deleteOrphanGuests(now: number): void {
     const seated = this.db.selectDistinct({ id: matchPlayers.playerId }).from(matchPlayers);

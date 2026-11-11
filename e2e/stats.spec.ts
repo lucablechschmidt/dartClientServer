@@ -32,6 +32,8 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
   await expect(pageA.getByRole("img", { name: s.history })).toBeVisible();
   await pageA.getByRole("button", { name: `${s.field} 20: ${s.hits.replace("{n}", "15")}` }).click();
   await expect(pageA.getByText(`${s.field} 20 · ${s.hits.replace("{n}", "15")}`)).toBeVisible();
+  await expect(tile(s.rings.triple)).toContainText("5"); // five T20, no single or double 20
+  await expect(tile(s.rings.single)).toContainText("0");
   await shot(pageA, "account-stats", true);
 
   await pageA.getByRole("navigation", { name: s.range }).getByRole("link", { name: s.ranges["30d"] }).click();

@@ -390,27 +390,28 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.players.listPlayers(0).map((p) => p.id)).toEqual(["r"]);
   });
 
-  it("field hits accumulate per player and field", () => {
+  it("field hits accumulate per player and field, split by ring", () => {
     const repo = make();
+    const c = (single = 0, double = 0, triple = 0) => ({ single, double, triple, unsplit: 0 });
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
     repo.players.addFieldHits(
       "r",
       new Map([
-        [20, 4],
-        [5, 3],
+        [20, c(1, 0, 1)],
+        [5, c(0, 0, 1)],
       ]),
     );
     repo.players.addFieldHits(
       "r",
       new Map([
-        [20, 1],
-        [0, 0],
+        [20, c(1)],
+        [0, c()],
       ]),
     );
     expect(repo.players.fieldHitsOf("r")).toEqual(
       new Map([
-        [20, 5],
-        [5, 3],
+        [20, c(2, 0, 1)],
+        [5, c(0, 0, 1)],
       ]),
     );
     expect(repo.players.fieldHitsOf("nobody")).toEqual(new Map());
@@ -645,6 +646,18 @@ describe("visit mapping", () => {
     const slots = visitToSlots(v);
     expect(slots).toEqual({ d1Field: 25, d1Type: "double", d2Field: null, d2Type: null, d3Field: null, d3Type: null, isBust: false });
     expect(rowToVisit({ id: "x", legId: "l", playerId: "p", seq: 0, createdAt: 0, ...slots })).toEqual(v);
+  });
+});
+
+describe("player_field_hits before the split (migration 0011)", () => {
+  it("a row with only weighted hits comes back as unsplit; new hits add their split on top", () => {
+    const db = openDatabase(":memory:");
+    const players = new SqlitePlayerRepository(db);
+    players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
+    db.$client.prepare("INSERT INTO player_field_hits (player_id, field, hits) VALUES ('r', 20, 7)").run();
+    expect(players.fieldHitsOf("r").get(20)).toEqual({ single: 0, double: 0, triple: 0, unsplit: 7 });
+    players.addFieldHits("r", new Map([[20, { single: 1, double: 0, triple: 1, unsplit: 0 }]]));
+    expect(players.fieldHitsOf("r").get(20)).toEqual({ single: 1, double: 0, triple: 1, unsplit: 7 });
   });
 });
 

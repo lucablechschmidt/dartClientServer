@@ -2,7 +2,7 @@ import type { FinishedMatch } from "@/db/repository";
 import { dartLabel, MODE_IDS, visitScore, type ModeId, type PlayerId } from "@/domain/game";
 import type { Session } from "@/domain/player";
 import { leaderboard, rangeStart, records, type ModeRecord, type StatsMatch, type StatsRange } from "@/domain/stats/aggregate";
-import { addFieldHits, fieldHits } from "@/domain/stats/field-hits";
+import { addFieldHits, fieldHits, type FieldCount } from "@/domain/stats/field-hits";
 import { x01Stats, type X01Stats } from "@/domain/stats/x01";
 import { checkoutOrder } from "@/domain/x01";
 import type { Deps } from "./deps";
@@ -28,8 +28,8 @@ export type MyStats = {
   x01: X01Stats;
   /** 3-dart average per counted X01 match, oldest first. */
   history: { matchId: string; finishedAt: number; average: number }[];
-  /** [field, hits], serializable for the client. */
-  fieldHits: [number, number][];
+  /** [field, hits split by ring], serializable for the client. */
+  fieldHits: [number, FieldCount][];
   /** The last games, newest first, guest matches included; `detail` when the match page exists (X01). */
   recent: { id: string; mode: ModeId; names: string[]; finishedAt: number; place: number | null; detail: boolean }[];
 };
