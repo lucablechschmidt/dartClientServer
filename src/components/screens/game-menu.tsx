@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CardList, CardRow } from "@/components/ui/card-list";
 import { PageFrame } from "@/components/ui/page-frame";
-import { SectionHeading } from "@/components/ui/form-controls";
+import { ButtonLink, SectionHeading } from "@/components/ui/form-controls";
 import type { Texts } from "@/i18n/de";
 
 type Mode = keyof Texts["gameMenu"]["modes"];
@@ -61,15 +61,18 @@ export function resultText(result: RecentMatchItem["result"], t: Texts["overview
 export function GameMenu({ texts, overviewTexts, matches, recent = [], now }: Props) {
   return (
     <div className="flex flex-1 flex-col">
-      <nav aria-label={texts.title} className="flex flex-1 flex-col items-center justify-center gap-6 py-8 text-fluid-xl">
-        {MODES.map((mode) => (
-          <Link key={mode} href={`/new/${mode}`} className="min-h-touch tap-feedback px-4 py-1 text-fg">
-            {texts.modes[mode]}
-          </Link>
-        ))}
-        <Link href="/tournaments" className="min-h-touch tap-feedback px-4 py-1 text-fg">
-          {texts.tournaments}
-        </Link>
+      {/* gray buttons in one centred column of the page width (11.11.2026) */}
+      <nav aria-label={texts.title} className="flex flex-1 flex-col justify-center px-4 py-8">
+        <PageFrame className="gap-3">
+          {MODES.map((mode) => (
+            <ButtonLink key={mode} href={`/new/${mode}`} className="tap-feedback py-3 text-fluid-lg">
+              {texts.modes[mode]}
+            </ButtonLink>
+          ))}
+          <ButtonLink href="/tournaments" className="tap-feedback py-3 text-fluid-lg">
+            {texts.tournaments}
+          </ButtonLink>
+        </PageFrame>
       </nav>
       {matches.length > 0 && (
         <section className="px-4 pb-4">
