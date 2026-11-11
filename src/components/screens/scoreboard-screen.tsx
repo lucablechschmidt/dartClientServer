@@ -116,13 +116,13 @@ export function ScoreboardScreen({
     if (view.progress === "leg-finished") setClosedLeg(null);
     undo();
   };
-  const turnHint = !isOpen
+  const starterHint = isOpen && enterOk && starterOk && playerIds.length > 1 ? texts.chooseStarter : null;
+  const othersHint = !isOpen
     ? texts.closed
     : enterOk
-      ? starterOk && playerIds.length > 1
-        ? texts.chooseStarter
-        : null
+      ? null
       : texts.turnOf.replace("{name}", initial.names[matchCurrentPlayer(state)] ?? "");
+  const turnHint = othersHint ?? starterHint;
   const lastName = view.lastPlayerId ? (initial.names[view.lastPlayerId] ?? "") : "";
 
   const header = (
@@ -248,7 +248,8 @@ export function ScoreboardScreen({
         texts={texts}
         header={header}
         keypad={keypad}
-        turnHint={turnHint}
+        turnHint={othersHint}
+        starterHint={starterHint}
         onSelectStarter={starterOk ? chooseStarter : undefined}
         onResign={view.playOut && playOutOk ? () => setAsking("resign") : null}
       />

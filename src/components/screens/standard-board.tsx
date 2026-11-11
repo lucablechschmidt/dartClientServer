@@ -13,8 +13,10 @@ type Props = {
   texts: Texts["game"];
   header: ReactNode;
   keypad: ReactNode;
-  /** Whose turn it is on a device that may not enter, "match closed", or the ToStart hint; replaces the mode's hint. */
+  /** Whose turn it is on a device that may not enter, or "match closed"; replaces the mode's hint. */
   turnHint: string | null;
+  /** ToStart: "tap a player"; shown together with the mode's hint (SplitScore: the first target right away). */
+  starterHint?: string | null;
   onSelectStarter?: (playerId: PlayerId) => void;
   /** X01 play-out (M5): the last player may give up. */
   onResign: (() => void) | null;
@@ -24,7 +26,9 @@ type Props = {
  * Scoring screen of X01, Elimination and SplitScore: player panels, the hint line, the legacy keypad;
  * with 3+ players the next player below the keypad, like in Cricket.
  */
-export function StandardBoard({ board, texts, header, keypad, turnHint, onSelectStarter, onResign }: Props) {
+export function StandardBoard({ board, texts, header, keypad, turnHint, starterHint = null, onSelectStarter, onResign }: Props) {
+  const modeHint = hintText(board.hint, texts);
+  const hint = turnHint ?? ([starterHint, modeHint].filter(Boolean).join(" · ") || null);
   return (
     <ScoreGrid
       header={header}
@@ -40,7 +44,7 @@ export function StandardBoard({ board, texts, header, keypad, turnHint, onSelect
       hint={
         <div className="flex items-center gap-2 px-3">
           <div className="flex-1">
-            <CheckoutHint hint={turnHint ?? hintText(board.hint, texts)} />
+            <CheckoutHint hint={hint} />
           </div>
           {onResign && (
             <TextButton tone="danger" onClick={onResign}>
