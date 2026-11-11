@@ -11,7 +11,7 @@ export type TournamentListItem = Pick<TournamentSummary, "id" | "name" | "format
 /** All tournaments, newest first, with format, players and the winner or "running" (M9). */
 export function TournamentList({ items, texts: t, back }: { items: TournamentListItem[]; texts: Texts["tournaments"]; back: string }) {
   return (
-    <div className="flex flex-1 flex-col bg-bg-grouped px-4 pb-4 text-fg">
+    <div data-page="grouped" className="flex flex-1 flex-col bg-bg-grouped px-4 pb-4 text-fg">
       <PageFrame className="gap-3">
         <div className="flex">
           <BackButton href="/" label={back} />

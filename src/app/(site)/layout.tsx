@@ -20,7 +20,7 @@ async function MainTabs() {
 /** The two tabs of the legacy HomeView, the account tab (M3) and for admins "Verwaltung". Setup and scoring screen have no tab bar. */
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-dvh flex-col pt-safe">
+    <div className="flex h-dvh flex-col bg-bg pt-safe grouped-page:bg-bg-grouped">
       {/* Only this area scrolls; the tab bar stays below it. */}
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</div>
       <Suspense fallback={<TabBar label={de.nav.main} items={TABS} />}>

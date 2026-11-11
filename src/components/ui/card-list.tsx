@@ -6,7 +6,7 @@ import { PageFrame, type PageWidth } from "./page-frame";
 /** Gray page area that holds cards (iOS `List` on systemGroupedBackground); `className` styles the centred column inside. */
 export function GroupedSection({ children, className = "", width }: { children: ReactNode; className?: string; width?: PageWidth }) {
   return (
-    <section className="flex-1 bg-bg-grouped px-4 py-5">
+    <section data-page="grouped" className="flex-1 bg-bg-grouped px-4 py-5">
       <PageFrame width={width} className={className}>
         {children}
       </PageFrame>

@@ -234,6 +234,9 @@
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* The tab layout takes the grey list ground while its page is a grouped list (data-page="grouped"), so the
+   strip behind the tab bar and the safe area match the page instead of showing a white bar. */
+@custom-variant grouped-page (&:has([data-page="grouped"]));
 
 @layer base {
   html,
