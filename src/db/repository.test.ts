@@ -684,6 +684,13 @@ describe("batch loading on SQLite (R-01)", () => {
     prepare.mockClear();
     expect(repo.loadMatches(all.map((m) => m.id))).toHaveLength(120);
     expect(prepare.mock.calls.length).toBeLessThanOrEqual(5);
+    prepare.mockClear();
+    // the history (/history): a page of 100 with seats and leg winners, and the count
+    const history = repo.listRecentMatches(10_000, 100);
+    expect(history).toHaveLength(100);
+    expect(history[0].players.map((p) => p.name)).toEqual(["Casey", "Sam"]);
+    expect(repo.countRecentMatches(10_000)).toBe(120);
+    expect(prepare.mock.calls.length).toBeLessThanOrEqual(4);
   });
 
   it("more ids than one chunk still load every match", () => {

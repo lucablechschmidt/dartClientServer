@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GameMenu } from "@/components/screens/game-menu";
 import { de } from "@/i18n/de";
-import { listOpenMatches, listRecentMatches } from "@/server/match-service";
+import { countRecentMatches, listOpenMatches, listRecentMatches } from "@/server/match-service";
 import { shownName } from "@/server/player-names";
 import { requireSession } from "@/server/request";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +18,9 @@ async function Menu() {
     perPlayer: m.inputMode === "per-player",
     startedAt: m.startedAt,
   }));
-  return <GameMenu texts={de.gameMenu} overviewTexts={de.overview} matches={matches} recent={listRecentMatches(deps)} now={deps.now()} />;
+  const latest = listRecentMatches(deps, 1).at(0);
+  const recent = latest ? { latest, count: countRecentMatches(deps) } : null;
+  return <GameMenu texts={de.gameMenu} overviewTexts={de.overview} matches={matches} recent={recent} now={deps.now()} />;
 }
 
 export default function HomePage() {

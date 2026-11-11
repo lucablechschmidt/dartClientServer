@@ -42,8 +42,13 @@ test("best of 3 legs (M5): leg victory screen, the throw alternates, undo across
   await admin.reload();
   await expect(winner(admin, A)).toBeVisible();
 
+  // start screen: the latest game in one sentence; the history page: the score, the winner in bold
   await admin.goto("/");
-  await expect(admin.getByRole("list", { name: de.overview.recent }).getByText(`${A} ${legsScore("2:0")}`)).toHaveCount(1);
+  await expect(admin.getByRole("link", { name: new RegExp(`${A} gewinnt gegen ${B} 2:0`) })).toBeVisible();
+  await admin.goto("/history");
+  const row = admin.getByRole("list", { name: de.overview.thisWeek }).getByRole("link").filter({ hasText: B });
+  await expect(row).toContainText(`${legsScore("2:0")} · Classic 301`);
+  await expect(row.locator("strong")).toHaveText(A);
 });
 
 test("four players (M5): ToStart, places, play-out and resign, history", async ({ admin, register, stamp }) => {
@@ -84,8 +89,8 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
   await expect(winner(admin, H)).toBeVisible();
   await expect(resultRow(admin, ADMIN)).toHaveText(new RegExp(`^4${ADMIN}`));
 
-  await admin.goto("/");
-  const history = admin.getByRole("list", { name: de.overview.recent });
-  await expect(history.getByText(`1. ${H} · 2. ${A} · 3. ${B} · 4. ${ADMIN}`)).toHaveCount(1);
+  await admin.goto("/history");
+  const history = admin.getByRole("list", { name: de.overview.thisWeek });
+  await expect(history.getByText(`1. ${H} · 2. ${A} · 3. ${B} · 4. ${ADMIN}`, { exact: false })).toHaveCount(1);
   await shot(admin, "overview-history", true);
 });

@@ -263,7 +263,23 @@ export type RecentResult<P = PlayerId> =
   | { kind: "score"; winner: P; unit: "legs" | "sets"; score: [number, number] }
   | { kind: "winner"; winner: P };
 
-export type RecentMatchView = { id: string; mode: ModeId; names: string[]; endedAt: number; result: RecentResult };
+export type RecentMatchView = {
+  id: string;
+  mode: ModeId;
+  /** X01 start score ("Classic 501"). */
+  startScore: number;
+  names: string[];
+  /** Shown in bold: the winner, with 3+ players everyone in first place; none when cancelled. */
+  winners: string[];
+  endedAt: number;
+  result: RecentResult;
+};
+
+/** Who won a closed match: the winner, or everyone in first place; nobody when cancelled. */
+export function winnersOf(r: RecentResult): PlayerId[] {
+  if (r.kind === "places") return r.order.filter((p) => p.place === 1).map((p) => p.player);
+  return r.kind === "abandoned" ? [] : [r.winner];
+}
 
 export function recentResult(m: RecentMatch): RecentResult {
   if (m.status !== "finished") return { kind: "abandoned" };
@@ -290,21 +306,32 @@ function withNames(r: RecentResult, name: (id: PlayerId) => string): RecentResul
   return r;
 }
 
-/** History in the game overview (M5): the last 20 closed matches. */
-export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
-  return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit).map((m) => {
+/** Page size of the history (`/history`): 25 games, "Weitere laden" adds the next 25. */
+export const HISTORY_PAGE = 25;
+
+/** History (M5, `/history` since 11.11.2026): the last `limit` closed matches, optionally of one mode. */
+export function listRecentMatches(deps: Deps, limit = HISTORY_PAGE, mode?: ModeId): RecentMatchView[] {
+  return deps.matches.listRecentMatches(deps.now() - MATCH_OPEN_MS, limit, mode).map((m) => {
     const name = (id: PlayerId) => {
       const p = m.players.find((x) => x.id === id);
       return p ? shownName(p) : "";
     };
+    const result = recentResult(m);
     return {
       id: m.id,
       mode: m.mode,
+      startScore: m.rules.startScore,
       names: m.players.map(shownName),
+      winners: winnersOf(result).map(name),
       endedAt: m.finishedAt ?? m.startedAt,
-      result: withNames(recentResult(m), name),
+      result: withNames(result, name),
     };
   });
+}
+
+/** How many closed matches the history has (optionally of one mode). */
+export function countRecentMatches(deps: Deps, mode?: ModeId): number {
+  return deps.matches.countRecentMatches(deps.now() - MATCH_OPEN_MS, mode);
 }
 
 /** Cancel by host or admin (E13). The match counts nowhere and is deleted 24 h after its start (`cleanupAbandoned`). */

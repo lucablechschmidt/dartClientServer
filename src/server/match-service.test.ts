@@ -10,6 +10,7 @@ import {
   decideWinner,
   listOpenMatches,
   listRecentMatches,
+  countRecentMatches,
   loadMatchView,
   restartMatch,
   setPlayOut,
@@ -416,6 +417,13 @@ describe("legs, sets and places (M5)", () => {
       [bo3, { kind: "score", winner: "Sam", unit: "legs", score: [2, 1] }],
     ]);
     expect(recent[0].names).toEqual(["Casey", "Sam"]);
+    // winners in bold, the start score for "Classic 301", the count and the filter by mode
+    expect(recent.map((m) => m.winners)).toEqual([[], ["Casey"], ["Casey"], ["Sam"]]);
+    expect(recent[0].startScore).toBe(short.startScore);
+    expect(countRecentMatches(deps)).toBe(4);
+    expect(listRecentMatches(deps, 2).map((m) => m.id)).toEqual([gone, single]);
+    expect(listRecentMatches(deps, 25, "cricket")).toEqual([]);
+    expect(countRecentMatches(deps, "cricket")).toBe(0);
   });
 
   it("restart keeps the format", () => {

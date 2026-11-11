@@ -90,7 +90,13 @@ test("admin deletes players on /admin, also one who started a match: it is cance
   await expect(admin.getByText(A, { exact: true })).toHaveCount(0);
   await admin.goto("/");
   await expect(admin.getByRole("list", { name: de.overview.title }).getByRole("link", { name: new RegExp(G1) })).toHaveCount(0);
-  await expect(admin.getByText(de.players.deletedName.replace("{name}", A))).toBeVisible(); // history: cancelled, name marked
+  await admin.goto("/history"); // history: cancelled, name marked
+  await expect(
+    admin
+      .getByRole("link")
+      .filter({ hasText: de.players.deletedName.replace("{name}", A) })
+      .filter({ hasText: de.overview.abandoned }),
+  ).toHaveCount(1);
   await host.goto("/players");
   await expect(host).toHaveURL(/\/login/);
 });

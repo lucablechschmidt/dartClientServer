@@ -294,7 +294,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 **Nach Schreibvorgängen** leitet eine Action um (`redirect`, bei Formularen), liefert den neuen Stand als `Result` (Zählscreen) oder ruft `revalidatePath` für die betroffenen Seiten (Spieler, Admin). Live-Änderungen anderer Geräte kommen per SSE-Ping, der Client lädt dann über `loadMatchAction` nach.
 
-**Regel (Ist seit Paket B für beendete Matches und Turnierspiele):** Lese-Methoden der Repositories laden Mengen **batchweise** (ein Select je Tabelle mit `inArray`, Gruppierung in JS), nie in Schleifen pro Datensatz; Filter (Spieler, Zeitraum) gehören in die SQL-Abfrage, nicht ins JS danach (R-01). Jede neue Liste bekommt dafür einen Test, der die Query-Anzahl zählt (Muster: `vi.spyOn(db.$client, "prepare")` in `repository.test.ts`). **Noch pro Datensatz:** `listOpenMatches`, `listMatches` und `listRecentMatches` (Spieler bzw. Sitze je Match); die Listen sind auf 20 bzw. wenige Einträge begrenzt.
+**Regel (Ist seit Paket B für beendete Matches und Turnierspiele):** Lese-Methoden der Repositories laden Mengen **batchweise** (ein Select je Tabelle mit `inArray`, Gruppierung in JS), nie in Schleifen pro Datensatz; Filter (Spieler, Zeitraum) gehören in die SQL-Abfrage, nicht ins JS danach (R-01). Jede neue Liste bekommt dafür einen Test, der die Query-Anzahl zählt (Muster: `vi.spyOn(db.$client, "prepare")` in `repository.test.ts`). Seit 11.11.2026 auch `listRecentMatches` (die Historie `/history`, 25 je Seite). **Noch pro Datensatz:** `listOpenMatches` und `listMatches` (Spieler bzw. Sitze je Match); die Listen sind auf wenige Einträge begrenzt.
 
 ### 12.3 Validierung, Fehler und Rückmeldung
 

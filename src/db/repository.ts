@@ -29,7 +29,7 @@ export type MatchSummary = {
 export type OpenMatch = Pick<MatchSummary, "id" | "mode" | "players" | "inputMode" | "startedAt">;
 
 /** For the history (M5): a closed match with what its result is derived from. */
-export type RecentMatch = Pick<MatchSummary, "id" | "mode" | "players" | "status" | "startedAt" | "finishedAt"> & {
+export type RecentMatch = Pick<MatchSummary, "id" | "mode" | "rules" | "players" | "status" | "startedAt" | "finishedAt"> & {
   format: MatchFormat;
   /** Winner per leg in leg order, null = leg not finished. */
   legWinners: (PlayerId | null)[];
@@ -138,7 +138,9 @@ export type MatchRepository = {
   /** Running matches the player sits in or hosts, whatever their age. */
   listOpenMatchIdsOf(playerId: PlayerId): string[];
   /** History (M5): finished, abandoned or running but older than `openSince`; most recently ended first. */
-  listRecentMatches(openSince: number, limit: number): RecentMatch[];
+  listRecentMatches(openSince: number, limit: number, mode?: ModeId): RecentMatch[];
+  /** How many matches `listRecentMatches` would list without a limit (the "n Spiele" on the start screen). */
+  countRecentMatches(openSince: number, mode?: ModeId): number;
 
   /**
    * Writes the visit state of a leg: rows from `fromSeq` on are replaced,

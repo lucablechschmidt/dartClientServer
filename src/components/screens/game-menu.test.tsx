@@ -37,45 +37,30 @@ describe("GameMenu overview", () => {
     expect(relativeTime(now - 90_000, now, de.overview)).toBe(o.minutesAgo.replace("{n}", "2"));
     expect(relativeTime(now - 2 * 3_600_000, now, de.overview)).toBe(o.hoursAgo.replace("{n}", "2"));
   });
-  it("lists the last matches with their result below the running ones (M5)", () => {
+  it("one row to the last games: the latest one in a sentence, the count, to /history (Design/last-games.png)", () => {
     render(
       <GameMenu
         texts={de.gameMenu}
         overviewTexts={de.overview}
         now={now}
         matches={[]}
-        recent={[
-          {
+        recent={{
+          latest: {
             id: "r1",
             mode: "x01",
-            names: ["Luca", "Mara"],
-            endedAt: now - 5 * 60_000,
-            result: { kind: "score", winner: "Mara", unit: "legs", score: [2, 1] },
+            startScore: 501,
+            names: ["admin", "Wanda"],
+            winners: ["admin"],
+            endedAt: now,
+            result: { kind: "winner", winner: "admin" },
           },
-          {
-            id: "r2",
-            mode: "splitscore",
-            names: ["Luca", "Mara", "Finn"],
-            endedAt: now - 2 * 86_400_000,
-            result: {
-              kind: "places",
-              order: [
-                { player: "Finn", place: 1 },
-                { player: "Luca", place: 1 },
-                { player: "Mara", place: 3 },
-              ],
-            },
-          },
-          { id: "r3", mode: "x01", names: ["Luca", "Mara"], endedAt: now, result: { kind: "abandoned" } },
-        ]}
+          count: 5,
+        }}
       />,
     );
-    expect(screen.getByText(o.recent)).toBeInTheDocument();
-    const rows = screen.getAllByRole("link", { name: /Luca · Mara/ });
-    expect(rows[0]).toHaveAttribute("href", "/match/r1");
-    expect(rows[0]).toHaveTextContent(`Mara ${o.legs} 2:1`);
-    expect(rows[1]).toHaveTextContent("1. Finn · 1. Luca · 3. Mara");
-    expect(rows[1]).toHaveTextContent(`${modes.splitscore} · ${o.daysAgo.replace("{n}", "2")}`);
-    expect(rows[2]).toHaveTextContent(o.abandoned);
+    const row = screen.getByRole("link", { name: new RegExp(`^${o.recent}`) });
+    expect(row).toHaveAttribute("href", "/history");
+    expect(row).toHaveTextContent("Zuletzt: admin gewinnt gegen Wanda · Classic 501");
+    expect(row).toHaveTextContent("5 Spiele");
   });
 });

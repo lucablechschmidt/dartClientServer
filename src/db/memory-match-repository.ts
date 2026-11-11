@@ -1,4 +1,4 @@
-import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
+import { replayMatch, type ModeId, type PlayerId, type Visit } from "@/domain/game";
 import { MemoryStore, toPlayer, type StoredLeg, type StoredMatch } from "./memory-store";
 import type {
   ExpiredGuestMatch,
@@ -112,14 +112,22 @@ export class MemoryMatchRepository implements MatchRepository {
       .filter((m) => m.status === "running" && (m.playerIds.includes(playerId) || m.hostPlayerId === playerId))
       .map((m) => m.id);
   }
-  listRecentMatches(openSince: number, limit: number): RecentMatch[] {
-    return [...this.store.matches.values()]
-      .filter((m) => m.status !== "running" || m.startedAt <= openSince)
+  private recent(openSince: number, mode?: ModeId): StoredMatch[] {
+    return [...this.store.matches.values()].filter(
+      (m) => (m.status !== "running" || m.startedAt <= openSince) && (mode === undefined || m.mode === mode),
+    );
+  }
+  countRecentMatches(openSince: number, mode?: ModeId): number {
+    return this.recent(openSince, mode).length;
+  }
+  listRecentMatches(openSince: number, limit: number, mode?: ModeId): RecentMatch[] {
+    return this.recent(openSince, mode)
       .sort((a, b) => (b.finishedAt ?? b.startedAt) - (a.finishedAt ?? a.startedAt))
       .slice(0, limit)
       .map((m) => ({
         id: m.id,
         mode: m.mode,
+        rules: m.rules,
         players: m.playerIds.map((id) => toPlayer(this.store.player(id))),
         status: m.status,
         startedAt: m.startedAt,

@@ -87,13 +87,19 @@ export function CardRow({
   return <li className={row}>{children}</li>;
 }
 
-/** A row that opens another page: label, optional detail on the right, a chevron (account → statistics …). */
-export function CardLinkRow({ href, label, detail }: { href: string; label: string; detail?: string }) {
+/**
+ * A row that opens another page: label, optional muted line below it, optional detail on the right, a
+ * chevron (account → statistics, start screen → last games).
+ */
+export function CardLinkRow({ href, label, subtitle, detail }: { href: string; label: string; subtitle?: string; detail?: string }) {
   return (
     <li className="list-none border-b border-separator last:border-b-0">
       <Link href={href} className="tap-row flex min-h-row items-center justify-between gap-3 tap-feedback py-2">
-        <span className="font-medium">{label}</span>
-        <span className="flex items-center gap-2 text-sm text-fg-muted">
+        <span className="flex min-w-0 flex-col">
+          <span className="font-medium">{label}</span>
+          {subtitle && <span className="text-sm text-fg-muted">{subtitle}</span>}
+        </span>
+        <span className="flex shrink-0 items-center gap-2 text-sm text-fg-muted">
           {detail}
           <ChevronRightIcon className="size-icon-sm" />
         </span>

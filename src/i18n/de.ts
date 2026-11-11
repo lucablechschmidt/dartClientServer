@@ -153,6 +153,21 @@ export const de = {
     winner: "{name} gewinnt",
     legs: "Legs",
     sets: "Sets",
+    /** Start screen (Design/last-games.png): one row with the latest game, the count, to /history. */
+    latest: "Zuletzt: {text}",
+    beats: "{winner} gewinnt gegen {others}",
+    ahead: "{winner} gewinnt vor {others}",
+    and: "und",
+    gameCount: { one: "1 Spiel", other: "{n} Spiele" },
+    /** X01 with its start score, the other modes by name. */
+    classic: "Classic {n}",
+    filter: "Modus",
+    all: "Alle",
+    modesShort: { x01: "Classic", cricket: "Cricket", elimination: "Elimination", splitscore: "SplitScore" },
+    thisWeek: "Diese Woche",
+    older: "Älter",
+    more: "Weitere laden",
+    none: "Noch keine Spiele.",
   },
   newGame: {
     title: "Neues Spiel",

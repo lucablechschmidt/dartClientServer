@@ -78,12 +78,11 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(admin.getByRole("listitem").filter({ hasText: g.totalPoints })).toHaveCount(1);
     await shot(admin, "victory-splitscore");
 
-    await admin.goto("/");
-    await expect(
-      admin
-        .getByRole("list", { name: de.overview.recent })
-        .getByText(new RegExp(`${de.gameMenu.modes.splitscore} ·`))
-        .first(),
-    ).toBeVisible();
+    // the history filtered by SplitScore lists the game, the Cricket filter does not
+    await admin.goto("/history?mode=splitscore");
+    await expect(admin.getByRole("link").filter({ hasText: B }).filter({ hasText: de.gameMenu.modes.splitscore })).toHaveCount(1);
+    await admin.getByRole("link", { name: de.overview.modesShort.cricket }).click();
+    await expect(admin).toHaveURL(/mode=cricket/);
+    await expect(admin.getByRole("link").filter({ hasText: B })).toHaveCount(0);
   });
 });

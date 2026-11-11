@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, ne, or, sql } from "drizzle-orm";
-import { replayMatch, type PlayerId, type Visit } from "@/domain/game";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, ne, or, sql } from "drizzle-orm";
+import { replayMatch, type ModeId, type PlayerId, type Visit } from "@/domain/game";
 import type { Db } from "./client";
 import type {
   ExpiredGuestMatch,
@@ -261,34 +261,63 @@ export class SqliteMatchRepository implements MatchRepository {
       .all()
       .map((r) => r.id);
   }
-  listRecentMatches(openSince: number, limit: number): RecentMatch[] {
-    return this.db
+  private recentWhere(openSince: number, mode?: ModeId) {
+    return and(
+      or(ne(matches.status, "running"), lte(matches.startedAt, openSince)),
+      mode === undefined ? undefined : eq(matches.mode, mode),
+    );
+  }
+  countRecentMatches(openSince: number, mode?: ModeId): number {
+    return this.db.select({ n: count() }).from(matches).where(this.recentWhere(openSince, mode)).get()?.n ?? 0;
+  }
+  /** History (M5, `/history`): one select for the matches, one for all seats, one for all leg winners (R-01). */
+  listRecentMatches(openSince: number, limit: number, mode?: ModeId): RecentMatch[] {
+    const rows = this.db
       .select()
       .from(matches)
-      .where(or(ne(matches.status, "running"), lte(matches.startedAt, openSince)))
+      .where(this.recentWhere(openSince, mode))
       .orderBy(desc(sql`coalesce(${matches.finishedAt}, ${matches.startedAt})`))
       .limit(limit)
-      .all()
-      .map((m) => {
-        const seats = this.db.select().from(matchPlayers).where(eq(matchPlayers.matchId, m.id)).all();
-        const winners = this.db
-          .select({ winner: legs.winnerPlayerId })
+      .all();
+    const ids = rows.map((m) => m.id);
+    const seats = groupBy(
+      chunked(ids).flatMap((c) =>
+        this.db
+          .select({ player: players, matchId: matchPlayers.matchId, placement: matchPlayers.placement })
+          .from(matchPlayers)
+          .innerJoin(players, eq(players.id, matchPlayers.playerId))
+          .where(inArray(matchPlayers.matchId, c))
+          .orderBy(asc(matchPlayers.matchId), asc(matchPlayers.seat))
+          .all(),
+      ),
+      (r) => r.matchId,
+    );
+    const winners = groupBy(
+      chunked(ids).flatMap((c) =>
+        this.db
+          .select({ matchId: legs.matchId, winner: legs.winnerPlayerId })
           .from(legs)
-          .where(eq(legs.matchId, m.id))
-          .orderBy(asc(legs.setNo), asc(legs.legNo))
-          .all();
-        return {
-          id: m.id,
-          mode: m.mode,
-          players: this.seatedPlayers(m.id),
-          status: m.status,
-          startedAt: m.startedAt,
-          finishedAt: m.finishedAt,
-          format: { legsToWinSet: m.legsToWinSet, setsToWinMatch: m.setsToWinMatch },
-          legWinners: winners.map((w) => w.winner),
-          placements: Object.fromEntries(seats.map((s) => [s.playerId, s.placement])),
-        };
-      });
+          .where(inArray(legs.matchId, c))
+          .orderBy(asc(legs.matchId), asc(legs.setNo), asc(legs.legNo))
+          .all(),
+      ),
+      (l) => l.matchId,
+    );
+    return rows.map((m) => {
+      const seated = seats.get(m.id) ?? [];
+      return {
+        id: m.id,
+        mode: m.mode,
+        rules: { startScore: m.startScore, inRule: m.inRule, outRule: m.outRule },
+        players: seated.map((r) => toPlayer(r.player)),
+        status: m.status,
+        startedAt: m.startedAt,
+        finishedAt: m.finishedAt,
+        format: { legsToWinSet: m.legsToWinSet, setsToWinMatch: m.setsToWinMatch },
+        legWinners: (winners.get(m.id) ?? []).map((w) => w.winner),
+        placements: Object.fromEntries(seated.map((r) => [r.player.id, r.placement])),
+      };
+    });
   }
   loadMatch(matchId: string): LoadedMatch | null {
     const row = this.db.select().from(matches).where(eq(matches.id, matchId)).get();
