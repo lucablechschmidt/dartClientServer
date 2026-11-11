@@ -45,7 +45,7 @@ describe("Keypad", () => {
     const onDart = vi.fn();
     render(<Keypad onDart={onDart} onUndo={() => {}} texts={texts} layout="cricket" />);
     expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual([
-      "0",
+      texts.miss,
       "15",
       "16",
       "17",
@@ -72,5 +72,15 @@ describe("Keypad", () => {
     expect(screen.getByRole("button", { name: texts.bull })).toHaveClass("text-key-double");
     await user.click(screen.getByRole("button", { name: texts.triple }));
     expect(textColors()).toEqual(["text-key-triple"]);
+  });
+  it("Cricket: X instead of 0 asks for the rest of the visit as misses", async () => {
+    const user = userEvent.setup();
+    const onMissRest = vi.fn();
+    const onDart = vi.fn();
+    render(<Keypad onDart={onDart} onUndo={() => {}} onMissRest={onMissRest} texts={texts} layout="cricket" />);
+    await user.click(screen.getByRole("button", { name: texts.miss }));
+    expect(onMissRest).toHaveBeenCalledTimes(1);
+    expect(onDart).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "0" })).toBeNull();
   });
 });

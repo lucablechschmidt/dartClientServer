@@ -14,11 +14,13 @@ import {
 } from "./keypad-logic";
 
 /** `keypad` names the group of keys for screen readers (R-29). */
-export type KeypadTexts = { keypad: string; bull: string; undo: string; double: string; triple: string };
+export type KeypadTexts = { keypad: string; bull: string; undo: string; double: string; triple: string; miss: string };
 
 type Props = {
   onDart: (dart: Dart) => void;
   onUndo: () => void;
+  /** Cricket's X: fill the rest of the visit with misses. */
+  onMissRest?: () => void;
   disabled?: boolean;
   /** E13: numbers, Bull, Double, Triple only when this device is currently allowed to enter. */
   canThrow?: boolean;
@@ -47,6 +49,8 @@ function label(key: KeypadKey, texts: KeypadTexts): string {
       return texts.double;
     case "triple":
       return texts.triple;
+    case "miss":
+      return texts.miss;
   }
 }
 
@@ -75,11 +79,13 @@ function keyClasses(key: KeypadKey, state: KeypadState): string {
       return key.value === 0 ? `${base} bg-key-zero text-key-fg` : fieldKey(base, state);
     case "bull":
       return fieldKey(base, state);
+    case "miss":
+      return `${base} bg-key-zero text-key-fg`;
   }
 }
 
 /** Port of ScoreInputView: 5 rows, modifier toggles, undo. Emits finished darts via callback. */
-export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canUndo = true, texts, layout = "full" }: Props) {
+export function Keypad({ onDart, onUndo, onMissRest, disabled = false, canThrow = true, canUndo = true, texts, layout = "full" }: Props) {
   const [state, setState] = useState<KeypadState>(initialKeypadState);
 
   const press = (key: KeypadKey) => {
@@ -87,6 +93,7 @@ export function Keypad({ onDart, onUndo, disabled = false, canThrow = true, canU
     setState(out.state);
     if ("dart" in out) onDart(out.dart);
     if ("undo" in out) onUndo();
+    if ("missRest" in out) onMissRest?.();
   };
 
   return (

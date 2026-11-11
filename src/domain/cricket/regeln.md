@@ -19,4 +19,4 @@ Gewonnen hat, wer alle sieben Felder geschlossen hat und dabei mehr Punkte als j
 
 - Die Tabelle zeigt pro Spieler und Feld die Treffer: Strich (1), Kreuz (2), Kreuz im Kreis (geschlossen).
 - Das Feld, auf dem du gerade punkten kannst, ist markiert.
-- Das Tastenfeld zeigt nur 0, 15 bis 20 und Bull.
+- Das Tastenfeld zeigt nur X, 15 bis 20 und Bull. **X** trägt die restlichen Darts der Aufnahme als Fehlwürfe ein; Undo nimmt sie zusammen zurück.

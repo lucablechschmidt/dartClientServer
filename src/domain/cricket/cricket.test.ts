@@ -104,7 +104,7 @@ describe("cricket (M7, legacy §4)", () => {
   });
 
   it("undo across the player switch reopens the previous visit", () => {
-    const s = undo(play(leg(), ...MISS, S(20)), 2);
+    const s = undo(play(leg(), T(20), S(19), S(18), S(20)), 2);
     expect(cricket.currentPlayer(s)).toBe(A);
     expect(cricket.isOpenVisit(s, 0)).toBe(true);
     expect(s.visits[0].darts).toHaveLength(2);
@@ -147,5 +147,25 @@ describe("cricket (M7, legacy §4)", () => {
     }
     const again = play(leg(A, B, C), ...s.visits.flatMap((v) => v.darts));
     expect(again).toEqual(s);
+  });
+
+  describe("cricket: the X key (11.11.2026)", () => {
+    it("misses at the end of a visit go back with one undo, the darts before stay", () => {
+      const s = play(leg(), T(20), S(0), S(0)); // T20, then X for the last two
+      expect(s.visits).toHaveLength(1);
+      const back = undo(s);
+      expect(back.visits[0].darts).toEqual([T(20)]);
+      expect(cricket.currentPlayer(back)).toBe(A);
+    });
+    it("X as the first dart: one undo removes the whole visit, the turn goes back", () => {
+      const s = play(leg(), ...MISS);
+      expect(cricket.currentPlayer(s)).toBe(B);
+      const back = undo(s);
+      expect(back.visits).toHaveLength(0);
+      expect(cricket.currentPlayer(back)).toBe(A);
+    });
+    it("other darts still go back one by one", () => {
+      expect(undo(play(leg(), T(20), S(19))).visits[0].darts).toEqual([T(20)]);
+    });
   });
 });

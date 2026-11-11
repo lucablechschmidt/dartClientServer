@@ -1,9 +1,24 @@
 import { groupStandings, slotsOf, type PlayerPanelData } from "../game/board";
 import type { GameMode } from "../game/mode";
 import { isDart } from "../game/scoring";
-import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId } from "../game/types";
-import { dartsOf, lastOpenVisit, nextSeat, playerOnTurn, popDart, previousVisit, shownVisit, withDart } from "../game/visits";
+import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId, type Result, type UndoError } from "../game/types";
+import { dartsOf, lastOpenVisit, nextSeat, playerOnTurn, previousVisit, shownVisit, withDart } from "../game/visits";
 import { closedFields, CRICKET_FIELDS, isClosedForAll, tally } from "./tally";
+
+/**
+ * Undo: the misses at the end of a visit go back all at once (in Cricket a miss is only entered with the
+ * X key, 11.11.2026, which fills the rest of the visit; like the
+ * filled slots of a bust in X01); any other dart one by one.
+ */
+function undoDart(state: LegState): Result<LegState, UndoError> {
+  const last = state.visits.at(-1);
+  if (!last) return { ok: false, reason: "nothing-to-undo" };
+  let keep = last.darts.length - 1;
+  if (last.darts[keep]?.field === 0) while (keep > 0 && last.darts[keep - 1].field === 0) keep--;
+  const darts = last.darts.slice(0, keep);
+  const visits = darts.length === 0 ? state.visits.slice(0, -1) : [...state.visits.slice(0, -1), { ...last, darts }];
+  return { ok: true, value: { ...state, visits } };
+}
 
 const finished = (state: LegState) => tally(state).winner !== null;
 const openVisit = (state: LegState) => lastOpenVisit(state, finished(state));
@@ -22,7 +37,7 @@ export const cricket: GameMode = {
     if (finished(state)) return { ok: false, reason: "leg-finished" };
     return { ok: true, value: withDart(state, openVisit(state), currentPlayer(state), dart) };
   },
-  undoDart: popDart,
+  undoDart,
   isOpenVisit: (state, index) => index === state.visits.length - 1 && openVisit(state) !== null,
   currentPlayer,
   isLegFinished: finished,

@@ -13,6 +13,7 @@ import {
   mayPlayOut,
   maySetStarter,
   mayUndo,
+  MISS,
   projectMatch,
   type Dart,
   type MatchState,
@@ -83,7 +84,7 @@ export function ScoreboardScreen({
     () => (onLoadAchievements ? onLoadAchievements(initial.id) : Promise.resolve([])),
     [onLoadAchievements, initial.id],
   );
-  const { state, sync, error, isOpen, pending, stale, throwDart, undo, playOut, chooseStarter, decide, retryNow, discard } =
+  const { state, sync, error, isOpen, pending, stale, throwDart, throwDarts, undo, playOut, chooseStarter, decide, retryNow, discard } =
     useVisitSync<Reason>({
       initial,
       onCommitVisit,
@@ -214,11 +215,12 @@ export function ScoreboardScreen({
 
   const keypad = (
     <Keypad
-      texts={{ keypad: texts.keypad, bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple }}
+      texts={{ keypad: texts.keypad, bull: texts.bull, undo: texts.undo, double: texts.double, triple: texts.triple, miss: texts.miss }}
       canThrow={enterOk}
       canUndo={undoOk}
       onDart={throwDart}
       onUndo={undoAndReopen}
+      onMissRest={() => throwDarts(Array.from({ length: board.dartsLeft }, () => MISS))}
       layout={board.mode === "cricket" ? "cricket" : "full"}
     />
   );

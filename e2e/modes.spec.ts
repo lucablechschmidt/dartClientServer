@@ -13,14 +13,22 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await register(B);
   });
 
-  test("cricket: scoring from the fourth mark, undo takes the points back, reduced keypad", async ({ admin }) => {
+  test("cricket: scoring from the fourth mark, undo takes the points back, reduced keypad with X", async ({ admin }) => {
     await startMatch(admin, "cricket", [A, B]);
     const b = board(admin);
     await b.tap(g.triple, "20", g.triple, "20");
     expect((await b.scores())[0]).toBe("60");
     await b.tap(g.undo);
     expect((await b.scores())[0]).toBe("0");
-    await b.tap(g.triple, "19", g.triple, "18", ...K.MISS, g.triple, "17", g.triple, "16", g.triple, "15", ...K.MISS);
+    await b.tap(g.triple, "19", g.triple, "18");
+    // B: 15, then X fills the last two darts with misses; one undo takes both back (like a bust)
+    await b.tap("15", g.miss, g.undo, "16", "17");
+    const row17 = admin
+      .getByRole("table", { name: g.marks })
+      .getByRole("row")
+      .filter({ has: admin.getByRole("rowheader", { name: "17" }) });
+    await expect(row17.getByRole("cell")).toHaveText([g.markSymbols[0], g.markSymbols[1]]); // the 17 is B's third dart, not A's first
+    await b.tap(g.triple, "17", g.triple, "16", g.triple, "15", g.miss);
     await expect(admin.getByText(g.nextPlayer.replace("{name}", B))).toHaveCount(1);
     await expect(b.key("1")).toHaveCount(0);
     await b.tap(g.double, g.bull, g.bull, "20");
@@ -35,7 +43,7 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await startMatch(admin, "cricket", [ADMIN, A, B]);
     const b = board(admin);
     await b.tap(g.triple, "20", g.triple, "19", "18"); // admin: 20 and 19 closed, 18 one mark
-    await b.tap(g.triple, "20", g.double, "19", "0"); // A: 20 closed, 19 two marks
+    await b.tap(g.triple, "20", g.double, "19", g.miss); // A: 20 closed, 19 two marks
     await b.tap(g.triple, "20", "17", "17"); // B: 20 closed, now by everyone
     const table = admin.getByRole("table", { name: g.marks });
     await expect(table.getByRole("rowheader", { name: "20" })).toHaveClass(/line-through/);

@@ -7,12 +7,15 @@ export type KeypadKey =
   | { kind: "bull" }
   | { kind: "double" }
   | { kind: "triple" }
-  | { kind: "undo" };
+  | { kind: "undo" }
+  /** Cricket: the rest of the visit as misses (11.11.2026, instead of 0). */
+  | { kind: "miss" };
 
 export type Modifier = "none" | "double" | "triple";
 export type KeypadState = { modifier: Modifier };
 
-export type KeypadOutput = { state: KeypadState; dart: Dart } | { state: KeypadState; undo: true } | { state: KeypadState };
+export type KeypadOutput =
+  { state: KeypadState; dart: Dart } | { state: KeypadState; undo: true } | { state: KeypadState; missRest: true } | { state: KeypadState };
 
 export const initialKeypadState: KeypadState = { modifier: "none" };
 
@@ -27,12 +30,17 @@ export const KEYPAD_ROWS: KeypadKey[][] = [
 const numbers = (...values: number[]): KeypadKey[] => values.map((value) => ({ kind: "number", value }));
 
 /**
- * Key layouts: the legacy keypad, and Cricket's (Figma): only 0, 15–20 and Bull, the modifiers and
- * undo in a shorter centered row. Every other field would count nothing in Cricket anyway.
+ * Key layouts: the legacy keypad, and Cricket's (Figma): only X, 15–20 and Bull, the modifiers and
+ * undo in a shorter centered row. Every other field would count nothing in Cricket anyway. X (instead
+ * of 0, 11.11.2026) fills the rest of the visit with misses; undo takes them back at once.
  */
 export const KEYPAD_LAYOUTS = {
   full: KEYPAD_ROWS,
-  cricket: [numbers(0, 15, 16, 17), [...numbers(18, 19, 20), { kind: "bull" }], [{ kind: "double" }, { kind: "triple" }, { kind: "undo" }]],
+  cricket: [
+    [{ kind: "miss" }, ...numbers(15, 16, 17)],
+    [...numbers(18, 19, 20), { kind: "bull" }],
+    [{ kind: "double" }, { kind: "triple" }, { kind: "undo" }],
+  ],
 } satisfies Record<string, KeypadKey[][]>;
 export type KeypadLayout = keyof typeof KEYPAD_LAYOUTS;
 
@@ -53,6 +61,8 @@ export function pressKey(state: KeypadState, key: KeypadKey): KeypadOutput {
       return { state: { modifier: state.modifier === "triple" ? "none" : "triple" } };
     case "undo":
       return { state: initialKeypadState, undo: true };
+    case "miss":
+      return { state: initialKeypadState, missRest: true };
     case "bull":
       if (state.modifier === "triple") return { state };
       return { state: initialKeypadState, dart: { field: 25, type: state.modifier === "double" ? "double" : "single" } };

@@ -318,6 +318,23 @@ export function useVisitSync<Reason extends string>({
     syncServer(state, r.value, [...(open ? rethrowable(open) : []), dart]);
   };
 
+  /** Several darts at once (Cricket's X: the rest of the visit as misses); one update, one sync. */
+  const throwDarts = (darts: Dart[]) => {
+    let next = state;
+    for (const dart of darts) {
+      const r = applyMatchDart(next, dart);
+      if (!r.ok) {
+        setError(errorText(r.reason));
+        return;
+      }
+      next = r.value;
+    }
+    if (next === state) return;
+    update(next);
+    const open = openVisit(currentLeg(state));
+    syncServer(state, next, [...(open ? rethrowable(open) : []), ...darts]);
+  };
+
   const undo = () => {
     const r = undoMatchDart(state);
     if (!r.ok) {
@@ -362,5 +379,5 @@ export function useVisitSync<Reason extends string>({
     push({ kind: "decide", playerId });
   };
 
-  return { state, sync, error, isOpen, pending, stale, throwDart, undo, playOut, chooseStarter, decide, retryNow, discard };
+  return { state, sync, error, isOpen, pending, stale, throwDart, throwDarts, undo, playOut, chooseStarter, decide, retryNow, discard };
 }

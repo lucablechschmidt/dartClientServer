@@ -4,6 +4,9 @@ import { initialKeypadState, isKeyHidden, pressKey, type KeypadState } from "./k
 const s = (modifier: KeypadState["modifier"]): KeypadState => ({ modifier });
 
 describe("pressKey", () => {
+  it("X (Cricket) asks for the rest of the visit as misses and drops a modifier", () => {
+    expect(pressKey(s("double"), { kind: "miss" })).toEqual({ state: initialKeypadState, missRest: true });
+  });
   it("plain number is a single and keeps no modifier", () => {
     expect(pressKey(initialKeypadState, { kind: "number", value: 20 })).toEqual({
       state: initialKeypadState,

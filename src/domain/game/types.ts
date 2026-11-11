@@ -63,3 +63,6 @@ export type StarterError = "leg-started" | "unknown-player" | "leg-finished";
 export type DecideError = "not-between-legs" | "unknown-player";
 
 export const MAX_DARTS_PER_VISIT = 3;
+
+/** A miss (field 0). Cricket's X key fills the rest of a visit with it (11.11.2026). */
+export const MISS: Dart = { field: 0, type: "single" };
