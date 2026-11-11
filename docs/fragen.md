@@ -4,6 +4,16 @@
 
 ---
 
+## Spielregeln im Setup abnehmen (11.11.2026)
+
+**Befund:** Für jeden Modus liegt ein Entwurf der Regeln als Markdown neben der Domäne: `src/domain/x01/regeln.md`, `src/domain/cricket/regeln.md`, `src/domain/elimination/regeln.md`, `src/domain/splitscore/regeln.md`. Grundlage sind der Code des Ports und `legacy-analysis.md` §3–6 (inklusive der Abweichungen vom Legacy: Platzierungen ab drei Spielern, Fehlwurf nie Bust, Anwurf bei jeder Spielerzahl). Aufbau je Datei: ein einleitender Absatz, dann `###`-Abschnitte mit Listen, ohne eigene Überschrift (die steht im Pop-over: „Regeln: X01“). Der Kommentar in der ersten Zeile wird nicht angezeigt. Im Setup gibt es schon den Info-Button oben rechts; er zeigt bis zur Abnahme „Regeln folgen“. Der X01-Text nennt den Checkout-Hinweis allgemein; bei Triple Out ist er heute falsch (Frage unten).
+
+**Optionen für die Anzeige:** (a) eine kleine Markdown-Bibliothek (`react-markdown`, neue Abhängigkeit), (b) ein eigener Mini-Renderer für genau das, was die Dateien nutzen (Absätze, `###`, Listen, **fett**), ohne Abhängigkeit, mit Test.
+
+**Frage:** Texte bitte direkt in den Dateien bearbeiten und hier „abgenommen“ eintragen. Welche Option für die Anzeige? Default ohne Antwort: (b).
+
+---
+
 ## Checkout-Hinweis bei Single-out und Triple-out (7.11.2026)
 
 **Befund:** Die Finish-Tabelle (`src/domain/checkouts.ts`) nimmt wie im Legacy Double-out an und wird unabhängig von der Out-Regel gezeigt. Bei Single-out sind die Wege gültig, aber nicht die kürzesten (19 Rest mit einem Dart bekommt keinen Hinweis). Bei Triple-out sind sie falsch (D20 beendet das Leg nicht).

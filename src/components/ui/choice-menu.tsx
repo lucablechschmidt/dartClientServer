@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ChoiceMark } from "./choice-parts";
+import { useDismiss } from "./use-dismiss";
 
 export type Choice<V extends string | number> = { value: V; label: string };
 
@@ -58,31 +59,21 @@ export function ChoiceMenu<V extends string | number>({
   const chosen = options.find((o) => o.value === value);
   const current = chosen?.label ?? String(value);
 
+  /** A field in the list takes its input on blur; blur it before the list goes away. */
+  const close = useCallback(() => {
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement && root.current?.contains(focused)) focused.blur();
+    setOpen(false);
+  }, []);
+  useDismiss(open, root, close, trigger);
+
   useEffect(() => {
     if (!open) return;
-    /** A field in the list takes its input on blur; blur it before the list goes away. */
-    const close = () => {
-      const focused = document.activeElement;
-      if (focused instanceof HTMLElement && root.current?.contains(focused)) focused.blur();
-      setOpen(false);
-    };
-    const outside = (e: PointerEvent) => !root.current?.contains(e.target as Node) && close();
-    const escape = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      close();
-      trigger.current?.focus();
-    };
     /** Tabbing out closes; a blur to nowhere (the phone keyboard's "done") keeps it open. */
     const leave = (e: FocusEvent) => e.relatedTarget instanceof Node && !root.current?.contains(e.relatedTarget) && setOpen(false);
     const node = root.current;
-    document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape);
     node?.addEventListener("focusout", leave);
-    return () => {
-      document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("keydown", escape);
-      node?.removeEventListener("focusout", leave);
-    };
+    return () => node?.removeEventListener("focusout", leave);
   }, [open]);
 
   useEffect(() => {

@@ -49,4 +49,10 @@ describe("setups per mode (M7)", () => {
     await user.click(playerRow("Moschusochse"));
     expect(screen.getByRole("button", { name: t.start })).toBeEnabled();
   });
+  it("an info button in the top row opens the mode's rules as a pop-over (placeholder until approved)", async () => {
+    const user = userEvent.setup();
+    render(<CricketSetup {...props} />);
+    await user.click(screen.getByRole("button", { name: t.rules }));
+    expect(screen.getByRole("region", { name: t.rulesTitle.replace("{mode}", t.modes.cricket) })).toHaveTextContent(t.rulesSoon);
+  });
 });

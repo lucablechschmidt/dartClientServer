@@ -156,6 +156,10 @@ export const de = {
   },
   newGame: {
     title: "Neues Spiel",
+    rules: "Regeln",
+    rulesTitle: "Regeln: {mode}",
+    /** Until Luca has approved src/domain/<mode>/regeln.md. */
+    rulesSoon: "Regeln folgen",
     choosePlayers: "Spieler in Wurfreihenfolge antippen",
     choosePlayersTitle: "Spieler auswählen",
     selectedCount: "{n} ausgewählt",

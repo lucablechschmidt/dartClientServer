@@ -9,7 +9,8 @@ import { ChoiceMenu, type Choice } from "@/components/ui/choice-menu";
 import { DisclosureChevron, LabeledValue } from "@/components/ui/choice-parts";
 import { ChoiceNumberField } from "@/components/ui/choice-number-field";
 import { FormError } from "@/components/ui/form-controls";
-import { ArrowRightIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, InfoIcon, PhoneIcon, TargetIcon } from "@/components/ui/icons";
+import { Popover } from "@/components/ui/popover";
 import type { GuestResult, Player } from "@/domain/player";
 import type { InvalidInput, ModeId } from "@/domain/game";
 import type { Texts } from "@/i18n/de";
@@ -103,8 +104,18 @@ export function SetupShell({
   return (
     <div className="flex flex-1 flex-col bg-bg-grouped px-4 text-fg">
       <PageFrame className="flex-1 gap-4 pb-4">
-        <div className="flex">
+        <div className="flex items-center justify-between">
           <BackButton href={backHref} label={commonTexts.back} />
+          {/* The rules of the mode; not on the tournament setup (it has its own heading). */}
+          {!heading && (
+            <Popover
+              label={texts.rules}
+              icon={<InfoIcon className="h-8 w-8" />}
+              title={texts.rulesTitle.replace("{mode}", texts.modes[mode])}
+            >
+              <p className="text-fg-muted">{texts.rulesSoon}</p>
+            </Popover>
+          )}
         </div>
         <div>
           <h1 className="text-title font-bold tracking-tight">{heading?.title ?? texts.title}</h1>
