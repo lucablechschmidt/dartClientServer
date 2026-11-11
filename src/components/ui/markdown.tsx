@@ -3,8 +3,9 @@ import rehypeRaw from "rehype-raw";
 
 /**
  * Markdown as the app's own elements (rules in the setup). A server component: react-markdown runs
- * while the page renders, the phone only gets the finished elements. Raw HTML in the text is skipped,
- * so a comment line stays invisible and nothing in the file can inject markup.
+ * while the page renders, the phone only gets the finished elements. Raw HTML in the text is rendered
+ * (rehype-raw), so the rules can use <details>/<summary> for folding sections; comments stay invisible.
+ * That is fine because the texts come only from the repo (src/domain/<mode>/regeln.md), never from users.
  */
 const components: Components = {
   h2: ({ children }) => <h3 className="pt-2 font-semibold">{children}</h3>,
