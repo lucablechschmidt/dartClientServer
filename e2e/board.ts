@@ -74,10 +74,12 @@ export async function addGuest(page: Page, name: string) {
 /** The scoring screen of one device. */
 export function board(page: Page) {
   const key = (name: string) => page.getByRole("button", { name, exact: true });
-  /** The status line is "saved" again; Next keeps a previous page hidden in the DOM, so only the visible one counts. */
+  /**
+   * The status line is "saved" again. Once saved it is empty, so invisible; waiting is for no visible
+   * status line saying "saving" or "not saved" (Next keeps a previous page hidden in the DOM).
+   */
   const saved = async () => {
-    if (await page.locator("[role=status]:visible").count())
-      await page.locator("[role=status][data-sync=saved]:visible").waitFor({ state: "attached" });
+    await page.locator('[role=status][data-sync]:not([data-sync="saved"]):visible').first().waitFor({ state: "detached" });
   };
   return {
     key,
