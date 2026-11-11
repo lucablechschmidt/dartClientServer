@@ -1,4 +1,5 @@
 import ReactMarkdown, { type Components } from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 /**
  * Markdown as the app's own elements (rules in the setup). A server component: react-markdown runs
@@ -17,7 +18,7 @@ const components: Components = {
 export function Markdown({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <ReactMarkdown components={components} skipHtml>
+      <ReactMarkdown rehypePlugins={[rehypeRaw]} components={components} skipHtml>
         {text}
       </ReactMarkdown>
     </div>
