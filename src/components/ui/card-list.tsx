@@ -14,12 +14,46 @@ export function GroupedSection({ children, className = "", width }: { children: 
   );
 }
 
-/** White card with rounded corners; its children are `CardRow`s. */
-export function CardList({ children, label }: { children: ReactNode; label?: string }) {
+const cardTones = { card: "bg-card-bg", fill: "bg-fill" } as const;
+
+/**
+ * Card with rounded corners; its children are `CardRow`s. `card`: white on the gray page area
+ * (GroupedSection); `fill`: gray on the plain page (victory screen).
+ */
+export function CardList({
+  children,
+  label,
+  tone = "card",
+  className = "",
+}: {
+  children: ReactNode;
+  label?: string;
+  tone?: keyof typeof cardTones;
+  className?: string;
+}) {
   return (
-    <ul aria-label={label} className="w-full rounded-panel bg-card-bg px-4 text-fg">
+    <ul aria-label={label} className={`w-full rounded-panel px-4 text-fg ${cardTones[tone]} ${className}`}>
       {children}
     </ul>
+  );
+}
+
+/**
+ * A row of facts: an optional lead (place), a title with a muted line below, a value on the right
+ * (players on the victory screen).
+ */
+export function DetailRow({ lead, title, detail, value }: { lead?: ReactNode; title: string; detail?: string; value?: ReactNode }) {
+  return (
+    <CardRow>
+      <span className="flex min-w-0 items-center gap-4">
+        {lead !== undefined && <span className="w-4 shrink-0 text-sm text-fg-muted tabular-nums">{lead}</span>}
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate">{title}</span>
+          {detail && <span className="text-sm text-fg-muted tabular-nums">{detail}</span>}
+        </span>
+      </span>
+      {value !== undefined && <span className="shrink-0 font-semibold tabular-nums">{value}</span>}
+    </CardRow>
   );
 }
 

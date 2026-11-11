@@ -214,6 +214,7 @@
   --spacing-cta: 3.5rem; /* height of "Spiel starten" */
   --spacing-qr: 14rem; /* invite QR code */
   --spacing-chart: 10rem; /* height of the average chart; its width follows the column */
+  --spacing-banner: 25dvh; /* most height the achievement banner takes on the victory screen; more scrolls */
   --spacing-cricket-label: 3.5rem; /* field column of the Cricket table */
   --spacing-cricket-col: 4.5rem; /* narrowest player column; more players scroll sideways */
 }

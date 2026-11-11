@@ -201,6 +201,16 @@ export function MedalIcon(props: IconProps) {
   );
 }
 
+/** arrow.uturn.backward (take the last dart back) */
+export function UndoIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M9 14L4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 010 11H11" />
+    </svg>
+  );
+}
+
 /** chevron.right (rows that open a page) */
 export function ChevronRightIcon(props: IconProps) {
   return (

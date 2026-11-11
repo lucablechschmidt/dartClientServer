@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 
 /**
@@ -53,21 +54,49 @@ export function TextButton({
   );
 }
 
-/** The one filled button of a screen (log in, join, try again). */
-export function PrimaryButton({
-  type = "submit",
-  pending = false,
-  disabled,
+/**
+ * Full-width buttons: `primary` the one filled button of a screen (log in, join, play again),
+ * `outline` a second choice in the accent, `secondary` a gray one (undo, statistics), `quiet` text only
+ * (back to the start page).
+ */
+const buttonVariants = {
+  primary: "bg-accent font-semibold text-on-accent",
+  outline: "border border-accent font-semibold text-accent",
+  secondary: "bg-fill font-medium text-fg",
+  quiet: "text-fg-muted",
+} as const;
+export type ButtonVariant = keyof typeof buttonVariants;
+const buttonClass = (variant: ButtonVariant, className: string) =>
+  `inline-flex min-h-touch w-full items-center justify-center gap-2 rounded-box px-4 disabled:opacity-50 ${buttonVariants[variant]} ${className}`;
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & Pending & { variant?: ButtonVariant };
+
+/** A full-width button in one of the variants; defaults to type="button". */
+export function Button({ variant = "secondary", type = "button", pending = false, disabled, className = "", ...props }: ButtonProps) {
+  return <button type={type} {...props} {...pendingProps(pending, disabled)} className={buttonClass(variant, className)} />;
+}
+
+/** The one filled button of a screen (log in, join, try again); defaults to type="submit". */
+export function PrimaryButton({ type = "submit", ...props }: Omit<ButtonProps, "variant">) {
+  return <Button {...props} type={type} variant="primary" />;
+}
+
+/** A link that looks like a full-width button (to the tournament, to the statistics). */
+export function ButtonLink({
+  href,
+  variant = "secondary",
   className = "",
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & Pending) {
+  children,
+}: {
+  href: string;
+  variant?: ButtonVariant;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <button
-      type={type}
-      {...props}
-      {...pendingProps(pending, disabled)}
-      className={`min-h-touch w-full rounded-box bg-accent font-semibold text-on-accent disabled:opacity-50 ${className}`}
-    />
+    <Link href={href} className={buttonClass(variant, className)}>
+      {children}
+    </Link>
   );
 }
 
