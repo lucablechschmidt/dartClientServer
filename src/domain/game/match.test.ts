@@ -11,6 +11,7 @@ import {
   newMatch,
   nextLegNumber,
   setLegStarter,
+  reorderPlayers,
   undoMatchDart,
   undoMatchVisit,
   undoStep,
@@ -318,5 +319,25 @@ describe("matchTotals (victory screen)", () => {
     const m = newMatch([A, B], rules, bestOf3);
     expect(projectMatch(m, { [A]: "A", [B]: "B" }).totals).toBeNull();
     expect(projectMatch(winLeg(winLeg(m, A), A), { [A]: "A", [B]: "B" }).totals?.[A].legs).toBe(2);
+  });
+});
+
+describe("reorderPlayers (11.11.2026: hold and drag before the first dart)", () => {
+  it("new order, the starter stays the same person", () => {
+    const m = setLegStarter(newMatch([A, B, C], rules, { legsToWinSet: 1, setsToWinMatch: 1 }), B);
+    if (!m.ok) throw new Error(m.reason);
+    const r = reorderPlayers(m.value, [C, A, B]);
+    if (!r.ok) throw new Error(r.reason);
+    expect(r.value.players).toEqual([C, A, B]);
+    expect(currentLeg(r.value).players).toEqual([C, A, B]);
+    expect(matchCurrentPlayer(r.value)).toBe(B); // B still starts, then C, then A
+    expect(matchCurrentPlayer(play(r.value, ...MISS))).toBe(C);
+  });
+  it("not after the first dart, and only the match's players, each once", () => {
+    const m = newMatch([A, B, C], rules, { legsToWinSet: 1, setsToWinMatch: 1 });
+    expect(reorderPlayers(play(m, S(1)), [C, B, A])).toEqual({ ok: false, reason: "leg-started" });
+    expect(reorderPlayers(m, [A, B])).toEqual({ ok: false, reason: "unknown-player" });
+    expect(reorderPlayers(m, [A, A, B])).toEqual({ ok: false, reason: "unknown-player" });
+    expect(reorderPlayers(m, [A, B, "x"])).toEqual({ ok: false, reason: "unknown-player" });
   });
 });

@@ -1,6 +1,19 @@
 import { applyDart, currentPlayer, isLegFinished, openVisit, playOutUndo, undoDart, winnerOf } from "./modes";
 import { newLeg } from "./state";
-import type { ApplyError, Dart, DecideError, LegState, ModeId, PlayerId, Result, Rules, StarterError, UndoError, Visit } from "./types";
+import type {
+  ApplyError,
+  Dart,
+  DecideError,
+  LegState,
+  ModeId,
+  PlayerId,
+  ReorderError,
+  Result,
+  Rules,
+  StarterError,
+  UndoError,
+  Visit,
+} from "./types";
 
 /**
  * A match is a list of legs (M5). `LegState` stays the unit that applyDart/undoDart know; legs,
@@ -205,4 +218,17 @@ export function setLegStarter(m: MatchState, playerId: PlayerId): Result<MatchSt
   if (status === "leg-finished") return { ok: true, value: startNextLeg(m, seat) };
   if (currentLeg(m).visits.length > 0) return { ok: false, reason: "leg-started" };
   return { ok: true, value: withCurrentLeg(m, { ...currentLeg(m), starter: seat }) };
+}
+
+/**
+ * New throwing order before the first dart of the match (11.11.2026: hold a player and drag). `order`
+ * must hold every player once; the chosen starter stays the same person, only the order after them changes.
+ */
+export function reorderPlayers(m: MatchState, order: readonly PlayerId[]): Result<MatchState, ReorderError> {
+  if (m.legs.length > 1 || currentLeg(m).visits.length > 0) return { ok: false, reason: "leg-started" };
+  const same = order.length === m.players.length && new Set(order).size === order.length && m.players.every((p) => order.includes(p));
+  if (!same) return { ok: false, reason: "unknown-player" };
+  const starter = m.players[currentLeg(m).starter];
+  const players = [...order];
+  return { ok: true, value: { ...m, players, legs: m.legs.map((l) => ({ ...l, players, starter: players.indexOf(starter) })) } };
 }

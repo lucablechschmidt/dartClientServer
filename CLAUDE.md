@@ -61,7 +61,8 @@ Stack: Next 16 (App Router, Cache Components on: pages that read SQLite
 call `connection()` inside a Suspense boundary, see `src/server/request.ts`),
 Tailwind 4 (tokens in `globals.css`, no tailwind.config), Drizzle + better-sqlite3
 (pinned to 12, v13 segfaults on Node 22.13 darwin-arm64), react-markdown (server-rendered only: the
-rules per mode in `src/domain/<mode>/regeln.md`, see `src/server/rules.ts`), Vitest, Playwright
+rules per mode in `src/domain/<mode>/regeln.md`, see `src/server/rules.ts`), dnd-kit (hold and drag to reorder
+players before the first dart, `src/components/darts/sortable.tsx`, lazy-loaded), Vitest, Playwright
 (browser tests in `e2e/` since M6, texts from `de`). npm install scripts are gated: `allowScripts` in
 package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.

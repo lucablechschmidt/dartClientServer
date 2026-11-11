@@ -39,6 +39,8 @@ type Props = {
   onUndoVisit: (matchId: string, step?: string) => Promise<ActionReply>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
+  /** 11.11.2026: new throwing order before the first dart. */
+  onReorder: (matchId: string, order: PlayerId[]) => Promise<ActionReply>;
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   /** M9: set for tournament games; the victory screen leads back there. */
   tournamentHref?: string;
@@ -67,6 +69,7 @@ export function ScoreboardScreen({
   onUndoVisit,
   onPlayOut,
   onSetStarter,
+  onReorder,
   onDecideWinner,
   onLoad,
   onRestart,
@@ -84,17 +87,33 @@ export function ScoreboardScreen({
     () => (onLoadAchievements ? onLoadAchievements(initial.id) : Promise.resolve([])),
     [onLoadAchievements, initial.id],
   );
-  const { state, sync, error, isOpen, pending, stale, throwDart, throwDarts, undo, playOut, chooseStarter, decide, retryNow, discard } =
-    useVisitSync<Reason>({
-      initial,
-      onCommitVisit,
-      onUndoVisit,
-      onPlayOut,
-      onSetStarter,
-      onDecideWinner,
-      onLoad,
-      errorText,
-    });
+  const {
+    state,
+    sync,
+    error,
+    isOpen,
+    pending,
+    stale,
+    throwDart,
+    throwDarts,
+    undo,
+    playOut,
+    chooseStarter,
+    reorder,
+    decide,
+    retryNow,
+    discard,
+  } = useVisitSync<Reason>({
+    initial,
+    onCommitVisit,
+    onUndoVisit,
+    onPlayOut,
+    onSetStarter,
+    onReorder,
+    onDecideWinner,
+    onLoad,
+    errorText,
+  });
 
   const legClosed = closedLeg === legKey(state);
   const view = useMemo(() => projectMatch(state, initial.names, legClosed), [state, initial.names, legClosed]);
@@ -124,6 +143,8 @@ export function ScoreboardScreen({
       ? null
       : texts.turnOf.replace("{name}", initial.names[matchCurrentPlayer(state)] ?? "");
   const turnHint = othersHint ?? starterHint;
+  // 11.11.2026: 3+ players may be put in a new order before the first dart of the match (host or admin, like the starter)
+  const reorderOk = starterOk && playerIds.length >= 3 && state.legs.length === 1;
   const lastName = view.lastPlayerId ? (initial.names[view.lastPlayerId] ?? "") : "";
 
   const header = (
@@ -236,6 +257,7 @@ export function ScoreboardScreen({
           isOpen={isOpen}
           turnHint={turnHint}
           onSelectStarter={starterOk ? chooseStarter : undefined}
+          onReorder={reorderOk ? reorder : undefined}
         />
         {confirm}
         {staleSheet}
@@ -253,6 +275,7 @@ export function ScoreboardScreen({
         turnHint={othersHint}
         starterHint={starterHint}
         onSelectStarter={starterOk ? chooseStarter : undefined}
+        onReorder={reorderOk ? reorder : undefined}
         onResign={view.playOut && playOutOk ? () => setAsking("resign") : null}
       />
       {confirm}

@@ -10,6 +10,7 @@ import {
   restartMatchAction,
   setPlayOutAction,
   setStarterAction,
+  reorderPlayersAction,
   decideWinnerAction,
   newAchievementsAction,
   undoVisitAction,
@@ -34,6 +35,7 @@ async function Match({ params }: { params: Promise<{ id: string }> }) {
       onUndoVisit={undoVisitAction}
       onPlayOut={setPlayOutAction}
       onSetStarter={setStarterAction}
+      onReorder={reorderPlayersAction}
       onDecideWinner={decideWinnerAction}
       tournamentHref={tournamentId ? `/tournaments/${tournamentId}` : undefined}
       onLoad={loadMatchAction}

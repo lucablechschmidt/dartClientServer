@@ -41,6 +41,7 @@ describe("ScoreboardScreen", () => {
         onUndoVisit={reply}
         onPlayOut={reply}
         onSetStarter={reply}
+        onReorder={reply}
         onDecideWinner={reply}
         onLoad={reply}
         onRestart={() => Promise.resolve()}

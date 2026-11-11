@@ -15,6 +15,7 @@ import {
   restartMatch,
   setPlayOut,
   setStarter,
+  reorder,
   undoVisit,
 } from "./match-service";
 import { createGuest, createPlayer, deletePlayer } from "./player-service";
@@ -367,6 +368,24 @@ describe("legs, sets and places (M5)", () => {
     commit(id, OUT, host);
     expect(setPlayOut(deps, { playerId: ids[2], name: "C", isAdmin: false }, id, true)).toEqual({ ok: false, reason: "forbidden" });
     expect(setPlayOut(deps, { playerId: ids[0], name: "A", isAdmin: false }, id, true).ok).toBe(true);
+  });
+
+  it("reorder: host or admin before the first dart; stored as seats, the starter stays", () => {
+    const [a, b, c] = players("Casey", "Sam", "Kim");
+    const id = createMatch(deps, { playerIds: [a, b, c], rules: short, hostPlayerId: a });
+    const host = { playerId: a, name: "Casey", isAdmin: false };
+    expect(reorder(deps, { playerId: b, name: "Sam", isAdmin: false }, id, [c, b, a])).toEqual({ ok: false, reason: "forbidden" });
+    expect(reorder(deps, host, id, [c, b])).toEqual({ ok: false, reason: "invalid-input" });
+    ok(setStarter(deps, host, id, b));
+    const v = ok(reorder(deps, host, id, [c, a, b])).view;
+    expect(v.state.players).toEqual([c, a, b]);
+    expect(v.board.activePlayerId).toBe(b);
+    const loaded = loadMatchView(deps, id)!; // stored: seats and starter survive a reload
+    expect(loaded.state.players).toEqual([c, a, b]);
+    expect(loaded.board.activePlayerId).toBe(b);
+    commit(id, MISS, host);
+    expect(loadMatchView(deps, id)!.board.activePlayerId).toBe(c);
+    expect(reorder(deps, host, id, [a, b, c])).toEqual({ ok: false, reason: "leg-started" });
   });
 
   it("starter: host or admin before the first dart; between legs for the next leg", () => {

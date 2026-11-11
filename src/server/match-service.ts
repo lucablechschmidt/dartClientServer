@@ -28,6 +28,7 @@ import {
   projectBoard,
   resign,
   setLegStarter,
+  reorderPlayers,
   startPlayOut,
   undoMatchVisit,
   undoStep,
@@ -183,6 +184,8 @@ function persist(deps: Deps, m: LoadedMatch, next: MatchState): LoadedMatch {
   const legs = [...m.legs];
   const status = matchStatus(next) === "finished" ? "finished" : "running";
   deps.transaction(() => {
+    // a new throwing order before the first dart (reorderPlayers) changes the seats
+    if (next.players.some((p, i) => m.state.players[i] !== p)) deps.matches.setSeatOrder(m.id, next.players);
     for (const gone of legs.splice(next.legs.length)) deps.matches.deleteLeg(gone.id);
     next.legs.forEach((leg, i) => {
       if (i >= legs.length) {
@@ -464,6 +467,21 @@ export function setStarter(deps: Deps, session: Session, matchId: string, player
   if (!maySetStarter(match, actorOf(session))) return { ok: false, reason: "forbidden" };
   const r = setLegStarter(m.state, playerId);
   if (!r.ok) return { ok: false, reason: r.reason === "unknown-player" ? "not-found" : r.reason };
+  const stored = persist(deps, m, r.value);
+  deps.events.publish(matchId);
+  return { ok: true, view: toView(stored, session, now) };
+}
+
+/** New throwing order before the first dart (11.11.2026); host or admin, like the starter. */
+export function reorder(deps: Deps, session: Session, matchId: string, order: PlayerId[]): ActionResult {
+  const m = deps.matches.loadMatch(matchId);
+  if (!m) return { ok: false, reason: "not-found" };
+  const match = accessOf(m);
+  const now = deps.now();
+  if (!isOpen(match, now)) return { ok: false, reason: "match-closed" };
+  if (!maySetStarter(match, actorOf(session))) return { ok: false, reason: "forbidden" };
+  const r = reorderPlayers(m.state, order);
+  if (!r.ok) return { ok: false, reason: r.reason === "unknown-player" ? "invalid-input" : r.reason };
   const stored = persist(deps, m, r.value);
   deps.events.publish(matchId);
   return { ok: true, view: toView(stored, session, now) };

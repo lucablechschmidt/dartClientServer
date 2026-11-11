@@ -6,6 +6,8 @@ export type QueueItem =
   | { kind: "undo"; step: string | null }
   | { kind: "play-out"; value: boolean }
   | { kind: "starter"; playerId: PlayerId }
+  /** 11.11.2026: new throwing order before the first dart. */
+  | { kind: "order"; order: PlayerId[] }
   | { kind: "decide"; playerId: PlayerId };
 
 /**

@@ -214,6 +214,14 @@ export class MemoryMatchRepository implements MatchRepository {
     const m = this.matchOfLeg(legId);
     this.legById(legId).starterIndex = Math.max(0, m.playerIds.indexOf(starterPlayerId));
   }
+  setSeatOrder(matchId: string, playerIds: readonly PlayerId[]): void {
+    const m = this.store.matches.get(matchId);
+    if (!m) return;
+    // legs keep their starter by person; the memory store holds it as a seat index
+    const starters = m.legs.map((l) => m.playerIds[l.starterIndex]);
+    m.playerIds = [...playerIds];
+    m.legs.forEach((l, i) => (l.starterIndex = Math.max(0, m.playerIds.indexOf(starters[i]))));
+  }
   setPlayOut(legId: string, playOut: boolean): void {
     this.legById(legId).playOut = playOut;
   }

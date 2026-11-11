@@ -18,6 +18,8 @@ type Props = {
   /** ToStart: "tap a player"; shown together with the mode's hint (SplitScore: the first target right away). */
   starterHint?: string | null;
   onSelectStarter?: (playerId: PlayerId) => void;
+  /** 11.11.2026: 3+ players before the first dart: hold a small panel and drag. */
+  onReorder?: (order: PlayerId[]) => void;
   /** X01 play-out (M5): the last player may give up. */
   onResign: (() => void) | null;
 };
@@ -26,7 +28,7 @@ type Props = {
  * Scoring screen of X01, Elimination and SplitScore: player panels, the hint line, the legacy keypad;
  * with 3+ players the next player below the keypad, like in Cricket.
  */
-export function StandardBoard({ board, texts, header, keypad, turnHint, starterHint = null, onSelectStarter, onResign }: Props) {
+export function StandardBoard({ board, texts, header, keypad, turnHint, starterHint = null, onSelectStarter, onReorder, onResign }: Props) {
   const modeHint = hintText(board.hint, texts);
   const hint = turnHint ?? ([starterHint, modeHint].filter(Boolean).join(" · ") || null);
   return (
@@ -38,6 +40,8 @@ export function StandardBoard({ board, texts, header, keypad, turnHint, starterH
             players={board.players}
             texts={{ darts: texts.darts, average: texts.average, visit: texts.visit }}
             onSelect={onSelectStarter}
+            onReorder={onReorder}
+            reorderTexts={texts.reorder}
           />
         </div>
       }

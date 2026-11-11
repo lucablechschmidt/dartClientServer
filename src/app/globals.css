@@ -299,6 +299,19 @@
   }
 }
 
+/*
+ * Hold-and-drag reordering (src/components/darts/sortable.tsx): the item's shift while dragging comes from
+ * dnd-kit as numbers and is set as CSS variables, so components need no style prop.
+ */
+@utility sortable-shift {
+  transform: translate3d(var(--drag-x, 0px), var(--drag-y, 0px), 0);
+  transition: var(--drag-transition, none);
+}
+/* iOS: holding a button must not open the callout (copy, look up) instead of starting the drag */
+@utility touch-callout-none {
+  -webkit-touch-callout: none;
+}
+
 /* Transition lengths from the motion tokens (theme.md §5): duration-fast | duration-base | duration-slow */
 @utility duration-fast {
   transition-duration: var(--duration-fast);

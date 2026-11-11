@@ -12,6 +12,7 @@ import {
   resign,
   rethrowable,
   setLegStarter,
+  reorderPlayers,
   startPlayOut,
   undoMatchDart,
   undoStep,
@@ -35,6 +36,8 @@ type Options<Reason extends string> = {
   onUndoVisit: (matchId: string, step?: string) => Promise<ActionReply<Reason>>;
   onPlayOut: (matchId: string, playOut: boolean) => Promise<ActionReply<Reason>>;
   onSetStarter: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
+  /** 11.11.2026: new throwing order before the first dart. */
+  onReorder: (matchId: string, order: PlayerId[]) => Promise<ActionReply<Reason>>;
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply<Reason>>;
   onLoad: (matchId: string) => Promise<ActionReply<Reason>>;
   /** Text for a domain or server error; shown in the status line. */
@@ -77,6 +80,7 @@ export function useVisitSync<Reason extends string>({
   onUndoVisit,
   onPlayOut,
   onSetStarter,
+  onReorder,
   onDecideWinner,
   onLoad,
   errorText,
@@ -125,11 +129,13 @@ export function useVisitSync<Reason extends string>({
           return onPlayOut(matchId, item.value);
         case "starter":
           return onSetStarter(matchId, item.playerId);
+        case "order":
+          return onReorder(matchId, item.order);
         case "decide":
           return onDecideWinner(matchId, item.playerId);
       }
     },
-    [matchId, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onDecideWinner],
+    [matchId, onCommitVisit, onUndoVisit, onPlayOut, onSetStarter, onReorder, onDecideWinner],
   );
 
   /** One call until it gets an answer; null if the queue was dropped meanwhile. */
@@ -368,6 +374,17 @@ export function useVisitSync<Reason extends string>({
     push({ kind: "starter", playerId });
   };
 
+  /** 11.11.2026: a new throwing order before the first dart (hold a player and drag). */
+  const reorder = (order: PlayerId[]) => {
+    const r = reorderPlayers(state, order);
+    if (!r.ok) {
+      setError(errorText(r.reason));
+      return;
+    }
+    update(r.value);
+    push({ kind: "order", order });
+  };
+
   /** M9: declare the winner of a tournament fixture after a leg. */
   const decide = (playerId: PlayerId) => {
     const r = decideWinner(state, playerId);
@@ -379,5 +396,21 @@ export function useVisitSync<Reason extends string>({
     push({ kind: "decide", playerId });
   };
 
-  return { state, sync, error, isOpen, pending, stale, throwDart, throwDarts, undo, playOut, chooseStarter, decide, retryNow, discard };
+  return {
+    state,
+    sync,
+    error,
+    isOpen,
+    pending,
+    stale,
+    throwDart,
+    throwDarts,
+    undo,
+    playOut,
+    chooseStarter,
+    reorder,
+    decide,
+    retryNow,
+    discard,
+  };
 }

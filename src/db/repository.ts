@@ -156,6 +156,8 @@ export type MatchRepository = {
   createLeg(leg: NewLeg): void;
   deleteLeg(legId: string): void;
   setLegStarter(legId: string, starterPlayerId: PlayerId): void;
+  /** New seat order (before the first dart, 11.11.2026); `playerIds` are the match's players in their new order. */
+  setSeatOrder(matchId: string, playerIds: readonly PlayerId[]): void;
   setPlayOut(legId: string, playOut: boolean): void;
   /** Final places of the match; null = not decided (match running again). */
   setPlacements(matchId: string, placements: Record<PlayerId, number | null>): void;

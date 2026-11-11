@@ -390,6 +390,32 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(repo.players.listPlayers(0).map((p) => p.id)).toEqual(["r"]);
   });
 
+  it("seat order: a new order before the first dart; the leg keeps its starter by person", () => {
+    const repo = make();
+    for (const [id, name] of [
+      ["a", "Casey"],
+      ["b", "Sam"],
+      ["c", "Kim"],
+    ])
+      repo.players.createPlayer({ id, name, createdAt: 1, guestUntil: null });
+    repo.matches.createMatch({
+      mode: "x01",
+      id: "m",
+      legId: "l",
+      rules,
+      playerIds: ["a", "b", "c"],
+      starterIndex: 1,
+      format,
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: 1,
+    });
+    repo.matches.setSeatOrder("m", ["c", "a", "b"]);
+    const m = repo.matches.loadMatch("m")!;
+    expect(m.players.map((p) => p.id)).toEqual(["c", "a", "b"]);
+    expect(m.state.players[m.state.legs[0].starter]).toBe("b");
+  });
+
   it("field hits accumulate per player and field, split by ring", () => {
     const repo = make();
     const c = (single = 0, double = 0, triple = 0) => ({ single, double, triple, unsplit: 0 });

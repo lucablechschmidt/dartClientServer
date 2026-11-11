@@ -364,6 +364,15 @@ export class SqliteMatchRepository implements MatchRepository {
   setLegStarter(legId: string, starterPlayerId: PlayerId): void {
     this.db.update(legs).set({ starterPlayerId }).where(eq(legs.id, legId)).run();
   }
+  setSeatOrder(matchId: string, playerIds: readonly PlayerId[]): void {
+    playerIds.forEach((playerId, seat) =>
+      this.db
+        .update(matchPlayers)
+        .set({ seat })
+        .where(and(eq(matchPlayers.matchId, matchId), eq(matchPlayers.playerId, playerId)))
+        .run(),
+    );
+  }
   setPlayOut(legId: string, playOut: boolean): void {
     this.db.update(legs).set({ playOut }).where(eq(legs.id, legId)).run();
   }

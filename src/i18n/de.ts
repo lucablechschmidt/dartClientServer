@@ -389,6 +389,13 @@ export const de = {
     resign: "Aufgeben",
     resignQuestion: "{name} gibt auf? Der Platz bleibt.",
     chooseStarter: "Anwurf: Spieler antippen",
+    /** 11.11.2026: hold a player and drag to change the order (3+ players, before the first dart). */
+    reorder: {
+      roleDescription: "verschiebbar",
+      instructions: "Antippen wählt den Anwurf. Lange halten und ziehen ändert die Reihenfolge, mit der Tastatur Alt und Pfeiltaste.",
+      picked: "{name} aufgenommen",
+      dropped: "{name} an Position {n}",
+    },
     points: "Punkte",
     marks: "Marks",
     /** Cricket marks 0–2 as on a chalk board: a dash for none, a stroke, a cross; 3 is the circled-cross icon. */

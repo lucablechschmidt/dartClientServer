@@ -60,6 +60,7 @@ export type ApplyError = "leg-finished" | "invalid-dart";
 export type UndoError = "nothing-to-undo";
 export type PlayOutError = "no-play-out";
 export type StarterError = "leg-started" | "unknown-player" | "leg-finished";
+export type ReorderError = "leg-started" | "unknown-player";
 export type DecideError = "not-between-legs" | "unknown-player";
 
 export const MAX_DARTS_PER_VISIT = 3;

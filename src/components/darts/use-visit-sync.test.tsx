@@ -55,6 +55,7 @@ function server() {
     }),
     onPlayOut: vi.fn(reply),
     onSetStarter: vi.fn(reply),
+    onReorder: vi.fn(reply),
     onDecideWinner: vi.fn(reply),
     onLoad: vi.fn(reply),
     errorText: (reason: string) => reason,

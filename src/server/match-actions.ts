@@ -11,6 +11,7 @@ import {
   restartMatch,
   setPlayOut,
   setStarter,
+  reorder,
   undoVisit,
   type ActionError,
   type ActionResult,
@@ -56,6 +57,14 @@ export async function setStarterAction(matchId: string, playerId: string): Promi
   if (!isId(matchId)) return notFound;
   if (!isId(playerId)) return invalidInput;
   return setStarter(deps, session, matchId, playerId);
+}
+
+/** 11.11.2026: new throwing order before the first dart (player ids in their new order). */
+export async function reorderPlayersAction(matchId: string, order: string[]): Promise<ActionResult> {
+  const { deps, session } = await requireSession();
+  if (!isId(matchId)) return notFound;
+  if (!Array.isArray(order) || order.length > 50 || !order.every(isId)) return invalidInput;
+  return reorder(deps, session, matchId, order);
 }
 
 export async function undoVisitAction(matchId: string, step?: string): Promise<ActionResult> {
