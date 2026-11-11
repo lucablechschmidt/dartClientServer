@@ -118,8 +118,8 @@ export function SetupShell({
           )}
         </div>
         <div>
-          <h1 className="text-title font-bold tracking-tight">{heading?.title ?? texts.title}</h1>
-          <p className="text-sm text-fg-muted">{heading?.subtitle ?? texts.modes[mode]}</p>
+          <h1 className="text-title font-bold tracking-tight">{heading?.subtitle ?? texts.modes[mode]}</h1>
+          <p className="text-sm text-fg-muted">{heading?.title ?? texts.title}</p>
         </div>
 
         <form id={FORM_ID} action={start} className="flex flex-col gap-3">
