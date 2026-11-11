@@ -1,5 +1,3 @@
-<!-- Entwurf, 11.11.2026: von Luca abzunehmen, erst danach in der App sichtbar. Quelle: src/domain/elimination, docs/legacy-analysis.md §5. -->
-
 Alle starten bei 0 und zählen hoch bis zur Zielpunktzahl. Wer dabei genau auf dem Punktestand eines Mitspielers landet, schickt diesen zurück auf 0.
 
 ### Ablauf

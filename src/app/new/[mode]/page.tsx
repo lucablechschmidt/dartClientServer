@@ -9,7 +9,9 @@ import { createMatchAction } from "@/server/match-actions";
 import { createGuestAction } from "@/server/player-actions";
 import { listPlayers } from "@/server/player-service";
 import { requireSession } from "@/server/request";
+import { Markdown } from "@/components/ui/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
+import { rulesOf } from "@/server/rules";
 
 export const metadata: Metadata = { title: de.newGame.title };
 
@@ -20,6 +22,7 @@ async function Setup({ params }: { params: Promise<{ mode: string }> }) {
   if (!(MODE_IDS as readonly string[]).includes(mode)) notFound();
   const { deps } = await requireSession();
   const ModeSetup = SETUPS[mode as ModeId];
+  const rules = rulesOf(mode as ModeId);
   return (
     <ModeSetup
       players={listPlayers(deps)}
@@ -27,6 +30,7 @@ async function Setup({ params }: { params: Promise<{ mode: string }> }) {
       commonTexts={{ back: de.ui.back, save: de.players.save, cancel: de.players.cancel }}
       onStart={createMatchAction}
       onAddGuest={createGuestAction}
+      rules={rules && <Markdown text={rules} />}
     />
   );
 }

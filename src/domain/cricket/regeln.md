@@ -1,5 +1,3 @@
-<!-- Entwurf, 11.11.2026: von Luca abzunehmen, erst danach in der App sichtbar. Quelle: src/domain/cricket, docs/legacy-analysis.md §4. -->
-
 Gespielt wird nur auf die Felder 15 bis 20 und Bull. Jedes Feld wird mit drei Treffern geschlossen; wer danach weiter trifft, sammelt Punkte.
 
 ### Treffer (Marks)

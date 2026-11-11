@@ -1,5 +1,3 @@
-<!-- Entwurf, 11.11.2026: von Luca abzunehmen, erst danach in der App sichtbar. Quelle: src/domain/x01, docs/legacy-analysis.md §3. -->
-
 Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 0 kommt, gewinnt das Leg.
 
 ### Ablauf

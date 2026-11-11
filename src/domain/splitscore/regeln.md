@@ -1,5 +1,3 @@
-<!-- Entwurf, 11.11.2026: von Luca abzunehmen, erst danach in der App sichtbar. Quelle: src/domain/splitscore, docs/legacy-analysis.md §6. -->
-
 Alle starten mit 40 Punkten. Neun Runden lang gibt es jeweils ein Zielfeld: Wer es trifft, sammelt Punkte, wer es verfehlt, verliert die Hälfte.
 
 ### Die Zielfelder

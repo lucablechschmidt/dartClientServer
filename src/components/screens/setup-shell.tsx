@@ -22,6 +22,8 @@ export type SetupProps = {
   /** Redirects to the new match or tournament; answers only when the server rejects the form. */
   onStart: (formData: FormData) => Promise<InvalidInput | undefined>;
   onAddGuest: (formData: FormData) => Promise<GuestResult>;
+  /** The mode's rules, rendered on the server (`Markdown`); without them the pop-over says "Regeln folgen". */
+  rules?: ReactNode;
 };
 
 type Props = SetupProps & {
@@ -77,6 +79,7 @@ export function SetupShell({
   canStart = (n) => n > 0,
   startLabel,
   playersInOptions = false,
+  rules,
 }: Props) {
   const [order, setOrder] = useState<string[]>([]);
   const [inputMode, setInputMode] = useState<"single" | "per-player">("single");
@@ -113,7 +116,7 @@ export function SetupShell({
               icon={<InfoIcon className="h-8 w-8" />}
               title={texts.rulesTitle.replace("{mode}", texts.modes[mode])}
             >
-              <p className="text-fg-muted">{texts.rulesSoon}</p>
+              {rules ?? <p className="text-fg-muted">{texts.rulesSoon}</p>}
             </Popover>
           )}
         </div>

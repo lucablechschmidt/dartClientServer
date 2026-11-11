@@ -30,6 +30,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // The rules of each mode are read at runtime (src/server/rules.ts); copy them into the standalone build.
+  outputFileTracingIncludes: { "/new/[mode]": ["./src/domain/*/regeln.md"] },
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
