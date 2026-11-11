@@ -61,4 +61,16 @@ describe("Keypad", () => {
     await user.click(screen.getByRole("button", { name: "20" }));
     expect(onDart).toHaveBeenCalledWith({ field: 20, type: "triple" });
   });
+  it("number keys take exactly one text color: yellow with Double, green with Triple, white otherwise (legacy ButtonsView)", async () => {
+    const user = userEvent.setup();
+    render(<Keypad onDart={() => {}} onUndo={() => {}} texts={texts} />);
+    const twenty = () => screen.getByRole("button", { name: "20" });
+    const textColors = () => [...twenty().classList].filter((c) => c.startsWith("text-key-"));
+    expect(textColors()).toEqual(["text-key-fg"]);
+    await user.click(screen.getByRole("button", { name: texts.double }));
+    expect(textColors()).toEqual(["text-key-double"]);
+    expect(screen.getByRole("button", { name: texts.bull })).toHaveClass("text-key-double");
+    await user.click(screen.getByRole("button", { name: texts.triple }));
+    expect(textColors()).toEqual(["text-key-triple"]);
+  });
 });

@@ -50,26 +50,29 @@ function label(key: KeypadKey, texts: KeypadTexts): string {
   }
 }
 
-/** Number and Bull keys: black, dimmed with yellow (Double) or green (Triple) text while a modifier is on. */
+/**
+ * Number and Bull keys: black, dimmed with yellow (Double) or green (Triple) text while a modifier is on.
+ * Exactly one text color per key: two `text-*` classes would let the CSS order decide (Double lost to white).
+ */
 function fieldKey(base: string, state: KeypadState): string {
   if (state.modifier === "double") return `${base} bg-key-bg opacity-75 text-key-double`;
   if (state.modifier === "triple") return `${base} bg-key-bg opacity-75 text-key-triple`;
-  return `${base} bg-key-bg`;
+  return `${base} bg-key-bg text-key-fg`;
 }
 
 /** Colors as in ButtonsView: numbers black/white, in modifier mode dimmed with yellow (Double) or green (Triple) text. */
 function keyClasses(key: KeypadKey, state: KeypadState): string {
   const base =
-    "min-h-touch rounded-panel text-fluid-lg font-normal tracking-tight text-key-fg select-none active:scale-95 transition-transform disabled:opacity-30";
+    "min-h-touch rounded-panel text-fluid-lg font-normal tracking-tight select-none active:scale-95 transition-transform disabled:opacity-30";
   switch (key.kind) {
     case "undo":
-      return `${base} bg-key-undo`;
+      return `${base} bg-key-undo text-key-fg`;
     case "double":
-      return `${base} bg-key-double ${state.modifier === "double" ? "ring-4 ring-modifier-ring" : ""}`;
+      return `${base} bg-key-double text-key-fg ${state.modifier === "double" ? "ring-4 ring-modifier-ring" : ""}`;
     case "triple":
-      return `${base} bg-key-triple ${state.modifier === "triple" ? "ring-4 ring-modifier-ring" : ""}`;
+      return `${base} bg-key-triple text-key-fg ${state.modifier === "triple" ? "ring-4 ring-modifier-ring" : ""}`;
     case "number":
-      return key.value === 0 ? `${base} bg-key-zero` : fieldKey(base, state);
+      return key.value === 0 ? `${base} bg-key-zero text-key-fg` : fieldKey(base, state);
     case "bull":
       return fieldKey(base, state);
   }
