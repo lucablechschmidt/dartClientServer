@@ -297,6 +297,35 @@ describe.each(impls)("Player and match repositories: %s", (_name, make) => {
     expect(byId.open).toBeNull();
   });
 
+  it("cancelled matches by their start; expired guest matches say whether they were cancelled", () => {
+    const repo = make();
+    repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });
+    repo.players.createPlayer({ id: "g", name: "Gast", createdAt: 2, guestUntil: 100 });
+    for (const [id, startedAt] of [
+      ["early", 10],
+      ["late", 50],
+      ["running", 10],
+    ] as const)
+      repo.matches.createMatch({
+        mode: "x01",
+        id,
+        legId: `l-${id}`,
+        rules,
+        playerIds: ["r", "g"],
+        starterIndex: 0,
+        format,
+        inputMode: "single",
+        hostPlayerId: null,
+        startedAt,
+      });
+    repo.matches.setMatchStatus("early", "abandoned", 20);
+    repo.matches.setMatchStatus("late", "abandoned", 60);
+    expect(repo.matches.listAbandonedMatchIds(10)).toEqual(["early"]);
+    expect(repo.matches.listAbandonedMatchIds(50).sort()).toEqual(["early", "late"]);
+    const abandoned = Object.fromEntries(repo.matches.listExpiredGuestMatches(100).map((m) => [m.id, m.abandoned]));
+    expect(abandoned).toEqual({ early: true, late: true, running: false });
+  });
+
   it("expired guest matches: a deleted regular player gets no field hits", () => {
     const repo = make();
     repo.players.createPlayer({ id: "r", name: "Regular", createdAt: 1, guestUntil: null });

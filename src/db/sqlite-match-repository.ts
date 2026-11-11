@@ -69,8 +69,17 @@ export class SqliteMatchRepository implements MatchRepository {
         : [];
       const m = this.finishedById(id);
       const finished = m ? { mode: m.mode, state: m.state, placements: m.placements, finishedAt: m.finishedAt ?? m.startedAt } : null;
-      return { id, regularPlayerIds, visits: rows.map(rowToVisit), finished };
+      const status = this.db.select({ status: matches.status }).from(matches).where(eq(matches.id, id)).get()?.status;
+      return { id, regularPlayerIds, visits: rows.map(rowToVisit), finished, abandoned: status === "abandoned" };
     });
+  }
+  listAbandonedMatchIds(startedBefore: number): string[] {
+    return this.db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(and(eq(matches.status, "abandoned"), lte(matches.startedAt, startedBefore)))
+      .all()
+      .map((r) => r.id);
   }
   deleteMatch(matchId: string): void {
     this.db.delete(matches).where(eq(matches.id, matchId)).run(); // match_player, leg, visit: ON DELETE CASCADE

@@ -76,6 +76,8 @@ export type ExpiredGuestMatch = {
   visits: Visit[];
   /** M10: what the achievements need, for a finished match; null otherwise. */
   finished: (FinishedMatchCore & { finishedAt: number }) | null;
+  /** Cancelled: counts nowhere, so nothing of it is saved. */
+  abandoned: boolean;
 };
 
 /** The part of a finished match the achievement detection reads. */
@@ -160,6 +162,8 @@ export type MatchRepository = {
 
   // Guest matches (E12)
   listExpiredGuestMatches(now: number): ExpiredGuestMatch[];
+  /** Cancelled matches started at or before `startedBefore` (deleted 24 h after their start). */
+  listAbandonedMatchIds(startedBefore: number): string[];
   /** Removes the match with its legs, visits and seats; a tournament fixture it played is open again. */
   deleteMatch(matchId: string): void;
 };

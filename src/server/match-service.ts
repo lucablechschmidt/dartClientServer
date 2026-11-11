@@ -307,7 +307,7 @@ export function listRecentMatches(deps: Deps, limit = 20): RecentMatchView[] {
   });
 }
 
-/** Cancel by host or admin (E13). The visits stay stored. */
+/** Cancel by host or admin (E13). The match counts nowhere and is deleted 24 h after its start (`cleanupAbandoned`). */
 export function cancelMatch(deps: Deps, session: Session, matchId: string): { ok: true } | { ok: false; reason: ActionError } {
   const m = deps.matches.loadMatch(matchId);
   if (!m) return { ok: false, reason: "not-found" };

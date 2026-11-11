@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { GUEST_LIFETIME_MS } from "@/domain/player";
-import type { Dart } from "@/domain/game";
+import { ABANDONED_LIFETIME_MS, type Dart } from "@/domain/game";
 import { memoryDeps } from "./testing";
-import { cleanupGuests } from "./guest-cleanup";
-import { commitVisit, createMatch, loadMatchView } from "./match-service";
+import { cleanupAbandoned, cleanupGuests } from "./guest-cleanup";
+import { cancelMatch, commitVisit, createMatch, loadMatchView } from "./match-service";
 import { createGuest, createPlayer, listPlayers } from "./player-service";
 
 let clock: number;
@@ -107,5 +107,36 @@ describe("cleanupGuests (E12)", () => {
     expect(cleanupGuests(deps)).toBe(1);
     expect(loadMatchView(deps, id)).toBeNull();
     expect(deps.store.players.size).toBe(1);
+  });
+});
+
+describe("cancelled matches", () => {
+  it("are deleted 24 h after their start, finished and running ones stay", () => {
+    const casey = ok(createPlayer(deps, "Casey")).player;
+    const sam = ok(createPlayer(deps, "Sam")).player;
+    const start = clock;
+    const cancelled = createMatch(deps, { playerIds: [casey.id, sam.id], rules, starterIndex: 0 });
+    const running = createMatch(deps, { playerIds: [casey.id, sam.id], rules, starterIndex: 0 });
+    expect(commitVisit(deps, sessionAdmin, cancelled, 0, 0, [T(20), T(20), T(20)]).ok).toBe(true);
+    clock += 3600_000;
+    expect(cancelMatch(deps, sessionAdmin, cancelled).ok).toBe(true);
+    clock = start + ABANDONED_LIFETIME_MS - 1;
+    expect(cleanupAbandoned(deps)).toBe(0);
+    clock = start + ABANDONED_LIFETIME_MS;
+    expect(cleanupAbandoned(deps)).toBe(1);
+    expect(loadMatchView(deps, cancelled)).toBeNull();
+    expect(loadMatchView(deps, running)).not.toBeNull();
+  });
+
+  it("a cancelled guest match saves no field hits and no achievements", () => {
+    const casey = ok(createPlayer(deps, "Casey")).player;
+    const guest = ok(createGuest(deps, "Gast")).player;
+    const id = createMatch(deps, { playerIds: [casey.id, guest.id], rules, starterIndex: 0 });
+    expect(commitVisit(deps, sessionAdmin, id, 0, 0, [T(20), T(20), T(20)]).ok).toBe(true);
+    expect(cancelMatch(deps, sessionAdmin, id).ok).toBe(true);
+    clock += GUEST_LIFETIME_MS;
+    expect(cleanupGuests(deps)).toBe(1);
+    expect(deps.players.fieldHitsOf(casey.id)).toEqual(new Map());
+    expect(deps.players.achievementsStored(casey.id)).toEqual([]);
   });
 });

@@ -6,7 +6,7 @@ export async function register() {
     const { closeDb, getDb } = await import("@/db/client");
     getDb();
     const { productionDeps } = await import("@/server/context");
-    const { cleanupGuests, CLEANUP_INTERVAL_MS } = await import("@/server/guest-cleanup");
+    const { cleanupAbandoned, cleanupGuests, CLEANUP_INTERVAL_MS } = await import("@/server/guest-cleanup");
     const { bootstrapAdmin, cleanupSessions } = await import("@/server/auth-service");
     const { readEnv } = await import("@/server/env");
     const env = readEnv();
@@ -17,8 +17,10 @@ export async function register() {
       try {
         const deps = productionDeps();
         const removed = cleanupGuests(deps);
+        const abandoned = cleanupAbandoned(deps);
         const sessions = cleanupSessions(deps);
-        if (removed > 0 || sessions > 0) log.info("cleanup", { guestMatches: removed, expiredSessions: sessions });
+        if (removed > 0 || abandoned > 0 || sessions > 0)
+          log.info("cleanup", { guestMatches: removed, abandonedMatches: abandoned, expiredSessions: sessions });
       } catch (e) {
         log.error("cleanup.failed", e);
       }

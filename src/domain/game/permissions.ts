@@ -21,6 +21,8 @@ export type MatchAccess = {
 export type Actor = { id: PlayerId; isAdmin: boolean };
 
 export const MATCH_OPEN_MS = 24 * 60 * 60 * 1000;
+/** A cancelled match is deleted this long after its start; it counts in no statistics and no achievement. */
+export const ABANDONED_LIFETIME_MS = MATCH_OPEN_MS;
 
 export function isOpen(match: Pick<MatchAccess, "status" | "startedAt">, now: number): boolean {
   return match.status === "running" && now - match.startedAt < MATCH_OPEN_MS;

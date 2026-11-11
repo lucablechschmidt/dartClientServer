@@ -82,7 +82,8 @@ building blocks (tab bar, screen header, option pills, card lists, icons) live i
 Player names are unique across regular players and guests (case-insensitive).
 Guests (E12): `player.guest_until` set = guest, listed 24 h, their matches are deleted daily by
 `src/server/guest-cleanup.ts` (started from `instrumentation.ts`) after saving regular players'
-field hits to `player_field_hits`. Statistics (M8): `src/domain/stats/` (pure figures, Elo per mode),
+field hits to `player_field_hits`. Cancelled matches count nowhere and are deleted 24 h after their start
+(`cleanupAbandoned`, same file); a cancelled guest match saves nothing. Statistics (M8): `src/domain/stats/` (pure figures, Elo per mode),
 `src/server/stats-service.ts`, charts are own SVG (`Dartboard`, `AverageChart`), no chart library.
 Achievements (M10): `src/domain/achievements/`, `src/server/achievement-service.ts`; computed from the finished
 games, only guest-game ones are saved at clean-up (`player_achievement`).

@@ -351,7 +351,7 @@ export const de = {
     resend: "Erneut senden",
     reenter: "Neu eingeben",
     cancel: "Spiel abbrechen",
-    cancelQuestion: "Spiel abbrechen? Die Aufnahmen bleiben gespeichert.",
+    cancelQuestion: "Spiel abbrechen? Es zählt nicht in Statistik und Erfolge und wird nach 24 Stunden gelöscht.",
     cancelConfirm: "Spiel Abbrechen",
     cancelBack: "Zurück",
     closed: "Spiel beendet",

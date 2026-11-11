@@ -28,9 +28,13 @@ export class MemoryMatchRepository implements MatchRepository {
         regularPlayerIds: seated.filter((p) => p.guestUntil === null && p.deletedAt === null).map((p) => p.id),
         visits: m.legs.flatMap((l) => l.visits),
         finished: this.finishedCore(m.id),
+        abandoned: m.status === "abandoned",
       });
     }
     return out;
+  }
+  listAbandonedMatchIds(startedBefore: number): string[] {
+    return [...this.store.matches.values()].filter((m) => m.status === "abandoned" && m.startedAt <= startedBefore).map((m) => m.id);
   }
   deleteMatch(matchId: string): void {
     this.store.matches.delete(matchId);
