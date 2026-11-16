@@ -1,4 +1,4 @@
-Gespielt wird nur auf die Felder 15 bis 20 und Bull. Jedes Feld wird mit drei Treffern geschlossen; wer danach weiter trifft, sammelt Punkte.
+Gespielt wird nur auf die Felder 15 bis 20 und Bull. Jedes Feld wird mit drei Treffern geschlossen. Wer danach weiter trifft, sammelt Punkte.
 
 <details>
 <summary class="text-lg font-bold">Treffer (Marks)</summary>
@@ -23,5 +23,5 @@ Gewonnen hat, wer alle sieben Felder geschlossen hat und dabei mehr Punkte als j
 <summary class="text-lg font-bold">Gut zu wissen</summary>
 - Die Tabelle zeigt pro Spieler und Feld die Treffer: Strich (1), Kreuz (2), Kreuz im Kreis (geschlossen).
 - Das Feld, auf dem du gerade punkten kannst, ist markiert.
-- Das Tastenfeld zeigt nur X, 15 bis 20 und Bull. **X** trägt die restlichen Darts der Aufnahme als Fehlwürfe ein; Undo nimmt sie zusammen zurück.
+- Das Tastenfeld zeigt nur X, 15 bis 20 und Bull. **X** trägt die restlichen Darts der Aufnahme als Fehlwürfe ein. Undo nimmt sie zusammen zurück.
 </details>
