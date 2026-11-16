@@ -120,7 +120,7 @@ export function SetupShell({
                 icon={<InfoIcon className="h-8 w-8" />}
                 title={texts.rulesTitle.replace("{mode}", texts.modes[mode])}
               >
-                {rules ?? <p className="text-fg-muted">{texts.rulesSoon}</p>}
+                {rules /*?? <p className="text-fg-muted">{texts.rulesSoon}</p>*/}
               </Popover>
             )}
           </div>
