@@ -102,7 +102,7 @@ export function Dartboard({ hits, texts: t }: Props) {
       <div className="flex w-full flex-col items-center gap-2" aria-live="polite">
         {picked === null ? (
           <>
-            <p className="text-sm text-fg-muted">{t.tapField}</p>
+            {/* <p className="text-sm text-fg-muted">{t.tapField}</p> */}
             <div className="flex items-center gap-2 text-xs text-fg-muted" aria-hidden="true">
               {t.few}
               {HEAT.slice(1).map((c) => (
