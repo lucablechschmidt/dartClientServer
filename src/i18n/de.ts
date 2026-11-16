@@ -274,7 +274,6 @@ export const de = {
     hitsColumn: "Treffer",
     few: "wenig",
     many: "viel",
-    tapField: "Feld antippen für Single, Double und Triple",
     rings: { single: "Single", double: "Double", triple: "Triple" },
     bullRings: { single: "Bull", double: "Double-Bull" },
     unsplit: "dazu {n} Treffer aus älteren Gast-Spielen ohne Aufteilung",

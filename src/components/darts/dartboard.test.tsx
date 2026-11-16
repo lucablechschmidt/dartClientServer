@@ -39,20 +39,17 @@ describe("Dartboard heatmap (M8)", () => {
         <button type="button">elsewhere</button>
       </div>,
     );
-    expect(screen.getByText(t.tapField)).toBeInTheDocument();
     await user.click(button(`${t.field} 20`, 15));
     expect(button(`${t.field} 20`, 15)).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("group", { name: t.rings.single })).toHaveTextContent("3");
     expect(screen.getByRole("group", { name: t.rings.double })).toHaveTextContent("3");
     expect(screen.getByRole("group", { name: t.rings.triple })).toHaveTextContent("2");
     await user.click(button(`${t.field} 20`, 15));
-    expect(screen.getByText(t.tapField)).toBeInTheDocument();
 
     await user.click(button(t.bull, 3));
     expect(screen.getByRole("group", { name: t.bullRings.double })).toHaveTextContent("1");
     expect(screen.queryByRole("group", { name: t.rings.triple })).toBeNull();
     await user.click(screen.getByRole("button", { name: "elsewhere" }));
-    expect(screen.getByText(t.tapField)).toBeInTheDocument();
   });
 
   it("hits saved before the split are named apart", async () => {
