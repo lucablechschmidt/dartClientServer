@@ -10,7 +10,7 @@ Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 
 <details>
 <summary class="text-lg font-bold">Einstieg und Ausstieg</summary>
 - **Startpunktzahl:** 501, 401, 301 oder eine eigene.
-- **Single In:** jeder Dart zählt sofort. **Double In** bzw. **Triple In:** Punkte zählen erst ab dem ersten Double bzw. Triple; ein anderer Treffer davor ist ein Bust.
+- **Single In:** jeder Dart zählt sofort. **Double In** bzw. **Triple In:** Punkte zählen erst ab dem ersten Double bzw. Triple. Ein anderer Treffer davor ist ein Bust.
 - **Single Out:** jeder Dart, der genau auf 0 bringt, beendet das Leg. **Double Out** bzw. **Triple Out:** der letzte Dart muss ein Double bzw. Triple sein.
 </details>
 
@@ -23,7 +23,7 @@ Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 
 
 <details>
 <summary class="text-lg font-bold">Checkout-Hinweis</summary>
-Ist der Rest mit den Darts der Aufnahme noch auszumachen, zeigt die App einen Weg mit möglichst wenigen Darts, z. B. 170: T20 T20 DBull. Bei Single Out sind es dieselben Wege wie bei Double Out; bei Triple Out nur ein Finish mit einem Dart (12: T4).
+Ist der Rest mit den Darts der Aufnahme noch auszumachen, zeigt die App einen Weg mit möglichst wenigen Darts, z. B. 170: T20 T20 DBull. Bei Single Out sind es dieselben Wege wie bei Double Out. bei Triple Out nur ein Finish mit einem Dart (12: T4).
 </details>
 
 <details>
@@ -35,5 +35,5 @@ Ist der Rest mit den Darts der Aufnahme noch auszumachen, zeigt die App einen We
 
 <details>
 <summary class="text-lg font-bold">Gewonnen</summary>
-Wer die nötigen Legs bzw. Sets zuerst hat, gewinnt das Match; ab drei Spielern der, der zuerst auscheckt.
+Wer die nötigen Legs bzw. Sets zuerst hat, gewinnt das Match. Ab drei Spielern der, der zuerst auscheckt.
 </details>

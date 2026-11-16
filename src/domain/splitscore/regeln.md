@@ -18,7 +18,7 @@ In dieser Reihenfolge, eine Runde pro Feld:
 <details>
 <summary class="text-lg font-bold">Ablauf</summary>
 - In jeder Runde wirft jeder eine Aufnahme mit drei Darts auf das aktuelle Zielfeld.
-- Nur Darts, die das Ziel treffen, zählen; alle anderen zählen 0.
+- Nur Darts, die das Ziel treffen, zählen. Alle anderen zählen 0.
 - **Mindestens ein Treffer:** die Punkte der Treffer kommen dazu (T20 in der 20er-Runde: 60).
 - **Kein Treffer:** der Punktestand wird halbiert und aufgerundet (45 → 23).
 - Nach der Bull-Runde ist das Spiel vorbei.
@@ -26,5 +26,5 @@ In dieser Reihenfolge, eine Runde pro Feld:
 
 <details>
 <summary class="text-lg font-bold">Gewonnen</summary>
-Wer nach neun Runden die meisten Punkte hat, gewinnt; gleich viele Punkte teilen sich einen Platz. Der Sieg-Screen zeigt zusätzlich die Summe aller Spieler.
+Wer nach neun Runden die meisten Punkte hat, gewinnt. Bei gleichstand nach Punkte teilen sie sich einen Platz.
 </details>
