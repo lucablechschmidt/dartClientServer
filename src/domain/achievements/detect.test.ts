@@ -8,15 +8,17 @@ const D = (field: number): Dart => ({ field, type: "double" });
 const T = (field: number): Dart => ({ field, type: "triple" });
 const MISS = [S(0), S(0), S(0)];
 
-function game(mode: ModeId, startScore: number, outRule: OutRule, players: string[], ...darts: Dart[]): MatchState {
-  return darts.reduce(
-    (m, d) => {
-      const r = applyMatchDart(m, d);
-      if (!r.ok) throw new Error(`applyMatchDart failed: ${r.reason}`);
-      return r.value;
-    },
-    newMatch(players, { startScore, inRule: "single", outRule }, { legsToWinSet: 1, setsToWinMatch: 1 }, 0, mode),
-  );
+const ONE_LEG = { legsToWinSet: 1, setsToWinMatch: 1 };
+/** The darts thrown one by one into `start`. */
+function darts(start: MatchState, ...thrown: Dart[]): MatchState {
+  return thrown.reduce((m, d) => {
+    const r = applyMatchDart(m, d);
+    if (!r.ok) throw new Error(`applyMatchDart failed: ${r.reason}`);
+    return r.value;
+  }, start);
+}
+function game(mode: ModeId, startScore: number, outRule: OutRule, players: string[], ...thrown: Dart[]): MatchState {
+  return darts(newMatch(players, { startScore, inRule: "single", outRule }, ONE_LEG, 0, mode), ...thrown);
 }
 const facts = (mode: ModeId, state: MatchState, player: string, placements: Record<string, number | null> = { [A]: 1, [B]: 2 }) =>
   [...factsOf({ mode, state, placements }, player)].sort();
@@ -93,6 +95,29 @@ describe("achievement detection (m10-plan §1)", () => {
     );
     expect(facts("cricket", m, A)).toEqual(["almostDone"]);
     expect(facts("cricket", m, A, { [A]: 2, [B]: 1 })).toEqual([]); // not without the win
+  });
+
+  it("JJ Nine: T1 T1 T1 thrown and counted in X01, Elimination and SplitScore", () => {
+    const T1 = [T(1), T(1), T(1)];
+    expect(facts("x01", game("x01", 301, "double", [A, B], ...T1), A)).toEqual(["jj-nine"]);
+    expect(facts("elimination", game("elimination", 301, "single", [A, B], ...T1), A)).toEqual(["jj-nine"]);
+    // SplitScore: only in the triple round (the sixth), T1 hits it
+    const split = game("splitscore", 40, "single", [A], ...Array.from({ length: 5 }, () => MISS).flat(), ...T1);
+    expect(facts("splitscore", split, A, { [A]: null })).toEqual(["jj-nine"]);
+    expect(facts("x01", game("x01", 301, "double", [A, B], T(1), T(1), S(1)), A)).toEqual([]);
+  });
+
+  it("JJ Nine: not when the visit busts or a dart does not count, and never in Cricket", () => {
+    // X01 rest 8: T1 T1 leave 2, the third T1 busts
+    expect(facts("x01", game("x01", 8, "single", [A, B], T(1), T(1), T(1)), A)).toEqual([]);
+    // X01 double in: the first T1 is no double, the visit busts
+    const doubleIn = darts(newMatch([A, B], { startScore: 301, inRule: "double", outRule: "double" }, ONE_LEG, 0, "x01"), T(1), T(1), T(1));
+    expect(facts("x01", doubleIn, A)).toEqual([]);
+    // Elimination target 8: the third T1 overshoots and is stored overthrown
+    expect(facts("elimination", game("elimination", 8, "single", [A, B], T(1), T(1), T(1)), A)).toEqual([]);
+    // SplitScore round 15: T1 is off the target and stored overthrown
+    expect(facts("splitscore", game("splitscore", 40, "single", [A], T(1), T(1), T(1)), A, { [A]: null })).toEqual([]);
+    expect(facts("cricket", game("cricket", 0, "single", [A, B], T(1), T(1), T(1)), A, { [A]: null, [B]: null })).toEqual([]);
   });
 
   it("a 180 counts in every mode", () => {

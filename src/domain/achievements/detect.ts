@@ -15,7 +15,9 @@ export function factsOf(match: AchievementMatch, player: PlayerId): Set<string> 
   const legs = match.state.legs.filter((l) => l.players.includes(player));
   const won = match.placements[player] === 1;
 
-  if (legs.some((l) => l.visits.some((v) => v.playerId === player && is180(v)))) add("180");
+  const anyVisit = (test: (v: Visit) => boolean) => legs.some((l) => l.visits.some((v) => v.playerId === player && test(v)));
+  if (anyVisit(is180)) add("180");
+  if (match.mode !== "cricket" && anyVisit(isTripleOneVisit)) add("jj-nine");
   switch (match.mode) {
     case "x01":
       for (const leg of legs) x01Facts(leg, player, facts);
@@ -35,6 +37,14 @@ export function factsOf(match: AchievementMatch, player: PlayerId): Set<string> 
 
 const is180 = (v: Visit) =>
   !v.isBust && v.darts.length === MAX_DARTS_PER_VISIT && v.darts.every((d) => d.type === "triple" && d.field === 20);
+
+/**
+ * JJ "Nine" McCarthy (17.11.2026): T1 T1 T1 thrown and counted, the best 9 points there are; every mode
+ * but Cricket. Darts that count nothing are stored overthrown (an X01 bust, an Elimination dart past the
+ * target, a SplitScore dart off the round's target), so three stored T1 in a visit that is no bust did count.
+ */
+const isTripleOneVisit = (v: Visit) =>
+  !v.isBust && v.darts.length === MAX_DARTS_PER_VISIT && v.darts.every((d) => d.type === "triple" && d.field === 1);
 
 /** X01: the player's checkout visits (rest brought to 0) with the rest before them. */
 function checkouts(leg: LegState, player: PlayerId): { visit: Visit; rest: number }[] {

@@ -13,6 +13,7 @@ export const ACHIEVEMENTS = [
   "never-halved",
   "bearly-never-halved",
   "almostDone",
+  "jj-nine",
 ] as const;
 export type AchievementKey = (typeof ACHIEVEMENTS)[number];
 

@@ -86,7 +86,7 @@ Konto has a folded "Profil" card (name, password, logout) and three rows below i
 
 ### Achievements
 
-Konto → Erfolge lists the ten achievements (180, Gone Fishing, 9-Darter, Shanghai, Gotta catch 'Em All!, First Blood, the three SplitScore ones and Done but not finished), earned ones with their time, open ones with how to get them. The victory screen shows "Neu für …" for what a game earned that no earlier game had. They are computed from the finished games like the statistics, so undo and deleted games take them back and old games count too; only those from guest games are saved before the guest games are deleted. Details: `docs/archive/m10-plan.md`.
+Konto → Erfolge lists the eleven achievements (180, Gone Fishing, 9-Darter, Shanghai, Gotta catch 'Em All!, First Blood, the three SplitScore ones, Done but not finished and JJ „Nine“ McCarthy for T1 T1 T1 counted in one visit, every mode but Cricket), earned ones with their time, open ones with how to get them. The victory screen shows "Neu für …" for what a game earned that no earlier game had. They are computed from the finished games like the statistics, so undo and deleted games take them back and old games count too; only those from guest games are saved before the guest games are deleted. Details: `docs/archive/m10-plan.md`.
 
 ## Testing
 

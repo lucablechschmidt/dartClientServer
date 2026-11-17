@@ -256,6 +256,7 @@ Detailplan: `docs/archive/m10-plan.md`.
 - [x] `src/domain/achievements/`: eine Erkennerfunktion je Achievement über `MatchState` aller Modi, Fortschritt für „alle Finishes“ (21 Doppel, nur Double Out); Tests mit Positiv- und Negativfall
 - [x] Berechnet aus den beendeten Spielen (kein Hook, Undo und gelöschte Spiele stimmen von selbst, rückwirkend ohne Lauf); nur Achievements aus Gast-Spielen werden beim Aufräumen in `player_achievement` gesichert
 - [x] Sieg-Screen-Banner „Neu: …“, Galerie in „Meine Statistik“ (nur die eigene); keine Spalte in den Ranglisten
+- [x] Neu (17.11.2026): **JJ „Nine“ McCarthy** (`jj-nine`), „Erziele die besten 9 Punkte möglich (T1T1T1)“: in einer Aufnahme T1 T1 T1 geworfen und gezählt (kein Bust, kein überworfener Dart), in allen Modi außer Cricket; in SplitScore damit nur in der Triple-Runde möglich
 
 **DoD:** 180 im Spiel zeigt das Banner und steht in der Galerie; Undo nimmt es zurück; alte Matches haben ihre 180er sofort. Abnahme am Board: `docs/test-pi.md`.
 

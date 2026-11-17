@@ -329,6 +329,7 @@ export const de = {
       "never-halved": { name: "Ungeteilt", how: "SplitScore ohne eine einzige Halbierung beendet." },
       "bearly-never-halved": { name: "Ein gutes Pferd", how: "SplitScore ohne Halbierung mit genau 175 Punkten beendet." },
       almostDone: { name: "Done but not finished", how: "Im Cricket alle Felder zu, ohne einen Punkt zu haben, und trotzdem gewonnen." },
+      "jj-nine": { name: "JJ „Nine“ McCarthy", how: "Erziele die besten 9 Punkte möglich (T1T1T1)." },
     },
   },
   ui: {
