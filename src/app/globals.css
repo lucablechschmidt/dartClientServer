@@ -59,6 +59,8 @@
   /*
    * Lines of several players in one chart (Elo over time): categorical hues in a fixed order, the first is
    * the accent. Both modes are validated for colour-blind separation on the card ground (dataviz skill).
+   * Not the iOS system colours: their orange and green fail the colour-blind check and 3:1 on white
+   * (theme.md §1); "increase contrast" has darker steps below.
    */
   --series-1: var(--accent);
   --series-2: light-dark(#eb6834, #d95926);
@@ -88,6 +90,11 @@
   :root {
     --fg-muted: light-dark(rgb(60 60 67 / 0.78), rgb(235 235 245 / 0.75));
     --frame-active: light-dark(#0040dd, #409cff);
+    /* Chart lines: darker steps of the same hues reach 3:1 on white and the grouped grey (dark ones already do) */
+    --series-2: light-dark(#c4561f, #d95926);
+    --series-3: light-dark(#00806b, #199e70);
+    --series-4: light-dark(#a86a00, #c98500);
+    --series-5: light-dark(#c2477a, #d55181);
   }
 }
 
