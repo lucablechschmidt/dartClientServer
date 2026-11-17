@@ -3,6 +3,7 @@ import { dartLabel, MODE_IDS, visitScore, type ModeId, type PlayerId } from "@/d
 import type { Session } from "@/domain/player";
 import { leaderboard, rangeStart, records, type ModeRecord, type StatsMatch, type StatsRange } from "@/domain/stats/aggregate";
 import { eloHistory, type EloPoint } from "@/domain/stats/elo";
+import { POINTS_MODES, pointsStats, type PointsMode, type PointsStats } from "@/domain/stats/final-points";
 import { addFieldHits, fieldHits, type FieldCount } from "@/domain/stats/field-hits";
 import { x01Stats, type X01Stats } from "@/domain/stats/x01";
 import { checkoutOrder } from "@/domain/x01";
@@ -27,6 +28,8 @@ export type MyStats = {
   range: StatsRange;
   records: Partial<Record<ModeId, ModeRecord>>;
   x01: X01Stats;
+  /** Cricket and SplitScore: high score and average of the points at the end, whatever the place. */
+  points: Partial<Record<PointsMode, PointsStats>>;
   /** 3-dart average per counted X01 match, oldest first. */
   history: { matchId: string; finishedAt: number; average: number }[];
   /** [field, hits split by ring], serializable for the client. */
@@ -49,6 +52,16 @@ export function myStats(deps: Deps, session: Session, range: StatsRange): MyStat
     x01: x01Stats(
       x01.flatMap((m) => m.state.legs),
       me,
+    ),
+    points: Object.fromEntries(
+      POINTS_MODES.flatMap((mode) => {
+        const s = pointsStats(
+          mode,
+          counted.filter((m) => m.mode === mode).map((m) => m.state.legs),
+          me,
+        );
+        return s ? [[mode, s] as const] : [];
+      }),
     ),
     history: x01.map((m) => ({ matchId: m.id, finishedAt: m.finishedAt ?? m.startedAt, average: x01Stats(m.state.legs, me).average })),
     fieldHits: [...hits].sort((a, b) => a[0] - b[0]),

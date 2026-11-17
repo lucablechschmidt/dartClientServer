@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/ui/form-controls";
 import { PillLinks } from "@/components/ui/pill-links";
 import { StatTile } from "@/components/ui/stat-tile";
 import { STATS_RANGES } from "@/domain/stats/aggregate";
+import { POINTS_MODES } from "@/domain/stats/final-points";
 import type { Texts } from "@/i18n/de";
 import { relativeTime } from "../game-menu";
 import { AverageChart } from "./average-chart";
@@ -23,7 +24,8 @@ type Props = {
 };
 
 /**
- * The own statistics on /account/stats (M8): range pills, tiles with the figures, the average per match,
+ * The own statistics on /account/stats (M8): range pills, tiles with the figures (X01, and high score and
+ * average of the final points in Cricket and SplitScore), the average per match,
  * the field hits on a dartboard (side by side in the wide frame, M14) and, always last, the recent
  * games with a link to the X01 match page. Only the own statistics, for everyone (m8-plan §2).
  */
@@ -49,6 +51,17 @@ export function MyStatsSection({ view, texts: t, overviewTexts, now }: Props) {
             .map(([start, darts]): [string, string] => [t.bestLeg.replace("{start}", start), t.darts.replace("{n}", String(darts))]),
         ] as [string, string][])
       : []),
+    // Cricket and SplitScore: the points at the end of a game, whatever the place
+    ...POINTS_MODES.flatMap((mode): [string, string][] => {
+      const p = view.points[mode];
+      const name = t.modes[mode];
+      return p
+        ? [
+            [t.modeHighScore.replace("{mode}", name), String(p.highScore)],
+            [t.modeAverage.replace("{mode}", name), two(p.average)],
+          ]
+        : [];
+    }),
   ];
 
   return (

@@ -264,6 +264,8 @@ export const de = {
     highestFinish: "Höchstes Finish",
     highestScore: "Höchste Aufnahme",
     bestLeg: "Bestes Leg {start}",
+    modeHighScore: "Highscore {mode}",
+    modeAverage: "Average {mode}",
     darts: "{n} Darts",
     history: "Average je Spiel",
     historyPoint: "{when}: Average {average}",

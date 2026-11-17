@@ -1,16 +1,20 @@
 import { de } from "@/i18n/de";
 import { board, K, resultRow, startMatch, winner } from "./board";
-import { ADMIN, expect, shot, test } from "./fixtures";
+import type { Page } from "@playwright/test";
+import { ADMIN, expect, settled, shot, test } from "./fixtures";
 
 const g = de.game;
 
 test.describe("M7 modes, each once to the end with an undo", () => {
   let A = "";
   let B = "";
+  /** A's and B's own devices, logged in. */
+  let pageA: Page;
+  let pageB: Page;
   test.beforeEach(async ({ register, stamp }) => {
     [A, B] = [`A${stamp}`, `B${stamp}`];
-    await register(A);
-    await register(B);
+    pageA = await register(A);
+    pageB = await register(B);
   });
 
   test("cricket: scoring from the fourth mark, undo takes the points back, reduced keypad with X", async ({ admin }) => {
@@ -85,6 +89,19 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(resultRow(admin, B)).toContainText(g.pointsOf.replace("{n}", "1")); // B halved nine times
     await expect(admin.getByRole("listitem").filter({ hasText: g.totalPoints })).toHaveCount(1);
     await shot(admin, "victory-splitscore");
+
+    // own statistics: high score and average of the points at the end, the loser's as well
+    const s = de.stats;
+    const tiles = async (page: Page, points: string, average: string) => {
+      await page.goto("/account/stats");
+      await settled(page);
+      const tile = (text: string) => page.getByRole("group", { name: text.replace("{mode}", s.modes.splitscore) });
+      await expect(tile(s.modeHighScore)).toContainText(points);
+      await expect(tile(s.modeAverage)).toContainText(average);
+    };
+    await tiles(pageA, "175", "175.00");
+    await shot(pageA, "account-stats-points");
+    await tiles(pageB, "1", "1.00");
 
     // the history filtered by SplitScore lists the game, the Cricket filter does not
     await admin.goto("/history?mode=splitscore");

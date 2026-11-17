@@ -20,6 +20,7 @@ const view: MyStatsView = {
     bestLeg: { 501: 15, 301: 9 },
     legsWon: 2,
   },
+  points: { splitscore: { games: 2, highScore: 412, average: 287.5 } },
   history: [],
   fieldHits: [],
   recent: [{ id: "m1", mode: "x01", names: ["Casey", "Sam"], finishedAt: 0, place: 1, detail: true }],
@@ -37,6 +38,14 @@ describe("MyStatsSection", () => {
     expect(tile(t.highestFinish)).toHaveTextContent("161");
     expect(tile(t.bestLeg.replace("{start}", "501"))).toHaveTextContent(t.darts.replace("{n}", "15"));
     expect(tile(t.bestLeg.replace("{start}", "301"))).toHaveTextContent(t.darts.replace("{n}", "9"));
+  });
+
+  it("Cricket and SplitScore: high score and average of the final points, only for a mode with games", () => {
+    render(<MyStatsSection view={view} {...props} />);
+    const label = (text: string, mode: keyof typeof t.modes) => text.replace("{mode}", t.modes[mode]);
+    expect(screen.getByRole("group", { name: label(t.modeHighScore, "splitscore") })).toHaveTextContent("412");
+    expect(screen.getByRole("group", { name: label(t.modeAverage, "splitscore") })).toHaveTextContent("287.50");
+    expect(screen.queryByRole("group", { name: label(t.modeHighScore, "cricket") })).toBeNull();
   });
 
   it("range pills as links, the chosen one marked", () => {

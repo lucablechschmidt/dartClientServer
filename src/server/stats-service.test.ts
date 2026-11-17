@@ -78,6 +78,8 @@ describe.each([
     d.players.addFieldHits("a", new Map([[5, { single: 0, double: 0, triple: 1, unsplit: 0 }]]));
     const s = myStats(d, as("a"), "all");
     expect(s.records).toEqual({ x01: { games: 1, wins: 1 }, cricket: { games: 1, wins: 1 } });
+    // the Cricket duel has no visits: 0 points at the end; X01 has no such figures
+    expect(s.points).toEqual({ cricket: { games: 1, highScore: 0, average: 0 } });
     expect(s.x01).toMatchObject({ visits: 2, average: (180 + 121) / 2, count180: 1, highestFinish: 121, bestLeg: { 301: 6 } });
     expect(s.history).toEqual([{ matchId: m, finishedAt: NOW - 10 * DAY, average: 150.5 }]);
     expect(new Map(s.fieldHits.map(([f, c]) => [f, hitsOf(c)]))).toEqual(
@@ -104,6 +106,27 @@ describe.each([
     const s = myStats(d, as("a"), "30d");
     expect(s.records).toEqual({ x01: { games: 1, wins: 1 } });
     expect(new Map(s.fieldHits).get(5)).toBeUndefined();
+  });
+
+  it("Cricket points at the end: high score and average of own counted games, guests and the range left out", () => {
+    const d = setup();
+    const T20 = v("a", [
+      [20, "triple"],
+      [20, "triple"],
+      [20, "triple"],
+    ]);
+    // T20 closes 20, two more T20 score 120; b, who wins this duel on paper, has no say
+    const play = (a: string, b: string, finishedAt: number) => {
+      const id = duel(d, a, b, finishedAt, "cricket");
+      d.matches.syncVisits(`${id}-l`, [T20], 0, () => `${id}-x${++n}`, finishedAt);
+    };
+    play("b", "a", NOW - 2 * DAY);
+    duel(d, "a", "b", NOW - 3 * DAY, "cricket"); // no visits: 0 points
+    play("g", "a", NOW - DAY); // guest game: counts nowhere
+    duel(d, "a", "b", NOW - 40 * DAY, "cricket"); // outside 30 days
+    expect(myStats(d, as("a"), "all").points).toEqual({ cricket: { games: 3, highScore: 120, average: 40 } });
+    expect(myStats(d, as("a"), "30d").points).toEqual({ cricket: { games: 2, highScore: 120, average: 60 } });
+    expect(myStats(d, as("c"), "all").points).toEqual({});
   });
 
   it("rankings per mode for everyone: rounded Elo, own place; deleted players hidden", () => {

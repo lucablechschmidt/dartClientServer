@@ -222,6 +222,7 @@ Detailplan: `docs/archive/m8-plan.md`.
 - [x] **Meine Statistik** im Tab Konto (nur das eigene Profil, auch für den Admin): Kennzahlen, Zeitfilter, Average-Verlauf (eigenes SVG), Feldtreffer als SVG-Dartscheibe, letzte Matches
 - [x] **Ranglisten je Modus** im Tab Konto als ausklappbare Karten (zugeklappt: eigener Platz und Elo; aufgeklappt: Platz, Name, Elo, Spiele)
 - [x] **Elo-Verlauf** in der aufgeklappten Rangliste (17.11.2026): Liniendiagramm wie „Average je Spiel“, Zeitraum Alles / Dieses Jahr / 30 Tage; zuerst nur der eigene Verlauf, ein Tipp auf einen Namen in der Rangliste blendet weitere Spieler ein oder aus (höchstens 5, je eine Farbe)
+- [x] **Punkte am Spielende** in „Meine Statistik“ (17.11.2026): je eine Kachel „Highscore“ und „Average“ für Cricket und SplitScore, nur die Punkte am Ende eines Spiels, unabhängig von der Platzierung; wie die übrigen Zahlen ohne Gast-Spiele und mit Zeitfilter
 - [x] Match-Detailansicht mit Statistik pro Leg (nur Teilnehmer)
 - [x] Turnier-Setzliste: ausgelost oder vom Ersteller festgelegt (ohne Elo)
 - [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (`docs/test-pi.md` Messungen). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `docs/test-pi.md`.
