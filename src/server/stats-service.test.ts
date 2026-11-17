@@ -119,8 +119,11 @@ describe.each([
     ]);
     expect(x01.rows[0].elo).toBe(Math.round(x01.rows[0].elo));
     expect(x01.own).toMatchObject({ name: "B", place: 3, elo: 984, games: 1 });
-    expect(ranks.find((r) => r.mode === "cricket")).toEqual({ mode: "cricket", rows: [], own: null });
+    expect(x01.history.b.map((p) => [p.finishedAt, p.elo])).toEqual([[NOW - 3 * DAY, 984]]);
+    expect(x01.history.a.map((p) => p.elo)).toEqual([1016, 999]);
+    expect(ranks.find((r) => r.mode === "cricket")).toEqual({ mode: "cricket", rows: [], own: null, history: {} });
     deletePlayer(d, as("admin", true), "c");
+    expect(Object.keys(leaderboards(d, as("b")).find((r) => r.mode === "x01")!.history).sort()).toEqual(["a", "b"]);
     expect(
       leaderboards(d, as("b"))
         .find((r) => r.mode === "x01")!

@@ -11,7 +11,15 @@ export const metadata: Metadata = { title: de.account.pages.rankings };
 
 async function Rankings() {
   const { deps, session } = await requireSession();
-  return <RankingsSection rankings={leaderboards(deps, session)} playerId={session.playerId} texts={de.stats} />;
+  return (
+    <RankingsSection
+      rankings={leaderboards(deps, session)}
+      playerId={session.playerId}
+      texts={de.stats}
+      overviewTexts={de.overview}
+      now={deps.now()}
+    />
+  );
 }
 
 /** M8: the rankings per mode, for everyone, below the account tab. */

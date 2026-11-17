@@ -16,6 +16,12 @@ export function rangeStart(range: StatsRange, now: number): number | null {
   return new Date(new Date(now).getFullYear(), 0, 1).getTime();
 }
 
+/** The items a range covers, by their time. */
+export function inRange<T extends { finishedAt: number }>(items: readonly T[], range: StatsRange, now: number): T[] {
+  const start = rangeStart(range, now);
+  return start === null ? [...items] : items.filter((i) => i.finishedAt >= start);
+}
+
 export type ModeRecord = { games: number; wins: number };
 
 const counted = (matches: readonly StatsMatch[]) => matches.filter((m) => !m.hasGuest);

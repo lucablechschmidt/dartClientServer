@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { leaderboard, rangeStart, records, type StatsMatch } from "./aggregate";
-import { eloRatings, ELO_START } from "./elo";
+import { inRange, leaderboard, rangeStart, records, type StatsMatch } from "./aggregate";
+import { eloHistory, eloRatings, ELO_START } from "./elo";
 
 let n = 0;
 /** A finished match; `order` best first, players listed together share a place. */
@@ -38,6 +38,19 @@ describe("Elo per mode (m8-plan §1)", () => {
     expect(ratings.get("a")).toBeCloseTo(1016 - 32 * expectedA, 6);
     expect(ratings.has("b")).toBe(false);
     expect(eloRatings([match("splitscore", [["a", "b"]])], "splitscore").get("a")).toBe(1000);
+  });
+
+  it("history: one point per player after each rated match, oldest first; the last one is the rating", () => {
+    const matches = [match("x01", ["c", "a"], 30), match("x01", ["a", "b"], 20), match("x01", ["a", "b", "c"], 25)];
+    const history = eloHistory(matches, "x01");
+    expect(history.get("a")!.map((p) => [p.finishedAt, Math.round(p.elo)])).toEqual([
+      [20, 1016],
+      [30, 999],
+    ]);
+    expect(history.get("b")).toEqual([{ matchId: matches[1].id, finishedAt: 20, elo: 984 }]);
+    expect(history.get("c")!.at(-1)!.elo).toBe(eloRatings(matches, "x01").get("c"));
+    expect(inRange(history.get("a")!, "30d", 30 + 30 * 24 * 60 * 60 * 1000).map((p) => p.finishedAt)).toEqual([30]);
+    expect(inRange(history.get("a")!, "all", 1e12)).toHaveLength(2);
   });
 });
 

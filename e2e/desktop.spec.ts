@@ -48,6 +48,8 @@ test("desktop: the main screens", async ({ admin, register, stamp }) => {
   await shot(pageA, "account-stats-desktop");
   await open(pageA, "/account/rankings");
   await pageA.getByRole("button", { name: new RegExp(`^${de.stats.modes.x01}`) }).click();
+  // the Elo chart draws in the measured width of its column, not in the phone-sized fallback
+  await expect(pageA.getByRole("img", { name: de.stats.eloHistory })).not.toHaveAttribute("viewBox", "0 0 320 160");
   await shot(pageA, "account-rankings-desktop");
   await open(pageA, "/account/achievements");
   await shot(pageA, "account-achievements-desktop");

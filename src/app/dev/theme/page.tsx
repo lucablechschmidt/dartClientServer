@@ -32,6 +32,11 @@ const TOKENS = [
   "heat-3",
   "heat-4",
   "heat-5",
+  "series-1",
+  "series-2",
+  "series-3",
+  "series-4",
+  "series-5",
 ];
 
 /** Literal class names so Tailwind generates them; one per token in TOKENS. */
@@ -65,6 +70,11 @@ const SWATCH: Record<string, string> = {
   "heat-3": "bg-heat-3",
   "heat-4": "bg-heat-4",
   "heat-5": "bg-heat-5",
+  "series-1": "bg-series-1",
+  "series-2": "bg-series-2",
+  "series-3": "bg-series-3",
+  "series-4": "bg-series-4",
+  "series-5": "bg-series-5",
 };
 
 const KEYS = [

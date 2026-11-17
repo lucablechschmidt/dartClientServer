@@ -288,6 +288,11 @@ export const de = {
     notRanked: "noch nicht gewertet",
     nobody: "Noch niemand gewertet.",
     columns: { place: "Platz", name: "Name", elo: "Elo", games: "Spiele" },
+    eloHistory: "Elo-Verlauf",
+    eloPoint: "{when}: {values}",
+    eloValue: "{name} {elo}",
+    eloNone: "Keine gewerteten Spiele in diesem Zeitraum.",
+    eloHint: "Namen in der Rangliste antippen, um Verläufe ein- oder auszublenden (höchstens {n}).",
     detail: {
       title: "Spielstatistik",
       leg: "Leg {n}",

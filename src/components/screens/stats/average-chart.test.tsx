@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { de } from "@/i18n/de";
-import { AverageChart, niceTicks } from "./average-chart";
+import { AverageChart } from "./average-chart";
+import { niceTicks } from "./trend-chart";
 
 const t = de.stats;
 const DAY = 24 * 60 * 60 * 1000;
@@ -16,6 +17,7 @@ describe("AverageChart (M8)", () => {
     expect(niceTicks(42.5, 61)).toEqual([40, 50, 60, 70]);
     expect(niceTicks(50, 50)).toEqual([40, 50, 60]);
     expect(niceTicks(0, 150.5)).toEqual([0, 50, 100, 150, 200]);
+    expect(niceTicks(880, 1210)).toEqual([800, 900, 1000, 1100, 1200, 1300]);
   });
 
   it("one line point per match, the last value labelled, a table for screen readers", () => {

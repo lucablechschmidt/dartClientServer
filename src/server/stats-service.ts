@@ -2,6 +2,7 @@ import type { FinishedMatch } from "@/db/repository";
 import { dartLabel, MODE_IDS, visitScore, type ModeId, type PlayerId } from "@/domain/game";
 import type { Session } from "@/domain/player";
 import { leaderboard, rangeStart, records, type ModeRecord, type StatsMatch, type StatsRange } from "@/domain/stats/aggregate";
+import { eloHistory, type EloPoint } from "@/domain/stats/elo";
 import { addFieldHits, fieldHits, type FieldCount } from "@/domain/stats/field-hits";
 import { x01Stats, type X01Stats } from "@/domain/stats/x01";
 import { checkoutOrder } from "@/domain/x01";
@@ -66,9 +67,18 @@ export function myStats(deps: Deps, session: Session, range: StatsRange): MyStat
 }
 
 export type RankingRow = { player: PlayerId; name: string; place: number; elo: number; games: number; wins: number };
-export type ModeRanking = { mode: ModeId; rows: RankingRow[]; own: RankingRow | null };
+export type ModeRanking = {
+  mode: ModeId;
+  rows: RankingRow[];
+  own: RankingRow | null;
+  /** Rounded Elo after each rated 1-vs-1 match, oldest first, per listed player who has one. */
+  history: Record<PlayerId, EloPoint[]>;
+};
 
-/** One ranking per mode for everyone (place, name, Elo, games), all time; deleted players are hidden. */
+/**
+ * One ranking per mode for everyone (place, name, Elo, games), all time, with each listed player's Elo
+ * over time; deleted players are hidden.
+ */
 export function leaderboards(deps: Deps, session: Session): ModeRanking[] {
   const finished = deps.matches.listFinishedMatches(null);
   const matches = finished.map(toStatsMatch);
@@ -79,7 +89,14 @@ export function leaderboards(deps: Deps, session: Session): ModeRanking[] {
       const p = players.get(r.player);
       return { ...r, elo: Math.round(r.elo), name: p ? shownName(p) : r.player };
     });
-    return { mode, rows, own: rows.find((r) => r.player === session.playerId) ?? null };
+    const points = eloHistory(matches, mode);
+    const history = Object.fromEntries(
+      rows.flatMap((r) => {
+        const own = points.get(r.player);
+        return own ? [[r.player, own.map((p) => ({ ...p, elo: Math.round(p.elo) }))] as const] : [];
+      }),
+    );
+    return { mode, rows, own: rows.find((r) => r.player === session.playerId) ?? null, history };
   });
 }
 

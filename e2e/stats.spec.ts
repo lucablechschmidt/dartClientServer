@@ -55,6 +55,11 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
   const table = pageA.getByRole("table", { name: s.ranking.replace("{mode}", s.modes.x01) });
   await expect(table.getByRole("row").filter({ hasText: A })).toHaveAttribute("aria-current", "true");
   await expect(table.getByRole("row").filter({ hasText: B })).toContainText("1001");
+  // Elo over time: at first only the own line; a tap on B's name in the table adds B's
+  const elo = pageA.getByRole("img", { name: s.eloHistory });
+  await expect(elo.locator("path")).toHaveCount(1);
+  await table.getByRole("button", { name: B, exact: true }).click();
+  await expect(elo.locator("path")).toHaveCount(2);
   await table.scrollIntoViewIfNeeded();
   await shot(pageA, "account-rankings");
 
