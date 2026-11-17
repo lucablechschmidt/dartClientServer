@@ -33,6 +33,8 @@ export default defineConfig({
       exclude: [
         "**/*.test.ts",
         "**/*.test.tsx",
+        // Rules per mode (src/domain/<mode>/regeln.md): text, not code; v8 would try to parse them as JS
+        "**/*.md",
         // Static SVG paths, no logic
         "src/components/ui/icons.tsx",
         "**/fixtures/**",
