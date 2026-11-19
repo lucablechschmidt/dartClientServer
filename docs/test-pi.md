@@ -80,7 +80,7 @@ Plan: `m12-plan.md` §5, §6.
 - [ ] iPhone (Safari) → Teilen → „Zum Home-Bildschirm“: Name „DART“, Dartscheiben-Icon; Start vom Icon ohne Browserleiste, die Anmeldung bleibt erhalten.
 - [ ] Android (Chrome) → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“: dasselbe; das Icon wird von der runden Maske nicht beschnitten.
 - [ ] Im Vollbild ein Match zählen: oben und unten nichts verdeckt (Notch, Home-Leiste), Hell und Dunkel.
-- [ ] Rate-Limit pro Gerät (E18): auf Handy A (Mobilfunk) zehnmal mit falschem Passwort anmelden, der elfte Versuch meldet „zu viele Versuche“; Handy B (anderes Netz) kann sich sofort anmelden.
+- [x] Rate-Limit pro Gerät (E18, bestanden 19.11.2026): auf Handy A (Mobilfunk) zehnmal mit falschem Passwort anmelden, der elfte Versuch meldet „zu viele Versuche“; Handy B (anderes Netz) kann sich sofort anmelden.
 - [ ] Sicherheits-Header über den Funnel: `curl -sI https://dartserver.swallow-pythagorean.ts.net/login` zeigt `content-security-policy`, `x-frame-options: DENY`, `x-content-type-options: nosniff`, `referrer-policy: same-origin` (`m12-plan.md` §5a).
 
 ## M13 – Code-Review und Konsolidierung

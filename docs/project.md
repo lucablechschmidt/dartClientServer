@@ -36,7 +36,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
-| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | PWA fertig, Rest geplant, bewusst zuletzt | M6 und M4c |
+| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | PWA, Security, Teil B (Ingress, E18) fertig; offen: Updates, Funnel-Check, Stromtest | M6 und M4c |
 | M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
