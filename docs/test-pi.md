@@ -8,7 +8,7 @@
 
 ## 0. Vorbereitung
 
-- [ ] Aktuellen Stand deployen; was läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`.
+- [x] Aktuellen Stand deployen; was läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`.
 - [ ] Mindestens zwei Handys mit Login, eines davon im Mobilfunk ohne WLAN.
 - Vieles lässt sich an einem Abend verbinden: das Best-of-3 aus M5 ist das aus M6 (mit Flugmodus), ein 180er darin deckt M10 ab, und das Match eignet sich zum Nachrechnen für M8. Für M9 braucht es vier bzw. sechs Spieler (Gäste gehen auch).
 
@@ -18,9 +18,9 @@
 
 Plan: `archive/m5-plan.md` §0, §7.
 
-- [ ] Best-of-3-Legs-Match zu zweit am Board: Leg-Sieg-Screen, Anwurf wechselt pro Leg, Undo über die Leg-Grenze zurück ins vorige Leg.
+- [x] Best-of-3-Legs-Match zu zweit am Board: Leg-Sieg-Screen, Anwurf wechselt pro Leg, Undo über die Leg-Grenze zurück ins vorige Leg.
 - [ ] 4-Spieler-Spiel mit Platzierungen bis Platz 4; der Letzte kann zu Ende spielen oder aufgeben.
-- [ ] Historie zeigt beendete und abgebrochene Matches.
+- [x] Historie zeigt beendete und abgebrochene Matches.
 
 ## M6 – Robustheit am Board
 
@@ -34,9 +34,9 @@ Plan: `archive/m6-plan.md` §0, §6.
 
 Plan: `archive/m7-plan.md` §0, §7.
 
-- [ ] Cricket zu dritt am Board durchspielen, Undo stimmt.
-- [ ] Elimination am Board durchspielen, Undo stimmt (auch das Zurücknehmen einer Elimination).
-- [ ] SplitScore am Board durchspielen, Undo stimmt.
+- [x] Cricket zu dritt am Board durchspielen, Undo stimmt.
+- [x] Elimination am Board durchspielen, Undo stimmt (auch das Zurücknehmen einer Elimination).
+- [x] SplitScore am Board durchspielen, Undo stimmt.
 
 ## M8 – Statistiken und Reporting
 
@@ -88,7 +88,7 @@ Plan: `m12-plan.md` §5, §6.
 Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Kontrast und `synchronous` sind entschieden (`architecture.md` E16, E17).
 
 - [ ] Statistik-Seiten mit der Pi-Datenbank messen, Zielwert < 500 ms (siehe §Messungen).
-- [ ] Optional: `curl /api/health` bei gesperrter Datenbank liefert `{"ok":false}` ohne Pfad (wurde nicht von Hand geprüft).
+- [x] Optional: `curl /api/health` bei gesperrter Datenbank liefert `{"ok":false}` ohne Pfad (wurde nicht von Hand geprüft).
 
 ## M14 – Styling
 
@@ -104,25 +104,25 @@ Plan: `archive/m14-plan.md` §0, §4.4, §5.
 
 Features, die nach dem Archivieren der Pläne direkt umgesetzt wurden (Commits vom 11., 17. und 19.11.2026); die Regeln stehen in `legacy-analysis.md` §9, `architecture.md` E8 und `theme.md`.
 
-- [ ] Adaptives Tastenfeld: In Cricket zu dritt sind Felder gesperrt, die alle geschlossen haben. In SplitScore gehen in der Double-Runde Zahlen erst mit Double, in der Triple-Runde erst mit Triple. X, 0 und Undo gehen immer.
-- [ ] X in Cricket und SplitScore: nach einem Treffer füllt X den Rest der Aufnahme mit Fehlwürfen, der Spieler wechselt; ein Undo nimmt beide Fehlwürfe zusammen zurück, Treffer gehen einzeln zurück. Im hellen Modus hebt sich X deutlich von den gesperrten Tasten ab.
-- [ ] Vor dem ersten Dart lassen sich die Spieler im Zählscreen per Halten und Ziehen umsortieren; nach dem ersten Dart nicht mehr.
+- [x] Adaptives Tastenfeld: In Cricket zu dritt sind Felder gesperrt, die alle geschlossen haben. In SplitScore gehen in der Double-Runde Zahlen erst mit Double, in der Triple-Runde erst mit Triple. X, 0 und Undo gehen immer.
+- [x] X in Cricket und SplitScore: nach einem Treffer füllt X den Rest der Aufnahme mit Fehlwürfen, der Spieler wechselt; ein Undo nimmt beide Fehlwürfe zusammen zurück, Treffer gehen einzeln zurück. Im hellen Modus hebt sich X deutlich von den gesperrten Tasten ab.
+- [x] Vor dem ersten Dart lassen sich die Spieler im Zählscreen per Halten und Ziehen umsortieren; nach dem ersten Dart nicht mehr.
 - [ ] Checkout-Hinweis je Out-Regel: X01 mit Single-Out zeigt bei 40 einen anderen Weg als mit Double-Out (D20).
-- [ ] SplitScore: das erste Ziel (15) steht neben dem Anwurf-Hinweis.
-- [ ] Spielregeln: der Info-Knopf im Setup jedes Modus zeigt die Regeln, die Abschnitte klappen auf und zu.
+- [x] SplitScore: das erste Ziel (15) steht neben dem Anwurf-Hinweis.
+- [x] Spielregeln: der Info-Knopf im Setup jedes Modus zeigt die Regeln, die Abschnitte klappen auf und zu.
 - [ ] Ein abgebrochenes Spiel steht in keiner Statistik und ist am Tag nach dem Start aus der Historie verschwunden.
 - [ ] Historie `/history`: Filter nach Modus, „Weitere laden“ holt die nächsten 25.
-- [ ] Statistik: ein Tipp auf ein Feld der Dartscheibe zeigt Single, Double und Triple getrennt; Cricket und SplitScore zeigen Highscore und Durchschnitt der Punkte am Spielende.
-- [ ] Rangliste: der Elo-Verlauf zeigt die eigene Linie, ein Tipp auf einen Namen blendet dessen Linie ein und aus (höchstens fünf).
+- [x] Statistik: ein Tipp auf ein Feld der Dartscheibe zeigt Single, Double und Triple getrennt; Cricket und SplitScore zeigen Highscore und Durchschnitt der Punkte am Spielende.
+- [x] Rangliste: der Elo-Verlauf zeigt die eigene Linie, ein Tipp auf einen Namen blendet dessen Linie ein und aus (höchstens fünf).
 - [ ] Ein Mehrspieler-Match (drei oder vier Spieler) verändert die Elo aller Teilnehmer (E8, 19.11.2026); ein Match mit Gast nicht.
-- [ ] Erfolg „JJ „Nine“ McCarthy“: T1 T1 T1 in einer Aufnahme (nicht in Cricket) steht danach unter Konto → Erfolge.
+- [x] Erfolg „JJ „Nine“ McCarthy“: T1 T1 T1 in einer Aufnahme (nicht in Cricket) steht danach unter Konto → Erfolge.
 - [ ] „Kontrast erhöhen“ in den Bedienungshilfen des Handys macht Grau und Blau dunkler.
 
 ---
 
 ## Messungen
 
-Statistik-Performance auf dem Pi (`archive/m8-plan.md` §7, `archive/m13-plan.md` §3.2 Schritt 4). Messen z. B. mit `time curl -s -b cookie https://…/account/stats`. Schwelle 500 ms; erst wenn die nicht reicht, kommt eine Aggregat-Tabelle (`archive/m13-plan.md` §5).
+Statistik-Performance auf dem Pi (`archive/m8-plan.md` §7, `archive/m13-plan.md` §3.2 Schritt 4). Messen z. B. mit `time curl -s -b cookie https://…/account/stats`. Schwelle 500 ms; erst wenn die nicht reicht, kommt eine Aggregat-Tabelle (`archive/m13-plan.md` §5). **Ergebnis** Maximal 90ms
 
 | Datum | DB-Größe | beendete Matches | `/account/stats` | `/account/rankings` | Sieg-Screen | Bemerkung |
 |---|---|---|---|---|---|---|
