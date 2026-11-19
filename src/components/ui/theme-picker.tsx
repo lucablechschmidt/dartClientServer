@@ -1,40 +1,24 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useSetting, writeSetting } from "./local-setting";
 import { SegmentedControl } from "./segmented";
 import { applyPreference, readPreference, THEME_PREFERENCES, THEME_STORAGE_KEY, type ThemePreference } from "./theme";
 
-type Labels = Record<ThemePreference, string> & { label: string };
+const parse = (raw: string | null): ThemePreference => readPreference({ getItem: () => raw });
 
-/* localStorage as an external store: same source for every picker and other tabs. */
-const listeners = new Set<() => void>();
-const subscribe = (cb: () => void) => {
-  listeners.add(cb);
-  window.addEventListener("storage", cb);
-  return () => {
-    listeners.delete(cb);
-    window.removeEventListener("storage", cb);
-  };
-};
-const getSnapshot = (): ThemePreference => readPreference(localStorage);
-const getServerSnapshot = (): ThemePreference => "system";
+type Labels = Record<ThemePreference, string> & { label: string };
 
 /**
  * System, Light or Dark side by side (account tab). State lives in localStorage and in the
  * data-theme attribute; the inline script in the layout restores it before the first paint.
  */
 export function ThemePicker({ labels }: { labels: Labels }) {
-  const preference = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const preference = useSetting(THEME_STORAGE_KEY, parse, "system");
 
   const choose = (next: ThemePreference) => {
+    // With a blocked storage the attribute still applies to this page.
     applyPreference(document.documentElement, next);
-    try {
-      if (next === "system") localStorage.removeItem(THEME_STORAGE_KEY);
-      else localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      /* private mode or similar: the attribute still applies to this page */
-    }
-    listeners.forEach((cb) => cb());
+    writeSetting(THEME_STORAGE_KEY, next === "system" ? null : next);
   };
 
   return (
