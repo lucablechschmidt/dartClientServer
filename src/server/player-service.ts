@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { NewPlayer, Player } from "@/db/repository";
-import { GUEST_LIFETIME_MS, isGuest, type PlayerResult, type Session } from "@/domain/player";
+import type { PlayerId } from "@/domain/game";
+import { GUEST_LIFETIME_MS, isGuest, isListed, type PlayerResult, type Session } from "@/domain/player";
 import type { Deps } from "./deps";
 
 export const playerNameSchema = z.string().trim().min(1).max(40);
@@ -22,6 +23,21 @@ function created(deps: Deps, id: string): Player {
   const player = deps.players.findPlayerById(id);
   if (!player) throw new Error(`player ${id} missing right after insert`);
   return player;
+}
+
+/**
+ * Players a new game or tournament may seat (security pass M12): each once, existing and not deleted,
+ * guests only while they are listed. The setup only offers such players; a forged form gets "invalid input".
+ */
+export function canSeat(deps: Deps, ids: readonly PlayerId[]): boolean {
+  const now = deps.now();
+  return (
+    new Set(ids).size === ids.length &&
+    ids.every((id) => {
+      const player = deps.players.findPlayerById(id);
+      return player !== null && isListed(player, now);
+    })
+  );
 }
 
 export function createPlayer(deps: Deps, rawName: string): CreateResult {

@@ -18,6 +18,7 @@ import {
 } from "./match-service";
 import { newInMatch, type NewAchievements } from "./achievement-service";
 import { log } from "./log";
+import { canSeat } from "./player-service";
 import { requireSession } from "./request";
 import { invalidInput, isId, newMatchFromForm, undoStepSchema, visitPositionSchema } from "./action-input";
 
@@ -27,6 +28,7 @@ export async function createMatchAction(formData: FormData): Promise<InvalidInpu
   const { deps, session } = await requireSession();
   const input = newMatchFromForm(formData, session.playerId);
   if (!input.ok) return input;
+  if (!canSeat(deps, input.value.playerIds)) return invalidInput;
   const id = createMatch(deps, input.value);
   redirect(`/match/${id}`);
 }

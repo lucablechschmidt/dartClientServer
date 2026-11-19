@@ -3,7 +3,7 @@ import type { Deps } from "./deps";
 import { memoryDeps, sqliteDeps } from "./testing";
 import { createMatch } from "./match-service";
 import type { Session } from "@/domain/player";
-import { createGuest, createPlayer, deletePlayer, listPlayers, renamePlayer } from "./player-service";
+import { canSeat, createGuest, createPlayer, deletePlayer, listPlayers, renamePlayer } from "./player-service";
 
 const admin: Session = { playerId: "admin", name: "Admin", isAdmin: true };
 const as = (playerId: string): Session => ({ playerId, name: playerId, isAdmin: false });
@@ -18,6 +18,23 @@ const ok = <T extends { ok: boolean }>(r: T) => {
   if (!r.ok) throw new Error("expected ok");
   return r as Extract<T, { ok: true }>;
 };
+
+describe("canSeat (security pass M12)", () => {
+  it("only existing, not deleted players, each once; guests while listed", () => {
+    const d = memoryDeps({ now: () => 1000 });
+    d.players.createPlayer({ id: "a", name: "A", createdAt: 1, guestUntil: null, passwordHash: null });
+    d.players.createPlayer({ id: "b", name: "B", createdAt: 1, guestUntil: null, passwordHash: null });
+    d.players.createPlayer({ id: "gone", name: "Gone", createdAt: 1, guestUntil: null, passwordHash: null });
+    d.players.markDeleted("gone", 2);
+    d.players.createPlayer({ id: "guest", name: "Guest", createdAt: 1, guestUntil: 2000, passwordHash: null });
+    d.players.createPlayer({ id: "old", name: "Old", createdAt: 1, guestUntil: 500, passwordHash: null });
+    expect(canSeat(d, ["a", "b", "guest"])).toBe(true);
+    expect(canSeat(d, ["a", "a"])).toBe(false);
+    expect(canSeat(d, ["a", "nobody"])).toBe(false);
+    expect(canSeat(d, ["a", "gone"])).toBe(false);
+    expect(canSeat(d, ["a", "old"])).toBe(false);
+  });
+});
 
 describe("player service: unique names", () => {
   it("rejects a second player with the same name, ignoring case, guests included", () => {

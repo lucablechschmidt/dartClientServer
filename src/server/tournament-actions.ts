@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { InvalidInput } from "@/domain/game";
-import { isId, newTournamentFromForm } from "./action-input";
+import { invalidInput, isId, newTournamentFromForm } from "./action-input";
+import { canSeat } from "./player-service";
 import { requireSession } from "./request";
 import { createTournament, deleteTournament, redrawTournament, startFixture, type TournamentError } from "./tournament-service";
 
@@ -13,6 +14,7 @@ export async function createTournamentAction(formData: FormData): Promise<Invali
   const { deps, session } = await requireSession();
   const input = newTournamentFromForm(formData);
   if (!input.ok) return input;
+  if (!canSeat(deps, input.value.playerIds)) return invalidInput;
   const id = createTournament(deps, session, input.value);
   redirect(`/tournaments/${id}`);
 }
