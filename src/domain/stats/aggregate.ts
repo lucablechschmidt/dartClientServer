@@ -41,7 +41,7 @@ export function records(matches: readonly StatsMatch[], player: PlayerId): Parti
 export type LeaderboardRow = { player: PlayerId; place: number; elo: number; games: number; wins: number };
 
 /**
- * Ranking of one mode: everyone with a counted match of it, by Elo (1000 without a 1-vs-1 match),
+ * Ranking of one mode: everyone with a counted match of it, by Elo (1000 without a rated match),
  * then by games; equal rounded Elo and games share the place. `hidden` players (deleted) are left
  * out, though their matches still count for the others' Elo.
  */

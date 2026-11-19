@@ -63,7 +63,7 @@ describe("RankingsSection (M8)", () => {
     const name = (n: string) => within(list).queryByRole("button", { name: n });
     expect(name("Sam")).toHaveAttribute("aria-pressed", "true");
     expect(name("Kim")).toHaveAttribute("aria-pressed", "false");
-    // without a rated 1-vs-1 match there is no line to show
+    // without a rated match there is no line to show
     expect(name("Alex")).toBeNull();
     expect(chart().querySelectorAll("path")).toHaveLength(1);
     expect(chart().querySelectorAll("circle")).toHaveLength(1);

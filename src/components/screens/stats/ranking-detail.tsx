@@ -24,7 +24,7 @@ type Props = {
  * An open ranking card: the Elo over time of the chosen players (range all, this year, 30 days) and the
  * table with place, name, Elo and games, the own row marked. Tapping a name in the table shows or hides
  * that player's line; at first only the own one is shown. A player keeps their colour while shown; the
- * dot in the row is the legend. Players without a rated 1-vs-1 match have no line to show.
+ * dot in the row is the legend. Players without a rated match have no line to show.
  */
 export function RankingDetail({ ranking: { mode, rows, history }, playerId, texts: t, overviewTexts, now }: Props) {
   const [range, setRange] = useState<StatsRange>("all");

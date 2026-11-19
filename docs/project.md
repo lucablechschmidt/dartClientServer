@@ -218,7 +218,7 @@ Detailplan: `docs/archive/m8-plan.md`.
 
 **Ziel:** Die Auswertungen, für die es die App gibt.
 
-- [x] `src/domain/stats/` mit Tests: 3-Dart-Average (Definition wie Legacy, Bust zählt 0), First-9, 180/140+/100+, Highest Finish, Best Leg (Darts), Highest Score, Feldtreffer, Spiele/Siege und **Elo je Modus** (nur 1 vs 1, E8); nur beendete Matches; Gast-Matches (E12) zählen in keiner Rangliste und nicht für Elo; Feldtreffer = Treffer aus vorhandenen Aufnahmen plus `player_field_hits`
+- [x] `src/domain/stats/` mit Tests: 3-Dart-Average (Definition wie Legacy, Bust zählt 0), First-9, 180/140+/100+, Highest Finish, Best Leg (Darts), Highest Score, Feldtreffer, Spiele/Siege und **Elo je Modus** (E8; seit 19.11.2026 auch Mehrspieler-Matches, jeder gegen jeden mit K/√(n−1)); nur beendete Matches; Gast-Matches (E12) zählen in keiner Rangliste und nicht für Elo; Feldtreffer = Treffer aus vorhandenen Aufnahmen plus `player_field_hits`
 - [x] **Meine Statistik** im Tab Konto (nur das eigene Profil, auch für den Admin): Kennzahlen, Zeitfilter, Average-Verlauf (eigenes SVG), Feldtreffer als SVG-Dartscheibe, letzte Matches
 - [x] **Ranglisten je Modus** im Tab Konto als ausklappbare Karten (zugeklappt: eigener Platz und Elo; aufgeklappt: Platz, Name, Elo, Spiele)
 - [x] **Elo-Verlauf** in der aufgeklappten Rangliste (17.11.2026): Liniendiagramm wie „Average je Spiel“, Zeitraum Alles / Dieses Jahr / 30 Tage; zuerst nur der eigene Verlauf, ein Tipp auf einen Namen in der Rangliste blendet weitere Spieler ein oder aus (höchstens 5, je eine Farbe)

@@ -43,7 +43,7 @@ Plan: `archive/m7-plan.md` §0, §7.
 Plan: `archive/m8-plan.md` §0, §7, §8.
 
 - [ ] Ein reales X01-Match aussuchen und für einen Spieler von Hand nachrechnen: Average, First-9, 180er, Highest Finish, Best Leg. Alle Kennzahlen stimmen mit `/account/stats` und `/match/[id]/stats`.
-- [ ] Elo eines Modus an zwei, drei Matches von Hand nachrechnen (Start 1000, K 32, nur 1 vs 1), stimmt mit `/account/rankings`.
+- [ ] Elo eines Modus an zwei, drei Matches von Hand nachrechnen (Start 1000, K 32; Mehrspieler-Match: jeder gegen jeden mit K/√(n−1), zu viert bei 1000: +28, +9, −9, −28), stimmt mit `/account/rankings`.
 - [ ] Turnier mit festgelegter Setzliste startet in der angetippten Reihenfolge.
 - [ ] Performance: siehe §Messungen unten.
 

@@ -84,7 +84,7 @@ export type ModeRanking = {
   mode: ModeId;
   rows: RankingRow[];
   own: RankingRow | null;
-  /** Rounded Elo after each rated 1-vs-1 match, oldest first, per listed player who has one. */
+  /** Rounded Elo after each rated match, oldest first, per listed player who has one. */
   history: Record<PlayerId, EloPoint[]>;
 };
 
