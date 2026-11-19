@@ -284,7 +284,7 @@ Detailplan: `docs/archive/m12-plan.md`. Abnahme am Handy: `docs/test-pi.md` M12.
 - [x] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“ (Name „DART“, Dartscheiben-Icon; Abnahme am Handy in `docs/test-pi.md` M12)
 - [x] ~~unattended-upgrades auf dem Pi, stündlicher Funnel-Check mit Logzeile~~ (entfällt, 19.11.2026: Updates von Hand laut README, der Check vom Pi aus prüfte den öffentlichen Weg nicht; Healthcheck für Caddy entfällt mit E18)
 - [ ] Optional: Umzug auf USB-SSD (E6, nur bei SD-Fehlern)
-- [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/archive/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; offen: Header am Pi)
+- [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/archive/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; Header am Pi über den Funnel geprüft, 19.11.2026)
 
 **Teil B – Ingress prüfen** (früher eigener Meilenstein, `docs/archive/m12-plan.md` Teil B):
 

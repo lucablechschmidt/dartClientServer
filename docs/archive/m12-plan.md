@@ -87,7 +87,7 @@ Befunde:
 | S5 | SSE-Route | Ein eingeloggter Nutzer kann beliebig viele Verbindungen öffnen (auch auf erfundene IDs). | niedrig | bewusst akzeptiert: nur Eingeloggte, eingeladene Mitspieler |
 | S6 | Rate-Limit | zählt pro IP; ob der Funnel die Handy-IP liefert, misst Teil B. | – | in Teil B (§B1–B5) |
 
-Noch offen aus §5a: die Header am Pi über den Funnel nachmessen (`curl -sI https://…/login`), gehört zur Abnahme (`docs/test-pi.md` M12).
+Header am Pi über den Funnel nachgemessen (`curl -sI https://…/login`, 19.11.2026): CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` kommen an. §5a damit vollständig.
 
 ## 8. Offene Fragen (Defaults gelten ohne Antwort)
 
