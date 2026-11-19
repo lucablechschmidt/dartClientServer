@@ -45,7 +45,7 @@ Plan: `archive/m8-plan.md` §0, §7, §8.
 - [ ] Ein reales X01-Match aussuchen und für einen Spieler von Hand nachrechnen: Average, First-9, 180er, Highest Finish, Best Leg. Alle Kennzahlen stimmen mit `/account/stats` und `/match/[id]/stats`.
 - [ ] Elo eines Modus an zwei, drei Matches von Hand nachrechnen (Start 1000, K 32; Mehrspieler-Match: jeder gegen jeden mit K/√(n−1), zu viert bei 1000: +28, +9, −9, −28), stimmt mit `/account/rankings`.
 - [ ] Turnier mit festgelegter Setzliste startet in der angetippten Reihenfolge.
-- [ ] Performance: siehe §Messungen unten.
+- [x] Performance: siehe §Messungen unten (19.11.2026, höchstens 90 ms).
 
 ## M9 – Turniere
 
@@ -87,7 +87,7 @@ Plan: `archive/m12-plan.md` §5, §6.
 
 Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Kontrast und `synchronous` sind entschieden (`architecture.md` E16, E17).
 
-- [ ] Statistik-Seiten mit der Pi-Datenbank messen, Zielwert < 500 ms (siehe §Messungen).
+- [x] Statistik-Seiten mit der Pi-Datenbank messen, Zielwert < 500 ms (siehe §Messungen; 19.11.2026, höchstens 90 ms).
 - [x] Optional: `curl /api/health` bei gesperrter Datenbank liefert `{"ok":false}` ohne Pfad (wurde nicht von Hand geprüft).
 
 ## M14 – Styling
@@ -122,11 +122,11 @@ Features, die nach dem Archivieren der Pläne direkt umgesetzt wurden (Commits v
 
 ## Messungen
 
-Statistik-Performance auf dem Pi (`archive/m8-plan.md` §7, `archive/m13-plan.md` §3.2 Schritt 4). Messen z. B. mit `time curl -s -b cookie https://…/account/stats`. Schwelle 500 ms; erst wenn die nicht reicht, kommt eine Aggregat-Tabelle (`archive/m13-plan.md` §5). **Ergebnis** Maximal 90ms
+Statistik-Performance auf dem Pi (`archive/m8-plan.md` §7, `archive/m13-plan.md` §3.2 Schritt 4). Messen z. B. mit `time curl -s -b cookie https://…/account/stats`. Schwelle 500 ms; erst wenn die nicht reicht, kommt eine Aggregat-Tabelle (`archive/m13-plan.md` §5).
 
 | Datum | DB-Größe | beendete Matches | `/account/stats` | `/account/rankings` | Sieg-Screen | Bemerkung |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| 19.11.2026 | – | Testdaten | ≤ 90 ms | ≤ 90 ms | ≤ 90 ms | höchster gemessener Wert 90 ms, weit unter der Schwelle; keine Aggregat-Tabelle nötig. Nach dem Löschen der Testdaten und einigen Wochen echter Spiele bei Gelegenheit wiederholen. |
 
 ---
 

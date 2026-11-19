@@ -37,7 +37,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | fertig (Stromtest bestanden, Updates von Hand), Abnahme am Handy offen | M6 und M4c |
-| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
+| M13 | Code-Review und Konsolidierung | A–F fertig, Messung am Pi höchstens 90 ms (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `docs/archive/`, ihre noch offene Abnahme am Board sammelt `docs/test-pi.md`.
@@ -225,7 +225,7 @@ Detailplan: `docs/archive/m8-plan.md`.
 - [x] **Punkte am Spielende** in „Meine Statistik“ (17.11.2026): je eine Kachel „Highscore“ und „Average“ für Cricket und SplitScore, nur die Punkte am Ende eines Spiels, unabhängig von der Platzierung; wie die übrigen Zahlen ohne Gast-Spiele und mit Zeitfilter
 - [x] Match-Detailansicht mit Statistik pro Leg (nur Teilnehmer)
 - [x] Turnier-Setzliste: ausgelost oder vom Ersteller festgelegt (ohne Elo)
-- [ ] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (`docs/test-pi.md` Messungen). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `docs/test-pi.md`.
+- [x] Performance prüfen (SQL-Aggregation statt alles in JS, wenn es langsam wird): mit echten Daten auf dem Pi messen (`docs/test-pi.md` Messungen). Das Laden ist seit M13 Paket B gebündelt (4 Abfragen statt 5–6 je Match, Spielerfilter in SQL); die Messung trägt `docs/test-pi.md`.
 - Später, eigener Meilenstein: **Checkout-Quote** (Checkouts ÷ Checkout-Darts), aus M8 herausgenommen am 5.11.2026
 
 **DoD:** Die Berichte zeigen für reale Daten aus M6 korrekte Werte (mit einem von Hand nachgerechneten Match gegengeprüft). Abnahme am Board: `docs/test-pi.md`.
@@ -306,7 +306,7 @@ Detailplan: `docs/archive/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 
 - [x] Paket A – Eingabevalidierung und Fehlerfluss (dazu: beim Restart bleibt der Host Host)
 - [x] Paket B – Pi-Ressourcen im Code: beendete Matches gebündelt laden, Spielerfilter in SQL, Rate-Limit-Map begrenzt, Datenbank beim Prozessende schließen
-- [ ] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`docs/test-pi.md` Messungen)
+- [x] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`docs/test-pi.md` Messungen)
 - [x] Paket B – `synchronous = NORMAL` entscheiden (E16: `FULL` bleibt)
 - [x] Paket C – Client-Lebenszyklus und Rückmeldung (dazu: Start-Button im Setup gesperrt, Lade-Platzhalter erst nach 150 ms)
 - [x] Paket D – Konsolidierung und Doku
