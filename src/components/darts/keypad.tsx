@@ -87,7 +87,7 @@ function keyClasses(key: KeypadKey, state: KeypadState): string {
     case "bull":
       return fieldKey(base, state);
     case "miss":
-      return `${base} bg-key-zero text-key-fg`;
+      return `${base} bg-key-miss text-key-fg`;
   }
 }
 

@@ -22,6 +22,7 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--key-bg` | `ScoreButtonsBackgroundColor` | Zahlentasten und Bull | `#000000` | `#2C2C2E` (Legacy: `rgb(255 255 255 / .50)`) |
 | `--key-fg` | `ScoreButtonsForegroundColor` | Beschriftung aller Tasten | `#FFFFFF` | `#FFFFFF` |
 | `--key-zero` | `zero` | Taste 0 | `rgb(0 0 0 / .50)` | `#48484A` (Legacy: `rgb(255 255 255 / .25)`) |
+| `--key-miss` | – (19.11.2026) | Taste X (Cricket, SplitScore): dunkler als die 0, damit sie sich von gesperrten Tasten abhebt | `rgb(0 0 0 / .70)` | `#48484A` |
 | `--key-double` | `double` (systemYellow) | Taste Double, Zahlentasten-Text im Double-Modus | `#FFCC00` | `#FFD60A` |
 | `--key-triple` | `triple` (systemGreen) | Taste Triple, Zahlentasten-Text im Triple-Modus | `#34C759` | `#30D158` |
 | `--key-undo` | `undo` (systemRed) | Taste Undo | `#FF3B30` | `#FF453A` |

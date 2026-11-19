@@ -22,6 +22,7 @@
   --key-bg: light-dark(#000000, #2c2c2e);
   --key-fg: #ffffff;
   --key-zero: light-dark(rgb(0 0 0 / 0.5), #48484a);
+  --key-miss: light-dark(rgb(0 0 0 / 0.7), #48484a); /* X (Cricket, SplitScore): darker than 0, stands out from disabled keys */
   --key-double: light-dark(#ffcc00, #ffd60a);
   --key-triple: light-dark(#34c759, #30d158);
   --key-undo: light-dark(#ff3b30, #ff453a);
@@ -119,6 +120,7 @@
   --color-key-bg: var(--key-bg);
   --color-key-fg: var(--key-fg);
   --color-key-zero: var(--key-zero);
+  --color-key-miss: var(--key-miss);
   --color-key-double: var(--key-double);
   --color-key-triple: var(--key-triple);
   --color-key-undo: var(--key-undo);
