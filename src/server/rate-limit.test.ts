@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RateLimiter } from "./rate-limit";
+import { ipFromHeaders, RateLimiter } from "./rate-limit";
 
 const MIN = 60_000;
 
@@ -35,5 +35,17 @@ describe("RateLimiter", () => {
     expect(l.retryAfter("ip", 1)).toBeGreaterThan(0);
     l.reset("ip");
     expect(l.retryAfter("ip", 1)).toBe(0);
+  });
+});
+
+describe("ipFromHeaders (E18)", () => {
+  it("the last X-Forwarded-For entry, the one Funnel sets", () => {
+    expect(ipFromHeaders(new Headers({ "x-forwarded-for": "2a00:fbc::1" }))).toBe("2a00:fbc::1");
+    // A client that sends its own header cannot choose the key: Funnel's entry comes last.
+    expect(ipFromHeaders(new Headers({ "x-forwarded-for": "1.2.3.4, 2a00:fbc::1" }))).toBe("2a00:fbc::1");
+  });
+  it("without the header (local development) one shared key", () => {
+    expect(ipFromHeaders(new Headers())).toBe("local");
+    expect(ipFromHeaders(new Headers({ "x-forwarded-for": " " }))).toBe("local");
   });
 });

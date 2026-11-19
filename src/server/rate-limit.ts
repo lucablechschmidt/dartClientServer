@@ -54,8 +54,16 @@ export function loginLimiter(): RateLimiter {
   return (globalForLimiter.__dartsLoginLimiter ??= new RateLimiter(LOGIN_WINDOW_MS, LOGIN_MAX_FAILURES));
 }
 
-/** Client IP: first entry of X-Forwarded-For (set by Caddy), otherwise "local". */
+/**
+ * Client IP for the rate limit (E18): the last entry of X-Forwarded-For. Tailscale Funnel sets it to
+ * the phone's address and is the only one that reaches the app (bound to 127.0.0.1 on the Pi). Earlier
+ * entries could be sent by the client itself and would let it pick a new key per attempt; the last one
+ * cannot. Without the header (local development) "local".
+ */
+export function ipFromHeaders(h: Pick<Headers, "get">): string {
+  return h.get("x-forwarded-for")?.split(",").at(-1)?.trim() || "local";
+}
+
 export async function clientIp(): Promise<string> {
-  const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
+  return ipFromHeaders(await headers());
 }
