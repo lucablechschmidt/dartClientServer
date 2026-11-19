@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isId, newMatchFromForm, newTournamentFromForm, offsetSchema, undoStepSchema, visitPositionSchema } from "./action-input";
-import { formNumber } from "./form";
+import { formNumber, safeNext } from "./form";
 
 const form = (fields: [string, string][]) => {
   const fd = new FormData();
@@ -21,6 +21,17 @@ const match: [string, string][] = [
 const without = (fields: [string, string][], name: string) => fields.filter(([k]) => k !== name);
 const replaced = (fields: [string, string][], name: string, value: string) =>
   fields.map(([k, v]): [string, string] => [k, k === name ? value : v]);
+
+describe("safeNext (security pass M12: no open redirect after login)", () => {
+  it("keeps paths on this site with query and hash", () => {
+    expect(safeNext("/account/stats?range=30d#x")).toBe("/account/stats?range=30d#x");
+    expect(safeNext("/")).toBe("/");
+  });
+  it("sends everything that leaves the site home, also with a backslash", () => {
+    for (const next of ["", "account", "https://evil.example", "//evil.example", "/\\evil.example", "/\\/evil.example", "/\t/evil.example"])
+      expect(safeNext(next), next).toBe("/");
+  });
+});
 
 describe("formNumber", () => {
   it("missing is undefined, empty or text is NaN, otherwise the number", () => {

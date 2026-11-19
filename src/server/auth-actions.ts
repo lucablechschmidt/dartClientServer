@@ -7,10 +7,7 @@ import { productionDeps } from "./context";
 import { log } from "./log";
 import { clientIp, loginLimiter } from "./rate-limit";
 import { clearSessionCookie, readSessionToken, setSessionCookie } from "./session-cookie";
-import { formText } from "./form";
-
-/** Only relative paths as target, otherwise back to the home page (no open redirect). */
-const safeNext = (s: string) => (s.startsWith("/") && !s.startsWith("//") ? s : "/");
+import { formText, safeNext } from "./form";
 
 export async function loginAction(_prev: LoginFormState, formData: FormData): Promise<LoginFormState> {
   const ip = await clientIp();

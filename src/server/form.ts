@@ -42,3 +42,18 @@ export function validate<S extends z.ZodType>(schema: S, raw: unknown): Result<z
   const parsed = schema.safeParse(raw);
   return parsed.success ? { ok: true, value: parsed.data } : { ok: false, reason: "invalid-input" };
 }
+
+/**
+ * Target after login (`?next=`): a path on this site, otherwise the home page (no open redirect).
+ * Resolved like a browser does, so `//host` and `/\\host` (a backslash counts as a slash) cannot leave the site.
+ */
+export function safeNext(next: string): string {
+  if (!next.startsWith("/")) return "/";
+  try {
+    const base = "http://same.invalid";
+    const url = new URL(next, base);
+    return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : "/";
+  } catch {
+    return "/";
+  }
+}
