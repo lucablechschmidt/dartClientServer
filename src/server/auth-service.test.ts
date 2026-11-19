@@ -9,7 +9,12 @@ import { createGuest, createPlayer, renamePlayer } from "./player-service";
 
 /** Hash in the format of `caddy hash-password` ($2a$…), with a small cost factor for fast tests. */
 const caddyHash = (pw: string) => bcrypt.hashSync(pw, 4).replace(/^\$2b\$/, "$2a$");
-const env: Env = { admin: { name: "Luca", passwordHash: caddyHash("admin-secret") }, appUrl: "http://127.0.0.1:3100", cookieSecure: false };
+const env: Env = {
+  admin: { name: "Luca", passwordHash: caddyHash("admin-secret") },
+  appUrl: "http://127.0.0.1:3100",
+  cookieSecure: false,
+  diagEnabled: false,
+};
 
 let auth: MemoryAuthRepository;
 let clock: number;

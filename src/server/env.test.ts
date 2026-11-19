@@ -10,8 +10,10 @@ describe("readEnv", () => {
       admin: { name: "darts", passwordHash: HASH },
       appUrl: "https://x.ts.net",
       cookieSecure: false,
+      diagEnabled: false,
     });
-    expect(readEnv({})).toEqual({ admin: null, appUrl: "http://127.0.0.1:3100", cookieSecure: true });
+    expect(readEnv({})).toEqual({ admin: null, appUrl: "http://127.0.0.1:3100", cookieSecure: true, diagEnabled: false });
+    expect(readEnv({ DIAG_ENABLED: "true" }).diagEnabled).toBe(true);
   });
   it("no admin when only one of the two admin variables is set", () => {
     expect(readEnv({ ADMIN_USER: "darts" }).admin).toBeNull();

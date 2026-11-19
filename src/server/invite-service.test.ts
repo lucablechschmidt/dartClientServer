@@ -11,7 +11,12 @@ import { cleanupGuests } from "./guest-cleanup";
 import { createPasswordInvite, createRegisterInvite, INVITE_LIFETIME_MS, inviteInfo, redeem } from "./invite-service";
 import { createGuest, listPlayers } from "./player-service";
 
-const env: Env = { admin: { name: "Luca", passwordHash: bcrypt.hashSync("admin-secret", 4) }, appUrl: "http://x", cookieSecure: false };
+const env: Env = {
+  admin: { name: "Luca", passwordHash: bcrypt.hashSync("admin-secret", 4) },
+  appUrl: "http://x",
+  cookieSecure: false,
+  diagEnabled: false,
+};
 let auth: MemoryAuthRepository;
 let clock: number;
 let deps: Deps;

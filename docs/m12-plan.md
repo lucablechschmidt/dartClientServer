@@ -129,6 +129,7 @@ Noch offen aus §5a: die Header am Pi über den Funnel nachmessen (`curl -sI htt
 - Alles hinter einem Schalter `DIAG_ENABLED=true` in der Pi-`.env`; ohne den Schalter antworten Seite und Route mit 404. So bleibt der Code bis zur Entscheidung im Deploy, ist aber nicht dauerhaft offen.
 - Test: `diag-screen.test.tsx` mit Fixture-Headern und Tick-Liste (Abstände werden korrekt berechnet).
 - **Commit:** „feat(diag): admin-only header and SSE diagnostics behind DIAG_ENABLED“
+- **Umgesetzt (19.11.2026):** `src/server/diag.ts` (Header-Auswahl, Schalter), `diag-actions.ts`, `src/app/diag/page.tsx`, `src/app/api/diag/ticks/route.ts` (dieselben Antwort-Header wie die Live-Route eines Matches), `diag-screen.tsx`. Ohne `DIAG_ENABLED=true` antworten Seite und Route mit 404, Nicht-Admins landen im Konto. Tests: `diag.test.ts`, `diag-screen.test.tsx`, `e2e/diag.spec.ts` (der Testserver schaltet die Seite ein: 10 Ticks, größter Abstand unter 1,5 s, Server Action ok).
 
 ## B3. Probe A: heutiger Weg mit Caddy
 

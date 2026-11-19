@@ -9,6 +9,8 @@ services:
       ADMIN_USER: ${ADMIN_USER:?set in .env}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?set in .env}
       APP_URL: ${APP_URL:?set in .env}
+      # M12 part B: /diag only while measuring (m12-plan §B2); remove the line from .env afterwards.
+      DIAG_ENABLED: ${DIAG_ENABLED:-false}
     volumes:
       - ./data:/data
     expose:

@@ -74,6 +74,23 @@ export const de = {
       "too-many-attempts": "Zu viele Versuche. Bitte in ein paar Minuten noch einmal.",
     },
   },
+  /** M12 part B: diagnostics page /diag (admins only, while measuring). */
+  diag: {
+    title: "Diagnose",
+    headers: "Angekommene Header",
+    missing: "fehlt",
+    ip: "IP für das Rate-Limit",
+    ticks: "Live-Verbindung (SSE)",
+    startTicks: "10 Ticks starten",
+    ticksRunning: "Läuft …",
+    tickLine: "Tick {n}: +{gap} ms",
+    ticksDone: "Fertig: {n} Ticks, größter Abstand {max} ms",
+    ticksFailed: "Verbindung abgebrochen",
+    action: "Server Action",
+    runAction: "Server Action testen",
+    actionOk: "ok ({ms} ms)",
+    actionFailed: "fehlgeschlagen",
+  },
   account: {
     title: "Konto",
     rename: "Umbenennen",

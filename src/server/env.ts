@@ -13,12 +13,15 @@ const schema = z.object({
     .optional(),
   APP_URL: z.url().default("http://127.0.0.1:3100"),
   COOKIE_SECURE: z.enum(["true", "false"]).default("true"),
+  /** M12 part B: the diagnostics page /diag and its tick stream; off unless set (m12-plan §B2). */
+  DIAG_ENABLED: z.enum(["true", "false"]).default("false"),
 });
 
 export type Env = {
   admin: { name: string; passwordHash: string } | null;
   appUrl: string;
   cookieSecure: boolean;
+  diagEnabled: boolean;
 };
 
 export function readEnv(source: Record<string, string | undefined> = process.env): Env {
@@ -35,5 +38,6 @@ export function readEnv(source: Record<string, string | undefined> = process.env
     admin: e.ADMIN_USER && e.ADMIN_PASSWORD_HASH ? { name: e.ADMIN_USER, passwordHash: e.ADMIN_PASSWORD_HASH } : null,
     appUrl: e.APP_URL.replace(/\/$/, ""),
     cookieSecure: e.COOKIE_SECURE === "true",
+    diagEnabled: e.DIAG_ENABLED === "true",
   };
 }
