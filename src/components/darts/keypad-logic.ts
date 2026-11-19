@@ -8,7 +8,7 @@ export type KeypadKey =
   | { kind: "double" }
   | { kind: "triple" }
   | { kind: "undo" }
-  /** Cricket: the rest of the visit as misses (11.11.2026, instead of 0). */
+  /** Cricket and SplitScore: the rest of the visit as misses (11.11.2026, instead of 0). */
   | { kind: "miss" };
 
 export type Modifier = "none" | "double" | "triple";
@@ -30,12 +30,14 @@ export const KEYPAD_ROWS: KeypadKey[][] = [
 const numbers = (...values: number[]): KeypadKey[] => values.map((value) => ({ kind: "number", value }));
 
 /**
- * Key layouts: the legacy keypad, and Cricket's (Figma): only X, 15–20 and Bull, the modifiers and
- * undo in a shorter centered row. Every other field would count nothing in Cricket anyway. X (instead
- * of 0, 11.11.2026) fills the rest of the visit with misses; undo takes them back at once.
+ * Key layouts: the legacy keypad; SplitScore's, the same with X in place of 0; and Cricket's (Figma):
+ * only X, 15–20 and Bull, the modifiers and undo in a shorter centered row. Every other field would count
+ * nothing in Cricket anyway. X (instead of 0, 11.11.2026) fills the rest of the visit with misses; undo
+ * takes them back at once.
  */
 export const KEYPAD_LAYOUTS = {
   full: KEYPAD_ROWS,
+  splitscore: KEYPAD_ROWS.map((row) => row.map((key): KeypadKey => (key.kind === "number" && key.value === 0 ? { kind: "miss" } : key))),
   cricket: [
     [{ kind: "miss" }, ...numbers(15, 16, 17)],
     [...numbers(18, 19, 20), { kind: "bull" }],

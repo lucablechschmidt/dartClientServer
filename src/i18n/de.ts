@@ -355,7 +355,7 @@ export const de = {
     double: "Double",
     triple: "Triple",
     bull: "Bull",
-    /** Cricket keypad: the rest of the visit as misses (instead of 0). */
+    /** Cricket and SplitScore keypad: the rest of the visit as misses (instead of 0). */
     miss: "X",
     back: "Zurück",
     toStart: "Anwurf",

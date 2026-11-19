@@ -9,7 +9,7 @@ import {
   lastOpenVisit,
   playerOnTurn,
   pointsPerVisit,
-  popDart,
+  popDartOrMisses,
   previousVisit,
   shownVisit,
   withDart,
@@ -42,7 +42,8 @@ export const splitscore: GameMode = {
     // A dart off the target is as good as missing the board: stored overthrown (legacy addSingleFaultyDartScore).
     return { ok: true, value: withDart(state, open, currentPlayer(state), hitsTarget(dart, target) ? dart : OVERTHROWN) };
   },
-  undoDart: popDart,
+  // The X key (11.11.2026) fills the rest of the visit with misses; undo takes them back at once.
+  undoDart: popDartOrMisses,
   isOpenVisit: (state, index) => index === state.visits.length - 1 && openVisit(state) !== null,
   currentPlayer,
   isLegFinished: finished,

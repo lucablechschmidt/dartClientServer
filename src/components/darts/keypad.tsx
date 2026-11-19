@@ -20,14 +20,14 @@ export type KeypadTexts = { keypad: string; bull: string; undo: string; double: 
 type Props = {
   onDart: (dart: Dart) => void;
   onUndo: () => void;
-  /** Cricket's X: fill the rest of the visit with misses. */
+  /** X (Cricket, SplitScore): fill the rest of the visit with misses. */
   onMissRest?: () => void;
   disabled?: boolean;
   /** E13: numbers, Bull, Double, Triple only when this device is currently allowed to enter. */
   canThrow?: boolean;
   canUndo?: boolean;
   texts: KeypadTexts;
-  /** "full": legacy 5 × 5; "cricket": X, 15–20, Bull (Figma). */
+  /** "full": legacy 5 × 5; "splitscore": the same with X instead of 0; "cricket": X, 15–20, Bull (Figma). */
   layout?: KeypadLayout;
   /** Adaptive keypad (11.11.2026): keys whose dart cannot count are off (Cricket: closed by all; SplitScore: off target). */
   live?: LiveKeys;
@@ -37,7 +37,11 @@ type Props = {
  * Literal classes per layout so Tailwind generates them. Every key spans two columns of a grid
  * twice as wide as the longest row, so a shorter row can start half a key in and sit centered.
  */
-const GRID: Record<KeypadLayout, string> = { full: "grid-cols-10 grid-rows-5", cricket: "grid-cols-8 grid-rows-3" };
+const GRID: Record<KeypadLayout, string> = {
+  full: "grid-cols-10 grid-rows-5",
+  splitscore: "grid-cols-10 grid-rows-5",
+  cricket: "grid-cols-8 grid-rows-3",
+};
 const ROW_OFFSET = ["", "col-start-2", "col-start-3", "col-start-4"];
 
 function label(key: KeypadKey, texts: KeypadTexts): string {

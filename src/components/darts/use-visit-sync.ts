@@ -324,7 +324,7 @@ export function useVisitSync<Reason extends string>({
     syncServer(state, r.value, [...(open ? rethrowable(open) : []), dart]);
   };
 
-  /** Several darts at once (Cricket's X: the rest of the visit as misses); one update, one sync. */
+  /** Several darts at once (the X key: the rest of the visit as misses); one update, one sync. */
   const throwDarts = (darts: Dart[]) => {
     let next = state;
     for (const dart of darts) {

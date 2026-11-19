@@ -130,6 +130,28 @@ describe("splitscore (M7, legacy §6)", () => {
   });
 });
 
+describe("splitscore: the X key (11.11.2026)", () => {
+  it("misses at the end of a visit go back with one undo, the darts before stay", () => {
+    const s = play(leg(), S(15), S(0), S(0)); // S15, then X for the last two
+    expect(s.visits[0].darts).toEqual([S(15), OVER, OVER]);
+    const back = undo(s);
+    expect(back.visits[0].darts).toEqual([S(15)]);
+    expect(splitscore.currentPlayer(back)).toBe(A);
+  });
+  it("X as the first dart: one undo removes the whole visit, the halving and the turn go back", () => {
+    const s = play(leg(), ...MISS);
+    expect(points(s)[A]).toBe(20);
+    expect(splitscore.currentPlayer(s)).toBe(B);
+    const back = undo(s);
+    expect(back.visits).toHaveLength(0);
+    expect(points(back)[A]).toBe(40);
+    expect(splitscore.currentPlayer(back)).toBe(A);
+  });
+  it("hits still go back one by one", () => {
+    expect(undo(play(leg(), S(15), T(15))).visits[0].darts).toEqual([S(15)]);
+  });
+});
+
 describe("splitscore: adaptive keypad (11.11.2026)", () => {
   const live = (state: LegState) => splitscore.board(state, {}).liveKeys;
   it("follows the round's target: 15, any double, any triple, bull; nothing once the game is over", () => {

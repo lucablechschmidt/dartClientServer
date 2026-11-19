@@ -72,17 +72,19 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(winner(admin, A)).toBeVisible();
   });
 
-  test("splitscore: the target moves on each round, a miss halves, the sum on the victory screen", async ({ admin }) => {
+  test("splitscore: the target moves on each round, X fills misses, a miss halves, the sum on the victory screen", async ({ admin }) => {
     await startMatch(admin, "splitscore", [A, B]);
     const b = board(admin);
     const targets = [["15"], ["16"], [g.double, "1"], ["17"], ["18"], [g.triple, "1"], ["19"], ["20"], [g.bull]];
     for (const [i, hit] of targets.entries()) {
-      await b.tap(...hit, "0", "0");
+      await b.tap(...hit, g.miss);
       if (i === 0) {
-        await b.tap("0", g.undo);
+        // X filled the last two darts; one undo takes both back, the round stays open
+        await b.tap(g.undo);
         await expect(admin.locator("[aria-live=polite]")).toHaveText(g.hints.target.replace("{target}", "15"));
+        await b.tap(g.miss);
       }
-      await b.tap(...K.MISS);
+      await b.tap(g.miss);
       if (i === 2) await shot(admin, "match-splitscore");
     }
     await expect(winner(admin, A)).toBeVisible();

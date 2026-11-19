@@ -242,7 +242,7 @@ export function ScoreboardScreen({
       onDart={throwDart}
       onUndo={undoAndReopen}
       onMissRest={() => throwDarts(Array.from({ length: board.dartsLeft }, () => MISS))}
-      layout={board.mode === "cricket" ? "cricket" : "full"}
+      layout={board.mode === "cricket" || board.mode === "splitscore" ? board.mode : "full"}
       live={board.liveKeys}
     />
   );

@@ -73,6 +73,15 @@ describe("Keypad", () => {
     await user.click(screen.getByRole("button", { name: texts.triple }));
     expect(textColors()).toEqual(["text-key-triple"]);
   });
+  it("SplitScore: the full layout with X in place of 0", async () => {
+    const user = userEvent.setup();
+    const onMissRest = vi.fn();
+    render(<Keypad onDart={() => {}} onUndo={() => {}} onMissRest={onMissRest} texts={texts} layout="splitscore" />);
+    expect(screen.getAllByRole("button").map((b) => b.textContent)).toHaveLength(25);
+    expect(screen.queryByRole("button", { name: "0" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: texts.miss }));
+    expect(onMissRest).toHaveBeenCalledTimes(1);
+  });
   it("Cricket: X instead of 0 asks for the rest of the visit as misses", async () => {
     const user = userEvent.setup();
     const onMissRest = vi.fn();
