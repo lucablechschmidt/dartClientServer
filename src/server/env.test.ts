@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readEnv } from "./env";
 
+/** bcrypt of "admin-secret", the test password of e2e/fixtures.ts; not the password on the Pi. */
 const HASH = "$2b$12$D9HmJZSfdcgsldYPsFwPfeGQL9USgbCm2j4nOg8Mr4DlrQrWSdc5m";
 
 describe("readEnv", () => {

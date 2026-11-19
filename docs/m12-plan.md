@@ -81,7 +81,7 @@ Befunde:
 |---|---|---|---|---|
 | S1 | `src/server/auth-actions.ts` | Offene Weiterleitung nach dem Login: `?next=/\evil.example` bestand die Prüfung (`/`, nicht `//`), der Browser macht aus dem Backslash einen Slash und landet auf der fremden Seite (Phishing-Link). | mittel | behoben: `safeNext` in `form.ts` löst den Pfad wie ein Browser auf und lässt nur die eigene Herkunft durch; Test in `action-input.test.ts` |
 | S2 | `match-actions.ts`, `tournament-actions.ts` | Spieler-IDs aus dem Formular ungeprüft: unbekannte oder doppelte IDs ergaben einen Datenbankfehler (Fehlerseite), gelöschte Spieler und abgelaufene Gäste ließen sich per gefälschtem Formular in ein neues Spiel oder Turnier setzen. | niedrig | behoben: `canSeat` in `player-service.ts` (jeder einmal, vorhanden, nicht gelöscht, Gäste nur solange gelistet), sonst „invalid-input“; Test in `player-service.test.ts` |
-| S3 | `src/server/env.test.ts` | Ein echter bcrypt-Hash steht seit dem ersten Commit im Test. Ist es der Admin-Hash vom Pi, könnte jemand mit Zugriff aufs Repo offline das Passwort raten. | – | offen, Frage an Luca (§8.3) |
+| S3 | `src/server/env.test.ts` | Ein bcrypt-Hash steht seit dem ersten Commit im Test. | – | kein Befund: es ist der Hash von `admin-secret`, dem Test-Passwort aus `e2e/fixtures.ts`, nicht das Passwort am Pi (Luca, 19.11.2026); Kommentar im Test |
 | S4 | `next.config.ts` | Kein `Strict-Transport-Security`. TLS endet bei Tailscale Funnel, das nur HTTPS anbietet. | niedrig | bewusst akzeptiert |
 | S5 | SSE-Route | Ein eingeloggter Nutzer kann beliebig viele Verbindungen öffnen (auch auf erfundene IDs). | niedrig | bewusst akzeptiert: nur Eingeloggte, eingeladene Mitspieler |
 | S6 | Rate-Limit | zählt pro IP; ob der Funnel die Handy-IP liefert, misst Teil B. | – | in Teil B (§B1–B5) |
@@ -92,7 +92,7 @@ Noch offen aus §5a: die Header am Pi über den Funnel nachmessen (`curl -sI htt
 
 1. **Automatischer Reboot** nach Kernel-Updates nachts um 4 (Default ja).
 2. **PWA-Name** auf dem Home-Bildschirm: „Darts“ (Default) oder „Darts Scorer“. **Antwort:** „DART“.
-3. **Hash in `src/server/env.test.ts`** (Security-Durchgang S3): Ist `$2b$12$D9HmJZ…` dein Admin-Hash vom Pi? Default ohne Antwort: Hash im Test durch einen frisch erzeugten ersetzen; falls es der Pi-Hash ist, zusätzlich das Admin-Passwort am Pi ändern (`scripts/hash-password.sh`, README).
+3. **Hash in `src/server/env.test.ts`** (Security-Durchgang S3): Ist `$2b$12$D9HmJZ…` dein Admin-Hash vom Pi? Default ohne Antwort: Hash im Test durch einen frisch erzeugten ersetzen; falls es der Pi-Hash ist, zusätzlich das Admin-Passwort am Pi ändern (`scripts/hash-password.sh`, README). **Antwort:** nein, nur der lokale Test-Hash (`admin-secret`); bleibt.
 
 ---
 
