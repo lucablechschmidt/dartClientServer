@@ -62,13 +62,13 @@ Vorgehen:
 
 ---
 
-## Stand (8.11.2026)
+## Stand (19.11.2026)
 
 - **Fertig, DoD am Board offen:** M5 X01 vollständig, M6 Robustheit (Praxistest mit Flugmodus offen), M7 Cricket, Elimination, SplitScore, M8 Statistiken (Tab Konto, Ranglisten je Modus, Match-Seite; Turnier-Setzliste ausgelost oder festgelegt), M9 Turniere, M10 Achievements (Galerie im Konto, Banner auf dem Sieg-Screen). M1–M4 sind am Handy abgenommen. Dazu die Board-Änderungen vom 5.11. (Tab „Verwaltung“, Spieler/Spiele/Turniere löschen, Eingabefelder im Setup, Elimination-Hinweis, nächster Spieler ab drei).
 - **M13 Code-Review und Konsolidierung** (`docs/archive/m13-plan.md`): Pakete A (Eingabevalidierung, Fehler-Log, Restart-Rechte), C (Lebenszyklus der Hooks, Pending-Buttons, Lade-Platzhalter, globale Fehlerseite) und D (Duplikate, `import type` aus `@/server` in Komponenten, Komponenten-Coverage, Doku) sind umgesetzt; B (Statistik-Matches gebündelt laden) im Code fertig, die Messung (§7) ist offen, `synchronous` bleibt `FULL` (E16); E (`choice-menu` geteilt) und F (Barrierefreiheit ohne Nachteil für Sehende, Axe-Lauf in `e2e/a11y.spec.ts`) sind fertig. Die Legacy-Tastenfarben bleiben (E17). M14 Styling wartet auf die Abnahme am Board.
-- **Offen:** M11 ist im Code fertig (180-Sound, Tastenrückmeldung; Schnelleingabe entfällt), Abnahme am Board in `docs/test-pi.md`. M12 Betrieb und Härtung (bewusst zuletzt; PWA/Service Worker dort würde auch das Laden ohne Netz abdecken, siehe `docs/test-pi.md` Beobachtungen), später vielleicht ein Meilenstein Checkout-Quote.
+- **Offen:** M11 ist im Code fertig (180-Sound, Tastenrückmeldung; Schnelleingabe entfällt), Abnahme am Board in `docs/test-pi.md`. M12 Betrieb und Härtung ist fertig (PWA „DART“ ohne Service Worker, Security-Durchgang, Caddy entfernt mit E18, Stromtest bestanden, Updates von Hand); offen nur Header-Prüfung und ggf. Android in `docs/test-pi.md`. Später vielleicht ein Meilenstein Checkout-Quote.
 - **Deploy und Push macht Luca selbst.** Was auf dem Pi läuft: `ssh pi 'grep IMAGE_TAG darts/.env'`. Admin dort ist `darts`. Die URL steht im README.
-- **Pläne** für die offenen Meilensteine liegen in `docs/m11-plan.md` und `docs/m12-plan.md` (Stand 23.10.2026, vor dem Abgleich mit dem Code); `docs/archive/m8-plan.md` und `docs/archive/m10-plan.md` sind abgeglichen und umgesetzt. Umgesetzte Pläne liegen in `docs/archive/` (seit 11.11.2026 auch M5–M10, M13, M14); ihre offene Abnahme am Board steht gesammelt in `docs/test-pi.md`.
+- **Pläne:** offen ist nur noch `docs/m11-plan.md` (§4 Sammelstelle für Kleinkram vom Board). Umgesetzte Pläne liegen in `docs/archive/` (seit 11.11.2026 auch M5–M10, M13, M14, seit 19.11.2026 M12); ihre offene Abnahme am Board steht gesammelt in `docs/test-pi.md`.
 - **Mehrsprachigkeit** ist vorbereitet, aber noch keine Sprachwahl gebaut: erst wenn eine zweite Sprache kommt (README „Adding a language“).
 
 ## So arbeiten wir

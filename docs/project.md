@@ -36,7 +36,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
-| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | PWA, Security, Teil B (Ingress, E18) fertig; offen: Updates, Funnel-Check, Stromtest | M6 und M4c |
+| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | fertig (Stromtest bestanden, Updates von Hand), Abnahme am Handy offen | M6 und M4c |
 | M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
@@ -279,22 +279,22 @@ Detailplan: `docs/m11-plan.md`. Abnahme am Board: `docs/test-pi.md` M11.
 
 ## M12 – Betrieb und Härtung
 
-Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
+Detailplan: `docs/archive/m12-plan.md`. Abnahme am Handy: `docs/test-pi.md` M12. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 - [x] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“ (Name „DART“, Dartscheiben-Icon; Abnahme am Handy in `docs/test-pi.md` M12)
-- [ ] unattended-upgrades auf dem Pi, stündlicher Funnel-Check mit Logzeile (Healthcheck für Caddy entfällt, E18)
+- [x] ~~unattended-upgrades auf dem Pi, stündlicher Funnel-Check mit Logzeile~~ (entfällt, 19.11.2026: Updates von Hand laut README, der Check vom Pi aus prüfte den öffentlichen Weg nicht; Healthcheck für Caddy entfällt mit E18)
 - [ ] Optional: Umzug auf USB-SSD (E6, nur bei SD-Fehlern)
-- [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; offen: Header am Pi)
+- [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/archive/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; offen: Header am Pi)
 
-**Teil B – Ingress prüfen** (früher eigener Meilenstein, `docs/m12-plan.md` Teil B):
+**Teil B – Ingress prüfen** (früher eigener Meilenstein, `docs/archive/m12-plan.md` Teil B):
 
 - [x] Diagnose-Seite `/diag` (nur Admin, hinter `DIAG_ENABLED`): ankommende Header, abgeleitete Client-IP, SSE-Ticks, Server-Action-Probe
-- [x] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App (19.11.2026, `m12-plan.md` §B6)
+- [x] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App (19.11.2026, `archive/m12-plan.md` §B6)
 - [x] Entscheidung E18: Caddy entfällt (Funnel liefert die Handy-IP, SSE und Server Actions laufen ohne Caddy)
 - [x] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername: pro Gerät, letzter `X-Forwarded-For`-Eintrag; Gegenprobe am Handy nach dem Umbau ok (19.11.2026), die Probe mit zwei Handys steht in `docs/test-pi.md` M12
 - [x] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen (19.11.2026)
 
-**DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E18 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
+**DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/archive/m12-plan.md` §B6, E18 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
 
 ---
 

@@ -1,7 +1,7 @@
 # M12-Plan – Betrieb und Härtung
 
 > Detailplan zu `project.md` M12. **Teil A** (unten, §0–§8): Neustart-Robustheit, Updates, PWA. **Teil B** (§B0–§B8, früher eigener Meilenstein „Ingress prüfen“): messen, ob Caddy noch gebraucht wird und ob das Rate-Limit die echte IP der Handys kennt. Teil B steht hier, weil er für die Nutzer keinen spürbaren Unterschied macht; eine kurze Rate-Limit-Probe von Hand gehört schon zur DoD von M4 und entscheidet, ob Teil B vorgezogen wird. Hier entsteht wenig App-Code; der Großteil ist Konfiguration auf dem Pi, die Luca mit `ssh pi` ausführt und Claude vorbereitet. Reihenfolge: Robustheit beim Neustart, dann PWA, zuletzt optional SSD. **Kein Backup** (E14, bewusste Entscheidung vom 23.10.2026).
-> Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §5 (PWA) und §5a (Security-Durchgang, Protokoll in §7) umgesetzt; §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
+> Stand: abgeschlossen (19.11.2026). Umgesetzt: §2, §5 (PWA), §5a (Security), Teil B (E18), Stromtest bestanden. Entschieden: keine automatischen Updates und kein Funnel-Check (§4, Luca 19.11.2026), Updates von Hand laut README. Offen nur die Abnahme am Handy (`docs/test-pi.md` M12) und optional die SSD.
 > Luca: §0 und §8. Stromtest bestanden (19.11.2026, §7).
 
 ---
@@ -16,8 +16,8 @@
 ## 1. Grundentscheidungen
 
 - **Kein Backup (E14).** Geht die Datenbank verloren, legt der nächste Start sie samt Admin neu an; Mitspieler werden neu eingeladen. Dafür gibt es in der README den Abschnitt „Datenbank neu anlegen“.
-- **Healthchecks**: der App-Container hat schon einen; Caddy bekommt einen (`wget` auf `/`), Compose startet beide bei Fehlern neu (`restart: unless-stopped` gibt es schon). Ein `cron`-Job auf dem Host prüft stündlich die Funnel-URL und schreibt bei Fehlern nach `syslog`.
-- **Updates**: `unattended-upgrades` für Sicherheitsupdates des Pi OS, automatischer Neustart nachts nur, wenn nötig (`Unattended-Upgrade::Automatic-Reboot "true"`, Zeit 04:00). Docker-Images werden nicht automatisch aktualisiert; Caddy-Image bei Bedarf über den Deploy.
+- **Healthchecks**: der App-Container hat schon einen; Caddy bekommt einen (`wget` auf `/`), Compose startet beide bei Fehlern neu (`restart: unless-stopped` gibt es schon). ~~Ein `cron`-Job auf dem Host prüft stündlich die Funnel-URL und schreibt bei Fehlern nach `syslog`.~~ (entfällt, §4)
+- **Updates** (geändert 19.11.2026, Luca: von Hand, siehe §4): ~~`unattended-upgrades` für Sicherheitsupdates des Pi OS, automatischer Neustart nachts nur, wenn nötig (`Unattended-Upgrade::Automatic-Reboot "true"`, Zeit 04:00). Docker-Images werden nicht automatisch aktualisiert; Caddy-Image bei Bedarf über den Deploy.~~
 - **PWA** nur das Nötige: Manifest (Name, Icons, `display: standalone`, Theme-Farben aus dem Theme), Icons in 192/512 px aus dem Legacy-App-Icon, `apple-touch-icon`, `viewport-fit=cover` (gibt es). Kein Service Worker: Offline-Puffer macht die Warteschlange aus M6, und ein Service Worker würde die Session-Umleitung verkomplizieren.
 - **SSD (E6)**: optional, nur wenn die SD-Karte Probleme macht oder Luca es will. Umzug = `rpi-clone` oder frisches OS plus `docker compose up` mit zurückkopiertem `~/darts/`.
 
@@ -28,11 +28,12 @@
 
 ## 4. Neustart-Robustheit und Monitoring
 
-- ~~`docker-compose.yml`: Healthcheck für Caddy~~ (Caddy entfällt, E18; die App hat ihren Healthcheck im Dockerfile); `deploy/check-funnel.sh` mit `cron` stündlich (`curl -sf -o /dev/null https://dartserver…/api/health || logger -t darts "funnel down"`).
-- `tailscale funnel` ist persistent (README); zusätzlich `tailscale set --auto-update`.
-- `unattended-upgrades` einrichten (`sudo apt install unattended-upgrades`, Konfiguration aus `deploy/50unattended-upgrades`).
-- README „Nach einem Neustart“ ergänzen um die neuen Jobs.
-- **Commit:** „M12: Healthchecks, Updates, Monitoring“
+**Entschieden (19.11.2026, Luca): nichts davon automatisch.**
+
+- ~~Healthcheck für Caddy~~: Caddy entfällt (E18); die App hat ihren Healthcheck im Dockerfile, Docker startet sie bei Fehlern neu.
+- ~~Stündlicher Funnel-Check per `cron`~~: entfällt. Vom Pi aus ginge der Abruf nicht über den öffentlichen Funnel-Weg, sondern direkt im Tailnet, prüfte also gerade das nicht, was von außen ausfallen kann; und er schriebe nur ins Log, ohne jemanden zu benachrichtigen.
+- ~~`unattended-upgrades`, `tailscale set --auto-update`~~: Updates von Hand, README „Updating the Pi“ (`apt full-upgrade`, Neustart falls nötig, Tailscale mit).
+- Der Stromtest (§6.1) hat gezeigt, dass App und Funnel einen Neustart von selbst überstehen.
 
 ## 5. PWA
 
@@ -90,7 +91,7 @@ Noch offen aus §5a: die Header am Pi über den Funnel nachmessen (`curl -sI htt
 
 ## 8. Offene Fragen (Defaults gelten ohne Antwort)
 
-1. **Automatischer Reboot** nach Kernel-Updates nachts um 4 (Default ja).
+1. **Automatischer Reboot** nach Kernel-Updates nachts um 4 (Default ja). **Antwort:** keine automatischen Updates, also auch kein automatischer Reboot (19.11.2026).
 2. **PWA-Name** auf dem Home-Bildschirm: „Darts“ (Default) oder „Darts Scorer“. **Antwort:** „DART“.
 3. **Hash in `src/server/env.test.ts`** (Security-Durchgang S3): Ist `$2b$12$D9HmJZ…` dein Admin-Hash vom Pi? Default ohne Antwort: Hash im Test durch einen frisch erzeugten ersetzen; falls es der Pi-Hash ist, zusätzlich das Admin-Passwort am Pi ändern (`scripts/hash-password.sh`, README). **Antwort:** nein, nur der lokale Test-Hash (`admin-secret`); bleibt.
 

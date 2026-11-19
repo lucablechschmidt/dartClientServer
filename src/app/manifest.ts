@@ -3,7 +3,7 @@ import { PAGE_GROUND } from "@/components/ui/theme";
 import { de } from "@/i18n/de";
 
 /**
- * M12 PWA (m12-plan §5): installable from the browser ("Zum Home-Bildschirm"), starts without the
+ * M12 PWA (archive/m12-plan §5): installable from the browser ("Zum Home-Bildschirm"), starts without the
  * browser bar. No service worker: the offline buffer is the visit queue from M6. The icon is a plain
  * dartboard drawn by `scripts/make-icons.mjs`; it sits inside the maskable safe zone, so one image is
  * both "any" and "maskable".

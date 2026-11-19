@@ -165,6 +165,17 @@ tailscale funnel status                  # https://dartserver.… → http://127
 
 If something is missing, run `sudo systemctl enable --now docker tailscaled`, `docker compose up -d` and `tailscale funnel --bg 8080`. After `docker compose down` the containers do not come back on boot by themselves; after `stop` or a reboot they do.
 
+### Updating the Pi
+
+There are no automatic updates (decided 19.11.2026). Every few weeks, and after news of a security hole, run on the Pi:
+
+```bash
+sudo apt update && sudo apt full-upgrade -y    # Raspberry Pi OS packages, Docker and Tailscale from their own sources too
+[ -f /var/run/reboot-required ] && sudo reboot   # only if an update asks for it (mostly the kernel)
+```
+
+The app and the Funnel come back by themselves after the reboot (checked with a power cut, 19.11.2026). The app itself is updated only through `./scripts/deploy.sh`.
+
 ### Looking around on the Pi
 
 ```bash
