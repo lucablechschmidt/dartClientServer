@@ -28,7 +28,7 @@
 
 ## 4. Neustart-Robustheit und Monitoring
 
-- `docker-compose.yml`: Healthcheck für Caddy; `deploy/check-funnel.sh` mit `cron` stündlich (`curl -sf -o /dev/null https://dartserver…/api/health || logger -t darts "funnel down"`).
+- ~~`docker-compose.yml`: Healthcheck für Caddy~~ (Caddy entfällt, E18; die App hat ihren Healthcheck im Dockerfile); `deploy/check-funnel.sh` mit `cron` stündlich (`curl -sf -o /dev/null https://dartserver…/api/health || logger -t darts "funnel down"`).
 - `tailscale funnel` ist persistent (README); zusätzlich `tailscale set --auto-update`.
 - `unattended-upgrades` einrichten (`sudo apt install unattended-upgrades`, Konfiguration aus `deploy/50unattended-upgrades`).
 - README „Nach einem Neustart“ ergänzen um die neuen Jobs.
@@ -162,8 +162,10 @@ In jedem Fall danach: Diagnose-Code und `DIAG_ENABLED` entfernen.
 
 | Probe | x-forwarded-for | x-forwarded-host / host | tailscale-* | SSE-Abstände | Server Action |
 |---|---|---|---|---|---|
-| A (mit Caddy) | | | | | |
-| B (ohne Caddy) | | | | | |
+| A (mit Caddy, 19.11.2026) | `172.18.0.1` (Docker-Gateway) | `dartserver.swallow-pythagorean.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 984–1021 ms | ok, 215 ms |
+| B (ohne Caddy, 19.11.2026) | `2a00:fbc:f0fa:…:e59a` (öffentliche IPv6 des Handys, Mobilfunk) | `dartserver.swallow-pythagorean.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 996–1006 ms | ok, 273 ms; Ab- und Anmelden ok |
+
+**Ergebnis:** erste Zeile von §B5. Caddy entfällt (E18). Das Rate-Limit nimmt den letzten Eintrag von `X-Forwarded-For` (`ipFromHeaders`), nicht den ersten: den setzt Funnel, frühere Einträge könnte der Client selbst schicken. Umstellung: `docker-compose.yml` ohne Caddy, App auf `127.0.0.1:8080:3000`, `Caddyfile` gelöscht, `scripts/deploy.sh` prüft die App direkt. Screenshots der Proben (nicht im Repo): `docs/diag/` lokal bei Luca.
 
 ---
 

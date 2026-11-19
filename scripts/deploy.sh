@@ -15,13 +15,15 @@ docker buildx build --platform linux/arm64 -t "${IMAGE}" --load .
 echo "▶ transfer to ${PI_HOST}"
 docker save "${IMAGE}" | gzip | ssh "${PI_HOST}" "docker load"
 ssh "${PI_HOST}" "mkdir -p ${REMOTE_DIR}/data"
-scp -q docker-compose.yml Caddyfile "${PI_HOST}:${REMOTE_DIR}/"
+scp -q docker-compose.yml "${PI_HOST}:${REMOTE_DIR}/"
+# E18: Caddy is gone; its file is no longer needed on the Pi.
+ssh "${PI_HOST}" "rm -f ${REMOTE_DIR}/Caddyfile"
 
 echo "▶ start"
 ssh "${PI_HOST}" "cd ${REMOTE_DIR} && grep -q '^IMAGE_TAG=' .env && sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${TAG}/' .env || echo 'IMAGE_TAG=${TAG}' >> .env; docker compose up -d --remove-orphans && docker image prune -f >/dev/null"
 
 echo "▶ health"
 sleep 5
-# App directly in the Compose network (behind Caddy) and Caddy from outside: without a session / must redirect to /login (307).
-ssh "${PI_HOST}" "cd ${REMOTE_DIR} && echo \"app:   \$(docker compose exec -T caddy wget -qO- http://app:3000/api/health || echo FAIL)\"; echo \"caddy: HTTP \$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/) (307 = login redirect active)\""
+# The app on the port Funnel forwards to: health, and without a session / must redirect to /login (307).
+ssh "${PI_HOST}" "echo \"health: \$(curl -s http://127.0.0.1:8080/api/health || echo FAIL)\"; echo \"login:  HTTP \$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/) (307 = login redirect active)\""
 echo "done: ${IMAGE}"

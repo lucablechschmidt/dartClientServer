@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 /**
  * Browser tests (M6) against the production build: `scripts/e2e-server.sh` starts the standalone
  * server on port 3100 with a fresh database and a test admin. With BASE_URL set (e.g. the container
- * behind Caddy, BASIC_AUTH=user:password) the tests run against that instead and start nothing.
+ * behind the Funnel, BASIC_AUTH=user:password if a proxy asks for it) the tests run against that instead and start nothing.
  * One worker: all tests share one database, and the rate-limit test locks the IP, so it runs last.
  */
 const PORT = Number(process.env.PORT ?? 3100);

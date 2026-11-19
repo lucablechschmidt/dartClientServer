@@ -1,5 +1,6 @@
 # Runs on the Pi under ~/darts. The image arrives via `docker load` from scripts/deploy.sh.
-# Only Caddy on 127.0.0.1:8080 is exposed; Tailscale Funnel forwards there (architecture.md §4).
+# The app listens on 127.0.0.1:8080 only; Tailscale Funnel forwards there and sets X-Forwarded-For
+# (architecture.md §4, E18: no reverse proxy since 19.11.2026).
 services:
   app:
     image: darts-app:${IMAGE_TAG:-latest}
@@ -13,15 +14,5 @@ services:
       DIAG_ENABLED: ${DIAG_ENABLED:-false}
     volumes:
       - ./data:/data
-    expose:
-      - "3000"
-
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    depends_on:
-      - app
     ports:
-      - "127.0.0.1:8080:8080"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - "127.0.0.1:8080:3000"

@@ -50,3 +50,6 @@ next-env.d.ts
 # CI-Artefakte (Screenshots des Smoke-Tests im Runner)
 /ci-screenshots
 /.npm
+
+# M12 part B probe screenshots (contain the phone's IP), local only
+/docs/diag/

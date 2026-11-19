@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /**
- * Configuration from the environment (M3). Admin data is optional as long as Basic Auth in Caddy
- * protects the app; if it is missing, there is no bootstrap and startup only warns.
+ * Configuration from the environment (M3). Admin data is optional; if it is missing, there is no
+ * bootstrap and startup only warns.
  */
 const schema = z.object({
   ADMIN_USER: z.string().trim().min(1).optional(),

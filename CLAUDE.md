@@ -76,7 +76,7 @@ pages below; the same for everyone), `/account/rankings` (per mode), `/account/s
 checks the cookie. Env: `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (bcrypt, first admin bootstrap),
 `APP_URL`, `COOKIE_SECURE=false` for local http. Input rights (E13, M4): `match.input_mode` and
 `host_player_id`, pure checks in `src/domain/x01/permissions.ts`, enforced in `match-service.ts`;
-live updates via SSE at `/api/match/[id]/events` (`src/server/match-events.ts`, Caddy `flush_interval -1`).
+live updates via SSE at `/api/match/[id]/events` (`src/server/match-events.ts`). On the Pi there is no reverse proxy since E18: Funnel → app on 127.0.0.1:8080, the rate limit keys on the last `X-Forwarded-For` entry.
 Sync (E11, M6): `src/components/darts/use-visit-sync.ts` plays a queue kept in localStorage
 (`sync-queue.ts`); commit and undo are safe to send twice (`undoStep`). Shared UI
 building blocks (tab bar, screen header, option pills, card lists, icons) live in

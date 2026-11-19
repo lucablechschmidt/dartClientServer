@@ -282,16 +282,16 @@ Detailplan: `docs/m11-plan.md`. Abnahme am Board: `docs/test-pi.md` M11.
 Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 - [x] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“ (Name „DART“, Dartscheiben-Icon; Abnahme am Handy in `docs/test-pi.md` M12)
-- [ ] unattended-upgrades auf dem Pi, Healthcheck auch für Caddy, stündlicher Funnel-Check mit Logzeile
+- [ ] unattended-upgrades auf dem Pi, stündlicher Funnel-Check mit Logzeile (Healthcheck für Caddy entfällt, E18)
 - [ ] Optional: Umzug auf USB-SSD (E6, nur bei SD-Fehlern)
 - [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; offen: Header am Pi)
 
 **Teil B – Ingress prüfen** (früher eigener Meilenstein, `docs/m12-plan.md` Teil B):
 
-- [ ] Diagnose-Seite `/diag` (nur Admin, hinter `DIAG_ENABLED`): ankommende Header, abgeleitete Client-IP, SSE-Ticks, Server-Action-Probe
-- [ ] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App
-- [ ] Entscheidung E18: Caddy entfällt oder bleibt mit Begründung
-- [ ] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername
+- [x] Diagnose-Seite `/diag` (nur Admin, hinter `DIAG_ENABLED`): ankommende Header, abgeleitete Client-IP, SSE-Ticks, Server-Action-Probe
+- [x] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App (19.11.2026, `m12-plan.md` §B6)
+- [x] Entscheidung E18: Caddy entfällt (Funnel liefert die Handy-IP, SSE und Server Actions laufen ohne Caddy)
+- [ ] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername: pro Gerät, letzter `X-Forwarded-For`-Eintrag; offen ist die Probe mit zwei Handys (`docs/test-pi.md` M12)
 - [ ] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen
 
 **DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E18 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
@@ -338,4 +338,4 @@ Detailplan: `docs/archive/m14-plan.md`.
 
 ## Entscheidungen
 
-Alle geklärten Fragen stehen als Entscheidungen E1–E17 in `docs/architecture.md` §11. Offene Fragen stehen im jeweiligen Plan unter „Offene Fragen“ (Defaults gelten ohne Antwort).
+Alle geklärten Fragen stehen als Entscheidungen E1–E18 in `docs/architecture.md` §11. Offene Fragen stehen im jeweiligen Plan unter „Offene Fragen“ (Defaults gelten ohne Antwort).

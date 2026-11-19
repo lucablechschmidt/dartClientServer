@@ -110,14 +110,14 @@ npm run test:e2e          # browser tests (e2e/) against an existing production 
 
 ## Deploying to the Pi
 
-### How the Pi is reachable: Tailscale and Caddy
+### How the Pi is reachable: Tailscale
 
 ```
-phone ──HTTPS──▶ Tailscale Funnel ──▶ Pi: tailscaled ──▶ Caddy 127.0.0.1:8080 ──▶ app:3000 (Docker network)
+phone ──HTTPS──▶ Tailscale Funnel ──▶ Pi: tailscaled ──▶ app 127.0.0.1:8080 (container port 3000)
 ```
 
 - **Tailscale Funnel** gives the Pi a public HTTPS address without opening a port in the home router. The connection is DS-Lite, so there is no public IPv4 anyway. The Pi connects out to Tailscale. `tailscaled` on the Pi holds the Let's Encrypt certificate, ends TLS and forwards plain HTTP to port 8080 on localhost.
-- **Caddy** is a small reverse proxy container. It is the only container with a port on the host (`127.0.0.1:8080`) and forwards into the Compose network to the app. It compresses responses, tells the app the original request was HTTPS, and passes SSE through unbuffered. The app container itself publishes no port.
+- **No reverse proxy** (E18, 19.11.2026): the app container publishes its port on `127.0.0.1:8080` only, so nothing in the home network reaches it. `tailscaled` sets `X-Forwarded-For` (the phone's IP, used by the login rate limit), `X-Forwarded-Host` and `X-Forwarded-Proto`, and passes SSE through unbuffered. Until then a Caddy container sat in between; with it the app saw only a Docker address, so all phones shared one rate-limit counter.
 
 Background, privacy notes and why there is no Basic Auth any more: `docs/architecture.md` §2, §4 and §10.
 
@@ -127,7 +127,7 @@ On the Mac: `ssh pi` as an alias in `~/.ssh/config` with the key in the ssh agen
 
 On the Pi: Docker with the Compose plugin, Tailscale with `tailscale funnel --bg 8080`, then `mkdir -p ~/darts/data` and create `~/darts/.env` from `deploy/env.example` (values: see Configuration).
 
-The Pi never builds and holds no repository, only `~/darts/` with `.env`, `docker-compose.yml`, `Caddyfile` and `data/`. A Next.js build does not fit into the Pi 3 B+ (1 GB RAM).
+The Pi never builds and holds no repository, only `~/darts/` with `.env`, `docker-compose.yml` and `data/`. A Next.js build does not fit into the Pi 3 B+ (1 GB RAM).
 
 ### Releasing a new version
 
@@ -138,7 +138,7 @@ git status                # commit first, otherwise the image is tagged <sha>-di
 ./scripts/deploy.sh
 ```
 
-The script builds `darts-app:<git-sha>` for `linux/arm64` on the Mac and streams it to the Pi (`docker save | ssh pi docker load`). It copies `docker-compose.yml` and `Caddyfile`, sets `IMAGE_TAG`, and runs `docker compose up -d`. Finally it checks health: the app answers `{"ok":true}`, and Caddy answers `307` (redirect to `/login`). Database migrations and the admin bootstrap run when the app starts.
+The script builds `darts-app:<git-sha>` for `linux/arm64` on the Mac and streams it to the Pi (`docker save | ssh pi docker load`). It copies `docker-compose.yml`, sets `IMAGE_TAG`, and runs `docker compose up -d`. Finally it checks the app on `127.0.0.1:8080`: health answers `{"ok":true}`, and `/` without a session answers `307` (redirect to `/login`). Database migrations and the admin bootstrap run when the app starts.
 
 There is deliberately no backup (E14). If `data/darts.db` is lost, the next start creates it again with the admin from `.env`, and players are invited again. To start over on purpose: `docker compose stop app && rm -f data/darts.db*` then `docker compose up -d`.
 
@@ -155,11 +155,11 @@ Run `ssh pi docker image prune -a` now and then when space runs low.
 
 ### After a reboot of the Pi
 
-Normally nothing is needed. Docker is enabled as a service, both containers have `restart: unless-stopped`, and `tailscaled` with the funnel setting persists. After one or two minutes, check:
+Normally nothing is needed. Docker is enabled as a service, the app container has `restart: unless-stopped`, and `tailscaled` with the funnel setting persists. After one or two minutes, check:
 
 ```bash
 systemctl is-active docker tailscaled    # both: active
-cd ~/darts && docker compose ps          # app (healthy) and caddy: Up
+cd ~/darts && docker compose ps          # app: Up (healthy)
 tailscale funnel status                  # https://dartserver.… → http://127.0.0.1:8080
 ```
 
@@ -196,7 +196,6 @@ flowchart LR
     TS["Tailscale Funnel<br/>dartserver…ts.net, TLS"]
   end
   subgraph Pi["Raspberry Pi 3 B+ (Docker Compose)"]
-    Caddy["Caddy :8080<br/>reverse proxy, no TLS"]
     subgraph App["app: Next.js, one Node process"]
       Pages["Server components<br/>render pages"]
       Actions["Server actions<br/>check the session"]
@@ -208,7 +207,7 @@ flowchart LR
     end
     DB[("SQLite<br/>data/darts.db")]
   end
-  UI -- "HTTPS: pages, server actions, SSE" --> TS --> Caddy --> App
+  UI -- "HTTPS: pages, server actions, SSE" --> TS -- "127.0.0.1:8080" --> App
   Actions --> Svc --> Dom2
   Svc --> Repo --> DB
   Svc --> Hub

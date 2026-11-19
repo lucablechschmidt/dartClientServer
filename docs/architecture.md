@@ -34,10 +34,9 @@
         │  ausgehende Verbindung des Pi (kein offener Port, kein IPv4 nötig)
         ▼
  FritzBox (DS-Lite)  →  Raspberry Pi 3 B+ (1 GB RAM)
-   tailscaled (Host)   TLS-Endpunkt mit Let's-Encrypt-Zertifikat, leitet an :8080
+   tailscaled (Host)   TLS-Endpunkt mit Let's-Encrypt-Zertifikat, setzt X-Forwarded-For, leitet an 127.0.0.1:8080
    └─ Docker Compose ──────────────────────────────────────────
-      ├─ caddy   :8080  (Reverse Proxy, kein TLS, SSE ungepuffert)
-      └─ app     :3000  (Next.js standalone, Node LTS, ein Prozess)
+      └─ app     127.0.0.1:8080 → :3000  (Next.js standalone, Node LTS, ein Prozess; seit 19.11.2026 ohne Caddy, E18)
                    ├─ Login/Session, Rechte, Rate-Limit, Event-Hub (im Prozess)
                    └─ /data/darts.db  (SQLite, WAL)  ← Volume
 ```
@@ -60,7 +59,7 @@
 | Tests | **Vitest** (Domänenlogik, Server, UI-Logik), **Playwright** (`e2e/`, seit M6: alle Abläufe und Modi, Netzausfälle, Layout, gegen den Produktions-Build) | Die Darts-Regeln sind reine Funktionen und gut testbar |
 | Deployment | **Docker Compose** auf dem Pi | Reproduzierbar, einfacher Rollback |
 | Ingress | **Tailscale Funnel** (auf dem Host, nicht im Container) | Einziger gangbarer Weg bei DS-Lite ohne eigene Domain; TLS endet auf dem Pi |
-| Build | **ausschließlich auf dem Entwicklungsrechner** (`docker buildx --platform linux/arm64`) | Ein Next.js-Build auf einem Pi 3 B+ mit 1 GB RAM und SD-Karte scheitert am Speicher. Auf dem Pi laufen nur Caddy und der fertige Standalone-Server (zusammen ca. 250–350 MB) |
+| Build | **ausschließlich auf dem Entwicklungsrechner** (`docker buildx --platform linux/arm64`) | Ein Next.js-Build auf einem Pi 3 B+ mit 1 GB RAM und SD-Karte scheitert am Speicher. Auf dem Pi läuft nur der fertige Standalone-Server (ca. 250–300 MB) |
 
 **Bewusst verworfen**
 - Postgres: Ein zusätzlicher Dienst und RAM-Verbrauch auf dem Pi bringen bei dieser Last keinen Nutzen.
@@ -78,7 +77,7 @@
 Einrichtung (einmalig, Details in `archive/m1-plan.md` §0):
 1. Tailscale auf dem Pi-Host installieren und mit dem Tailscale-Konto anmelden (Login über Google, Apple, Microsoft oder GitHub).
 2. In der Tailscale-Admin-Konsole MagicDNS und HTTPS-Zertifikate aktivieren und Funnel in der Zugriffsrichtlinie erlauben (`nodeAttrs` → `funnel`).
-3. `tailscale funnel --bg 8080` auf dem Pi; Caddy lauscht auf 8080.
+3. `tailscale funnel --bg 8080` auf dem Pi; die App lauscht auf `127.0.0.1:8080` (bis 19.11.2026 Caddy, E18).
 
 Grenzen: Funnel erlaubt nur die Ports 443, 8443 und 10000 nach außen, ist für private Nutzung gedacht und nicht für hohe Bandbreite. Für diese App irrelevant.
 
@@ -232,10 +231,10 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 ## 10. Sicherheit
 
 - HTTPS überall (Tailscale Funnel, TLS-Endpunkt auf dem Pi). Der Hostname ist öffentlich auffindbar, deshalb steht der Login vor allem außer `/login`, `/einladung/<token>` und `/api/health`.
-- Caddy und App sind nur auf `localhost` des Pi gebunden, nicht im Heimnetz erreichbar.
+- Die App ist nur auf `127.0.0.1` des Pi gebunden, nicht im Heimnetz erreichbar; nur `tailscaled` erreicht sie.
 - **Login (E10):** ein Spieler mit `password_hash` (bcrypt, Kostenfaktor 12; der erste Admin aus `.env`) kann sich einloggen. Session-Token 32 Zufallsbytes im Cookie `darts_session` (`httpOnly`, `sameSite=lax`, `secure`, 1 Jahr fest), in der DB nur der SHA-256. Einladungs- und Reset-Token ebenso, 24 h, einmalig.
 - **Autorisierung serverseitig** in jeder Seite und Action (`requireSession`, `requireAdmin`); `src/proxy.ts` leitet nur ohne Cookie um und ersetzt keine Prüfung. Eingaberechte am Match (E13) prüft `src/domain/game/permissions.ts`, aufgerufen im Service, nie nur in der UI.
-- **Rate-Limit** im Prozess: 10 Fehlversuche je IP in 15 min für Login und Token-Einlösen; die IP kommt aus `X-Forwarded-For` von Caddy.
+- **Rate-Limit** im Prozess: 10 Fehlversuche je IP in 15 min für Login und Token-Einlösen; die IP ist der letzte Eintrag in `X-Forwarded-For`, den Tailscale Funnel setzt (E18; frühere Einträge könnte der Client selbst schicken).
 - Server Actions sind durch Nexts Origin-Prüfung gegen CSRF geschützt; `COOKIE_SECURE=false` nur lokal über http.
 - **Sicherheits-Header** (`next.config.ts`): Content-Security-Policy nur mit eigener Herkunft (`default-src 'self'`, `frame-ancestors 'none'`, `form-action 'self'`, `object-src 'none'`), dazu `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `X-Content-Type-Options: nosniff`, `Permissions-Policy` ohne Kamera, Mikrofon, Ort; kein `X-Powered-By`. **Bewusster Kompromiss:** `script-src` und `style-src` erlauben `'unsafe-inline'`, weil Next.js seine Daten als Inline-Skripte streamt und das Theme-Skript vor dem ersten Paint läuft; eine Nonce pro Request würde das Root-Layout dynamisch machen und das partielle Prerendering brechen. Externe Skripte sind trotzdem blockiert. Der Smoke-Test prüft die Header und schlägt bei jeder CSP-Verletzung im Browser fehl.
 - **Abhängigkeiten:** `scripts/ci.sh` bricht bei bekannten Lücken mit Schweregrad hoch oder kritisch in Laufzeit-Abhängigkeiten ab (`npm audit --omit=dev --audit-level=high`).
@@ -265,6 +264,7 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 | E15 | Wo liegt das Repo, wie läuft CI? | **Entschieden (23.10.2026, umgezogen bis 29.10.2026):** das Repo liegt auf GitHub (`lucablechschmidt/dartClientServer`), vorher GitLab.com. Alles Plattformspezifische bleibt minimal: die CI-Schritte stehen in `scripts/ci.sh` (Install, Lint, Typecheck, Tests, Build, Smoke-Test), `.github/workflows/ci.yml` ruft nur dieses Skript. Keine Plattform-Features (Environments, Pages, Registry) im Workflow; Issues und Pläne bleiben in `docs/`, nicht im Tracker, damit sie mitziehen. Deploy bleibt manuell vom Mac (`scripts/deploy.sh`), nie aus der CI, weil der Pi nicht aus dem Internet erreichbar ist |
 | E16 | SQLite `synchronous = NORMAL` statt `FULL` (M13 R-21)? | **Entschieden (19.11.2026, zurückgestellt seit 8.11.2026):** `FULL` bleibt. Jede bestätigte Aufnahme übersteht auch einen Stromausfall; beim Eingeben gab es keine Geschwindigkeitsprobleme. `NORMAL` (weniger Schreiblast auf der SD-Karte, bei Stromausfall fehlen evtl. die letzten Sekunden) erst, wenn Commits am Pi spürbar langsam werden |
 | E17 | Kontrast der Legacy-Tastenfarben (M13 Paket F)? | **Entschieden (19.11.2026, zurückgestellt seit 11.11.2026):** Die Legacy-Farben bleiben, auch bei „Kontrast erhöhen“: weiße Schrift auf Double (`#FFCC00`), Triple (`#34C759`), Undo/„Spiel Abbrechen“ (`#FF3B30`) und auf der grauen Hinweis-Leiste. Sie sind am Board groß und gut erkennbar und entsprechen der alten App; begründete Ausnahme in `theme.md` §1. Der Axe-Lauf (`e2e/a11y.spec.ts`) lässt genau diese Stellen aus |
+| E18 | Ingress: Caddy behalten? Woher kennt das Rate-Limit die IP? | **Entschieden (19.11.2026, gemessen in M12 Teil B, `m12-plan.md` §B6):** Caddy entfällt, Tailscale Funnel leitet direkt an die App auf `127.0.0.1:8080`. Mit Caddy kam bei der App nur die Docker-Adresse `172.18.0.1` an, alle Geräte teilten sich also einen Fehlversuchs-Zähler; ohne Caddy setzt Funnel `X-Forwarded-For` auf die öffentliche IP des Handys. SSE (Ticks im Sekundentakt), Server Actions und Login laufen ohne Caddy gleich gut. Das Rate-Limit nimmt den **letzten** Eintrag von `X-Forwarded-For` (`ipFromHeaders` in `src/server/rate-limit.ts`): den setzt Funnel, frühere könnte der Client selbst mitschicken. Kompression (vorher Caddy `encode`) fällt weg; für die paar Nutzer unerheblich |
 
 ---
 
@@ -354,6 +354,6 @@ Ziel: SOLID, testbar, wiederverwendbar. Konkret:
 
 **Ist.** Ein Node-Prozess, eine SQLite-Verbindung (`globalThis`), WAL, `busy_timeout 5 s`, Migrationen beim Start; Event-Hub und Rate-Limit im Speicher (§5); SSE-Streams räumen bei `abort`/`cancel` auf (Hub-Abmeldung, Intervall, `close`); Aufräumjob einmal täglich (`setInterval(...).unref()`); Bundle ohne Fremd-UI-Bibliotheken (`.next/static` ≈ 940 KB); Docker-Image ohne `data`, `.env`, `Legacy`, `docs` (`.dockerignore`).
 
-**Bewusste Grenzen (Ist):** jede Session darf jede Match-ID abonnieren (nur Pings, keine Daten, R-24); `/api/health` ist öffentlich; das Rate-Limit vertraut `X-Forwarded-For` von Caddy (M12 Teil B prüft das).
+**Bewusste Grenzen (Ist):** jede Session darf jede Match-ID abonnieren (nur Pings, keine Daten, R-24); `/api/health` ist öffentlich; das Rate-Limit nimmt den letzten Eintrag von `X-Forwarded-For`, den Funnel setzt (E18, gemessen in M12 Teil B).
 
 **Ist (B):** Beendete Matches und Turnierspiele laden batchweise (12.2); die Rate-Limit-Map räumt ab 1 000 Einträgen abgelaufene auf (R-20); das Aufräum-Intervall liegt auf `globalThis`, die Datenbank wird beim Prozessende geschlossen (`exit`-Hook; Next beendet sich bei `SIGTERM` selbst, R-22). `synchronous` bleibt `FULL` (E16, R-21); `/api/health` antwortet seit Paket A ohne Fehlermeldung und loggt sie (R-23). Nach Paket B misst Luca die Statistik-Seiten mit der Pi-Datenbank (`docs/test-pi.md` Messungen); eine Aggregat-Tabelle kommt nur, wenn das nicht reicht (`archive/m13-plan.md` §5).
