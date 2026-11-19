@@ -73,13 +73,14 @@ Plan: `m11-plan.md` §1, §2, §5.
 - [ ] Konto → Ton „Aus“: dieses Gerät bleibt beim nächsten 180er still, die anderen nicht.
 - [ ] Eine gedrückte Taste leuchtet am Board sichtbar auf, auch bei schnellem Tippen und in Hell und Dunkel.
 
-## M12 – Betrieb und Härtung (nur PWA, der Rest folgt)
+## M12 – Betrieb und Härtung (PWA und Security, der Rest folgt)
 
 Plan: `m12-plan.md` §5, §6.
 
 - [ ] iPhone (Safari) → Teilen → „Zum Home-Bildschirm“: Name „DART“, Dartscheiben-Icon; Start vom Icon ohne Browserleiste, die Anmeldung bleibt erhalten.
 - [ ] Android (Chrome) → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“: dasselbe; das Icon wird von der runden Maske nicht beschnitten.
 - [ ] Im Vollbild ein Match zählen: oben und unten nichts verdeckt (Notch, Home-Leiste), Hell und Dunkel.
+- [ ] Sicherheits-Header über den Funnel: `curl -sI https://dartserver.swallow-pythagorean.ts.net/login` zeigt `content-security-policy`, `x-frame-options: DENY`, `x-content-type-options: nosniff`, `referrer-policy: same-origin` (`m12-plan.md` §5a).
 
 ## M13 – Code-Review und Konsolidierung
 

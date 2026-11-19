@@ -284,7 +284,7 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 - [x] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“ (Name „DART“, Dartscheiben-Icon; Abnahme am Handy in `docs/test-pi.md` M12)
 - [ ] unattended-upgrades auf dem Pi, Healthcheck auch für Caddy, stündlicher Funnel-Check mit Logzeile
 - [ ] Optional: Umzug auf USB-SSD (E6, nur bei SD-Fehlern)
-- [ ] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert
+- [x] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert (Protokoll §7; offen: Frage §8.3, Header am Pi)
 
 **Teil B – Ingress prüfen** (früher eigener Meilenstein, `docs/m12-plan.md` Teil B):
 

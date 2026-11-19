@@ -1,7 +1,7 @@
 # M12-Plan – Betrieb und Härtung
 
 > Detailplan zu `project.md` M12. **Teil A** (unten, §0–§8): Neustart-Robustheit, Updates, PWA. **Teil B** (§B0–§B8, früher eigener Meilenstein „Ingress prüfen“): messen, ob Caddy noch gebraucht wird und ob das Rate-Limit die echte IP der Handys kennt. Teil B steht hier, weil er für die Nutzer keinen spürbaren Unterschied macht; eine kurze Rate-Limit-Probe von Hand gehört schon zur DoD von M4 und entscheidet, ob Teil B vorgezogen wird. Hier entsteht wenig App-Code; der Großteil ist Konfiguration auf dem Pi, die Luca mit `ssh pi` ausführt und Claude vorbereitet. Reihenfolge: Robustheit beim Neustart, dann PWA, zuletzt optional SSD. **Kein Backup** (E14, bewusste Entscheidung vom 23.10.2026).
-> Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §5 (PWA) umgesetzt; §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
+> Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §5 (PWA) und §5a (Security-Durchgang, Protokoll in §7) umgesetzt; §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
 > Luca: §0 und §8.
 
 ---
@@ -62,12 +62,37 @@ Einmal über den ganzen Code, nicht nur über einen Diff: prüfen, ob der Code �
 
 ## 7. Protokoll der Proben
 
-(wird nach dem Stromtest gefüllt)
+(Stromtest: wird danach gefüllt)
+
+### Security-Durchgang (§5a, 19.11.2026)
+
+Über den ganzen Code gegen `architecture.md` §10. Geprüft:
+
+- **Authentifizierung:** jede Seite holt die Session (`requireSession`/`currentSession` bzw. das Layout von `(site)`), jede der 28 Server Actions ruft `requireSession` oder `requireAdmin`; öffentlich nur Login, Logout, Einladung einlösen, `/api/health`, Manifest und Icons; `/dev/*` liefert im Build 404. Die SSE-Route antwortet ohne Session mit 401. Die Session wird bei jeder Anfrage aus der DB aufgelöst (Admin-Recht frisch, gelöschte Spieler sofort ohne Zugang).
+- **Objektrechte:** Eingaben am Match nur über `permissions.ts` (`gate`, `canUndo`, `maySetStarter`, `mayRestart`, `canCancel`); Turniere verwalten nur Ersteller oder Admin; Spieler umbenennen nur sich selbst oder Gäste, löschen nur Admins (Gäste ohne Match: jeder); `/match/[id]/stats` nur Teilnehmer. Lesen eines Matches darf jeder Eingeloggte (Zuschauen, E13), gewollt.
+- **Token:** 32 Byte Zufall, in der DB nur SHA-256; Einladungen 24 h, einmalig, beim Einlösen in der Transaktion erneut geprüft; Login mit Dummy-Hash bei unbekanntem Namen (gleiche Laufzeit), Rate-Limit auf Login und Einlösen.
+- **Eingaben:** alle Actions prüfen mit Zod bzw. `isId`; SQL nur über Drizzle mit gebundenen Parametern (`sql`-Vorlagen ohne `sql.raw`); `dangerouslySetInnerHTML` nur für das Theme-Skript (Konstante) und das QR-SVG (serverseitig aus der Einladungs-URL); `rehype-raw` nur für die Regel-Dateien aus dem Repo.
+- **Secrets und Logs:** keine `.env` im Repo oder in der History; Logs ohne Passwörter, Hashes, Token (nur Name, IP, IDs).
+- **Abhängigkeiten:** `npm audit --omit=dev`: 0 Lücken.
+
+Befunde:
+
+| # | Datei | Befund | Schwere | Stand |
+|---|---|---|---|---|
+| S1 | `src/server/auth-actions.ts` | Offene Weiterleitung nach dem Login: `?next=/\evil.example` bestand die Prüfung (`/`, nicht `//`), der Browser macht aus dem Backslash einen Slash und landet auf der fremden Seite (Phishing-Link). | mittel | behoben: `safeNext` in `form.ts` löst den Pfad wie ein Browser auf und lässt nur die eigene Herkunft durch; Test in `action-input.test.ts` |
+| S2 | `match-actions.ts`, `tournament-actions.ts` | Spieler-IDs aus dem Formular ungeprüft: unbekannte oder doppelte IDs ergaben einen Datenbankfehler (Fehlerseite), gelöschte Spieler und abgelaufene Gäste ließen sich per gefälschtem Formular in ein neues Spiel oder Turnier setzen. | niedrig | behoben: `canSeat` in `player-service.ts` (jeder einmal, vorhanden, nicht gelöscht, Gäste nur solange gelistet), sonst „invalid-input“; Test in `player-service.test.ts` |
+| S3 | `src/server/env.test.ts` | Ein echter bcrypt-Hash steht seit dem ersten Commit im Test. Ist es der Admin-Hash vom Pi, könnte jemand mit Zugriff aufs Repo offline das Passwort raten. | – | offen, Frage an Luca (§8.3) |
+| S4 | `next.config.ts` | Kein `Strict-Transport-Security`. TLS endet bei Tailscale Funnel, das nur HTTPS anbietet. | niedrig | bewusst akzeptiert |
+| S5 | SSE-Route | Ein eingeloggter Nutzer kann beliebig viele Verbindungen öffnen (auch auf erfundene IDs). | niedrig | bewusst akzeptiert: nur Eingeloggte, eingeladene Mitspieler |
+| S6 | Rate-Limit | zählt pro IP; ob der Funnel die Handy-IP liefert, misst Teil B. | – | in Teil B (§B1–B5) |
+
+Noch offen aus §5a: die Header am Pi über den Funnel nachmessen (`curl -sI https://…/login`), gehört zur Abnahme (`docs/test-pi.md` M12).
 
 ## 8. Offene Fragen (Defaults gelten ohne Antwort)
 
 1. **Automatischer Reboot** nach Kernel-Updates nachts um 4 (Default ja).
 2. **PWA-Name** auf dem Home-Bildschirm: „Darts“ (Default) oder „Darts Scorer“. **Antwort:** „DART“.
+3. **Hash in `src/server/env.test.ts`** (Security-Durchgang S3): Ist `$2b$12$D9HmJZ…` dein Admin-Hash vom Pi? Default ohne Antwort: Hash im Test durch einen frisch erzeugten ersetzen; falls es der Pi-Hash ist, zusätzlich das Admin-Passwort am Pi ändern (`scripts/hash-password.sh`, README).
 
 ---
 
