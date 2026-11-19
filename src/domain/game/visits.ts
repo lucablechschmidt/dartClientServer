@@ -36,6 +36,21 @@ export function popDart(state: LegState): Result<LegState, UndoError> {
 }
 
 /**
+ * Undo for the modes with the X key (Cricket and SplitScore, 11.11.2026): X fills the rest of the visit
+ * with misses, so the misses at the end of a visit go back all at once (like the filled slots of a bust
+ * in X01); any other dart one by one. A miss is field 0, single in Cricket, overthrown in SplitScore.
+ */
+export function popDartOrMisses(state: LegState): Result<LegState, UndoError> {
+  const last = state.visits.at(-1);
+  if (!last) return { ok: false, reason: "nothing-to-undo" };
+  let keep = last.darts.length - 1;
+  if (last.darts[keep]?.field === 0) while (keep > 0 && last.darts[keep - 1].field === 0) keep--;
+  const darts = last.darts.slice(0, keep);
+  const visits = darts.length === 0 ? state.visits.slice(0, -1) : [...state.visits.slice(0, -1), { ...last, darts }];
+  return { ok: true, value: { ...state, visits } };
+}
+
+/**
  * The darts of an open visit as they can be thrown again (re-sent to the server, re-applied after
  * a reload). An open visit holds overthrown darts only in SplitScore (off the target, M7), where
  * they mean exactly what a miss means; the mode stores them as overthrown again.
