@@ -1,4 +1,5 @@
 import { tally, CRICKET_FIELDS } from "../cricket/tally";
+import { isMaximum } from "../game/maximum";
 import { dartScore, visitScore } from "../game/scoring";
 import { MAX_DARTS_PER_VISIT, type LegState, type PlayerId, type Visit } from "../game/types";
 import { rounds } from "../splitscore/rounds";
@@ -16,7 +17,7 @@ export function factsOf(match: AchievementMatch, player: PlayerId): Set<string> 
   const won = match.placements[player] === 1;
 
   const anyVisit = (test: (v: Visit) => boolean) => legs.some((l) => l.visits.some((v) => v.playerId === player && test(v)));
-  if (anyVisit(is180)) add("180");
+  if (anyVisit(isMaximum)) add("180");
   if (match.mode !== "cricket" && anyVisit(isTripleOneVisit)) add("jj-nine");
   switch (match.mode) {
     case "x01":
@@ -34,9 +35,6 @@ export function factsOf(match: AchievementMatch, player: PlayerId): Set<string> 
   }
   return facts;
 }
-
-const is180 = (v: Visit) =>
-  !v.isBust && v.darts.length === MAX_DARTS_PER_VISIT && v.darts.every((d) => d.type === "triple" && d.field === 20);
 
 /**
  * JJ "Nine" McCarthy (17.11.2026): T1 T1 T1 thrown and counted, the best 9 points there are; every mode

@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Keypad } from "@/components/darts/keypad";
 import { ScoreGrid } from "@/components/darts/score-grid";
+import { useMaximumSound } from "@/components/darts/use-maximum-sound";
 import { useVisitSync, type ActionReply as Reply, type MatchViewLike } from "@/components/darts/use-visit-sync";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { useAsyncAction } from "@/components/ui/use-async-action";
@@ -114,6 +115,8 @@ export function ScoreboardScreen({
     onLoad,
     errorText,
   });
+
+  useMaximumSound(state);
 
   const legClosed = closedLeg === legKey(state);
   const view = useMemo(() => projectMatch(state, initial.names, legClosed), [state, initial.names, legClosed]);

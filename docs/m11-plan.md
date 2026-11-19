@@ -1,7 +1,7 @@
 # M11-Plan – Sound und Komfort am Board
 
 > Detailplan zu `project.md` M11 (aus dem Backlog). Kleine, voneinander unabhängige Dinge, die das Zählen am Board angenehmer machen. Jeder Punkt ist ein eigener Commit und kann einzeln weggelassen werden. Reihenfolge nach Nutzen.
-> Stand: erste Fassung, 23.10.2026. Noch nicht umgesetzt.
+> Stand: §1 umgesetzt (19.11.2026), §2–§4 offen.
 > Luca: §0 und §7.
 
 ---
@@ -19,6 +19,7 @@
 - `src/components/darts/use-sound.ts`: Hook, der die Dateien einmal vorlädt (`<audio preload>`), und `play180()` zufällig eine abspielt. Mobile Browser spielen Audio erst nach einer Nutzerinteraktion: Das erste Tippen auf dem Keypad „entsperrt“ den Audio-Kontext (`AudioContext.resume()` oder ein stummes `play()`), danach geht es ohne Interaktion.
 - Ausgelöst im Zählscreen, wenn eine abgeschlossene Aufnahme 180 Punkte hat, auf **jedem** Gerät, das die Aufnahme sieht (auch per SSE), damit es am Board aus dem Host-Handy kommt, egal wer geworfen hat; Schalter „Ton“ im Tab Konto (localStorage, Default an).
 - Test: Hook mit `HTMLMediaElement.play`-Mock; Auswahl zufällig aus drei.
+- **Umgesetzt (19.11.2026):** `completesMaximum` in `src/domain/game/maximum.ts` (nur wenn Darts dazukommen: Undo, das eine ältere 180 freilegt, und Neuladen bleiben still; T20 T20 T20 als Bust zählt nicht), `src/components/darts/use-maximum-sound.ts`, Schalter `SoundPicker` im Konto; Darstellung und Ton teilen sich den localStorage-Store `src/components/ui/local-setting.ts`. Zuschauer-Handys spielen den Ton erst, nachdem dort einmal irgendwo getippt wurde (Vorgabe der mobilen Browser).
 - **Commit:** „M11: 180-Sound“
 
 ## 2. Haptik und Tastenrückmeldung

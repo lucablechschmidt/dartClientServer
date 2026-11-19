@@ -268,7 +268,7 @@ Detailplan: `docs/archive/m10-plan.md`.
 
 Detailplan: `docs/m11-plan.md`.
 
-- [ ] 180-Sound: die drei `.m4a` aus `Legacy/Dart/Assets.xcassets` per `<audio>`, zufällig eine, auf jedem Gerät, das die Aufnahme sieht; Schalter „Ton“ im Konto
+- [x] 180-Sound: die drei `.m4a` aus `Legacy/Dart/Assets.xcassets` per `<audio>`, zufällig eine, auf jedem Gerät, das die Aufnahme sieht; Schalter „Ton“ im Konto
 - [ ] Haptik bei Bust und Match-Ende (Android), sichtbare Tastenrückmeldung
 - [ ] Schnelleingabe pro Aufnahme, nur falls die Dart-Eingabe am Board nervt (M6): Summe wird in drei Darts zerlegt, `visit.is_quick`, Feldtreffer lassen solche Aufnahmen aus
 - [ ] Kleinkram vom Board (Sammelstelle aus M6)

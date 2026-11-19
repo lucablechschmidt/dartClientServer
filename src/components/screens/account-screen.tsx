@@ -1,6 +1,7 @@
 import { CardLinkRow, CardList, GroupedSection } from "@/components/ui/card-list";
 import { FoldCard } from "@/components/ui/fold-card";
 import { SectionHeading } from "@/components/ui/form-controls";
+import { SoundPicker } from "@/components/ui/sound-picker";
 import { ThemePicker } from "@/components/ui/theme-picker";
 import type { PasswordFormState, PlayerResult, Session } from "@/domain/player";
 import type { Texts } from "@/i18n/de";
@@ -11,7 +12,7 @@ export type { InviteLink };
 
 type Props = {
   session: Session;
-  texts: { account: Texts["account"]; auth: Texts["auth"]; players: Texts["players"]; theme: Texts["theme"] };
+  texts: { account: Texts["account"]; auth: Texts["auth"]; players: Texts["players"]; theme: Texts["theme"]; sound: Texts["sound"] };
   onRename: (formData: FormData) => Promise<PlayerResult>;
   onChangePassword: (prev: PasswordFormState, formData: FormData) => Promise<PasswordFormState>;
   onLogout: () => Promise<void>;
@@ -19,8 +20,8 @@ type Props = {
 
 /**
  * Account tab, the same for everyone: a folded "Profil" card (own name, password, logout), then the rows to the rankings, the
- * own statistics and the own achievements (each a page of its own), last the appearance (System, Light, Dark; only
- * here). The admin tools are in the admin tab.
+ * own statistics and the own achievements (each a page of its own), then the appearance (System, Light, Dark; only
+ * here), last the sound (M11, on or off for this device). The admin tools are in the admin tab.
  */
 export function AccountScreen({ session, texts, onRename, onChangePassword, onLogout }: Props) {
   const p = texts.account.pages;
@@ -37,6 +38,10 @@ export function AccountScreen({ session, texts, onRename, onChangePassword, onLo
       <section className="flex flex-col gap-2">
         <SectionHeading>{texts.theme.label}</SectionHeading>
         <ThemePicker labels={texts.theme} />
+      </section>
+      <section className="flex flex-col gap-2">
+        <SectionHeading>{texts.sound.label}</SectionHeading>
+        <SoundPicker labels={texts.sound} />
       </section>
     </GroupedSection>
   );

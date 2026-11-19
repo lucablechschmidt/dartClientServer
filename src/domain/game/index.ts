@@ -10,4 +10,5 @@ export * from "./match";
 export { replay, replayMatch, type StoredLeg } from "./replay";
 export * from "./permissions";
 export * from "./view";
+export { completesMaximum, isMaximum } from "./maximum";
 export { matchResult, matchTotals, type MatchResult, type PlayerMatchTotals } from "./result";

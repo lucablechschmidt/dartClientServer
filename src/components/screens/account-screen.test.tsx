@@ -8,7 +8,7 @@ const show = () =>
   render(
     <AccountScreen
       session={{ playerId: "a", name: "Casey", isAdmin: false }}
-      texts={{ account: de.account, auth: de.auth, players: de.players, theme: de.theme }}
+      texts={{ account: de.account, auth: de.auth, players: de.players, theme: de.theme, sound: de.sound }}
       onRename={vi.fn()}
       onChangePassword={vi.fn()}
       onLogout={vi.fn()}

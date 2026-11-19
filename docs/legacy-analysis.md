@@ -134,4 +134,4 @@ Werden im Port **nicht** übernommen:
 - „ToStart“ nur bei genau 2 Spielern; der Port erlaubt Anwurf-Wahl bei jeder Spielerzahl vor dem ersten Dart.
 - Nach einem Sieg mit 3+ Spielern ist das Spiel vorbei; der Port spielt **alle Platzierungen aus** (siehe `architecture.md` §1, E7).
 - `ContentView`, `Item`, `RootView`, `CustomTabBar`, `TestingView`, `TextTestView`, `LegVictoryView`, `Tournament.swift` (Round-Robin-Generator, unbenutzt) sind Platzhalter oder Experimente.
-- Der 180-Sound: drei `.m4a`-Dateien in `Assets.xcassets/180-*.dataset`, eine wird zufällig gespielt. Web: Backlog (`<audio>` mit den drei Dateien, nach Konvertierung zu `.mp3`/`.ogg`).
+- Der 180-Sound: drei `.m4a`-Dateien in `Assets.xcassets/180-*.dataset`, eine wird zufällig gespielt. Web (M11): dieselben drei Dateien unverändert als `public/sounds/180-1.m4a` … per `<audio>`, auf jedem Gerät, das die Aufnahme sieht, abschaltbar im Konto („Ton“). Legacy spielt ihn nur in X01 und Elimination (Cricket und SplitScore überschreiben `addDartThrow` ohne Sound); der Port spielt ihn laut `m11-plan.md` §1 in jedem Modus, wenn T20 T20 T20 zählt (wie der Erfolg „180“).

@@ -88,7 +88,9 @@ field hits to `player_field_hits`. Cancelled matches count nowhere and are delet
 (`cleanupAbandoned`, same file); a cancelled guest match saves nothing. Statistics (M8): `src/domain/stats/` (pure figures, Elo per mode),
 `src/server/stats-service.ts`, charts are own SVG (`Dartboard`, `TrendChart` behind `AverageChart` and the rankings' Elo history), no chart library.
 Achievements (M10): `src/domain/achievements/`, `src/server/achievement-service.ts`; computed from the finished
-games, only guest-game ones are saved at clean-up (`player_achievement`).
+games, only guest-game ones are saved at clean-up (`player_achievement`). 180 sound (M11): `completesMaximum`
+(`src/domain/game/maximum.ts`) → `use-maximum-sound.ts`, files in `public/sounds/`; per-device settings (Darstellung,
+Ton) share the localStorage store `src/components/ui/local-setting.ts`.
 
 Writes: every service that writes more than once wraps them in `deps.transaction(() => …)`
 (synchronous; bcrypt before it). Service tests build deps with `memoryDeps()`; atomicity is

@@ -32,6 +32,12 @@ export const de = {
     dark: "Dunkel",
     system: "System",
   },
+  /** M11: the 180 sound on this device. */
+  sound: {
+    label: "Ton",
+    on: "An",
+    off: "Aus",
+  },
   players: {
     title: "Spieler",
     namePlaceholder: "Name",
