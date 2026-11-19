@@ -13,7 +13,6 @@ const env: Env = {
   admin: { name: "Luca", passwordHash: caddyHash("admin-secret") },
   appUrl: "http://127.0.0.1:3100",
   cookieSecure: false,
-  diagEnabled: false,
 };
 
 let auth: MemoryAuthRepository;

@@ -15,7 +15,6 @@ const env: Env = {
   admin: { name: "Luca", passwordHash: bcrypt.hashSync("admin-secret", 4) },
   appUrl: "http://x",
   cookieSecure: false,
-  diagEnabled: false,
 };
 let auth: MemoryAuthRepository;
 let clock: number;

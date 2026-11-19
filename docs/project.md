@@ -291,8 +291,8 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 - [x] Diagnose-Seite `/diag` (nur Admin, hinter `DIAG_ENABLED`): ankommende Header, abgeleitete Client-IP, SSE-Ticks, Server-Action-Probe
 - [x] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App (19.11.2026, `m12-plan.md` §B6)
 - [x] Entscheidung E18: Caddy entfällt (Funnel liefert die Handy-IP, SSE und Server Actions laufen ohne Caddy)
-- [ ] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername: pro Gerät, letzter `X-Forwarded-For`-Eintrag; offen ist die Probe mit zwei Handys (`docs/test-pi.md` M12)
-- [ ] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen
+- [x] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername: pro Gerät, letzter `X-Forwarded-For`-Eintrag; Gegenprobe am Handy nach dem Umbau ok (19.11.2026), die Probe mit zwei Handys steht in `docs/test-pi.md` M12
+- [x] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen (19.11.2026)
 
 **DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E18 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
 
