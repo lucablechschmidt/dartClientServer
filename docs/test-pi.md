@@ -90,6 +90,24 @@ Plan: `archive/m14-plan.md` §0, §4.4, §5.
 - [ ] Mit „Bewegung reduzieren“ (System-Einstellung) läuft keine Animation.
 - Nach der Abnahme kommt Schritt 3 als Code (Kandidaten 3 und 8, `archive/m14-plan.md` §4.4; Checkliste in `project.md` M14).
 
+## Nachträge ohne eigenen Plan (11.–19.11.2026)
+
+Features, die nach dem Archivieren der Pläne direkt umgesetzt wurden (Commits vom 11., 17. und 19.11.2026); die Regeln stehen in `legacy-analysis.md` §9, `architecture.md` E8 und `theme.md`.
+
+- [ ] Adaptives Tastenfeld: In Cricket zu dritt sind Felder gesperrt, die alle geschlossen haben. In SplitScore gehen in der Double-Runde Zahlen erst mit Double, in der Triple-Runde erst mit Triple. X, 0 und Undo gehen immer.
+- [ ] X in Cricket und SplitScore: nach einem Treffer füllt X den Rest der Aufnahme mit Fehlwürfen, der Spieler wechselt; ein Undo nimmt beide Fehlwürfe zusammen zurück, Treffer gehen einzeln zurück. Im hellen Modus hebt sich X deutlich von den gesperrten Tasten ab.
+- [ ] Vor dem ersten Dart lassen sich die Spieler im Zählscreen per Halten und Ziehen umsortieren; nach dem ersten Dart nicht mehr.
+- [ ] Checkout-Hinweis je Out-Regel: X01 mit Single-Out zeigt bei 40 einen anderen Weg als mit Double-Out (D20).
+- [ ] SplitScore: das erste Ziel (15) steht neben dem Anwurf-Hinweis.
+- [ ] Spielregeln: der Info-Knopf im Setup jedes Modus zeigt die Regeln, die Abschnitte klappen auf und zu.
+- [ ] Ein abgebrochenes Spiel steht in keiner Statistik und ist am Tag nach dem Start aus der Historie verschwunden.
+- [ ] Historie `/history`: Filter nach Modus, „Weitere laden“ holt die nächsten 25.
+- [ ] Statistik: ein Tipp auf ein Feld der Dartscheibe zeigt Single, Double und Triple getrennt; Cricket und SplitScore zeigen Highscore und Durchschnitt der Punkte am Spielende.
+- [ ] Rangliste: der Elo-Verlauf zeigt die eigene Linie, ein Tipp auf einen Namen blendet dessen Linie ein und aus (höchstens fünf).
+- [ ] Ein Mehrspieler-Match (drei oder vier Spieler) verändert die Elo aller Teilnehmer (E8, 19.11.2026); ein Match mit Gast nicht.
+- [ ] Erfolg „JJ „Nine“ McCarthy“: T1 T1 T1 in einer Aufnahme (nicht in Cricket) steht danach unter Konto → Erfolge.
+- [ ] „Kontrast erhöhen“ in den Bedienungshilfen des Handys macht Grau und Blau dunkler.
+
 ---
 
 ## Messungen

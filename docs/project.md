@@ -54,7 +54,7 @@ Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `
 - [x] FritzBox: Anschlussart geprüft (E1): DS-Lite → Tailscale Funnel, keine Portfreigabe
 - [x] Pi: Raspberry Pi OS Lite 64-bit, SSH-Key, Docker und Compose installieren, `ssh pi` als Alias in `~/.ssh/config`
 - [x] Tailscale auf dem Pi, MagicDNS + HTTPS + Funnel aktiviert, `tailscale funnel --bg 8080` → `https://dartserver.swallow-pythagorean.ts.net`
-- [ ] Entscheidung SD oder SSD (E6) festhalten
+- [x] Entscheidung SD oder SSD (E6) festhalten (23.10.2026: SD bleibt)
 
 **DoD:** `ssh pi docker run --rm hello-world` läuft; `tailscale funnel status` zeigt den Hostnamen; E6 ist in `architecture.md` eingetragen.
 
@@ -312,7 +312,8 @@ Detailplan: `docs/archive/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 - [x] Paket D – Konsolidierung und Doku
 - [x] Paket E – nur wiederverwendbare Bausteine teilen: `choice-menu.tsx` (§6 Frage 4)
 - [x] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende (Axe-Lauf ohne Befund außer Kontrast)
-- [ ] Paket F – Kontrast von Grau und Akzent entscheiden (`docs/fragen.md`)
+- [x] Paket F – Kontrast von Grau und Akzent entscheiden (Option c, 11.11.2026, `theme.md` §1)
+- [ ] Paket F – Kontrast der Tastenfarben und der Hinweis-Leiste entscheiden (`docs/fragen.md`, zurückgestellt)
 
 **DoD:** siehe `docs/archive/m13-plan.md` §3. Abnahme am Board: `docs/test-pi.md`.
 
