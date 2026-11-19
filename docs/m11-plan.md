@@ -1,7 +1,7 @@
 # M11-Plan – Sound und Komfort am Board
 
 > Detailplan zu `project.md` M11 (aus dem Backlog). Kleine, voneinander unabhängige Dinge, die das Zählen am Board angenehmer machen. Jeder Punkt ist ein eigener Commit und kann einzeln weggelassen werden. Reihenfolge nach Nutzen.
-> Stand: §1 umgesetzt (19.11.2026), §2–§4 offen.
+> Stand: §1 und §2 umgesetzt (19.11.2026, §2 ohne Vibration), §3 und §4 offen.
 > Luca: §0 und §7.
 
 ---
@@ -24,8 +24,9 @@
 
 ## 2. Haptik und Tastenrückmeldung
 
-- Kurze Vibration bei Bust und bei Leg-/Match-Ende (`navigator.vibrate`, nur Android, Safari ignoriert es), Schalter zusammen mit „Ton“.
+- ~~Kurze Vibration bei Bust und bei Leg-/Match-Ende~~: entfällt (§7.3, Luca: ohne Vibration).
 - Keypad: `active:scale-95` gibt es; dazu ein kurzer Farbwechsel beim Tippen, damit am Board sichtbar ist, dass der Tipp angekommen ist, auch wenn das Netz gerade hängt.
+- **Umgesetzt (19.11.2026):** Utility `key-feedback` in `globals.css` mit Token `--key-press` (Weiß 30 %): Die Schicht erscheint beim Drücken sofort und blendet in `--duration-base` aus; nur Opacity (`theme.md` §5 Regel 6). Gilt für jede Taste in jedem Layout, gesperrte Tasten leuchten nicht.
 - **Commit:** „M11: Haptik“
 
 ## 3. Schnelleingabe pro Aufnahme (nur bei Bedarf, §7)
@@ -43,7 +44,7 @@ Sammelstelle für das, was in M6 auffällt und nicht dort erledigt wurde (Schrif
 
 ## 5. DoD
 
-Am Board: 180 löst den Sound aus, auch auf dem Zuschauer-Handy; Bust vibriert auf Android; die Schnelleingabe (falls gebaut) zählt ein Leg korrekt zu Ende.
+Am Board: 180 löst den Sound aus, auch auf dem Zuschauer-Handy; eine gedrückte Taste leuchtet auf; die Schnelleingabe (falls gebaut) zählt ein Leg korrekt zu Ende.
 - **Commit:** „M11: done“
 
 ---

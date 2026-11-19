@@ -25,6 +25,7 @@ iOS-Systemfarben sind mit ihren offiziellen Werten übersetzt (Light / Dark).
 | `--key-double` | `double` (systemYellow) | Taste Double, Zahlentasten-Text im Double-Modus | `#FFCC00` | `#FFD60A` |
 | `--key-triple` | `triple` (systemGreen) | Taste Triple, Zahlentasten-Text im Triple-Modus | `#34C759` | `#30D158` |
 | `--key-undo` | `undo` (systemRed) | Taste Undo | `#FF3B30` | `#FF453A` |
+| `--key-press` | – (M11) | Tastenrückmeldung: Schicht über einer gedrückten Taste (`key-feedback`) | `rgb(255 255 255 / .3)` | `rgb(255 255 255 / .3)` |
 | `--slot-bg` | `FrameBackground` (DartScoreView, über dem Panel) | Füllung der drei Dart-Kästen | `rgb(0 0 0 / .10)` | `rgb(255 255 255 / .10)` |
 | `--hint-bg` | `Color.gray.opacity(0.5)` | Checkout-Hinweis-Leiste | `rgb(142 142 147 / .5)` | `rgb(142 142 147 / .5)` |
 | `--cricket-closed` | `CricketFieldClosed` (M7) | Cricket-Feld, das alle geschlossen haben (Zeile und Felder, Symbol in `--on-accent`) | `#8E8E93` | `rgb(200 200 200 / .5)` |
@@ -113,4 +114,5 @@ Regeln:
 3. Erscheinen läuft als Keyframe-Animation beim Einhängen (`animate-*`, Keyframes in `globals.css`); Verschwinden ist sofort.
 4. Zählen bleibt sofort: Keine Animation verzögert eine Eingabe, einen Spielerwechsel oder einen Screen. Punktestände zählen nie hoch oder runter.
 5. Tippbare Zeilen und Links nehmen `tap-feedback` (Grund dunkelt beim Drücken sofort ab und blendet beim Loslassen aus), Zeilen in Karten zusätzlich `tap-row` statt `w-full`.
-6. Neue Dauern oder Kurven werden Tokens; `duration-300` und Ad-hoc-Kurven gibt es nicht.
+6. Tasten des Keypads nehmen `key-feedback` (M11): eine helle Schicht in `--key-press` erscheint beim Drücken sofort und blendet beim Loslassen aus, damit am Board sichtbar ist, dass der Tipp angekommen ist.
+7. Neue Dauern oder Kurven werden Tokens; `duration-300` und Ad-hoc-Kurven gibt es nicht.

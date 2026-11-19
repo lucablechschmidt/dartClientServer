@@ -74,7 +74,7 @@ function fieldKey(base: string, state: KeypadState): string {
 /** Colors as in ButtonsView: numbers black/white, in modifier mode dimmed with yellow (Double) or green (Triple) text. */
 function keyClasses(key: KeypadKey, state: KeypadState): string {
   const base =
-    "min-h-touch rounded-panel text-fluid-lg font-normal tracking-tight select-none active:scale-95 transition-transform disabled:opacity-30";
+    "key-feedback min-h-touch rounded-panel text-fluid-lg font-normal tracking-tight select-none active:scale-95 transition-transform disabled:opacity-30";
   switch (key.kind) {
     case "undo":
       return `${base} bg-key-undo text-key-fg`;

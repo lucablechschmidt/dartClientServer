@@ -25,6 +25,7 @@
   --key-double: light-dark(#ffcc00, #ffd60a);
   --key-triple: light-dark(#34c759, #30d158);
   --key-undo: light-dark(#ff3b30, #ff453a);
+  --key-press: rgb(255 255 255 / 0.3); /* M11: a key lights up while pressed (the label colour, so it works on every key) */
 
   --hint-bg: rgb(142 142 147 / 0.5);
 
@@ -388,6 +389,32 @@
   }
   @media (prefers-reduced-motion: reduce) {
     transition: none;
+  }
+}
+/*
+ * M11: a keypad key lights up the moment it is pressed and fades back when released, so the board sees the
+ * tap landed even while the network hangs. Only the overlay's opacity changes (theme.md §5 rule 2).
+ */
+@utility key-feedback {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--key-press);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-ios);
+  }
+  &:active:not(:disabled)::after {
+    opacity: 1;
+    transition-duration: 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
   }
 }
 /* A tappable row inside a card: the highlight reaches a little past the text on both sides */
