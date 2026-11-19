@@ -2,7 +2,7 @@
 
 > Detailplan zu `project.md` M12. **Teil A** (unten, §0–§8): Neustart-Robustheit, Updates, PWA. **Teil B** (§B0–§B8, früher eigener Meilenstein „Ingress prüfen“): messen, ob Caddy noch gebraucht wird und ob das Rate-Limit die echte IP der Handys kennt. Teil B steht hier, weil er für die Nutzer keinen spürbaren Unterschied macht; eine kurze Rate-Limit-Probe von Hand gehört schon zur DoD von M4 und entscheidet, ob Teil B vorgezogen wird. Hier entsteht wenig App-Code; der Großteil ist Konfiguration auf dem Pi, die Luca mit `ssh pi` ausführt und Claude vorbereitet. Reihenfolge: Robustheit beim Neustart, dann PWA, zuletzt optional SSD. **Kein Backup** (E14, bewusste Entscheidung vom 23.10.2026).
 > Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §5 (PWA) und §5a (Security-Durchgang, Protokoll in §7) umgesetzt; §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
-> Luca: §0 und §8.
+> Luca: §0 und §8. Stromtest bestanden (19.11.2026, §7).
 
 ---
 
@@ -62,7 +62,7 @@ Einmal über den ganzen Code, nicht nur über einen Diff: prüfen, ob der Code �
 
 ## 7. Protokoll der Proben
 
-(Stromtest: wird danach gefüllt)
+**Stromtest (§6.1, 19.11.2026): bestanden** (Luca). Pi hart vom Strom getrennt, danach waren Funnel-URL, Login und das laufende Match wieder da; ohne Caddy (E18), nur der App-Container.
 
 ### Security-Durchgang (§5a, 19.11.2026)
 
