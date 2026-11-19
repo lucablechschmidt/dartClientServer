@@ -1,7 +1,7 @@
 # M12-Plan – Betrieb und Härtung
 
 > Detailplan zu `project.md` M12. **Teil A** (unten, §0–§8): Neustart-Robustheit, Updates, PWA. **Teil B** (§B0–§B8, früher eigener Meilenstein „Ingress prüfen“): messen, ob Caddy noch gebraucht wird und ob das Rate-Limit die echte IP der Handys kennt. Teil B steht hier, weil er für die Nutzer keinen spürbaren Unterschied macht; eine kurze Rate-Limit-Probe von Hand gehört schon zur DoD von M4 und entscheidet, ob Teil B vorgezogen wird. Hier entsteht wenig App-Code; der Großteil ist Konfiguration auf dem Pi, die Luca mit `ssh pi` ausführt und Claude vorbereitet. Reihenfolge: Robustheit beim Neustart, dann PWA, zuletzt optional SSD. **Kein Backup** (E14, bewusste Entscheidung vom 23.10.2026).
-> Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
+> Stand: zweite Fassung, 23.10.2026, ohne Backup. Durchsicht 19.11.2026: §5 (PWA) umgesetzt; §2 steht schon in der README („Datenbank neu anlegen“); aus §5a sind die Sicherheits-Header (`next.config.ts`) und der `npm audit` in `scripts/ci.sh` vorhanden, der Durchgang selbst fehlt. Sonst nicht umgesetzt.
 > Luca: §0 und §8.
 
 ---
@@ -38,6 +38,7 @@
 
 - `src/app/manifest.ts` (Next-Metadata-Route), Icons unter `public/icons/`, `apple-touch-icon` im Root-Layout, `theme-color` je Farbschema.
 - Test: Lighthouse-PWA-Check lokal, am Handy „Zum Home-Bildschirm“ und Start ohne Browserleiste.
+- **Umgesetzt (19.11.2026):** Name „DART“ (§8.2). Icon: **nicht** das Legacy-App-Icon (ein privates Foto, das als PWA-Icon ohne Login öffentlich abrufbar wäre), sondern eine schlichte Dartscheibe auf dunklem Grund (Luca, 19.11.2026), gezeichnet von `scripts/make-icons.mjs` (SVG → PNG per Playwright): `public/icons/icon-192.png`, `icon-512.png` (auch `maskable`, die Scheibe liegt in der sicheren Zone), `src/app/icon.png` (48 px, ersetzt das Next-Standard-`favicon.ico`), `src/app/apple-icon.png` (180 px). `appleWebApp` (Titel, `capable`) und `themeColor` je Farbschema im Root-Layout, Farben aus `PAGE_GROUND` (= `--bg`, per Test gekoppelt). `src/proxy.ts` lässt `/icons/` ohne Cookie durch. Test: `src/app/manifest.test.ts`, `e2e/pwa.spec.ts`. Offen: Abnahme am Handy (`docs/test-pi.md` M12).
 - **Commit:** „M12: PWA-Manifest und Icons“
 
 ## 5a. Security-Durchgang

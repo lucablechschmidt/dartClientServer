@@ -18,6 +18,8 @@ export const de = {
   app: {
     title: "Darts Scorer",
     description: "Darts zählen am Board",
+    /** M12: name under the icon on the home screen (m12-plan §8.2). */
+    installName: "DART",
   },
   nav: {
     newGame: "Neues Spiel",

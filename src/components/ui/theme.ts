@@ -3,6 +3,12 @@
  * (before the first paint) and by the picker.
  */
 export const THEME_STORAGE_KEY = "theme";
+
+/**
+ * The page ground (`--bg` in globals.css) as literal colours for places that cannot read CSS: the
+ * browser bar (`theme-color`) and the PWA manifest. `theme.test.ts` keeps them equal to the token.
+ */
+export const PAGE_GROUND = { light: "#ffffff", dark: "#000000" } as const;
 export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
 export type ThemePreference = (typeof THEME_PREFERENCES)[number];
 export type ResolvedTheme = "light" | "dark";

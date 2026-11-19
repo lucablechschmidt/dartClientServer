@@ -36,7 +36,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
-| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
+| M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | PWA fertig, Rest geplant, bewusst zuletzt | M6 und M4c |
 | M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
@@ -281,7 +281,7 @@ Detailplan: `docs/m11-plan.md`. Abnahme am Board: `docs/test-pi.md` M11.
 
 Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
-- [ ] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“
+- [x] PWA: Manifest, Icon, „Zum Startbildschirm hinzufügen“ (Name „DART“, Dartscheiben-Icon; Abnahme am Handy in `docs/test-pi.md` M12)
 - [ ] unattended-upgrades auf dem Pi, Healthcheck auch für Caddy, stündlicher Funnel-Check mit Logzeile
 - [ ] Optional: Umzug auf USB-SSD (E6, nur bei SD-Fehlern)
 - [ ] Security-Durchgang über den ganzen Code gegen `architecture.md` §10 (`docs/m12-plan.md` §5a), Befunde behoben oder bewusst akzeptiert

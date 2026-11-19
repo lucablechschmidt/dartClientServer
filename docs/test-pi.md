@@ -73,6 +73,14 @@ Plan: `m11-plan.md` §1, §2, §5.
 - [ ] Konto → Ton „Aus“: dieses Gerät bleibt beim nächsten 180er still, die anderen nicht.
 - [ ] Eine gedrückte Taste leuchtet am Board sichtbar auf, auch bei schnellem Tippen und in Hell und Dunkel.
 
+## M12 – Betrieb und Härtung (nur PWA, der Rest folgt)
+
+Plan: `m12-plan.md` §5, §6.
+
+- [ ] iPhone (Safari) → Teilen → „Zum Home-Bildschirm“: Name „DART“, Dartscheiben-Icon; Start vom Icon ohne Browserleiste, die Anmeldung bleibt erhalten.
+- [ ] Android (Chrome) → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“: dasselbe; das Icon wird von der runden Maske nicht beschnitten.
+- [ ] Im Vollbild ein Match zählen: oben und unten nichts verdeckt (Notch, Home-Leiste), Hell und Dunkel.
+
 ## M13 – Code-Review und Konsolidierung
 
 Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Kontrast und `synchronous` sind entschieden (`architecture.md` E16, E17).

@@ -49,6 +49,8 @@ It prints the same hash three times, because each consumer reads `$` differently
 
 ## Using the app
 
+**On the phone's home screen:** the app is a PWA named "DART" (iPhone: Safari → Share → "Add to Home Screen"; Android: Chrome → "Install app"). It then starts without the browser bar. There is no service worker; a visit entered without network waits in the device's queue (M6). The icon is a plain dartboard drawn by `scripts/make-icons.mjs` (`node scripts/make-icons.mjs` writes `public/icons/` and `src/app/icon.png`, `apple-icon.png`).
+
 ### Accounts, invitations, password reset
 
 There is no sign-up. The admin invites every player (`docs/architecture.md` E10):

@@ -54,6 +54,7 @@ npm run db:generate              # drizzle-kit migration after editing src/db/sc
 npm run test:e2e                 # Playwright tests in e2e/ against the last build (standalone on :3100; BASE_URL/BASIC_AUTH for the container)
 ./scripts/smoke.sh               # production build + test:e2e, screenshots → docs/screenshots
 ./scripts/ci.sh                  # everything the CI runs (install, lint, typecheck, test, smoke); .github/workflows/ci.yml only calls this
+node scripts/make-icons.mjs      # redraw the PWA icon (dartboard SVG → PNGs in public/icons, src/app/icon.png, apple-icon.png)
 ./scripts/deploy.sh              # buildx arm64 → ssh pi docker load → compose up (see README), only when asked
 ```
 

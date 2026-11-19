@@ -1,5 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { applyPreference, readPreference, resolveTheme, themeInitScript } from "./theme";
+import { applyPreference, PAGE_GROUND, readPreference, resolveTheme, themeInitScript } from "./theme";
 
 const storageWith = (value: string | null) => ({ getItem: () => value });
 
@@ -62,5 +63,12 @@ describe("themeInitScript", () => {
     // Parsing the inline script is the point of this test; it is our own constant, not user input.
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
     expect(() => new Function(themeInitScript)).not.toThrow();
+  });
+});
+
+describe("PAGE_GROUND", () => {
+  it("equals the --bg token in globals.css (light, dark)", () => {
+    const css = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8");
+    expect(css).toContain(`--bg: light-dark(${PAGE_GROUND.light}, ${PAGE_GROUND.dark});`);
   });
 });

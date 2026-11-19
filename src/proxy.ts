@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC = ["/login", "/einladung", "/api/health"];
 
 /**
- * /dev/* exists only in development. Everything else needs the session cookie (M3);
+ * The matcher leaves out what a browser or the home screen fetches without the cookie: the manifest and
+ * the icons (M12 PWA). /dev/* exists only in development. Everything else needs the session cookie (M3);
  * whether the session is valid is checked by the page (requireSession); there is no DB here.
  */
 export function proxy(request: NextRequest) {
@@ -19,5 +20,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/|favicon\\.ico|icon\\.|apple-icon|manifest|robots\\.txt).*)"],
+  matcher: ["/((?!_next/|favicon\\.ico|icon\\.|icons/|apple-icon|manifest|robots\\.txt).*)"],
 };
