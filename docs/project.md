@@ -35,7 +35,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M8 | Statistiken und Reporting | fertig, DoD am Board offen | M5 |
 | M9 | Turniere | fertig, DoD am Board offen | M7 |
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
-| M11 | Sound und Komfort am Board | geplant, Reihenfolge nach Lust | M9 |
+| M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
 | M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` und Tastenfarben-Kontrast zurückgestellt (`fragen.md`) | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
@@ -266,11 +266,11 @@ Detailplan: `docs/archive/m10-plan.md`.
 
 **Ziel:** Kleine Dinge, die das Zählen am Board angenehmer machen; jeder Punkt einzeln weglassbar.
 
-Detailplan: `docs/m11-plan.md`.
+Detailplan: `docs/m11-plan.md`. Abnahme am Board: `docs/test-pi.md` M11.
 
 - [x] 180-Sound: die drei `.m4a` aus `Legacy/Dart/Assets.xcassets` per `<audio>`, zufällig eine, auf jedem Gerät, das die Aufnahme sieht; Schalter „Ton“ im Konto
 - [x] ~~Haptik bei Bust und Match-Ende (Android)~~ (entfällt, `m11-plan.md` §7.3), sichtbare Tastenrückmeldung
-- [ ] Schnelleingabe pro Aufnahme, nur falls die Dart-Eingabe am Board nervt (M6): Summe wird in drei Darts zerlegt, `visit.is_quick`, Feldtreffer lassen solche Aufnahmen aus
+- [x] ~~Schnelleingabe pro Aufnahme, nur falls die Dart-Eingabe am Board nervt (M6): Summe wird in drei Darts zerlegt, `visit.is_quick`, Feldtreffer lassen solche Aufnahmen aus~~ (nicht gewünscht, 19.11.2026)
 - [ ] Kleinkram vom Board (Sammelstelle aus M6)
 
 **DoD:** 180 löst den Sound aus, auch auf dem Zuschauer-Handy; eine gedrückte Taste leuchtet sichtbar auf.

@@ -1,7 +1,7 @@
 # M11-Plan – Sound und Komfort am Board
 
 > Detailplan zu `project.md` M11 (aus dem Backlog). Kleine, voneinander unabhängige Dinge, die das Zählen am Board angenehmer machen. Jeder Punkt ist ein eigener Commit und kann einzeln weggelassen werden. Reihenfolge nach Nutzen.
-> Stand: §1 und §2 umgesetzt (19.11.2026, §2 ohne Vibration), §3 und §4 offen.
+> Stand: §1 und §2 umgesetzt (19.11.2026, §2 ohne Vibration), §3 entfällt, §4 Sammelstelle. Abnahme am Board: `docs/test-pi.md` M11.
 > Luca: §0 und §7.
 
 ---
@@ -9,7 +9,7 @@
 ## 0. Was Luca tut
 
 1. Die drei `.m4a`-Aufnahmen aus `Legacy/Dart/Assets.xcassets/180-*.dataset` freigeben (sind Eigenaufnahmen, oder? Ja!) und sagen, ob sie zufällig abwechseln sollen wie in Legacy. zufällig
-2. Entscheiden, ob die Schnelleingabe pro Aufnahme überhaupt gewünscht ist (§7, Frage 2). Laut `project.md` nur, falls die Dart-Eingabe am Board nervt; M6 am Board zeigt das.
+2. Entscheiden, ob die Schnelleingabe pro Aufnahme überhaupt gewünscht ist (§7, Frage 2). Laut `project.md` nur, falls die Dart-Eingabe am Board nervt; M6 am Board zeigt das. Nicht gewünscht.
 
 ---
 
@@ -29,7 +29,9 @@
 - **Umgesetzt (19.11.2026):** Utility `key-feedback` in `globals.css` mit Token `--key-press` (Weiß 30 %): Die Schicht erscheint beim Drücken sofort und blendet in `--duration-base` aus; nur Opacity (`theme.md` §5 Regel 6). Gilt für jede Taste in jedem Layout, gesperrte Tasten leuchten nicht.
 - **Commit:** „M11: Haptik“
 
-## 3. Schnelleingabe pro Aufnahme (nur bei Bedarf, §7)
+## 3. ~~Schnelleingabe pro Aufnahme~~ (entfällt, 19.11.2026)
+
+> Luca: nicht gewünscht. Die Skizze bleibt zur Erinnerung stehen.
 
 - Idee: statt drei Darts die Summe der Aufnahme tippen („Schnell: 60“), wie bei anderen Dart-Apps. Das passt nicht ins Datenmodell (drei Dart-Plätze, Feldtreffer, Checkout-Hinweis), deshalb nur als **Darstellungs-Trick**: Die Summe wird in drei Darts zerlegt (z. B. 60 → S20 S20 S20, 100 → T20 S20 S20, 26 → S20 S5 S1), gespeichert wird die Zerlegung mit einem Flag `visit.is_quick = 1`, und Feldtreffer-Statistiken lassen solche Aufnahmen aus. Checkout und Bust gelten weiter pro Dart der Zerlegung.
 - Schalter im Setup („Eingabe: Darts / Aufnahme“), Keypad bekommt dann ein Zahlenfeld 0–180 mit Schnelltasten 26, 41, 45, 60, 85, 100, 140, 180.
@@ -44,7 +46,7 @@ Sammelstelle für das, was in M6 auffällt und nicht dort erledigt wurde (Schrif
 
 ## 5. DoD
 
-Am Board: 180 löst den Sound aus, auch auf dem Zuschauer-Handy; eine gedrückte Taste leuchtet auf; die Schnelleingabe (falls gebaut) zählt ein Leg korrekt zu Ende.
+Am Board: 180 löst den Sound aus, auch auf dem Zuschauer-Handy; eine gedrückte Taste leuchtet auf.
 - **Commit:** „M11: done“
 
 ---
@@ -56,5 +58,5 @@ Sprachausgabe der Reste („Caller“), Sounds für andere Ereignisse, Musik.
 ## 7. Offene Fragen (Defaults gelten ohne Antwort)
 
 1. **Sound auf allen Geräten** (Default) oder nur auf dem Host-Handy.
-2. **Schnelleingabe**: erst entscheiden, wenn M6 am Board gelaufen ist (Default: nicht bauen).
+2. **Schnelleingabe**: erst entscheiden, wenn M6 am Board gelaufen ist (Default: nicht bauen). Nicht gewünscht (19.11.2026).
 3. **Vibration** bei Bust und Match-Ende (Default) oder nur Match-Ende. Ohne Vibration

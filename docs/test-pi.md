@@ -63,6 +63,16 @@ Plan: `archive/m10-plan.md` §0, §7.
 - [ ] Undo vom Sieg-Screen nimmt ihn wieder weg.
 - [ ] Alte Spiele mit 180ern zählen sofort (Galerie eines Spielers mit älterem 180er prüfen).
 
+## M11 – Sound und Komfort am Board
+
+Plan: `m11-plan.md` §1, §2, §5.
+
+- [ ] Ein 180er (T20 T20 T20) spielt einen der drei Töne auf dem Host-Handy, egal wer geworfen hat.
+- [ ] Derselbe 180er klingt auch auf einem Zuschauer-Handy, das das Match nur ansieht (dort vorher einmal irgendwo getippt, sonst sperrt der Browser den Ton).
+- [ ] Undo nach einem 180er und Neuladen der Seite spielen ihn nicht noch einmal.
+- [ ] Konto → Ton „Aus“: dieses Gerät bleibt beim nächsten 180er still, die anderen nicht.
+- [ ] Eine gedrückte Taste leuchtet am Board sichtbar auf, auch bei schnellem Tippen und in Hell und Dunkel.
+
 ## M13 – Code-Review und Konsolidierung
 
 Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Die offenen Entscheidungen (Kontrast, `synchronous = NORMAL`) stehen in `docs/fragen.md`, nicht hier.
