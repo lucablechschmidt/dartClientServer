@@ -3,7 +3,7 @@ import { MAX_DARTS_PER_VISIT, type Dart, type OutRule } from "./game/types";
 
 /**
  * Checkout routes, double-out (single-out shows the same routes, triple-out only one-dart finishes: Luca
- * 11.11.2026, docs/fragen.md). Ported from Legacy/Dart/Classes/ClassicGame/Checkouts.swift, then checked
+ * 11.11.2026). Ported from Legacy/Dart/Classes/ClassicGame/Checkouts.swift, then checked
  * at the board (7.11.2026, M6 practice test): one table instead of three, because a rest is always
  * finished with the fewest darts (50 is Bull, not 10 D20; 110 is T20 Bull), and four legacy entries
  * did not add up (10, 53, 86, 143). A route is written as thrown: setup darts first, the double last.

@@ -9,8 +9,8 @@ const g = de.game;
 /**
  * WCAG 2.1 A/AA rules of axe-core; every violation is listed by rule and element when the test fails.
  * Contrast is checked with "increase contrast" on (prefers-contrast: more): only then the app darkens
- * the muted grey and the accent, like iOS (Luca 11.11.2026, option c in docs/fragen.md). Left out until
- * decided (docs/fragen.md, 11.11.2026): white on the Double/Triple keys, on undo red and on the grey hint bar (legacy colours).
+ * the muted grey and the accent, like iOS (Luca 11.11.2026, theme.md §1). Left out on purpose (architecture.md E17):
+ * white on the Double/Triple keys, on undo red and on the grey hint bar (legacy colours).
  */
 async function noViolations(page: Page, where: string) {
   // no animations either: a list fading in would be measured half transparent

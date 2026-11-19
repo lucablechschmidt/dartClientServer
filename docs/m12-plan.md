@@ -123,13 +123,13 @@ Ergebnis in §B6 eintragen.
 
 | Ergebnis | Folge |
 |---|---|
-| Funnel setzt `X-Forwarded-For` mit der Handy-IP, SSE und Server Actions laufen ohne Caddy | **Caddy entfällt.** App bekommt `127.0.0.1:8080:3000`, `Caddyfile` und Caddy-Dienst raus, `scripts/deploy.sh` prüft Health direkt, README und `architecture.md` §2, §3, §4, §5 nachziehen, neue Entscheidung **E16**. Das Rate-Limit vertraut `X-Forwarded-For`, weil nur `tailscaled` den Port erreicht (an `127.0.0.1` gebunden). |
-| Funnel setzt keine Client-IP | Weder mit noch ohne Caddy kennt die App die IP. **Rate-Limit umstellen auf pro Name** (Fehlversuche je eingegebenem Spielernamen, zusätzlich ein großzügiger globaler Deckel gegen Durchprobieren vieler Namen). Caddy entfällt trotzdem, sofern SSE und Server Actions ohne ihn laufen. E16 hält beides fest. |
+| Funnel setzt `X-Forwarded-For` mit der Handy-IP, SSE und Server Actions laufen ohne Caddy | **Caddy entfällt.** App bekommt `127.0.0.1:8080:3000`, `Caddyfile` und Caddy-Dienst raus, `scripts/deploy.sh` prüft Health direkt, README und `architecture.md` §2, §3, §4, §5 nachziehen, neue Entscheidung **E18**. Das Rate-Limit vertraut `X-Forwarded-For`, weil nur `tailscaled` den Port erreicht (an `127.0.0.1` gebunden). |
+| Funnel setzt keine Client-IP | Weder mit noch ohne Caddy kennt die App die IP. **Rate-Limit umstellen auf pro Name** (Fehlversuche je eingegebenem Spielernamen, zusätzlich ein großzügiger globaler Deckel gegen Durchprobieren vieler Namen). Caddy entfällt trotzdem, sofern SSE und Server Actions ohne ihn laufen. E18 hält beides fest. |
 | SSE puffert ohne Caddy oder Server Actions scheitern | Caddy bleibt; §3 bekommt einen Satz, wofür genau. Das Rate-Limit wird je nach erster Zeile trotzdem korrigiert (mit `trusted_proxies` in Caddy, falls Funnel die IP liefert). |
 
 In jedem Fall danach: Diagnose-Code und `DIAG_ENABLED` entfernen.
 
-- **Commits:** „feat(auth): rate limit per …“ (falls nötig), „chore(deploy): remove Caddy, app listens on 127.0.0.1:8080“ (falls entschieden), „chore(diag): remove diagnostics“, „docs: E16 ingress“, nach der DoD „M12: done“.
+- **Commits:** „feat(auth): rate limit per …“ (falls nötig), „chore(deploy): remove Caddy, app listens on 127.0.0.1:8080“ (falls entschieden), „chore(diag): remove diagnostics“, „docs: E18 ingress“, nach der DoD „M12: done“.
 
 ## B6. Messwerte
 
@@ -146,4 +146,4 @@ Eigene Domain, Cloudflare Tunnel (Option aus §4 von `architecture.md`; mit Clou
 
 ## B8. DoD (Teil B)
 
-Die Messwerte in §6 sind eingetragen; die Entscheidung steht als E16 in `architecture.md`; das Rate-Limit zählt nachweislich pro Gerät oder pro Name (Probe: zehn Fehlversuche von Handy A, Handy B kann sich danach sofort anmelden); der Diagnose-Code ist wieder entfernt; Pipeline grün und, falls Caddy entfällt, die App nach einem Neustart des Pi wieder erreichbar.
+Die Messwerte in §6 sind eingetragen; die Entscheidung steht als E18 in `architecture.md`; das Rate-Limit zählt nachweislich pro Gerät oder pro Name (Probe: zehn Fehlversuche von Handy A, Handy B kann sich danach sofort anmelden); der Diagnose-Code ist wieder entfernt; Pipeline grün und, falls Caddy entfällt, die App nach einem Neustart des Pi wieder erreichbar.

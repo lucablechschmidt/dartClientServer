@@ -9,7 +9,7 @@
 
 ## 0. Was Luca tut
 
-1. ✅ §6 beantworten (8.11.2026; Frage 6 zurückgestellt, jetzt in `docs/fragen.md`).
+1. ✅ §6 beantworten (8.11.2026; Frage 6 zurückgestellt, am 19.11.2026 als E16 entschieden).
 2. ✅ M13 in `docs/project.md` eintragen (Übersicht und Checkliste).
 3. ⏳ Nach Paket B (Performance) mit der echten Datenbank vom Pi messen, ob die Statistik-Seiten schnell genug sind (`m8-plan.md` §7); Code steht, Messung später (§7).
 
@@ -33,7 +33,7 @@
 
 ## 2. Befundliste
 
-Stand 8.11.2026: ✅ = umgesetzt (R-01 im Code, Messung offen; R-19 nur als Test, §6 Frage 7). Offen: R-21 und der Kontrast aus Paket F (`docs/fragen.md`); R-30 entfällt; R-14, R-24 bleiben bewusst; R-31 kommt mit M14.
+Stand 8.11.2026: ✅ = umgesetzt (R-01 im Code, Messung offen; R-19 nur als Test, §6 Frage 7). R-21 und der Kontrast aus Paket F sind seit 19.11.2026 entschieden (`architecture.md` E16, E17); R-30 entfällt; R-14, R-24 bleiben bewusst; R-31 kommt mit M14.
 
 Priorität: **hoch** = Fehlverhalten oder Risiko für Nutzer/Pi, **mittel** = verletzt eine vereinbarte Regel oder macht Wartung teurer, **niedrig** = Schönheit, Konsistenz. Aufwand: S < 2 h, M = halber Tag, L = ein Tag oder mehr. „Paket“ verweist auf §3.
 
@@ -176,9 +176,9 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 
 **Abnahme:** `npm run lint`, `typecheck`, `test:coverage` grün; keine der neun Kopien mehr vorhanden (`grep "structural, no server import"` leer).
 
-**Ergänzt (8.11.2026):** 6. `README.md`: Abschnitt Logs um `request.failed` ergänzen, Rechte von „Nochmal“ (Host, Admin, Mitspieler; Host bleibt Host) bei den Spielregeln nennen. 7. `docs/prompt.md` „Stand“ auf M13 nachziehen (A–C fertig, B ohne Messung, §8 offen). 8. `/dev/theme`: Regel „jeder `ui`-Baustein bekommt einen Eintrag“ (§9) entweder umsetzen oder streichen (Vorschlag in `fragen.md`).
+**Ergänzt (8.11.2026):** 6. `README.md`: Abschnitt Logs um `request.failed` ergänzen, Rechte von „Nochmal“ (Host, Admin, Mitspieler; Host bleibt Host) bei den Spielregeln nennen. 7. `docs/prompt.md` „Stand“ auf M13 nachziehen (A–C fertig, B ohne Messung, §8 offen). 8. `/dev/theme`: Regel „jeder `ui`-Baustein bekommt einen Eintrag“ (§9) entweder umsetzen oder streichen (Vorschlag an Luca; gestrichen am 11.11.2026, `architecture.md` §9).
 
-**Umsetzung D (8.11.2026):** Schritte 1–8. Abweichungen: 1) `bestOfToWin` entfiel, `toWin` gibt es seit Paket A nur noch einmal (`action-input.ts`). 2) `requireAdmin` leitet jetzt nach `/account` (wie die Admin-Seite vorher, e2e erwartet das), nicht nach `/`. 3) Wo ein Screen nur einen Teil einer Server-Ansicht braucht, ist der Typ ein `Pick` (`MatchViewLike`, `TournamentScreenView`, `TournamentListItem`), sonst der Server-Typ selbst; Erfolge nutzen `GalleryItem` aus der Domäne. Elf statt neun Kopien ersetzt (`InviteLink`, `TournamentListItem` kamen dazu). 4) `networkidle` ersetzt `settled(page)` in `e2e/fixtures.ts` (kein Lade-Platzhalter mehr); im Offline-Test reicht das Warten auf „gespeichert“, das `tap` schon tut. 5) Die `/dev/theme`-Regel ist als Frage in `fragen.md` (Default: streichen). Abnahme: Lint, Typecheck, `test:coverage` (494, Komponenten 82 % bei Schwelle 60 %), `test:e2e` (36) grün; `grep "structural, no server import"` leer.
+**Umsetzung D (8.11.2026):** Schritte 1–8. Abweichungen: 1) `bestOfToWin` entfiel, `toWin` gibt es seit Paket A nur noch einmal (`action-input.ts`). 2) `requireAdmin` leitet jetzt nach `/account` (wie die Admin-Seite vorher, e2e erwartet das), nicht nach `/`. 3) Wo ein Screen nur einen Teil einer Server-Ansicht braucht, ist der Typ ein `Pick` (`MatchViewLike`, `TournamentScreenView`, `TournamentListItem`), sonst der Server-Typ selbst; Erfolge nutzen `GalleryItem` aus der Domäne. Elf statt neun Kopien ersetzt (`InviteLink`, `TournamentListItem` kamen dazu). 4) `networkidle` ersetzt `settled(page)` in `e2e/fixtures.ts` (kein Lade-Platzhalter mehr); im Offline-Test reicht das Warten auf „gespeichert“, das `tap` schon tut. 5) Die `/dev/theme`-Regel ging als Frage an Luca (Default: streichen; gestrichen am 11.11.2026). Abnahme: Lint, Typecheck, `test:coverage` (494, Komponenten 82 % bei Schwelle 60 %), `test:e2e` (36) grün; `grep "structural, no server import"` leer.
 
 ### 3.5 Paket E – Große Module teilen
 
@@ -208,7 +208,7 @@ Jedes Paket ist einzeln umsetzbar, hat eigene Tests und einen oder mehrere Commi
 - **R-27:** `ChoiceMenu` ist eine Disclosure statt eines Menüs, weil die Liste ein Textfeld enthält, das in `menu`/`listbox` nicht erlaubt ist. Optionen sind Buttons mit `aria-pressed`. Per Tastatur geöffnet springt der Fokus auf die gewählte Option, Wahl oder Escape bringen ihn zurück, Tab hinaus schließt. Beim Antippen bleibt der Fokus (keine Handy-Tastatur). `choice-parts.tsx` hält das Menü unter 150 Zeilen.
 - **R-28:** Fokus-Fang von Hand statt `<dialog>`, damit Aussehen und Einblenden gleich bleiben; nebenbei sprang der Fokus bei jedem Re-Render auf „Abbrechen“.
 - **R-29:** Keypad-Name, `aria-controls` an `FoldCard`, Titel je Seite (feste Titel, wo der Inhalt dynamisch ist).
-- **Axe-Lauf:** `e2e/a11y.spec.ts` mit `@axe-core/playwright` fand zusätzlich `label-content-name-mismatch` (WCAG 2.5.3). Nach Lucas Vorgabe tragen Bedienelemente jetzt genau ihren sichtbaren Text als Namen: Auswahl „Einstieg Single In“, Spielerzeile = Name (+ Gast, Position) mit `aria-pressed`, Panels nach ihrem Text (kleine Panels zeigen fünf Buchstaben, so heißen sie auch), Theme-Toggle „System“ mit `title`. `color-contrast` ist ausgelassen, bis die Frage in `docs/fragen.md` beantwortet ist.
+- **Axe-Lauf:** `e2e/a11y.spec.ts` mit `@axe-core/playwright` fand zusätzlich `label-content-name-mismatch` (WCAG 2.5.3). Nach Lucas Vorgabe tragen Bedienelemente jetzt genau ihren sichtbaren Text als Namen: Auswahl „Einstieg Single In“, Spielerzeile = Name (+ Gast, Position) mit `aria-pressed`, Panels nach ihrem Text (kleine Panels zeigen fünf Buchstaben, so heißen sie auch), Theme-Toggle „System“ mit `title`. `color-contrast` war ausgelassen bis zur Entscheidung (11.11.2026 Grau und Akzent, `theme.md` §1; 19.11.2026 Tastenfarben, `architecture.md` E17).
 
 Abnahme: Axe-Lauf über Setup (mit offenem Menü), Zählscreen, ConfirmSheet, Leg-Sieg und Konto ohne Befund (außer Kontrast); Setup per Tastatur bedienbar (Unit-Tests); `npm test` (498), `test:e2e` (38) grün.
 
@@ -258,4 +258,4 @@ Beim Abgleich Doku ↔ Code aufgefallen; alle sechs sind seit Paket D (8.11.2026
 
 ## 8. Zurückgestellte Fragen
 
-1. **`synchronous = NORMAL` (R-21, vorher §6 Frage 6):** steht als offene Frage in `docs/fragen.md` (dort Befund, Optionen, Default). Bis zur Antwort bleibt `FULL`, Paket B setzt den Pragma nicht.
+1. **`synchronous = NORMAL` (R-21, vorher §6 Frage 6):** entschieden am 19.11.2026 (`architecture.md` E16): `FULL` bleibt, Paket B setzt den Pragma nicht.

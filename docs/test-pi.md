@@ -75,7 +75,7 @@ Plan: `m11-plan.md` §1, §2, §5.
 
 ## M13 – Code-Review und Konsolidierung
 
-Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Die offenen Entscheidungen (Kontrast, `synchronous = NORMAL`) stehen in `docs/fragen.md`, nicht hier.
+Plan: `archive/m13-plan.md` §0.3, §3.2 Schritt 4, §7. Kontrast und `synchronous` sind entschieden (`architecture.md` E16, E17).
 
 - [ ] Statistik-Seiten mit der Pi-Datenbank messen, Zielwert < 500 ms (siehe §Messungen).
 - [ ] Optional: `curl /api/health` bei gesperrter Datenbank liefert `{"ok":false}` ohne Pfad (wurde nicht von Hand geprüft).

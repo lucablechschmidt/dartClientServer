@@ -1,7 +1,7 @@
 # M14-Plan – Styling
 
 > **Archiviert am 11.11.2026:** im Code umgesetzt; die offene Abnahme am Board steht in `docs/test-pi.md`.
-> Detailplan zu `project.md` M14. Zusammengeführt aus zwei Fragen in `docs/fragen.md` (6.11.2026): „Responsives Layout auf dem Desktop“ und „Dezente Animationen wie unter iOS“. Luca hat beide beantwortet und als eigenen Meilenstein „Styling“ eingeordnet.
+> Detailplan zu `project.md` M14. Zusammengeführt aus zwei Fragen an Luca (6.11.2026): „Responsives Layout auf dem Desktop“ und „Dezente Animationen wie unter iOS“. Luca hat beide beantwortet und als eigenen Meilenstein „Styling“ eingeordnet.
 > Stand: 6.11.2026. Teil A und Teil B Schritt 1–2 umgesetzt; Schritt 3 wartet auf Lucas Abnahme am Board.
 > Luca: §0.
 
@@ -13,7 +13,7 @@
 2. Nach Teil B Schritt 2 die Animationen am Board am Handy abnehmen. Erst danach kommt Schritt 3 (Kandidaten 3 und 8).
 3. Die zurückgestellten Punkte (§3) bei Bedarf wieder aufnehmen.
 
-## 1. Entscheidungen (aus `fragen.md`, 6.11.2026)
+## 1. Entscheidungen (6.11.2026)
 
 | Frage | Entscheidung |
 |---|---|

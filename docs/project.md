@@ -37,7 +37,7 @@ Die Meilensteine sind in der Reihenfolge nummeriert, in der sie umgesetzt werden
 | M10 | Achievements | fertig, DoD am Board offen | M8 |
 | M11 | Sound und Komfort am Board | fertig (Schnelleingabe entfällt), DoD am Board offen | M9 |
 | M12 | Betrieb und Härtung, inkl. Ingress prüfen (Caddy, Rate-Limit) | geplant, bewusst zuletzt | M6 und M4c |
-| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` und Tastenfarben-Kontrast zurückgestellt (`fragen.md`) | – |
+| M13 | Code-Review und Konsolidierung | A, C, D, E, F fertig; offen: Messung (B); `synchronous` (E16) und Tastenfarben (E17) entschieden | – |
 | M14 | Styling: Desktop-Layout, dezente Animationen | fertig bis Schritt 3 (wartet auf Abnahme am Board) | – |
 
 Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `docs/archive/`, ihre noch offene Abnahme am Board sammelt `docs/test-pi.md`.
@@ -290,11 +290,11 @@ Detailplan: `docs/m12-plan.md`. Kein Backup (E14, bewusst: Spiel-Projekt).
 
 - [ ] Diagnose-Seite `/diag` (nur Admin, hinter `DIAG_ENABLED`): ankommende Header, abgeleitete Client-IP, SSE-Ticks, Server-Action-Probe
 - [ ] Probe A über den heutigen Weg (Funnel → Caddy → App), Probe B mit Funnel direkt auf die App
-- [ ] Entscheidung E16: Caddy entfällt oder bleibt mit Begründung
+- [ ] Entscheidung E18: Caddy entfällt oder bleibt mit Begründung
 - [ ] Rate-Limit zählt pro Gerät (wenn Funnel die IP liefert) oder pro Spielername
 - [ ] Diagnose-Code wieder entfernt, README und `architecture.md` nachgezogen
 
-**DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E16 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
+**DoD:** Der Pi wird hart vom Strom getrennt und wieder eingeschaltet; die App läuft wieder, ein laufendes Match ist noch da; die App ist am Handy als Icon auf dem Home-Bildschirm und startet im Vollbild. Teil B: Messwerte in `docs/m12-plan.md` §B6, E18 eingetragen, zehn Fehlversuche von Handy A sperren Handy B nicht, Diagnose-Code entfernt.
 
 ---
 
@@ -307,13 +307,13 @@ Detailplan: `docs/archive/m13-plan.md` (eigener Meilenstein, §6 Frage 1).
 - [x] Paket A – Eingabevalidierung und Fehlerfluss (dazu: beim Restart bleibt der Host Host)
 - [x] Paket B – Pi-Ressourcen im Code: beendete Matches gebündelt laden, Spielerfilter in SQL, Rate-Limit-Map begrenzt, Datenbank beim Prozessende schließen
 - [ ] Paket B – Messung mit synthetischen Daten und mit der Pi-Datenbank (`docs/test-pi.md` Messungen)
-- [ ] Paket B – `synchronous = NORMAL` entscheiden (`docs/fragen.md`)
+- [x] Paket B – `synchronous = NORMAL` entscheiden (E16: `FULL` bleibt)
 - [x] Paket C – Client-Lebenszyklus und Rückmeldung (dazu: Start-Button im Setup gesperrt, Lade-Platzhalter erst nach 150 ms)
 - [x] Paket D – Konsolidierung und Doku
 - [x] Paket E – nur wiederverwendbare Bausteine teilen: `choice-menu.tsx` (§6 Frage 4)
 - [x] Paket F – Barrierefreiheit, nie auf Kosten der UX für Sehende (Axe-Lauf ohne Befund außer Kontrast)
 - [x] Paket F – Kontrast von Grau und Akzent entscheiden (Option c, 11.11.2026, `theme.md` §1)
-- [ ] Paket F – Kontrast der Tastenfarben und der Hinweis-Leiste entscheiden (`docs/fragen.md`, zurückgestellt)
+- [x] Paket F – Kontrast der Tastenfarben und der Hinweis-Leiste entscheiden (E17: Legacy-Farben bleiben)
 
 **DoD:** siehe `docs/archive/m13-plan.md` §3. Abnahme am Board: `docs/test-pi.md`.
 
@@ -338,4 +338,4 @@ Detailplan: `docs/archive/m14-plan.md`.
 
 ## Entscheidungen
 
-Alle geklärten Fragen stehen als Entscheidungen E1–E15 in `docs/architecture.md` §11.
+Alle geklärten Fragen stehen als Entscheidungen E1–E17 in `docs/architecture.md` §11. Offene Fragen stehen im jeweiligen Plan unter „Offene Fragen“ (Defaults gelten ohne Antwort).
