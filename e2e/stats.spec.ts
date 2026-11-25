@@ -88,6 +88,12 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
   await pageA.waitForURL(/\/history\/match\/[^/]+\?mode=x01$/);
   await pageA.getByRole("link", { name: de.game.back }).first().click();
   await pageA.waitForURL((u) => u.pathname === "/history" && u.search === "?mode=x01");
+  // the admin may take back the winning dart on /match/[id], but not when the game is opened from the history
+  await admin.goto(second);
+  await expect(admin.getByRole("button", { name: de.game.undoWinningDart })).toBeEnabled();
+  await admin.goto(`/history${new URL(second).pathname}`);
+  await expect(winner(admin, B)).toBeVisible();
+  await expect(admin.getByRole("button", { name: de.game.undoWinningDart })).toHaveCount(0);
   await admin.goto(`${new URL(second).pathname}/stats`);
   await expect(admin.getByText(de.errorPage.notFoundTitle)).toBeVisible();
 });

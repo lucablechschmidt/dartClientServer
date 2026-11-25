@@ -10,7 +10,8 @@ import type { Texts } from "@/i18n/de";
 type Props = {
   view: MatchBoardView;
   texts: Texts["game"];
-  onUndoWinningDart: () => void;
+  /** Null for a game opened from the history: a finished game seen there cannot be reopened. */
+  onUndoWinningDart: (() => void) | null;
   onRestart: () => Promise<void>;
   /** M9: a tournament game leads back to its tournament instead of offering a rematch. */
   tournamentHref?: string;
@@ -80,10 +81,12 @@ export function VictoryScreen({
             </Button>
           )}
           <div className="flex gap-2">
-            <Button onClick={onUndoWinningDart} disabled={pending}>
-              <UndoIcon className="size-icon-xs shrink-0" />
-              {texts.undoWinningDart}
-            </Button>
+            {onUndoWinningDart && (
+              <Button onClick={onUndoWinningDart} disabled={pending}>
+                <UndoIcon className="size-icon-xs shrink-0" />
+                {texts.undoWinningDart}
+              </Button>
+            )}
             {statsHref && <ButtonLink href={statsHref}>{texts.matchStats}</ButtonLink>}
           </div>
           <ButtonLink href={backHref ?? "/"} variant="quiet">

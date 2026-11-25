@@ -97,10 +97,11 @@ describe("VictoryScreen (design VictoryScreen1v1 / VictoryScreenMultiplayer)", (
     await user.click(screen.getByRole("button", { name: g.undoWinningDart }));
     expect(onUndoWinningDart).toHaveBeenCalledTimes(1);
     unmount();
-    // opened from the history: back there instead of home
-    const fromHistory = show(played(["a", "b"], [S(20), S(20)]), { backHref: "/history?mode=x01" });
+    // opened from the history: back there instead of home, no undo
+    const fromHistory = show(played(["a", "b"], [S(20), S(20)]), { backHref: "/history?mode=x01", onUndoWinningDart: null });
     expect(screen.getByRole("link", { name: g.back })).toHaveAttribute("href", "/history?mode=x01");
     expect(screen.queryByRole("link", { name: g.home })).toBeNull();
+    expect(screen.queryByRole("button", { name: g.undoWinningDart })).toBeNull();
     fromHistory.unmount();
     show(played(["a", "b"], [S(20), S(20)]), { tournamentHref: "/tournaments/7" });
     expect(screen.queryByRole("button", { name: g.restart })).toBeNull();

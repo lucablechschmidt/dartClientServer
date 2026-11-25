@@ -45,7 +45,10 @@ type Props = {
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   /** M9: set for tournament games; the victory screen leads back there. */
   tournamentHref?: string;
-  /** Set for a game opened from the history: the way back leads there instead of to the start page. */
+  /**
+   * Set for a game opened from the history: the way back leads there instead of to the start page,
+   * and the victory screen offers no undo, so looking at an old game cannot reopen it.
+   */
   backHref?: string;
   /** The X01 match page; `/match/[id]/stats?from=match` unless the game was opened from the history. */
   statsHref?: string;
@@ -206,7 +209,7 @@ export function ScoreboardScreen({
               view={view}
               texts={texts}
               pending={sync !== "saved" || !undoOk}
-              onUndoWinningDart={undo}
+              onUndoWinningDart={backHref ? null : undo}
               onPlayOut={playOutOk ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
               tournamentHref={tournamentHref}
