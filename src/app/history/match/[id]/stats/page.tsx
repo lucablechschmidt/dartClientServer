@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MatchStatsRoute, type StatsParams, type StatsSearch } from "@/app/match/[id]/stats/stats-route";
+import { MatchStatsRoute, type StatsParams, type StatsSearch } from "@/app/_routes/match-stats-route";
 import { de } from "@/i18n/de";
 
 export const metadata: Metadata = { title: de.stats.detail.title };

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { de } from "@/i18n/de";
-import { MatchRoute, type MatchParams } from "./match-route";
+import { MatchRoute, type MatchParams } from "@/app/_routes/match-route";
 
 export const metadata: Metadata = { title: de.game.title };
 
