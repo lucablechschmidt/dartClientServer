@@ -1,4 +1,4 @@
-Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 0 kommt, gewinnt das Leg.
+Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 0 kommt, gewinnt das Spiel/ Leg.
 
 <details>
 <summary class="text-lg font-bold">Ablauf</summary>
@@ -14,7 +14,7 @@ Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 
 - **Startpunktzahl:** 501, 401, 301 oder eine eigene.
 - **Single In:** jeder Dart zählt sofort.<br/>
 **Double In** bzw. **Triple In:** Punkte zählen erst ab dem ersten Double bzw. Triple. Ein anderer Treffer davor ist ein Bust.
-- **Single Out:** jeder Dart, der genau auf 0 bringt, beendet das Leg.
+- **Single Out:** jeder Dart, der genau auf 0 bringt, beendet das Spiel/ Leg.
 **Double Out** bzw. **Triple Out:** der letzte Dart muss ein Double bzw. Triple sein.
 </details>
 
@@ -23,7 +23,6 @@ Jeder startet mit derselben Punktzahl und zählt herunter. Wer zuerst genau auf 
 
 - Ein Dart, der unter 0 führt, nicht passend auf 0 bringt oder einen Rest übrig lässt, der sich nicht mehr auschecken lässt (1 bei Double Out, 1 oder 2 bei Triple Out), ist ein Bust.
 - Die ganze Aufnahme zählt dann 0, der Rest steht wieder wie vor der Aufnahme, und der Nächste ist dran.
-- Ein Fehlwurf (0) ist nie ein Bust.
 </details>
 
 <details>

@@ -7,10 +7,10 @@ In dieser Reihenfolge, eine Runde pro Feld:
 
 1. 15
 2. 16
-3. ein beliebiges Double
+3. beliebige Double
 4. 17
 5. 18
-6. ein beliebiges Triple
+6. beliebige Triple
 7. 19
 8. 20
 9. Bull

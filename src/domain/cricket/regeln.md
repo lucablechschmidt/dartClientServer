@@ -18,7 +18,7 @@ Gespielt wird nur auf die Felder 15 bis 20 und Bull. Jedes Feld wird mit drei Tr
 <details>
 <summary class="text-lg font-bold">Gewonnen</summary>
 
-Gewonnen hat, wer alle sieben Felder geschlossen hat und dabei mehr Punkte als jeder andere. Wer alles zu hat, aber nicht vorne liegt, muss weiter Punkte sammeln. Die anderen Plätze folgen nach Punkten, bei Gleichstand nach der Zahl geschlossener Felder.
+Gewonnen hat, wer alle sieben Felder geschlossen hat und dabei mehr Punkte als jeder andere besitzt. Wer alles zu hat, aber nicht vorne liegt, muss weiter Punkte sammeln. Die anderen Plätze folgen nach Punkten, bei Gleichstand nach der Zahl geschlossener Felder.
 </details>
 
 
@@ -26,6 +26,6 @@ Gewonnen hat, wer alle sieben Felder geschlossen hat und dabei mehr Punkte als j
 <summary class="text-lg font-bold">Gut zu wissen</summary>
 
 - Die Tabelle zeigt pro Spieler und Feld die Treffer: Strich (1), Kreuz (2), Kreuz im Kreis (geschlossen).
-- Das Feld, auf dem du gerade punkten kannst, ist markiert.
+- Die Felder, auf dem du gerade punkten kannst, sind markiert.
 - Das Tastenfeld zeigt nur **X**, 15 bis 20 und Bull. X trägt die restlichen Darts der Aufnahme als Fehlwürfe ein. Undo nimmt sie zusammen zurück.
 </details>

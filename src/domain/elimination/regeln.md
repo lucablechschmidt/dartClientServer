@@ -10,7 +10,7 @@ Alle starten bei 0 und zählen hoch bis zur Zielpunktzahl. Wer dabei genau auf d
 <details>
 <summary class="text-lg font-bold">Eliminieren</summary>
 
-- Landet dein Stand nach einem Dart genau auf dem Stand eines Mitspielers, fällt dieser auf 0 zurück. Stehen mehrere dort, trifft es alle.
+- Landet dein Stand nach einem Dart genau auf dem Stand eines Mitspielers, fällt dieser auf 0 zurück.
 - Der Hinweis zeigt, wie viele Punkte bis zur nächsten Elimination fehlen, die mit den übrigen Darts noch zu schaffen ist. Ist keine erreichbar, zeigt er den Abstand zum nächsten Spieler über dir.
 </details>
 
