@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { historyMatchHref, historyQuery } from "@/components/screens/history-href";
+import { historyFilter, historyMatchHref } from "@/components/screens/history-href";
 import { MatchDetailScreen } from "@/components/screens/stats/match-detail";
 import { Skeleton } from "@/components/ui/skeleton";
 import { de } from "@/i18n/de";
@@ -18,7 +18,7 @@ async function Detail({ params, searchParams, history = false }: Props) {
   const r = matchDetail(deps, session, id);
   // Not a player of the match (the admin included) or no X01 match: as if it did not exist.
   if (!r.ok) notFound();
-  const backHref = history ? historyMatchHref(id, historyQuery(search)) : search.from === "match" ? `/match/${id}` : "/account/stats";
+  const backHref = history ? historyMatchHref(id, historyFilter(search)) : search.from === "match" ? `/match/${id}` : "/account/stats";
   return <MatchDetailScreen detail={r.detail} texts={de.stats} back={de.ui.back} backHref={backHref} />;
 }
 

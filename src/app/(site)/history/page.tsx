@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SubPage } from "@/components/screens/account/sub-page";
-import { historyQuery } from "@/components/screens/history-href";
+import { historyFilter } from "@/components/screens/history-href";
 import { HISTORY_MODES, HistoryScreen } from "@/components/screens/recent-games";
 import { Skeleton } from "@/components/ui/skeleton";
 import { startOfWeek } from "@/domain/calendar";
@@ -30,7 +30,7 @@ async function History({ searchParams }: { searchParams: Search }) {
       mode={mode}
       weekStart={startOfWeek(deps.now())}
       moreHref={more ? query(shown + HISTORY_PAGE) : null}
-      query={historyQuery(params)}
+      filter={historyFilter(params)}
       now={deps.now()}
       texts={de.overview}
       modes={de.gameMenu.modes}

@@ -60,7 +60,7 @@ describe("HistoryScreen", () => {
         mode="cricket"
         weekStart={weekStart}
         moreHref="/history?mode=cricket&n=50"
-        query="?mode=cricket"
+        filter={{ mode: "cricket" }}
         now={now}
         texts={o}
         modes={de.gameMenu.modes}

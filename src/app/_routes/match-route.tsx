@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { historyHref, historyQuery, historyStatsHref } from "@/components/screens/history-href";
+import { historyFilter, historyHref, historyStatsHref } from "@/components/screens/history-href";
 import { ScoreboardScreen } from "@/components/screens/scoreboard-screen";
 import { de } from "@/i18n/de";
 import {
@@ -31,7 +31,7 @@ async function Match({ params, history }: Props) {
   const view = loadMatchView(deps, id, session);
   if (!view) notFound();
   const tournamentId = tournamentOfMatch(deps, id);
-  const query = history ? historyQuery(await history) : null;
+  const filter = history ? historyFilter(await history) : null;
   return (
     <ScoreboardScreen
       initial={view}
@@ -43,8 +43,8 @@ async function Match({ params, history }: Props) {
       onReorder={reorderPlayersAction}
       onDecideWinner={decideWinnerAction}
       tournamentHref={tournamentId ? `/tournaments/${tournamentId}` : undefined}
-      backHref={query === null ? undefined : historyHref(query)}
-      statsHref={query === null ? undefined : historyStatsHref(id, query)}
+      backHref={filter ? historyHref(filter) : undefined}
+      statsHref={filter ? historyStatsHref(id, filter) : undefined}
       onLoad={loadMatchAction}
       onRestart={restartMatchAction}
       onCancel={cancelMatchAction}
