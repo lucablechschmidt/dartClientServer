@@ -45,6 +45,10 @@ type Props = {
   onDecideWinner: (matchId: string, playerId: PlayerId) => Promise<ActionReply>;
   /** M9: set for tournament games; the victory screen leads back there. */
   tournamentHref?: string;
+  /** Set for a game opened from the history: the way back leads there instead of to the start page. */
+  backHref?: string;
+  /** The X01 match page; `/match/[id]/stats?from=match` unless the game was opened from the history. */
+  statsHref?: string;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
   /** Redirects home on success; answers only when cancelling is not possible. */
@@ -76,6 +80,8 @@ export function ScoreboardScreen({
   onRestart,
   onCancel,
   tournamentHref,
+  backHref,
+  statsHref,
   onLoadAchievements,
   achievementTexts,
 }: Props) {
@@ -159,6 +165,7 @@ export function ScoreboardScreen({
       onRetry={retryNow}
       onCancel={initial.access.canCancel && isOpen ? () => setAsking("cancel") : null}
       home={view.progress === "finished"}
+      backHref={backHref}
       texts={texts}
     />
   );
@@ -203,12 +210,13 @@ export function ScoreboardScreen({
               onPlayOut={playOutOk ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
               tournamentHref={tournamentHref}
+              backHref={backHref}
               achievements={
                 achievementTexts && <AchievementBanner load={loadAchievements} ready={sync === "saved"} texts={achievementTexts} />
               }
               statsHref={
                 view.board.mode === "x01" && actor !== null && initial.match.players.some((p) => p.id === actor.id)
-                  ? `/match/${initial.id}/stats?from=match`
+                  ? (statsHref ?? `/match/${initial.id}/stats?from=match`)
                   : undefined
               }
             />

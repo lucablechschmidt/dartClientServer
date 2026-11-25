@@ -4,6 +4,7 @@ import { CardLinkRow, CardList, CardRow } from "@/components/ui/card-list";
 import { SectionHeading } from "@/components/ui/form-controls";
 import { PillLinks } from "@/components/ui/pill-links";
 import type { Texts } from "@/i18n/de";
+import { historyMatchHref } from "./history-href";
 import { relativeTime } from "./relative-time";
 
 type Mode = keyof Texts["gameMenu"]["modes"];
@@ -85,13 +86,15 @@ type HistoryProps = {
   weekStart: number;
   /** Link to the next page ("Weitere laden"), when there are more games. */
   moreHref: string | null;
+  /** The filter as a query string (`historyQuery`); the games carry it, so their way back leads to this list. */
+  query?: string;
   now: number;
   texts: T;
   modes: ModeNames;
 };
 
 /** `/history`: filter by mode, the games of this week and the older ones, winner in bold, more on request. */
-export function HistoryScreen({ games, mode, weekStart, moreHref, now, texts: t, modes }: HistoryProps) {
+export function HistoryScreen({ games, mode, weekStart, moreHref, query = "", now, texts: t, modes }: HistoryProps) {
   const groups = [
     { title: t.thisWeek, games: games.filter((g) => g.endedAt >= weekStart) },
     { title: t.older, games: games.filter((g) => g.endedAt < weekStart) },
@@ -112,7 +115,7 @@ export function HistoryScreen({ games, mode, weekStart, moreHref, now, texts: t,
           <CardList label={g.title}>
             {g.games.map((m) => (
               <CardRow key={m.id}>
-                <Link href={`/match/${m.id}`} className="tap-row flex min-h-touch flex-col justify-center tap-feedback py-1">
+                <Link href={historyMatchHref(m.id, query)} className="tap-row flex min-h-touch flex-col justify-center tap-feedback py-1">
                   <span className="truncate">
                     {m.names.map((n, i) => (
                       <Fragment key={n}>

@@ -68,7 +68,7 @@ players before the first dart, `src/components/darts/sortable.tsx`, lazy-loaded)
 package.json lists the approved packages. The machine's `~/.npm` cache has
 root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 
-Routes: `/` game menu (one row to the last games), `/history` (last games, `?mode=`, `?n=` in steps of 25), `/new/[mode]` setup, `/players`, `/account` (own name, password, logout, rows to the
+Routes: `/` game menu (one row to the last games), `/history` (last games, `?mode=`, `?n=` in steps of 25; a game opened there is `/history/match/[id]` and `/history/match/[id]/stats`, carrying the filter so back leads to the list), `/new/[mode]` setup, `/players`, `/account` (own name, password, logout, rows to the
 pages below; the same for everyone), `/account/rankings` (per mode), `/account/stats` (own, `?range=`),
 `/account/achievements` (own), `/match/[id]/stats` (X01 match page, its players only), `/admin` (tab "Verwaltung", admins only: invites, players, guests, deleting games and tournaments), `/match/[id]` scoreboard, `/tournaments`,
 `/tournaments/new`, `/tournaments/[id]` (M9), `/login`, `/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,

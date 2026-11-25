@@ -1,56 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import { ScoreboardScreen } from "@/components/screens/scoreboard-screen";
 import { de } from "@/i18n/de";
-import {
-  cancelMatchAction,
-  commitVisitAction,
-  loadMatchAction,
-  restartMatchAction,
-  setPlayOutAction,
-  setStarterAction,
-  reorderPlayersAction,
-  decideWinnerAction,
-  newAchievementsAction,
-  undoVisitAction,
-} from "@/server/match-actions";
-import { loadMatchView } from "@/server/match-service";
-import { tournamentOfMatch } from "@/server/tournament-service";
-import { requireSession } from "@/server/request";
+import { MatchRoute, type MatchParams } from "./match-route";
 
 export const metadata: Metadata = { title: de.game.title };
 
-async function Match({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const { deps, session } = await requireSession();
-  const view = loadMatchView(deps, id, session);
-  if (!view) notFound();
-  const tournamentId = tournamentOfMatch(deps, id);
-  return (
-    <ScoreboardScreen
-      initial={view}
-      texts={de.game}
-      onCommitVisit={commitVisitAction}
-      onUndoVisit={undoVisitAction}
-      onPlayOut={setPlayOutAction}
-      onSetStarter={setStarterAction}
-      onReorder={reorderPlayersAction}
-      onDecideWinner={decideWinnerAction}
-      tournamentHref={tournamentId ? `/tournaments/${tournamentId}` : undefined}
-      onLoad={loadMatchAction}
-      onRestart={restartMatchAction}
-      onCancel={cancelMatchAction}
-      onLoadAchievements={newAchievementsAction}
-      achievementTexts={de.achievements}
-    />
-  );
-}
-
-export default function MatchPage({ params }: { params: Promise<{ id: string }> }) {
-  return (
-    <Suspense fallback={<div className="score-grid" />}>
-      <Match params={params} />
-    </Suspense>
-  );
+export default function MatchPage({ params }: { params: MatchParams }) {
+  return <MatchRoute params={params} />;
 }

@@ -14,6 +14,8 @@ type Props = {
   onRestart: () => Promise<void>;
   /** M9: a tournament game leads back to its tournament instead of offering a rematch. */
   tournamentHref?: string;
+  /** A game opened from the history: the last button leads back there instead of to the start page. */
+  backHref?: string;
   /** M5 plan §9.2: set when the last player may still play out (3+ players, this device may enter for him). */
   onPlayOut: (() => void) | null;
   pending: boolean;
@@ -40,6 +42,7 @@ export function VictoryScreen({
   onPlayOut,
   pending,
   tournamentHref,
+  backHref,
   statsHref,
   achievements,
 }: Props) {
@@ -83,8 +86,8 @@ export function VictoryScreen({
             </Button>
             {statsHref && <ButtonLink href={statsHref}>{texts.matchStats}</ButtonLink>}
           </div>
-          <ButtonLink href="/" variant="quiet">
-            {texts.home}
+          <ButtonLink href={backHref ?? "/"} variant="quiet">
+            {backHref ? texts.back : texts.home}
           </ButtonLink>
         </div>
       </div>

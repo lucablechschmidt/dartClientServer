@@ -46,7 +46,7 @@ describe("HistoryScreen", () => {
     render(<HistoryScreen games={games} mode={null} weekStart={weekStart} moreHref={null} now={now} texts={o} modes={de.gameMenu.modes} />);
     const week = screen.getByRole("list", { name: o.thisWeek });
     const older = screen.getByRole("list", { name: o.older });
-    expect(within(week).getByRole("link")).toHaveAttribute("href", "/match/new");
+    expect(within(week).getByRole("link")).toHaveAttribute("href", "/history/match/new");
     expect([...within(week).getByRole("link").querySelectorAll("strong")].map((b) => b.textContent)).toEqual(["Mara"]);
     expect(within(week).getByRole("link")).toHaveTextContent("Classic 501");
     expect(within(older).getByRole("link")).toHaveTextContent(de.gameMenu.modes.cricket);
@@ -60,6 +60,7 @@ describe("HistoryScreen", () => {
         mode="cricket"
         weekStart={weekStart}
         moreHref="/history?mode=cricket&n=50"
+        query="?mode=cricket"
         now={now}
         texts={o}
         modes={de.gameMenu.modes}
@@ -69,6 +70,8 @@ describe("HistoryScreen", () => {
     expect(within(filter).getByRole("link", { name: o.modesShort.cricket })).toHaveAttribute("aria-current", "page");
     expect(within(filter).getByRole("link", { name: o.all })).toHaveAttribute("href", "/history");
     expect(screen.getByRole("link", { name: o.more })).toHaveAttribute("href", "/history?mode=cricket&n=50");
+    // a game carries the filter, so its way back leads to this list
+    expect(screen.getByRole("list", { name: o.older }).querySelector("a")).toHaveAttribute("href", "/history/match/old?mode=cricket");
     rerender(<HistoryScreen games={[]} mode={null} weekStart={weekStart} moreHref={null} now={now} texts={o} modes={de.gameMenu.modes} />);
     expect(screen.getByText(o.none)).toBeInTheDocument();
   });

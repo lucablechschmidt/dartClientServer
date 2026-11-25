@@ -78,6 +78,16 @@ test("M8: own statistics and rankings from the account tab after two x01 games",
   await pageA.waitForURL(/\/stats\?from=match$/);
   await pageA.getByRole("link", { name: de.ui.back }).click();
   await pageA.waitForURL(second);
+  // opened from the filtered history: the game and its statistics live below /history, back leads to the list
+  await pageA.goto("/history?mode=x01");
+  await pageA.getByRole("list", { name: de.overview.thisWeek }).getByRole("link").first().click();
+  await pageA.waitForURL(/\/history\/match\/[^/]+\?mode=x01$/);
+  await pageA.getByRole("link", { name: de.game.matchStats }).click();
+  await pageA.waitForURL(/\/history\/match\/[^/]+\/stats\?from=match&mode=x01$/);
+  await pageA.getByRole("link", { name: de.ui.back }).click();
+  await pageA.waitForURL(/\/history\/match\/[^/]+\?mode=x01$/);
+  await pageA.getByRole("link", { name: de.game.back }).first().click();
+  await pageA.waitForURL((u) => u.pathname === "/history" && u.search === "?mode=x01");
   await admin.goto(`${new URL(second).pathname}/stats`);
   await expect(admin.getByText(de.errorPage.notFoundTitle)).toBeVisible();
 });

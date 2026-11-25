@@ -24,17 +24,21 @@ type Props = {
   onCancel: (() => void) | null;
   /** Victory screen: the same cross for everyone, straight to the start page without asking. */
   home?: boolean;
+  /** A game opened from the history: always the way back there, also on the victory screen. */
+  backHref?: string;
   texts: Texts["game"];
 };
 
 const iconButton = "grid min-h-touch min-w-touch place-items-center text-fg";
 
 /** Header row of the scoring screen: cancel or back, the rules or the legs/sets score, the sync status. */
-export function ScoreboardHeader({ title, status, sync, hasError, onRetry, onCancel, home = false, texts }: Props) {
+export function ScoreboardHeader({ title, status, sync, hasError, onRetry, onCancel, home = false, backHref, texts }: Props) {
   return (
     <ScreenHeader
       left={
-        home ? (
+        backHref && (home || !onCancel) ? (
+          <BackButton href={backHref} label={texts.back} />
+        ) : home ? (
           <Link href="/" aria-label={texts.home} className={iconButton}>
             <XmarkCircleIcon className="h-8 w-8" />
           </Link>
