@@ -53,7 +53,7 @@ Jeder Meilenstein hat einen Detailplan `docs/mN-plan.md`; umgesetzte liegen in `
 - [x] Swift-Modell mit `architecture.md` §6 verglichen, Zielmodell festgelegt, E2–E5, E7, E8 entschieden
 - [x] FritzBox: Anschlussart geprüft (E1): DS-Lite → Tailscale Funnel, keine Portfreigabe
 - [x] Pi: Raspberry Pi OS Lite 64-bit, SSH-Key, Docker und Compose installieren, `ssh pi` als Alias in `~/.ssh/config`
-- [x] Tailscale auf dem Pi, MagicDNS + HTTPS + Funnel aktiviert, `tailscale funnel --bg 8080` → `https://dartserver.swallow-pythagorean.ts.net`
+- [x] Tailscale auf dem Pi, MagicDNS + HTTPS + Funnel aktiviert, `tailscale funnel --bg 8080` → `https://<pi>.<tailnet>.ts.net`
 - [x] Entscheidung SD oder SSD (E6) festhalten (23.10.2026: SD bleibt)
 
 **DoD:** `ssh pi docker run --rm hello-world` läuft; `tailscale funnel status` zeigt den Hostnamen; E6 ist in `architecture.md` eingetragen.

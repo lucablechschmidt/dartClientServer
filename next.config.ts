@@ -37,9 +37,17 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   // Dev only: the dev server blocks /_next/* for any hostname but localhost, so a phone on the
-  // LAN gets server-rendered pages without hydration (every onClick button is dead). List the
-  // networks the dev machine is reached from; no effect on the production build.
-  allowedDevOrigins: ["141.100.*.*", "192.168.*.*", "10.*.*.*"],
+  // LAN gets server-rendered pages without hydration (every onClick button is dead). The private
+  // networks are allowed; any other network the dev machine is reached from goes into
+  // DEV_ORIGINS in .env (comma-separated, e.g. "172.20.*.*"). No effect on the production build.
+  allowedDevOrigins: [
+    "192.168.*.*",
+    "10.*.*.*",
+    ...(process.env.DEV_ORIGINS ?? "")
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean),
+  ],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

@@ -28,7 +28,7 @@
 
 ```
  Handy/Tablet (Browser, PWA)
-        │  HTTPS  →  https://dartserver.swallow-pythagorean.ts.net
+        │  HTTPS  →  https://<pi>.<tailnet>.ts.net
         ▼
  Tailscale-Ingress (Funnel)          nur TLS-Durchleitung, Inhalt bleibt verschlüsselt
         │  ausgehende Verbindung des Pi (kein offener Port, kein IPv4 nötig)
@@ -72,7 +72,7 @@
 
 **Befund (E1, geprüft):** Der Anschluss ist **DS-Lite** (FritzBox Online-Monitor: „IPv4 über DS-Lite-Tunnel, AFTR-Gateway“). Es gibt keine eigene öffentliche IPv4-Adresse, Portfreigaben und MyFRITZ! über IPv4 funktionieren nicht. DynDNS und das FritzBox-VPN helfen nicht, weil beide über DS-Lite nur per IPv6 erreichbar wären und das VPN jedem Mitspieler ein Profil abverlangen würde.
 
-**Lösung: Tailscale Funnel.** Der Pi baut eine ausgehende Verbindung zu Tailscale auf; Tailscale nimmt Anfragen an **`https://dartserver.swallow-pythagorean.ts.net`** entgegen und leitet den verschlüsselten TLS-Strom unverändert an den Pi weiter. TLS endet auf dem Pi (`tailscaled` holt das Let's-Encrypt-Zertifikat). Keine Domain, keine Kosten, keine Portfreigabe, funktioniert aus IPv4- und IPv6-Netzen.
+**Lösung: Tailscale Funnel.** Der Pi baut eine ausgehende Verbindung zu Tailscale auf; Tailscale nimmt Anfragen an **`https://<pi>.<tailnet>.ts.net`** entgegen und leitet den verschlüsselten TLS-Strom unverändert an den Pi weiter. TLS endet auf dem Pi (`tailscaled` holt das Let's-Encrypt-Zertifikat). Keine Domain, keine Kosten, keine Portfreigabe, funktioniert aus IPv4- und IPv6-Netzen.
 
 Einrichtung (einmalig, Details in `archive/m1-plan.md` §0):
 1. Tailscale auf dem Pi-Host installieren und mit dem Tailscale-Konto anmelden (Login über Google, Apple, Microsoft oder GitHub).

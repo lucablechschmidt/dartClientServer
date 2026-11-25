@@ -1,6 +1,27 @@
 # Darts Scorer Web
 
-Web port of the iOS app "Dart" (Swift source in `Legacy/`) as a Next.js app with SQLite, running on a Raspberry Pi behind Tailscale Funnel. Players count darts on their phones; the Pi stores every visit and serves the app at **https://dartserver.swallow-pythagorean.ts.net**.
+A darts scoring app for a group of friends: players enter every dart on their phones, a Raspberry Pi at home stores each visit in SQLite and keeps all phones in sync. It is a web port (Next.js, TypeScript) of "Dart", an iOS app I wrote earlier in Swift; its source is in `Legacy/Dart/`. Four game modes (X01, Cricket, Elimination, SplitScore), tournaments, statistics with Elo rankings and achievements. A private project in daily use, not a public service.
+
+<p>
+  <img src="docs/screenshots/overview.png" alt="Start screen with the four game modes" width="200">
+  <img src="docs/screenshots/match-after-180.png" alt="X01 scoring screen with keypad" width="200">
+  <img src="docs/screenshots/victory-legs.png" alt="Victory screen comparing both players" width="200">
+  <img src="docs/screenshots/account-stats.png" alt="Own statistics with field hits on a dartboard" width="200">
+</p>
+
+## About this project
+
+**What it is meant to show**
+
+- **Git as a working tool:** [Conventional Commits](https://www.conventionalcommits.org/), checked by commitlint in a `commit-msg` hook; Prettier and ESLint on every commit (`lefthook.yml`); one commit per coherent change, so `git log` reads as the project's history.
+- **Planning before code:** every milestone (M0–M13) has a written plan with open questions and a definition of done before the first line of code (`docs/project.md`, `docs/archive/m*-plan.md`); decisions are recorded with their reasons (`docs/architecture.md`, E1–E18). Acceptance happens on the real device (`docs/test-pi.md`).
+- **Tests at every level:** pure game rules tested in Node, components in jsdom, Playwright browser tests against the production build (two phones at once, network outages, accessibility with axe-core, a Content-Security-Policy check in every test), coverage thresholds per layer; the CI (`scripts/ci.sh`) runs all of it.
+- **Data that stays right:** only the darts are stored; scores, winners and statistics are always computed from them. A visit entered without network waits in a queue on the phone and is safe to send twice; writes run in one transaction.
+- **Clear layers:** pure domain code shared by phone and server, repositories, services and UI, with the allowed imports enforced by ESLint.
+
+**How it was built**
+
+The Swift app in `Legacy/Dart/` is written entirely by hand. For the web port, the architecture, the data model, the game rules, the milestone plans and every decision in `docs/` are mine; the plans also record which questions came up and how they were answered. Much of the implementation was written with [Claude Code](https://claude.com/claude-code) as a pair programmer, working from those plans and the conventions in `CLAUDE.md`; the commits it co-wrote carry a `Co-Authored-By` line. Testing at the board and acceptance on the Pi are mine.
 
 Plans and decisions live in `docs/` (German):
 
@@ -32,10 +53,11 @@ The SQLite file is created at `./data/darts.db` on first start. Development-only
 |---|---|---|---|
 | `ADMIN_USER` | `admin` | `darts` | Name of the first admin |
 | `ADMIN_PASSWORD_HASH` | first line of the script | second line of the script | bcrypt hash of the admin password |
-| `APP_URL` | `http://localhost:3000` | `https://dartserver.swallow-pythagorean.ts.net` | Address used in invite links and QR codes |
+| `APP_URL` | `http://localhost:3000` | `https://<pi>.<tailnet>.ts.net` | Address used in invite links and QR codes |
 | `COOKIE_SECURE` | `false` (plain http) | not set (`true`) | Secure flag of the session cookie |
 | `DATABASE_PATH` | `./data/darts.db` | set by `docker-compose.yml` | SQLite file |
 | `IMAGE_TAG` | – | set by `deploy.sh` | Image version that runs |
+| `DEV_ORIGINS` | optional | – | Further networks (besides `192.168.*.*`, `10.*.*.*`) a phone reaches the dev server from, comma-separated |
 
 The admin user and hash only take effect on start-up as long as the database has no admin yet; after that the database is the source of truth (`docs/architecture.md` §10).
 
@@ -131,7 +153,7 @@ The Pi never builds and holds no repository, only `~/darts/` with `.env`, `docke
 
 ### Releasing a new version
 
-Only when asked to, after a green pipeline:
+After a green pipeline:
 
 ```bash
 git status                # commit first, otherwise the image is tagged <sha>-dirty
@@ -160,7 +182,7 @@ Normally nothing is needed. Docker is enabled as a service, the app container ha
 ```bash
 systemctl is-active docker tailscaled    # both: active
 cd ~/darts && docker compose ps          # app: Up (healthy)
-tailscale funnel status                  # https://dartserver.… → http://127.0.0.1:8080
+tailscale funnel status                  # https://<pi>.<tailnet>.ts.net → http://127.0.0.1:8080
 ```
 
 If something is missing, run `sudo systemctl enable --now docker tailscaled`, `docker compose up -d` and `tailscale funnel --bg 8080`. After `docker compose down` the containers do not come back on boot by themselves; after `stop` or a reboot they do.
@@ -204,7 +226,7 @@ flowchart LR
     UI --- LS
   end
   subgraph Internet
-    TS["Tailscale Funnel<br/>dartserver…ts.net, TLS"]
+    TS["Tailscale Funnel<br/>public ts.net address, TLS"]
   end
   subgraph Pi["Raspberry Pi 3 B+ (Docker Compose)"]
     subgraph App["app: Next.js, one Node process"]
@@ -325,3 +347,7 @@ flowchart LR
 3. Run `./scripts/ci.sh` once; green means the setup is fine.
 4. Read the plan of the next milestone in `docs/` and answer the open questions at its end.
 5. Before a deploy: green pipeline, `./scripts/deploy.sh`, then `ssh pi 'cd darts && docker compose logs --tail 20 app'`.
+
+## License
+
+MIT, see `LICENSE`.

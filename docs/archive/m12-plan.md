@@ -134,7 +134,7 @@ Header am Pi über den Funnel nachgemessen (`curl -sI https://…/login`, 19.11.
 
 ## B3. Probe A: heutiger Weg mit Caddy
 
-Handy im Mobilfunknetz → `https://dartserver…/diag`. Erwartet laut Hypothese: `x-forwarded-for` ist eine Pi-interne Adresse (Docker-Gateway oder `127.0.0.1`), nicht die Mobilfunk-IP. Ticks kommen im Sekundentakt. Ergebnis in §B6 eintragen.
+Handy im Mobilfunknetz → `https://<pi>.<tailnet>.ts.net/diag`. Erwartet laut Hypothese: `x-forwarded-for` ist eine Pi-interne Adresse (Docker-Gateway oder `127.0.0.1`), nicht die Mobilfunk-IP. Ticks kommen im Sekundentakt. Ergebnis in §B6 eintragen.
 
 ## B4. Probe B: Funnel direkt auf die App, ohne Caddy
 
@@ -163,8 +163,8 @@ In jedem Fall danach: Diagnose-Code und `DIAG_ENABLED` entfernen.
 
 | Probe | x-forwarded-for | x-forwarded-host / host | tailscale-* | SSE-Abstände | Server Action |
 |---|---|---|---|---|---|
-| A (mit Caddy, 19.11.2026) | `172.18.0.1` (Docker-Gateway) | `dartserver.swallow-pythagorean.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 984–1021 ms | ok, 215 ms |
-| B (ohne Caddy, 19.11.2026) | `2a00:fbc:f0fa:…:e59a` (öffentliche IPv6 des Handys, Mobilfunk) | `dartserver.swallow-pythagorean.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 996–1006 ms | ok, 273 ms; Ab- und Anmelden ok |
+| A (mit Caddy, 19.11.2026) | `172.18.0.1` (Docker-Gateway) | `<pi>.<tailnet>.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 984–1021 ms | ok, 215 ms |
+| B (ohne Caddy, 19.11.2026) | öffentliche IPv6 des Handys (Mobilfunk) | `<pi>.<tailnet>.ts.net` / dasselbe, `https` | nur `tailscale-funnel-request: ?1` | 996–1006 ms | ok, 273 ms; Ab- und Anmelden ok |
 
 **Ergebnis:** erste Zeile von §B5. Caddy entfällt (E18). Das Rate-Limit nimmt den letzten Eintrag von `X-Forwarded-For` (`ipFromHeaders`), nicht den ersten: den setzt Funnel, frühere Einträge könnte der Client selbst schicken. Umstellung: `docker-compose.yml` ohne Caddy, App auf `127.0.0.1:8080:3000`, `Caddyfile` gelöscht, `scripts/deploy.sh` prüft die App direkt. Screenshots der Proben (nicht im Repo): `docs/diag/` lokal bei Luca. Gegenprobe nach dem Umbau (Funnel → App auf 8080): Handy-IP kommt an, Ticks bis 1019 ms, Server Action ok. Danach Diagnose-Code und `DIAG_ENABLED` entfernt (§B5); die Diagnose steht in der Git-History (`29032c4`), falls sie noch einmal gebraucht wird. Version ohne Diagnose ausgerollt, `/diag` antwortet 404. **DoD Teil B (§B8) erfüllt (19.11.2026):** Messwerte eingetragen, E18 entschieden, Rate-Limit-Probe mit zwei Handys bestanden (zehn Fehlversuche auf Handy A, Handy B meldet sich sofort an), Diagnose-Code entfernt, Pipeline grün.
 

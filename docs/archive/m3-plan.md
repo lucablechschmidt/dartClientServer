@@ -131,7 +131,7 @@ F und Reset sind technisch dasselbe (Einladung mit festem Spieler, Passwort setz
 - `Caddyfile`: `basic_auth` raus, `header_up X-Forwarded-Proto https`.
 - `docker-compose.yml`: `caddy` ohne `BASIC_AUTH_*`; `app` bekommt `ADMIN_USER`, `ADMIN_PASSWORD_HASH`, `APP_URL`.
 - `deploy/env.example`, `scripts/hash-password.sh` (gibt `ADMIN_PASSWORD_HASH=` aus), `README.md` (Erststart, Einladung, Reset, Löschen, `.env`-Umstellung, Datenbank-Neustart).
-- `.env` auf dem Pi: `BASIC_AUTH_USER` → `ADMIN_USER`, `BASIC_AUTH_HASH` → `ADMIN_PASSWORD_HASH` (Wert unverändert), `APP_URL=https://dartserver.swallow-pythagorean.ts.net`. Claude liefert die `sed`-Zeile, Luca führt sie aus.
+- `.env` auf dem Pi: `BASIC_AUTH_USER` → `ADMIN_USER`, `BASIC_AUTH_HASH` → `ADMIN_PASSWORD_HASH` (Wert unverändert), `APP_URL=https://<pi>.<tailnet>.ts.net`. Claude liefert die `sed`-Zeile, Luca führt sie aus.
 - Datenbank auf dem Pi leeren: `docker compose stop app && rm data/darts.db*`, beim Start legen Migrationen und Bootstrap alles neu an.
 - `scripts/deploy.sh`: Health-Check erwartet von Caddy `302` (Redirect auf `/login`) statt `401`.
 - Lokal: Produktions-Build mit `ADMIN_USER=admin ADMIN_PASSWORD_HASH=<Test-Hash> COOKIE_SECURE=false`, Smoke-Test komplett (Login, Match, Gast, Einladung A/C/D/E in einem zweiten Browser-Kontext, Login erzeugen F, Reset, Login löschen, Logout → Redirect).

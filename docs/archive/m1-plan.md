@@ -21,7 +21,7 @@
      User <dein User>
    ```
    Prüfung: `ssh pi docker run --rm hello-world`
-3. **Tailscale auf dem Pi** (erledigt, Hostname `dartserver.swallow-pythagorean.ts.net`):
+3. **Tailscale auf dem Pi** (erledigt, Hostname `<pi>.<tailnet>.ts.net`):
    ```
    curl -fsSL https://tailscale.com/install.sh | sh
    sudo tailscale up

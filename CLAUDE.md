@@ -35,6 +35,10 @@ e.g. `x01`, `cricket`, `elimination`, `splitscore`, `game`, `setup`, `scoreboard
 (`commitlint.config.mjs`) checks every message in a `commit-msg` hook, and a `pre-commit` hook runs Prettier
 and ESLint on the staged files (`lefthook.yml`, installed by `npm install`; skip once with `LEFTHOOK=0`).
 
+The repository is public (portfolio for job applications). Never commit the Pi's Tailscale
+hostname, IP addresses, e-mail addresses or other personal data: use placeholders such as
+`https://<pi>.<tailnet>.ts.net`; machine-specific values belong in the untracked `.env`.
+
 Note: `/Users/utrapp/repos/CLAUDE.md` (one directory up) belongs to a different
 project, the HCI/Flutter course material. Its rules about labs, personas and
 anchor validation do not apply here.
