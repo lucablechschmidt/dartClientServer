@@ -42,6 +42,32 @@ export function rounds(state: LegState): Rounds {
   return { points, target: targetOfVisit(state, next) };
 }
 
+/** One visit of the match history: the darts, whether one hit the target, the change and the score after it. */
+export type RoundVisit = {
+  playerId: PlayerId;
+  target: Target;
+  darts: Dart[];
+  /** At least one dart on the target: the visit's points were added; otherwise the score was halved. */
+  hit: boolean;
+  /** Points added, or (negative) the points lost by halving. */
+  change: number;
+  score: number;
+};
+
+/** The match history (25.11.2026): every complete visit in throwing order, with the same rules as `rounds`. */
+export function roundLog(state: LegState): RoundVisit[] {
+  const points: Record<PlayerId, number> = Object.fromEntries(state.players.map((p) => [p, state.rules.startScore]));
+  return state.visits.flatMap((visit, index) => {
+    const target = targetOfVisit(state, index);
+    if (!target || visit.darts.length < MAX_DARTS_PER_VISIT) return [];
+    const before = points[visit.playerId];
+    const hit = visit.darts.some((d) => d.type !== "overthrown");
+    const score = hit ? before + visit.darts.reduce((n, d) => n + dartScore(d), 0) : Math.ceil(before / 2);
+    points[visit.playerId] = score;
+    return [{ playerId: visit.playerId, target, darts: visit.darts, hit, change: score - before, score }];
+  });
+}
+
 const NUMBERS = Array.from({ length: 20 }, (_, i) => i + 1);
 
 /** Adaptive keypad (11.11.2026): the darts that hit `target`; every other key is off. */

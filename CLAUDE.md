@@ -74,7 +74,7 @@ root-owned files; use `npm install --cache <tmpdir>` until it is chowned.
 
 Routes: `/` game menu (one row to the last games), `/history` (last games, `?mode=`, `?n=` in steps of 25; a game opened there is `/history/match/[id]` and `/history/match/[id]/stats`, carrying the filter so back leads to the list), `/new/[mode]` setup, `/players`, `/account` (own name, password, logout, rows to the
 pages below; the same for everyone), `/account/rankings` (per mode), `/account/stats` (own, `?range=`),
-`/account/achievements` (own), `/match/[id]/stats` (X01 match page, its players only), `/admin` (tab "Verwaltung", admins only: invites, players, guests, deleting games and tournaments), `/match/[id]` scoreboard, `/tournaments`,
+`/account/achievements` (own), `/match/[id]/stats` (match page of X01 and SplitScore, its players only), `/admin` (tab "Verwaltung", admins only: invites, players, guests, deleting games and tournaments), `/match/[id]` scoreboard, `/tournaments`,
 `/tournaments/new`, `/tournaments/[id]` (M9), `/login`, `/einladung/[token]` (public). Auth (M3, E10): a player with `password_hash` is a login,
 `is_admin` is a column; `requireSession()` in every page and action, `src/proxy.ts` only
 checks the cookie. Env: `ADMIN_USER`, `ADMIN_PASSWORD_HASH` (bcrypt, first admin bootstrap),

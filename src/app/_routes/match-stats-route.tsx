@@ -16,14 +16,14 @@ async function Detail({ params, searchParams, history = false }: Props) {
   const [{ id }, search] = await Promise.all([params, searchParams]);
   const { deps, session } = await requireSession();
   const r = matchDetail(deps, session, id);
-  // Not a player of the match (the admin included) or no X01 match: as if it did not exist.
+  // Not a player of the match (the admin included) or a mode without a match page: as if it did not exist.
   if (!r.ok) notFound();
   const backHref = history ? historyMatchHref(id, historyFilter(search)) : search.from === "match" ? `/match/${id}` : "/account/stats";
   return <MatchDetailScreen detail={r.detail} texts={de.stats} back={de.ui.back} backHref={backHref} />;
 }
 
 /**
- * M8: statistics of one X01 match per leg, for its players; from the victory screen or the own recent
+ * M8: the match page of an X01 (per leg) or SplitScore match (per round), for its players; from the victory screen or the own recent
  * games (back there). With `history` the page below `/history/match/[id]`: back to the game opened from the history.
  */
 export function MatchStatsRoute(props: Props) {

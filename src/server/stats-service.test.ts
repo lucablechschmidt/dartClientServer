@@ -160,6 +160,7 @@ describe.each([
     const r = matchDetail(d, as("b"), m);
     if (!r.ok) throw new Error(r.reason);
     expect(r.detail.players.map((p) => p.name)).toEqual(["A", "B"]);
+    if (r.detail.mode !== "x01") throw new Error(r.detail.mode);
     const leg = r.detail.legs[0];
     expect(leg.winner).toBe("a");
     expect(leg.rows[0].visits.map((x) => [x.darts.join(" "), x.points, x.rest])).toEqual([
@@ -172,6 +173,47 @@ describe.each([
     expect(matchDetail(d, as("admin", true), m)).toEqual({ ok: false, reason: "forbidden" });
     expect(matchDetail(d, as("a"), "nope")).toEqual({ ok: false, reason: "not-found" });
     expect(matchDetail(d, as("a"), duel(d, "a", "b", NOW, "cricket"))).toEqual({ ok: false, reason: "not-found" });
+  });
+
+  it("match detail: splitscore rounds with each player's darts, change and score; listed in the recent games", () => {
+    const d = setup();
+    d.matches.createMatch({
+      mode: "splitscore",
+      id: "s1",
+      legId: "s1-l",
+      rules: { startScore: 40, inRule: "single", outRule: "single" },
+      playerIds: ["a", "b"],
+      starterIndex: 0,
+      format: { legsToWinSet: 1, setsToWinMatch: 1 },
+      inputMode: "single",
+      hostPlayerId: null,
+      startedAt: NOW - 2,
+    });
+    const over = { field: 0, type: "overthrown" } as const;
+    const off = (p: string): Visit => ({ playerId: p, darts: [over, over, over], isBust: false });
+    // round 15: a S15 D15 and a miss (+45 → 85), b misses (20); then both miss everything, b hits bull at the end
+    const visits = [
+      { playerId: "a", darts: [{ field: 15, type: "single" }, { field: 15, type: "double" }, over], isBust: false } satisfies Visit,
+      off("b"),
+      ...Array.from({ length: 7 }, () => [off("a"), off("b")]).flat(),
+      off("a"),
+      { playerId: "b", darts: [{ field: 25, type: "single" }, over, over], isBust: false } satisfies Visit,
+    ];
+    d.matches.syncVisits("s1-l", visits, 0, () => `s1-v${++n}`, NOW - 1);
+    d.matches.setMatchStatus("s1", "finished", NOW - 1);
+    d.matches.setPlacements("s1", { b: 1, a: 2 });
+    const r = matchDetail(d, as("a"), "s1");
+    if (!r.ok) throw new Error(r.reason);
+    if (r.detail.mode !== "splitscore") throw new Error(r.detail.mode);
+    expect(r.detail.rounds.map((x) => x.target)).toEqual(["15", "16", "double", "17", "18", "triple", "19", "20", "bull"]);
+    expect(r.detail.rounds[0].cells).toEqual({
+      a: { darts: ["15", "D15", "✕"], hit: true, change: 45, score: 85 },
+      b: { darts: ["✕", "✕", "✕"], hit: false, change: -20, score: 20 },
+    });
+    expect(r.detail.rounds.at(-1)?.cells.b).toMatchObject({ hit: true, change: 25, score: 26 });
+    expect(r.detail.winners).toEqual(["b"]);
+    expect(myStats(d, as("a"), "all").recent.find((m) => m.id === "s1")?.detail).toBe(true);
+    expect(matchDetail(d, as("c"), "s1")).toEqual({ ok: false, reason: "forbidden" });
   });
 
   it("a deleted opponent is shown with the mark in my recent games", () => {

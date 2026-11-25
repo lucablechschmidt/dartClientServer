@@ -20,7 +20,7 @@ type Props = {
   /** M5 plan §9.2: set when the last player may still play out (3+ players, this device may enter for him). */
   onPlayOut: (() => void) | null;
   pending: boolean;
-  /** M8: the X01 match page, only for the match's players. */
+  /** M8: the match page (X01, SplitScore), only for the match's players. */
   statsHref?: string;
   /** M10: the banner with newly earned achievements, at the top. */
   achievements?: ReactNode;

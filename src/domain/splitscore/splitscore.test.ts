@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { newLeg } from "../game/state";
 import type { Dart, LegState } from "../game/types";
 import { splitscore } from "./mode";
-import { rounds, TARGETS } from "./rounds";
+import { roundLog, rounds, TARGETS } from "./rounds";
 
 const [A, B, C] = ["a", "b", "c"];
 const S = (field: number): Dart => ({ field, type: "single" });
@@ -166,5 +166,40 @@ describe("splitscore: adaptive keypad (11.11.2026)", () => {
     s = play(s, ...MISS, ...MISS, ...MISS); // triple, 19, 20
     expect(live(s)).toEqual({ fields: [25], rings: ["single", "double"] });
     expect(live(play(s, ...MISS))).toBeUndefined();
+  });
+});
+
+describe("roundLog (match history, 25.11.2026)", () => {
+  it("every complete visit with its target, darts, change and the score after it; off-target darts stay misses", () => {
+    let s = play(leg(), S(15), D(15), S(3)); // A: 15 + 30, S3 is off target → +45
+    s = play(s, ...MISS); // B: halved, 40 → 20
+    s = play(s, ...MISS); // A on 16: 85 → 43
+    s = play(s, S(16)); // B's visit still open: not listed
+    expect(roundLog(s)).toEqual([
+      { playerId: A, target: "15", darts: [S(15), D(15), OVER], hit: true, change: 45, score: 85 },
+      { playerId: B, target: "15", darts: [OVER, OVER, OVER], hit: false, change: -20, score: 20 },
+      { playerId: A, target: "16", darts: [OVER, OVER, OVER], hit: false, change: -42, score: 43 },
+    ]);
+  });
+
+  it("ends with the same score as rounds", () => {
+    const s = play(
+      leg([A]),
+      S(15),
+      ...MISS.slice(1),
+      ...MISS,
+      D(5),
+      D(3),
+      D(4),
+      ...MISS,
+      ...MISS,
+      T(1),
+      ...MISS.slice(1),
+      ...MISS,
+      ...MISS,
+      ...MISS,
+    );
+    expect(roundLog(s).at(-1)?.score).toBe(points(s)[A]);
+    expect(roundLog(s).map((v) => v.target)).toEqual([...TARGETS]);
   });
 });

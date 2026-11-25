@@ -20,6 +20,7 @@ import {
   type MatchState,
   type PlayerId,
 } from "@/domain/game";
+import { hasMatchPage } from "@/domain/stats/match-page";
 import type { Texts } from "@/i18n/de";
 import { CricketBoard } from "./cricket-board";
 import { LegVictoryScreen, scoreLine } from "./leg-victory-screen";
@@ -50,7 +51,7 @@ type Props = {
    * and the victory screen offers no undo, so looking at an old game cannot reopen it.
    */
   backHref?: string;
-  /** The X01 match page; `/match/[id]/stats?from=match` unless the game was opened from the history. */
+  /** The match page (X01, SplitScore); `/match/[id]/stats?from=match` unless the game was opened from the history. */
   statsHref?: string;
   onLoad: (matchId: string) => Promise<ActionReply>;
   onRestart: (matchId: string) => Promise<void>;
@@ -218,7 +219,7 @@ export function ScoreboardScreen({
                 achievementTexts && <AchievementBanner load={loadAchievements} ready={sync === "saved"} texts={achievementTexts} />
               }
               statsHref={
-                view.board.mode === "x01" && actor !== null && initial.match.players.some((p) => p.id === actor.id)
+                hasMatchPage(view.board.mode) && actor !== null && initial.match.players.some((p) => p.id === actor.id)
                   ? (statsHref ?? `/match/${initial.id}/stats?from=match`)
                   : undefined
               }

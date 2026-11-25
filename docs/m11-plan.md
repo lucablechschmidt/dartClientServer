@@ -42,6 +42,7 @@
 
 Sammelstelle für das, was in M6 auffällt und nicht dort erledigt wurde (Schriftgrößen im Querformat, Position der Statuszeile, Checkout-Hinweis mit zwei Wegen, „Bust“ groß einblenden). Jeder Punkt eine Zeile hier, dann ein Commit.
 
+- SplitScore-Matchverlauf (25.11.2026, Luca): Button „Statistik“ auf dem Sieg-Screen (auch aus `/history`) und in den eigenen letzten Spielen führt zu `/match/[id]/stats` mit einer Tabelle: eine Zeile je Runde (15, 16, Doppel, …, Bull), je Spieler die Darts, „+Punkte“ oder „halbiert“ und der Stand danach, unten der Endstand. Darts wie auf der X01-Seite (`15 D15 ✕`, ein Fehlwurf ist ✕). Wie X01 nur für die Teilnehmer. Umgesetzt.
 - ~~`/dev/theme` zeigt nur Zählscreen und Tokens; die `ui`-Bausteine fehlen dort~~ (erledigt 11.11.2026: die Regel ist gestrichen, `architecture.md` §9).
 
 ## 5. DoD

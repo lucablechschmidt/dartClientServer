@@ -5,7 +5,9 @@ import { leaderboard, rangeStart, records, type ModeRecord, type StatsMatch, typ
 import { eloHistory, type EloPoint } from "@/domain/stats/elo";
 import { POINTS_MODES, pointsStats, type PointsMode, type PointsStats } from "@/domain/stats/final-points";
 import { addFieldHits, fieldHits, type FieldCount } from "@/domain/stats/field-hits";
+import { hasMatchPage } from "@/domain/stats/match-page";
 import { x01Stats, type X01Stats } from "@/domain/stats/x01";
+import { roundLog, TARGETS, type Target } from "@/domain/splitscore";
 import { checkoutOrder } from "@/domain/x01";
 import type { Deps } from "./deps";
 import { shownName } from "./player-names";
@@ -74,7 +76,7 @@ export function myStats(deps: Deps, session: Session, range: StatsRange): MyStat
         names: m.players.map(shownName),
         finishedAt: m.finishedAt ?? m.startedAt,
         place: m.placements[me] ?? null,
-        detail: m.mode === "x01",
+        detail: hasMatchPage(m.mode),
       })),
   };
 }
@@ -114,23 +116,58 @@ export function leaderboards(deps: Deps, session: Session): ModeRanking[] {
 }
 
 export type DetailVisit = { darts: string[]; points: number; bust: boolean; rest: number };
-export type MatchDetail = {
-  id: string;
-  finishedAt: number | null;
+type DetailPlayers = { id: string; finishedAt: number | null; players: { id: PlayerId; name: string }[] };
+export type X01MatchDetail = DetailPlayers & {
+  mode: "x01";
   startScore: number;
-  players: { id: PlayerId; name: string }[];
   legs: { setNo: number; legNo: number; winner: PlayerId | null; rows: { player: PlayerId; visits: DetailVisit[]; average: number }[] }[];
 };
+/** One player's visit in a SplitScore round: the darts, points added (or lost by halving) and the score after it. */
+export type SplitScoreCell = { darts: string[]; hit: boolean; change: number; score: number };
+export type SplitScoreMatchDetail = DetailPlayers & {
+  mode: "splitscore";
+  startScore: number;
+  /** Highest final score; equal scores share the win. */
+  winners: PlayerId[];
+  rounds: { target: Target; cells: Partial<Record<PlayerId, SplitScoreCell>> }[];
+};
+export type MatchDetail = X01MatchDetail | SplitScoreMatchDetail;
 
-/** X01 match page (m8-plan §2): every visit per leg and player with the rest after it; only for its players. */
+/**
+ * Match page for its players (m8-plan §2): X01 every visit per leg and player with the rest after it;
+ * SplitScore (25.11.2026) every round with each player's darts and score. Other modes have none.
+ */
 export function matchDetail(
   deps: Deps,
   session: Session,
   matchId: string,
 ): { ok: true; detail: MatchDetail } | { ok: false; reason: "not-found" | "forbidden" } {
   const m = deps.matches.loadMatch(matchId);
-  if (m?.mode !== "x01") return { ok: false, reason: "not-found" };
+  if (!m || !hasMatchPage(m.mode)) return { ok: false, reason: "not-found" };
   if (!m.players.some((p) => p.id === session.playerId)) return { ok: false, reason: "forbidden" };
+  const head = { id: m.id, finishedAt: m.finishedAt, players: m.players.map((p) => ({ id: p.id, name: shownName(p) })) };
+  if (m.mode === "splitscore") {
+    const log = m.state.legs.flatMap(roundLog);
+    const final = new Map(log.map((v) => [v.playerId, v.score]));
+    const best = Math.max(...final.values());
+    return {
+      ok: true,
+      detail: {
+        ...head,
+        mode: "splitscore",
+        startScore: m.rules.startScore,
+        winners: log.length > 0 ? m.players.filter((p) => final.get(p.id) === best).map((p) => p.id) : [],
+        rounds: TARGETS.map((target) => ({
+          target,
+          cells: Object.fromEntries(
+            log
+              .filter((v) => v.target === target)
+              .map((v) => [v.playerId, { darts: v.darts.map(dartLabel), hit: v.hit, change: v.change, score: v.score }]),
+          ),
+        })).filter((r) => Object.keys(r.cells).length > 0),
+      },
+    };
+  }
   const legs = m.state.legs.map((leg, i) => ({
     setNo: m.legs[i]?.setNo ?? 1,
     legNo: m.legs[i]?.legNo ?? i + 1,
@@ -149,12 +186,6 @@ export function matchDetail(
   }));
   return {
     ok: true,
-    detail: {
-      id: m.id,
-      finishedAt: m.finishedAt,
-      startScore: m.rules.startScore,
-      players: m.players.map((p) => ({ id: p.id, name: shownName(p) })),
-      legs,
-    },
+    detail: { ...head, mode: "x01", startScore: m.rules.startScore, legs },
   };
 }

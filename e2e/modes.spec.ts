@@ -91,6 +91,7 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await expect(resultRow(admin, B)).toContainText(g.pointsOf.replace("{n}", "1")); // B halved nine times
     await expect(admin.getByRole("listitem").filter({ hasText: g.totalPoints })).toHaveCount(1);
     await shot(admin, "victory-splitscore");
+    const game = new URL(admin.url()).pathname;
 
     // own statistics: high score and average of the points at the end, the loser's as well
     const s = de.stats;
@@ -104,6 +105,21 @@ test.describe("M7 modes, each once to the end with an undo", () => {
     await tiles(pageA, "175", "175.00");
     await shot(pageA, "account-stats-points");
     await tiles(pageB, "1", "1.00");
+
+    // the match page (25.11.2026): from the game opened in the history, one row per round, back to the game
+    await pageA.goto(`/history${game}?mode=splitscore`);
+    await pageA.getByRole("link", { name: g.matchStats }).click();
+    await pageA.waitForURL(/\/history\/match\/[^/]+\/stats\?from=match&mode=splitscore$/);
+    const d = s.detail;
+    const rows = pageA.getByRole("table", { name: d.rounds }).getByRole("row");
+    await expect(rows).toHaveCount(11); // head, nine rounds, final score
+    await expect(rows.nth(1)).toContainText(`+15${d.score.replace("{n}", "55")}`); // A: S15 and two misses
+    await expect(rows.nth(1)).toContainText(`${d.halved}${d.score.replace("{n}", "20")}`); // B
+    await expect(rows.nth(3)).toContainText(d.targets.double);
+    await expect(rows.last()).toContainText(`${d.final}1751`);
+    await shot(pageA, "match-stats-splitscore");
+    await pageA.getByRole("link", { name: de.ui.back }).click();
+    await pageA.waitForURL((u) => u.pathname === `/history${game}` && u.search === "?mode=splitscore");
 
     // the history filtered by SplitScore lists the game, the Cricket filter does not
     await admin.goto("/history?mode=splitscore");

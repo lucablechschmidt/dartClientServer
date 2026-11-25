@@ -72,6 +72,7 @@ Plan: `m11-plan.md` §1, §2, §5.
 - [ ] Undo nach einem 180er und Neuladen der Seite spielen ihn nicht noch einmal.
 - [ ] Konto → Ton „Aus“: dieses Gerät bleibt beim nächsten 180er still, die anderen nicht.
 - [ ] Eine gedrückte Taste leuchtet am Board sichtbar auf, auch bei schnellem Tippen und in Hell und Dunkel.
+- [ ] SplitScore-Matchverlauf (`m11-plan.md` §4): nach einem echten SplitScore-Spiel „Statistik“ auf dem Sieg-Screen; jede Runde stimmt mit dem Gespielten überein (Darts, Punkte, halbiert, Stand), auch über `/history` geöffnet; die Tabelle passt mit drei Spielern aufs Handy.
 
 ## M12 – Betrieb und Härtung
 

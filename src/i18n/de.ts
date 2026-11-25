@@ -13,6 +13,8 @@ const modeNames = {
 /** In/out rules as shown in the setup and the scoreboard header. */
 const inNames = { single: "Single In", double: "Double In", triple: "Triple In" } as const;
 const outNames = { single: "Single Out", double: "Double Out", triple: "Triple Out" } as const;
+/** SplitScore targets that are not a number. */
+const targetNames = { double: "Doppel", triple: "Triple", bull: "Bull" } as const;
 
 export const de = {
   app: {
@@ -312,6 +314,14 @@ export const de = {
       bust: "Bust",
       average: "Average",
       wonBy: "{name} gewinnt das Leg",
+      /** SplitScore match page (25.11.2026). */
+      rounds: "Runden",
+      target: "Ziel",
+      targets: targetNames,
+      score: "Stand {n}",
+      halved: "halbiert",
+      final: "Endstand",
+      matchWonBy: "{name} gewinnt",
     },
   },
   achievements: {
@@ -430,7 +440,7 @@ export const de = {
       elimination: "Nächste Elimination in {n}",
       gap: "Nächster Spieler: {n} Punkte",
       target: "Ziel: {target}",
-      targets: { double: "Doppel", triple: "Triple", bull: "Bull" },
+      targets: targetNames,
     },
     errors: {
       "not-found": "Spiel nicht gefunden.",
