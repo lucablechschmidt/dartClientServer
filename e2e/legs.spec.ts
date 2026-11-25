@@ -80,6 +80,14 @@ test("four players (M5): ToStart, places, play-out and resign, history", async (
   await expect(resultRow(admin, ADMIN)).toHaveText(new RegExp(`^4${ADMIN}.*${g.restOf.replace("{n}", "\\d+")}$`));
   await shot(admin, "match-places");
 
+  // opened from the history the finished game stays closed: no play-out, no undo
+  const game = new URL(admin.url()).pathname;
+  await admin.goto(`/history${game}`);
+  await expect(winner(admin, H)).toBeVisible();
+  await expect(admin.getByRole("button", { name: g.playOut })).toHaveCount(0);
+  await expect(admin.getByRole("button", { name: g.undoWinningDart })).toHaveCount(0);
+  await admin.goto(game);
+
   await admin.getByRole("button", { name: g.playOut }).click();
   await b.key("0").waitFor();
   await expect(anyNext).toHaveCount(0); // the last player plays out alone

@@ -48,7 +48,7 @@ type Props = {
   tournamentHref?: string;
   /**
    * Set for a game opened from the history: the way back leads there instead of to the start page,
-   * and the victory screen offers no undo, so looking at an old game cannot reopen it.
+   * and the victory screen offers neither undo nor play-out, so looking at an old game cannot reopen it.
    */
   backHref?: string;
   /** The match page (X01, SplitScore); `/match/[id]/stats?from=match` unless the game was opened from the history. */
@@ -211,7 +211,7 @@ export function ScoreboardScreen({
               texts={texts}
               pending={sync !== "saved" || !undoOk}
               onUndoWinningDart={backHref ? null : undo}
-              onPlayOut={playOutOk ? () => playOut(true) : null}
+              onPlayOut={playOutOk && !backHref ? () => playOut(true) : null}
               onRestart={() => onRestart(initial.id)}
               tournamentHref={tournamentHref}
               backHref={backHref}
